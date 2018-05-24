@@ -1,2 +1,2 @@
 # JSBox-addins
-JSBox's addins
+en-ch-translater - 中英互译
