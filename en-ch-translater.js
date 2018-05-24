@@ -1,16 +1,16 @@
 /**
- * @Version 2.5
+ * @Version 2.6
  * @author Liu Guo
- * @date 2018.5.18
+ * @date 2018.5.24
  * @brief
- *   1. 修复安装总量统计最高只能显示100的bug
+ *   1. 优化与改进
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.5
-let addinURL = "https://gist.githubusercontent.com/LiuGuoGY/ec3918f9f68952b4f3aea78b5c9eb926/raw"
+let appVersion = 2.6
+let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
 let query = $context.query
@@ -24,9 +24,9 @@ if(query.action != null) {
 }
 if (needCheckup()) {
   checkupVersion()
-} else {
-  translate($clipboard.text)
 }
+translate($clipboard.text)
+
 
 function setupView() {
   $app.autoKeyboardEnabled = true
@@ -540,7 +540,7 @@ function setupSetting() {
     templateDetails: {
       text : "",
     },
-    url: "https://gist.github.com/LiuGuoGY/ec3918f9f68952b4f3aea78b5c9eb926",
+    url: "https://github.com/LiuGuoGY/JSBox-addins/blob/master/en-ch-translater.js",
   },
   {
     templateTitle: {
@@ -600,8 +600,15 @@ function setupSetting() {
               }]
             })
           } else {
-            if(title.templateTitle.text == "反馈与建议") {
-              setupFeedBack()
+            // if(title.templateTitle.text == "反馈与建议") {
+            //   setupFeedBack()
+            // }
+            switch(title.templateTitle.text) {
+              case "反馈与建议": setupFeedBack()
+                break
+              case "版本号": checkupVersion()
+                break
+              default:
             }
           }
         }
@@ -640,7 +647,7 @@ function setupFeedBack() {
           font: $font(15),
         },
         layout: function(make, view) {
-          make.top.inset(0)
+          make.top.inset(10)
           make.left.inset(20)
         }
       },
@@ -659,7 +666,7 @@ function setupFeedBack() {
           alwaysBounceVertical: false,
         },
         layout: function(make, view) {
-          make.height.equalTo(180)
+          make.height.equalTo(160)
           make.top.equalTo($("feedbackTextTitle").bottom).inset(5)
           make.centerX.equalTo(view.center)
           make.left.right.inset(20)
@@ -713,7 +720,7 @@ function setupFeedBack() {
         layout: function(make, view) {
           make.left.right.inset(20)
           make.height.equalTo(40)
-          make.bottom.inset(0)
+          make.bottom.inset(10)
           make.centerX.equalTo(view.super)
         },
         events: {
@@ -761,12 +768,10 @@ function translate(text) {
     let newText = preprocess(text)
     myLoading("翻译中")
     if (checkSpecChar(newText)) {
-      myLog("含有特殊字符")
       googleTran(newText)
     } else {
       if (isTooLoog(newText)) {
         googleTran(newText)
-        myLog("长度太长")
       } else {
         bingTran(newText)
       }
@@ -790,7 +795,6 @@ function preprocess(txt) {
   if (whichLan(txt) == "en") {
     newText = txt.replace(/-\n/g, "")
   }
-  myLog(newText)
   return newText
 }
 
@@ -877,7 +881,6 @@ function googleTran(text) {
     showsProgress: false,
     handler: function(resp) {
       myLoading(false)
-      myLog(resp.data)
       analyseGData(resp.data)
     }
   })
@@ -893,7 +896,6 @@ function kingsoftTran(text) {
     showsProgress: false,
     handler: function(resp) {
       let data = resp.data
-      myLog(data)
       if (data.status == 1) {
         myLoading(false)
         analyseKData(data)
@@ -1064,17 +1066,11 @@ function checkupVersion() {
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
-      $console.info(resp)
       let str = resp.data.string
-      $console.info(str)
       let lv = getVFS(str)
       myLoading(false)
       if (needUpdate(appVersion, lv)) {
         sureToUpdate(str, resp.data)
-      } else {
-        if($app.env == $env.today) {
-          translate($clipboard.text)
-        }
       }
     }
   })
@@ -1095,7 +1091,6 @@ function getUpDes(str) {
   let eIndex = str.indexOf("@/brief")
   let des = str.substring(bIndex + 6, eIndex)
   let fixDes = des.replace(/\*/g, "")
-  myLog(fixDes)
   return fixDes
 }
 
@@ -1191,7 +1186,9 @@ function myLog(text) {
 
 //myloading
 function myLoading(text) {
+  if ($app.env == $env.today && !needShowUi()) {
     $ui.loading(text)
+  }
 }
 
 //myAlert
@@ -1224,7 +1221,6 @@ function copy(text) {
   $text.tokenize({
     text: $clipboard.text,
     handler: function(results) {
-      myLog(results)
     }
   })
   $delay(0.1, function() {
@@ -1245,7 +1241,6 @@ function delSquCha(text) {
     result += newText.slice(index1 + 2, index2 + 1)
     newText = newText.substring(index2 + 1)
   }while(newText.indexOf("▫️") >= 0)
-  myLog(result)
   return result
 }
 
@@ -1288,8 +1283,6 @@ function uploadInstall() {
         deviceToken: $objc("FCUUID").invoke("uuidForDevice").rawValue()
       },
       handler: function(resp) {
-        let data = resp.data
-        myLog(data)
       }
     })
   }
@@ -1311,8 +1304,6 @@ function sendFeedBack(text, contact) {
       contact: contact,
     },
     handler: function(resp) {
-      let data = resp.data
-      myLog(data)
       $device.taptic(2)
       $delay(0.2, function() {
         $device.taptic(2)
