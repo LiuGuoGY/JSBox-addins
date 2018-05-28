@@ -1,15 +1,15 @@
 /**
- * @Version 2.6
+ * @Version 2.7
  * @author Liu Guo
- * @date 2018.5.24
+ * @date 2018.5.28
  * @brief
- *   1. 优化与改进
+ *   1. 新增卡片阴影,增强立体视觉效果
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.6
+let appVersion = 2.7
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -54,14 +54,15 @@ function setupView() {
       props: {
         id: "card",
         bgcolor: $color("white"),
-        radius: 15,
         borderColor: $rgba(100, 100, 100, 0.4),
-        borderWidth: 1,
+        borderWidth: 0,
+        clipsToBounds: false,
       },
       layout: function(make, view) {
         make.left.right.inset(10)
         make.height.equalTo(300)
         make.center.equalTo(view.super)
+        shadow(view)
       },
       events: {
         tapped: function(sender) {
@@ -746,6 +747,15 @@ function needShowUi(){
   }
 }
 
+function shadow(view) {
+  var layer = view.runtimeValue().invoke("layer")
+  layer.invoke("setCornerRadius", 15)
+  layer.invoke("setShadowOffset", $size(3, 3))
+  layer.invoke("setShadowColor", $color("gray").runtimeValue().invoke("CGColor"))
+  layer.invoke("setShadowOpacity", 0.3)
+  layer.invoke("setShadowRadius", 8)
+}
+
 function solveAction(action) {
   let language = ($("speechLan").text == "英")?"en-US":"zh-CN"
   switch(action) {
@@ -825,7 +835,6 @@ function isTooLoog(text) {
 function bingTran(text) {
   let url = "http://xtk.azurewebsites.net/BingDictService.aspx?Word=" + text + "&Samples=false"
   let codeUrl = encodeURI(url)
-  myLog(codeUrl)
   $http.request({
     method: "GET",
     url: codeUrl,
@@ -1060,7 +1069,9 @@ function updateAddin(app) {
 
 //检查版本
 function checkupVersion() {
-  myLoading("检查更新")
+  if($app.env == $env.today && !needShowUi()) {
+    $ui.Loading("检查更新")
+  }
   $http.download({
     url: addinURL,
     showsProgress: false,
@@ -1068,7 +1079,9 @@ function checkupVersion() {
     handler: function(resp) {
       let str = resp.data.string
       let lv = getVFS(str)
-      myLoading(false)
+      if($app.env == $env.today && !needShowUi()) {
+        myLoading(false)
+      }
       if (needUpdate(appVersion, lv)) {
         sureToUpdate(str, resp.data)
       }
@@ -1186,9 +1199,7 @@ function myLog(text) {
 
 //myloading
 function myLoading(text) {
-  if ($app.env == $env.today && !needShowUi()) {
-    $ui.loading(text)
-  }
+  $ui.loading(text)
 }
 
 //myAlert
@@ -1257,7 +1268,7 @@ function requireInstallNumbers(){
     handler: function(resp) {
       let results = resp.data.count
       if(results != undefined) {
-       $("tabShowInstallsDetail").text = "" + results
+        $("tabShowInstallsDetail").text = "" + results
       }
     }
   })
