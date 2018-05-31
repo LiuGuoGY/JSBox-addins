@@ -1,45 +1,134 @@
 /**
- * @Version 2.7
+ * @Version 2.8
  * @author Liu Guo
- * @date 2018.5.28
+ * @date 2018.5.31
  * @brief
- *   1. 新增卡片阴影,增强立体视觉效果
+ *   1. 新增键盘模式，作为键盘时，iOS 11选中文本即时翻译， iOS 11以下复制文本即时翻译
+ *   2. 修复当英文中含有中文时翻译为原文的 Bug
+ *   3. 增加中英混合时的权重处理，现在翻译方向更加精准
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.7
+let appVersion = 2.8
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
 let query = $context.query
 
 uploadInstall()
-if ($app.env != $env.today || needShowUi()) {
-  setupView()
+if ($app.env == $env.keyboard) {
+  setupKeyBdView()
+  detectContent()
+} else {
+  if ($app.env != $env.today || needShowUi()) {
+    setupView()
+  }
+  if(query.action != null) {
+    solveAction(query.action)
+  }
+  if (needCheckup()) {
+    checkupVersion()
+  }
+  translate($clipboard.text)
 }
-if(query.action != null) {
-  solveAction(query.action)
-}
-if (needCheckup()) {
-  checkupVersion()
-}
-translate($clipboard.text)
 
+function detectContent() {
+  let preSelected = ""
+  let selectedText = ""
+  let copyedText = $clipboard.text
+  let preCopyed = $clipboard.text
+  var timer = $timer.schedule({
+    interval: 0.2,
+    handler: function() {
+      selectedText = $keyboard.selectedText
+      copyedText = $clipboard.text
+      if(selectedText != preSelected) {
+        if(selectedText != "" && selectedText != undefined) {
+          translate(selectedText)
+          preSelected = selectedText
+        }
+      } else if (copyedText != preCopyed) {
+        if(copyedText != "" && copyedText != undefined) {
+          translate(copyedText)
+          preCopyed = copyedText
+        }
+      }
+    }
+  })
+}
+
+function setupKeyBdView() {
+  $ui.render({
+    props: {
+      title: "中英互译",
+    },
+    views: [{
+      type: "text",
+      props: {
+        id: "result",
+        text: "",
+        align: $align.left,
+        radius: 10,
+        textColor: $color("#333333"),
+        font: $font(15),
+        borderColor: $rgba(90, 90, 90, 0.6),
+        borderWidth: 1,
+        editable: false,
+        selectable: false,
+        bgcolor: $rgba(100, 100, 100, 0.07),
+        alwaysBounceVertical: false,
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.center)
+        make.top.bottom.inset(20)
+        make.left.right.inset(20)
+      },
+      events:{
+        didBeginEditing: function(sender) {
+        },
+        didEndEditing: function(sender) {
+        },
+      },
+    },
+    {
+      type: "button",
+      props: {
+        id: "textSpeech2",
+        borderColor: $rgba(255, 255, 255, 0.0),
+        borderWidth: 1,
+        bgcolor: $rgba(255, 255, 255, 0.0),
+        icon: $icon("012", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.bottom.equalTo($("result").bottom).inset(5)
+        make.right.equalTo($("result").right).inset(5)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          speechText($("result").text)
+        }
+      }
+    }]
+  })
+}
 
 function setupView() {
   $app.autoKeyboardEnabled = true
   $app.keyboardToolbarEnabled = true
   $ui.render({
     props: {
-      title: "中英互译"
+      title: "中英互译",
     },
     views: [{
       type: "view",
       props: {
         id: "backgroud",
-        bgcolor: $rgba(100, 100, 100, 0.0),
+        bgcolor: $color("white"),
       },
       layout: $layout.fill,
       events: {
@@ -828,7 +917,8 @@ function isTooLoog(text) {
     if (text.length > 6) {
       return true
     }
-  } 
+  }
+  return false 
 }
 
 //必应翻译
@@ -863,13 +953,13 @@ function bingTran(text) {
 
 //谷歌翻译
 function googleTran(text) {
-  let tl = whichLan(text)
-  if (tl == "en") {
+  let sl = whichLan(text)
+  let tl = ""
+  if (sl == "en") {
     tl = "zh-CN"
   } else {
     tl = "en"
   }
-  myLog(tl)
   $http.request({
     method: "POST",
     url: "http://translate.google.cn/translate_a/single",
@@ -883,7 +973,7 @@ function googleTran(text) {
       "q": text,
       "tl": tl,
       "ie": "UTF-8",
-      "sl": "auto",
+      "sl": sl,
       "client": "ia",
       "dj": "1"
     },
@@ -985,11 +1075,13 @@ function showResult(title, msg) {
         }
       ]
     })
+  } else if($app.env == $env.keyboard) {
+    $("result").text = msg
+    $device.taptic(0)
   } else {
     $("text").text = title
     $("result").text = msg
   }
-  
 }
 
 //更多操作
@@ -1166,9 +1258,12 @@ function needCheckup() {
 
 //判断语言
 function whichLan(text) {
-  let patrn = /[\u4E00-\u9FA5]|[\uFE30-\uFFA0]/gi
+  let englishChar = text.match(/[a-zA-Z]/g)
+  let englishNumber = !englishChar?0:englishChar.length
+  let chineseChar = text.match(/[\u4e00-\u9fff\uf900-\ufaff]/g)
+  let chineseNumber = !chineseChar?0:chineseChar.length
   let tl = "en"
-  if (patrn.exec(text)) {
+  if ((chineseNumber * 2) >= englishNumber) {
     tl = "zh-CN"
   } else {
     tl = "en"
@@ -1180,12 +1275,14 @@ function whichLan(text) {
 function speechText(text) {
   let newText = delSquCha(text)
   let lan = whichLan(newText)
+  let rate = 0.5
   if (lan == "en") {
     lan = "en-US"
+    rate = 0.4
   }
   $text.speech({
     text: newText,
-    rate: 0.4,
+    rate: rate,
     language: lan,
   })
 }
@@ -1279,7 +1376,7 @@ function uploadInstall() {
     $cache.set("firstInstall", true)
     $http.request({
       method: "POST",
-      url: "https://leancloud.cn:443/1.1/installations",
+      url: "https://pwqyveon.api.lncld.net/1.1/installations",
       timeout: 5,
       header: {
         "Content-Type": "application/json",
