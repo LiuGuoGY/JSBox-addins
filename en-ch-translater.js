@@ -1,17 +1,16 @@
 /**
- * @Version 2.8
+ * @Version 2.9
  * @author Liu Guo
- * @date 2018.5.31
+ * @date 2018.6.5
  * @brief
- *   1. 新增键盘模式，作为键盘时，iOS 11选中文本即时翻译， iOS 11以下复制文本即时翻译
- *   2. 修复当英文中含有中文时翻译为原文的 Bug
- *   3. 增加中英混合时的权重处理，现在翻译方向更加精准
+ *   1. 现在可以在分享面板中使用翻译插件
+ *   2. 一个错误修复
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.8
+let appVersion = 2.9
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -31,7 +30,7 @@ if ($app.env == $env.keyboard) {
   if (needCheckup()) {
     checkupVersion()
   }
-  translate($clipboard.text)
+  translate(sourceText())
 }
 
 function detectContent() {
@@ -117,6 +116,14 @@ function setupKeyBdView() {
   })
 }
 
+function sourceText() {
+  if($context.textItems != undefined) {
+    return $context.textItems[0]
+  } else {
+    return $clipboard.text
+  }
+}
+
 function setupView() {
   $app.autoKeyboardEnabled = true
   $app.keyboardToolbarEnabled = true
@@ -128,7 +135,7 @@ function setupView() {
       type: "view",
       props: {
         id: "backgroud",
-        bgcolor: $color("white"),
+        bgcolor: $color("clear"),
       },
       layout: $layout.fill,
       events: {
@@ -1162,7 +1169,7 @@ function updateAddin(app) {
 //检查版本
 function checkupVersion() {
   if($app.env == $env.today && !needShowUi()) {
-    $ui.Loading("检查更新")
+    $ui.loading("检查更新")
   }
   $http.download({
     url: addinURL,
@@ -1172,7 +1179,7 @@ function checkupVersion() {
       let str = resp.data.string
       let lv = getVFS(str)
       if($app.env == $env.today && !needShowUi()) {
-        myLoading(false)
+        $ui.loading(false)
       }
       if (needUpdate(appVersion, lv)) {
         sureToUpdate(str, resp.data)
