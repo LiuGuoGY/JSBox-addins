@@ -1,27 +1,37 @@
 /**
- * @Version 2.9
+ * @Version 3.0
  * @author Liu Guo
- * @date 2018.6.5
+ * @date 2018.6.9
  * @brief
- *   1. 现在可以在分享面板中使用翻译插件
- *   2. 一个错误修复
+ *   1. 增加赞赏页面，支持支付宝、微信和QQ支付
+ *   2. 新增炫彩模式，由作者精心挑选的颜色，“创新以换壳为本”
+ *   3. 针对通知中心的UI进行了改进优化
+ *   4. 现在大文本时翻译框可以缩放，并加上了顺滑的动效设计
+ *   5. 其他优化和改进
+ *   6. 1.19.0版本的JSBox中存在的通知中心文本框被遮挡的问题将在1.20.0正式版中解决
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.9
+let appVersion = 3.0
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
 let query = $context.query
+let resumeAction = 0
+let colors = [$rgba(120, 219, 252, 0.4), $rgba(252, 175, 230, 0.4), $rgba(252, 200, 121, 0.4), $rgba(187, 252, 121, 0.4), $rgba(173, 121, 252, 0.4), $rgba(252, 121, 121, 0.4), $rgba(121, 252, 252, 0.4), $rgba(121, 252, 127, 0.4)]
+let cardHeight = 300
 
 uploadInstall()
-if ($app.env == $env.keyboard) {
+if ($context.link != undefined || $context.safari != undefined) {
+  let url = ($context.link != undefined)?$context.link:$context.safari.items.baseURI
+  // translateUrl(url)
+} else if ($app.env == $env.keyboard) {
   setupKeyBdView()
   detectContent()
 } else {
-  if ($app.env != $env.today || needShowUi()) {
+  if ($app.env != $env.today || getCache("showUi", true)) {
     setupView()
   }
   if(query.action != null) {
@@ -31,7 +41,33 @@ if ($app.env == $env.keyboard) {
     checkupVersion()
   }
   translate(sourceText())
+  // translateUrl("https://stackoverflow.com")
 }
+
+$app.listen({
+  resume: function() {
+    let nDate = new Date()
+    let sTime = getCache("stopTime", nDate.getTime())
+    let tdoa = (nDate.getTime() - sTime) / 1000
+    if (tdoa > 5) {
+      switch(resumeAction) {
+        case 1: 
+        $photo.delete({
+          count: 1,
+          format: "data",
+          handler: function(success) {
+            $ui.alert({
+              title: "温馨提示",
+              message: "如果赞赏成功\n待开发者审核之后\n会将你的昵称放入赞赏名单里\n-----------\n如有匿名或其他要求请反馈给开发者",
+            })
+          }
+        })
+        break
+      }
+      resumeAction = 0
+    }
+  }
+})
 
 function detectContent() {
   let preSelected = ""
@@ -64,6 +100,26 @@ function setupKeyBdView() {
       title: "中英互译",
     },
     views: [{
+      type: "gradient",
+      props: {
+        colors: [randomColor(), $rgba(255, 255, 255, 0.0), randomColor()],
+        locations: [0.0, 0.5, 1.0],
+        startPoint: $point(0.1, 0),
+        endPoint: $point(0.7, 1),
+        hidden: !getCache("showColor", true)
+      },
+      layout: $layout.fill,
+    },
+    {
+      type: "blur",
+      props: {
+        style: 1,
+        radius: 10,
+        hidden: !getCache("showColor", true)
+      },
+      layout: $layout.fill
+    },
+    {
       type: "text",
       props: {
         id: "result",
@@ -76,7 +132,7 @@ function setupKeyBdView() {
         borderWidth: 1,
         editable: false,
         selectable: false,
-        bgcolor: $rgba(100, 100, 100, 0.07),
+        bgcolor: $color("#F3F4F5"),
         alwaysBounceVertical: false,
       },
       layout: function(make, view) {
@@ -130,6 +186,7 @@ function setupView() {
   $ui.render({
     props: {
       title: "中英互译",
+      navBarHidden: isInToday(),
     },
     views: [{
       type: "view",
@@ -156,7 +213,7 @@ function setupView() {
       },
       layout: function(make, view) {
         make.left.right.inset(10)
-        make.height.equalTo(300)
+        make.height.equalTo(cardHeight)
         make.center.equalTo(view.super)
         shadow(view)
       },
@@ -167,6 +224,27 @@ function setupView() {
         }
       },
       views: [{
+        type: "gradient",
+        props: {
+          colors: [randomColor(), $rgba(255, 255, 255, 0.0), randomColor()],
+          locations: [0.0, 0.5, 1.0],
+          radius: 15,
+          startPoint: $point(0.1, 0),
+          endPoint: $point(0.7, 1),
+          hidden: !getCache("showColor", true)
+        },
+        layout: $layout.fill,
+      },
+      {
+        type: "blur",
+        props: {
+          style: 1,
+          radius: 10,
+          hidden: !getCache("showColor", true)
+        },
+        layout: $layout.fill
+      },
+      {
         type: "label",
         props: {
           id: "title",
@@ -227,7 +305,7 @@ function setupView() {
         layout: function(make, view) {
           make.centerX.equalTo(view.center)
           make.top.equalTo($("title").bottom).inset(20)
-          make.height.equalTo(85)
+          make.height.equalTo(cardHeight * 17 / 60)
           make.left.right.inset(20)
         },
         events:{
@@ -237,6 +315,9 @@ function setupView() {
             $("speechInput").hidden = false
             // $("ocr").hidden = false
             $("speechLan").hidden = false
+            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
+              $("textExpan1").hidden = false
+            }
           },
           didEndEditing: function(sender) {
             $("textDrop1").hidden = true
@@ -244,6 +325,14 @@ function setupView() {
             $("speechInput").hidden = true
             // $("ocr").hidden = true
             $("speechLan").hidden = true
+            $("textExpan1").hidden = true
+          },
+          didChange: function(sender) {
+            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
+              $("textExpan1").hidden = false
+            } else {
+              $("textExpan1").hidden = true
+            }
           }
         },
       },
@@ -275,9 +364,9 @@ function setupView() {
         type: "button",
         props: {
           id: "textSpeech1",
-          borderColor: $rgba(255, 255, 255, 0.0),
+          borderColor: $color("clear"),
           borderWidth: 1,
-          bgcolor: $rgba(255, 255, 255, 0.0),
+          bgcolor: $color("clear"),
           icon: $icon("012", $rgba(100, 100, 100, 0.3), $size(20, 20)),
           hidden: true,
         },
@@ -297,9 +386,9 @@ function setupView() {
         type: "button",
         props: {
           id: "speechInput",
-          borderColor: $rgba(255, 255, 255, 0.0),
+          borderColor: $color("clear"),
           borderWidth: 1,
-          bgcolor: $rgba(255, 255, 255, 0.0),
+          bgcolor: $color("clear"),
           icon: $icon("044", $rgba(100, 100, 100, 0.3), $size(20, 20)),
           hidden: true,
         },
@@ -353,10 +442,55 @@ function setupView() {
       {
         type: "button",
         props: {
-          id: "ocr",
-          borderColor: $rgba(255, 255, 255, 0.0),
+          id: "textExpan1",
+          borderColor: $color("clear"),
           borderWidth: 1,
-          bgcolor: $rgba(255, 255, 255, 0.0),
+          bgcolor: $color("clear"),
+          icon: $icon("160", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+          hidden: true,
+          info: "160",
+        },
+        layout: function(make, view) {
+          make.bottom.equalTo($("text").bottom).inset(5)
+          make.left.equalTo($("text").left).inset(5)
+          make.width.equalTo(20)
+          make.height.equalTo(20)
+        },
+        events: {
+          tapped: function(sender) {
+            let animateDura = 0.2
+            if (sender.info == "160") {
+              sender.info = "161"
+              $("result").hidden = true
+              $("text").blur()
+              $("text").animator.moveY(cardHeight * 19 / 120).thenAfter(animateDura).makeHeight(cardHeight * 3.0 / 5.0).easeInOut.animate(animateDura)
+              $delay(animateDura * 2, function() {
+                $("text").updateLayout(function(make) {
+                  make.height.equalTo(cardHeight * 3.0 / 5.0)
+                })
+              })
+            } else {
+              sender.info = "160"
+              $("text").blur()
+              $("text").animator.makeHeight(cardHeight * 17 / 60).thenAfter(animateDura).moveY(-cardHeight * 19 / 120).easeInOut.animate(animateDura)
+              $delay(animateDura * 2, function() {
+                $("text").updateLayout(function(make) {
+                  make.height.equalTo(cardHeight * 17 / 60)
+                })
+                $("result").hidden = false
+              })
+            }
+            sender.icon = $icon(sender.info, $rgba(100, 100, 100, 0.3), $size(20, 20))
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "ocr",
+          borderColor: $color("clear"),
+          borderWidth: 1,
+          bgcolor: $color("clear"),
           icon: $icon("018", $rgba(100, 100, 100, 0.3), $size(20, 20)),
           hidden: true,
         },
@@ -388,33 +522,44 @@ function setupView() {
           borderColor: $rgba(90, 90, 90, 0.6),
           borderWidth: 1,
           editable: true,
-          bgcolor: $rgba(100, 100, 100, 0.07),
+          bgcolor: $color("#F3F4F5"),//$rgba(100, 100, 100, 0.07),
           alwaysBounceVertical: false,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.center)
-          make.top.equalTo($("text").bottom).inset(10)
-          make.height.equalTo(85)
+          make.bottom.inset(61)
+          make.height.equalTo(cardHeight * 17 / 60)
           make.left.right.inset(20)
         },
         events:{
           didBeginEditing: function(sender) {
             $("textCopy2").hidden = false
             $("textSpeech2").hidden = false
+            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
+              $("textExpan2").hidden = false
+            }
           },
           didEndEditing: function(sender) {
             $("textCopy2").hidden = true
             $("textSpeech2").hidden = true
+            $("textExpan2").hidden = true
           },
+          didChange: function(sender) {
+            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
+              $("textExpan2").hidden = false
+            } else {
+              $("textExpan2").hidden = true
+            }
+          }
         },
       },
       {
         type: "button",
         props: {
           id: "textCopy2",
-          borderColor: $rgba(255, 255, 255, 0.0),
+          borderColor: $color("clear"),
           borderWidth: 1,
-          bgcolor: $rgba(255, 255, 255, 0.0),
+          bgcolor: $color("clear"),
           icon: $icon("019", $rgba(100, 100, 100, 0.3), $size(20, 20)),
           hidden: true,
         },
@@ -435,9 +580,9 @@ function setupView() {
         type: "button",
         props: {
           id: "textSpeech2",
-          borderColor: $rgba(255, 255, 255, 0.0),
+          borderColor: $color("clear"),
           borderWidth: 1,
-          bgcolor: $rgba(255, 255, 255, 0.0),
+          bgcolor: $color("clear"),
           icon: $icon("012", $rgba(100, 100, 100, 0.3), $size(20, 20)),
           hidden: true,
         },
@@ -456,9 +601,54 @@ function setupView() {
       {
         type: "button",
         props: {
+          id: "textExpan2",
+          borderColor: $color("clear"),
+          borderWidth: 1,
+          bgcolor: $color("clear"),
+          icon: $icon("160", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+          hidden: true,
+          info: "160",
+        },
+        layout: function(make, view) {
+          make.bottom.equalTo($("result").bottom).inset(5)
+          make.left.equalTo($("result").left).inset(5)
+          make.width.equalTo(20)
+          make.height.equalTo(20)
+        },
+        events: {
+          tapped: function(sender) {
+            let animateDura = 0.2
+            if (sender.info == "160") {
+              sender.info = "161"
+              $("text").hidden = true
+              $("result").blur()
+              $("result").animator.moveY(-cardHeight * 19 / 120).thenAfter(animateDura).makeHeight(cardHeight * 3 / 5).easeInOut.animate(animateDura)
+              $delay(animateDura * 2, function() {
+                $("result").updateLayout(function(make) {
+                  make.height.equalTo(cardHeight * 3 / 5)
+                })
+              })
+            } else {
+              sender.info = "160"
+              $("result").blur()
+              $("result").animator.makeHeight(cardHeight * 17 / 60).thenAfter(animateDura).moveY(cardHeight * 19 / 120).easeInOut.animate(animateDura)
+              $delay(animateDura * 2, function() {
+                $("result").updateLayout(function(make) {
+                  make.height.equalTo(cardHeight * 17 / 60)
+                })
+                $("text").hidden = false
+              })
+            }
+            sender.icon = $icon(sender.info, $rgba(100, 100, 100, 0.3), $size(20, 20))
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
           id: "translate",
           title: "翻译",
-          bgcolor: $color("white"),
+          bgcolor: $color("clear"),
           borderColor: $rgba(90, 90, 90, 0.6),
           borderWidth: 1,
           titleColor: $rgba(90, 90, 90, 0.6),
@@ -482,9 +672,7 @@ function setupView() {
         type: "button",
         props: {
           id: "tools",
-          borderColor: $color("white"),
-          borderWidth: 1,
-          bgcolor: $color("white"),
+          bgcolor: $color("clear"),
           icon: $icon("102", $rgba(100, 100, 100, 0.4), $size(20, 20)),
           hidden: false,
         },
@@ -504,9 +692,7 @@ function setupView() {
         type: "button",
         props: {
           id: "setting",
-          borderColor: $color("white"),
-          borderWidth: 1,
-          bgcolor: $color("white"),
+          bgcolor: $color("clear"),
           icon: $icon("002", $rgba(100, 100, 100, 0.4), $size(20, 20)),
         },
         layout: function(make, view) {
@@ -521,6 +707,27 @@ function setupView() {
           }
         }
       }]
+    },
+    {
+      type: "button",
+      props: {
+        title: "CLOSE",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.bottom.equalTo($("card").top).inset(1)
+        make.width.equalTo(120)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $app.close(0.1)
+        }
+      }
     }]
   })
 }
@@ -573,7 +780,7 @@ function setupSetting() {
         type: "switch",
         props: {
           id: "tabShowUiSwitch",
-          on: needShowUi(),
+          on: getCache("showUi", true),
         },
         layout: function(make, view) {
           make.right.inset(15)
@@ -582,6 +789,45 @@ function setupSetting() {
         events: {
           changed: function(sender) {
               $cache.set("showUi", sender.on)
+          }
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
+  const tabShowColorItem = {
+    type: "view",
+    props: {
+
+    },
+    views: [{
+        type: "label",
+        props: {
+          id: "tabShowColorLabel",
+          text: "炫彩模式",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "switch",
+        props: {
+          id: "tabShowColorSwitch",
+          on: getCache("showColor", true),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+              $cache.set("showColor", sender.on)
+              $delay(0.3, function() {
+                $app.openExtension($addin.current.name)
+              })
           }
         }
       }
@@ -641,7 +887,7 @@ function setupSetting() {
   },
   {
     templateTitle: {
-      text : "版本号",
+      text : "检查更新",
     },
     templateDetails: {
       text : "" + appVersion.toFixed(1),
@@ -655,59 +901,108 @@ function setupSetting() {
     templateDetails: {
       text : "",
     },
+  },
+  {
+    templateTitle: {
+      text : "支持与赞赏",
+      textColor: $color("#FF823E"),
+    },
+    templateDetails: {
+      text : "",
+    },
   }]
   $ui.push({
     props: {
       title: "设置",
+      navBarHidden: isInToday(),
     },
     views: [{
       type: "list",
       props: {
+        id: "list",
         template: feedBackTemplate,
         data: [
           {
             title: "功能设置",
-            rows: [tabShowUiItem]
+            rows: [tabShowUiItem, tabShowColorItem]
           },
           {
-            title: "其他",
+            title: "关于",
             rows: array,
           },
           {
             title: "统计",
             rows: [tabShowInstalls]
           }
-        ]
+        ],
       },
-      layout: $layout.fill,
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        if(isInToday()) {
+          make.height.equalTo(cardHeight)
+        } else {
+          make.height.equalTo(view.super)
+        }
+        make.width.equalTo(view.super)
+      },
       events: {
         didSelect: function(sender, indexPath, title) {
           let titleText = title.templateTitle.text
           if(title.url) {
-            $ui.push({
-              props: {
-                title: titleText
-              },
-              views: [{
-                type: "web",
-                props: {
-                  url: title.url,
-                },
-                layout: $layout.fill,
-              }]
-            })
+            setupWebView(titleText, title.url)
           } else {
-            // if(title.templateTitle.text == "反馈与建议") {
-            //   setupFeedBack()
-            // }
             switch(title.templateTitle.text) {
               case "反馈与建议": setupFeedBack()
                 break
               case "版本号": checkupVersion()
                 break
+              case "支持与赞赏": setupReward()
+                break
               default:
             }
           }
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: "CLOSE",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.right.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("list").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $app.close(0.1)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: "BACK",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.left.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("list").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $ui.pop()
         }
       }
     }]
@@ -715,11 +1010,391 @@ function setupSetting() {
   requireInstallNumbers()
 }
 
+//赞赏页面
+function setupReward() {
+  const rewardTemplate = [{
+    type: "label",
+    props: {
+      id: "templateTitle",
+      textColor: $color("#333333"),
+      font: $font("TrebuchetMS-Italic",17)
+    },
+    layout: function(make, view) {
+      make.left.inset(40);
+      make.centerY.equalTo(view.super);
+    }
+  },
+  {
+    type: "image",
+    props: {
+      id: "templateImage",
+      icon: $icon("061", $color("#FF823E"), $size(15, 15)),
+      bgcolor: $color("clear"),
+      hidden: false,
+    },
+    layout: function(make, view) {
+      make.right.inset(40);
+      make.centerY.equalTo(view.super);
+    }
+  }]
+  let array = $cache.get("rewardList")
+  if(array == undefined) {
+    array = []
+  }
+  $ui.push({
+    props: {
+      title: "支持与赞赏",
+      navBarHidden: isInToday(),
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      props: {
+        id: "reward",
+      },
+      layout: function(make, view) {
+        make.left.right.inset(10)
+        make.height.equalTo(cardHeight)
+        make.center.equalTo(view.super)
+      },
+      events: {
+        
+      },
+      views:[{
+        type: "label",
+        props: {
+          id: "rewardTextTitle",
+          text: "赞赏名单(按时间排序)：",
+          textColor: $color("#333333"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.top.inset(10)
+          make.left.inset(20)
+        }
+      },
+      {
+        type: "list",
+        props: {
+          id: "rewardList",
+          template: rewardTemplate,
+          radius: 5,
+          borderColor: $rgba(90, 90, 90, 0.4),
+          borderWidth: 1,
+          insets: $insets(5,5,5,5),
+          rowHeight: 35,
+          bgcolor: $color("clear"),
+          selectable: false,
+          data: [
+            {
+              rows: array,
+            },
+          ],
+          header: {
+            type: "label",
+            props: {
+              height: 20,
+              text: "Thank you all.",
+              textColor: $rgba(90, 90, 90, 0.6),
+              align: $align.center,
+              font: $font(12)
+            }
+          }
+        },
+        layout: function(make, view) {
+          make.height.equalTo(160)
+          make.top.equalTo($("rewardTextTitle").bottom).inset(5)
+          make.centerX.equalTo(view.center)
+          make.left.right.inset(20)
+        },
+        events: {
+          didSelect: function(sender, indexPath, data) {
+
+          }
+        }
+      },
+      {
+        type: "tab",
+        props: {
+          id: "selection",
+          items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
+          tintColor: $color("#333333"),
+          index: 0,
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.width.equalTo(200)
+          make.bottom.inset(60)
+          make.height.equalTo(25)
+        },
+        events: {
+          changed: function(sender) {
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "aliRewardButton",
+          title: " 支付宝 ",
+          icon: $icon("074", $color("#108EE9"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#108EE9"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            switch($("selection").index) {
+              case 0: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX08935BBCTQWGRIJ7VDF")
+                break
+              case 1: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX09116CT3WME79IRNO41")
+                break
+              case 2: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX09563WVPH2YUGMKTX0A")
+                break
+            }
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "wxRewardButton",
+          title: " 微信 ",
+          icon: $icon("189", $color("#1AAD19"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#1AAD19"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.left.inset(40)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            begainReward(sender.title)
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "qqRewardButton",
+          title: " QQ ",
+          icon: $icon("070", $color("#E81F1F"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#E81F1F"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.right.inset(40)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            begainReward(sender.title)
+          }
+        }
+      },
+      {
+        type: "label",
+        props: {
+          id: "recommandText",
+          text: "— 推荐方式 —",
+          textColor: $rgba(100, 100, 100, 0.5),
+          font: $font(10),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo($("aliRewardButton"))
+          make.bottom.inset(8)
+        }
+      },]
+    },
+    {
+      type: "button",
+      props: {
+        title: "CLOSE",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.right.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("reward").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $app.close(0.1)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: "BACK",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.left.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("reward").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $ui.pop()
+        }
+      }
+    }]
+  })
+  requireReward()
+}
+
+function begainReward(way) {
+  $ui.alert({
+    title: "确定赞赏？",
+    message: "点击确定后，将会下载付款码到手机相册，并会跳转到" + way + "扫一扫\n你只需要选择相册里的付款码即可赞赏\n----------\n赞赏完成后别忘记回来，插件会自动删除付款码图片",
+    actions: [
+      {
+        title: "确定",
+        handler: function() {
+          downloadRewardPic(way)
+        }
+      },
+      {
+        title: "取消",
+      }
+    ]
+  })
+}
+
+function downloadRewardPic(way) {
+  let PicWay = ""
+  let PicMoney = ""
+  let url = ""
+  switch($("selection").index) {
+    case 0: PicMoney = "02"
+      break
+    case 1: PicMoney = "05"
+      break
+    case 2: PicMoney = "10"
+      break
+  }
+  switch(way) {
+    case " 微信 ": PicWay = "wx"
+      url = "weixin://scanqrcode"
+      break
+    case " QQ ": PicWay = "qq"
+      url = "mqqapi://qrcode/scan_qrcode?version=1&src_type=app"
+      break
+  }
+  $http.download({
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater/" + PicWay + "_reward_" + PicMoney + ".JPG",
+    progress: function(bytesWritten, totalBytes) {
+      var percentage = bytesWritten * 1.0 / totalBytes
+    },
+    handler: function(resp) {
+      $photo.save({
+        data: resp.data,
+        handler: function(success) {
+          if (success) {
+            let nDate = new Date()
+            $cache.set("stopTime", nDate.getTime())
+            resumeAction = 1
+            $app.openURL(url)
+            
+          }
+        }
+      })
+    }
+  })
+}
+
+function setupWebView(title, url) {
+  $ui.push({
+    props: {
+      title: title,
+      navBarHidden: isInToday()
+    },
+    views: [{
+      type: "web",
+      props: {
+        id: "webView",
+        url: url,
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        if(isInToday()) {
+          make.height.equalTo(cardHeight)
+        } else {
+          make.height.equalTo(view.super)
+        }
+        make.width.equalTo(view.super)
+      },
+    },
+    {
+      type: "button",
+      props: {
+        title: "CLOSE",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.right.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("webView").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $app.close(0.1)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: "BACK",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.left.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("webView").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $ui.pop()
+        }
+      }
+    }]
+  })
+}
+
 //反馈页面
 function setupFeedBack() {
   $ui.push({
     props: {
-      title: "反馈与建议"
+      title: "反馈与建议",
+      navBarHidden: isInToday(),
     },
     layout: $layout.fill,
     views: [{
@@ -729,7 +1404,7 @@ function setupFeedBack() {
       },
       layout: function(make, view) {
         make.left.right.inset(10)
-        make.height.equalTo(300)
+        make.height.equalTo(cardHeight)
         make.center.equalTo(view.super)
       },
       events: {
@@ -828,19 +1503,65 @@ function setupFeedBack() {
           }
         }
       },]
+    },
+    {
+      type: "button",
+      props: {
+        title: "CLOSE",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.right.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("feedback").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $app.close(0.1)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: "BACK",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: !isInToday(),
+      },
+      layout: function(make, view) {
+        make.left.inset(0)
+        make.width.equalTo(view.super).multipliedBy(0.5)
+        make.bottom.equalTo($("feedback").top).inset(1)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $ui.pop()
+        }
+      }
     }]
   })
 }
 
-//通知中心是否展示UI界面
-function needShowUi(){
-  let temp= $cache.get("showUi")
+//获取缓存 def为默认值
+function getCache(key, def) {
+  let temp= $cache.get(key)
   if(temp == undefined) {
-    $cache.set("showUi", true)
-    return true
+    $cache.set(key, def)
+    return def
   } else {
     return temp
   }
+}
+
+function randomColor() {
+  return colors[Math.floor(Math.random()*colors.length)]
 }
 
 function shadow(view) {
@@ -850,6 +1571,10 @@ function shadow(view) {
   layer.invoke("setShadowColor", $color("gray").runtimeValue().invoke("CGColor"))
   layer.invoke("setShadowOpacity", 0.3)
   layer.invoke("setShadowRadius", 8)
+}
+
+function isInToday() {
+  return ($app.env == $env.today)?true:false
 }
 
 function solveAction(action) {
@@ -1015,17 +1740,18 @@ function kingsoftTran(text) {
 //分析谷歌数据
 function analyseGData(data) {
   let length = data.sentences.length
-  let meanText = "▫️"
-  let meanTitle = ""
-  for (let i = 0; i < length; i++) {
-    meanText += data.sentences[i].trans
-    if (i < length - 1) {
-      meanText += "\n"
+  if(length != undefined) {
+    let meanText = "▫️"
+    let meanTitle = ""
+    for (let i = 0; i < length; i++) {
+      meanText += data.sentences[i].trans
+      if (i < length - 1) {
+        meanText += "\n"
+      }
+      meanTitle += data.sentences[i].orig
     }
-    meanTitle += data.sentences[i].orig
+    showResult(meanTitle, meanText)
   }
-
-  showResult(meanTitle, meanText)
 }
 
 //分析必应数据
@@ -1064,7 +1790,7 @@ function analyseKData(data) {
 
 //展示翻译结果
 function showResult(title, msg) {
-  if(!needShowUi() && $app.env == $env.today) {
+  if(!getCache("showUi", true) && $app.env == $env.today) {
     $ui.alert({
       title: shortDisplay(title),
       message: msg,
@@ -1168,7 +1894,7 @@ function updateAddin(app) {
 
 //检查版本
 function checkupVersion() {
-  if($app.env == $env.today && !needShowUi()) {
+  if($app.env == $env.today && !getCache("showUi", true)) {
     $ui.loading("检查更新")
   }
   $http.download({
@@ -1178,11 +1904,11 @@ function checkupVersion() {
     handler: function(resp) {
       let str = resp.data.string
       let lv = getVFS(str)
-      if($app.env == $env.today && !needShowUi()) {
+      if($app.env == $env.today && !getCache("showUi", true)) {
         $ui.loading(false)
       }
       if (needUpdate(appVersion, lv)) {
-        sureToUpdate(str, resp.data)
+        sureToUpdate(str, resp.data, lv)
       }
     }
   })
@@ -1192,7 +1918,7 @@ function checkupVersion() {
 function getVFS(str) {
   let vIndex = str.indexOf("@Version ")
   let start = vIndex + 9
-  let end = start + 3
+  let end = str.indexOf("\n", start)
   let lv = str.substring(start, end)
   return lv
 }
@@ -1219,23 +1945,23 @@ function currentIcon() {
 }
 
 //确定升级？
-function sureToUpdate(str, app) {
+function sureToUpdate(str, app, version) {
   let des = getUpDes(str)
   $ui.alert({
-    title: "发现新版本",
+    title: "发现新版本 V" + version,
     message: des + "\n是否更新？",
     actions: [{
+        title: "否",
+        handler: function() {
+
+        }
+      },
+      {
         title: "是",
         handler: function() {
           updateAddin(app)
         }
       },
-      {
-        title: "否",
-        handler: function() {
-
-        }
-      }
     ]
   })
 }
@@ -1308,14 +2034,14 @@ function myLoading(text) {
 
 //myAlert
 function myAlert(text) {
-  if ($app.env == $env.today && !needShowUi()) {
+  if ($app.env == $env.today && !getCache("showUi", true)) {
     $ui.alert(text)
   }
 }
 
 //myToast
 function myToast(text, duration) {
-  if ($app.env == $env.today && !needShowUi()) {
+  if ($app.env == $env.today && !getCache("showUi", true)) {
     $ui.toast(text, duration)
   }
 }
@@ -1357,6 +2083,56 @@ function delSquCha(text) {
     newText = newText.substring(index2 + 1)
   }while(newText.indexOf("▫️") >= 0)
   return result
+}
+
+function requireRewardNumber() {
+  $http.request({
+    method: "GET",
+    url: "https://pwqyveon.api.lncld.net/1.1/classes/Reward?count=1&limit=0",
+    timeout: 5,
+    header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": appId,
+        "X-LC-Key": appKey,
+    },
+    handler: function(resp) {
+      let results = resp.data.count
+      if(results != undefined) {
+        
+      }
+    }
+  })
+}
+
+function requireReward() {
+  $http.request({
+    method: "GET",
+    url: "https://pwqyveon.api.lncld.net/1.1/classes/Reward",
+    timeout: 5,
+    header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": appId,
+        "X-LC-Key": appKey,
+    },
+    handler: function(resp) {
+      let data = resp.data.results
+      let array = []
+      if(data != undefined) {
+        for(let i = 0; i < data.length; i++) {
+          array.unshift({
+            templateTitle: {
+              text : data[i].name,
+            },
+            templateImage: {
+              hidden: false,
+            }
+          })
+        }
+        $("rewardList").data = array
+        $cache.set("rewardList", array)
+      }
+    }
+  })
 }
 
 function requireInstallNumbers(){
