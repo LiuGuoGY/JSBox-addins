@@ -1,15 +1,15 @@
 /**
- * @version 1.0
+ * @version 1.1
  * @author Liu Guo
  * @date 2018.6.14
  * @brief
- *   1. 完成1.0开发
+ *   1. 修复因为JSBox的Bug而导致的云库显示异常的问题
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.0
+let appVersion = 1.1
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -342,7 +342,7 @@ function setupStoreView() {
               }
             }
           ],
-          data: getCache("cloudItems", []),
+          data: [],
         },
         layout: function(make, view) {
           make.width.equalTo(view.super)
@@ -1310,7 +1310,6 @@ function requireItems() {
           })
         }
         $("rowsCloudShow").data = array
-        $cache.set("cloudItems", array)
       }
     }
   })
