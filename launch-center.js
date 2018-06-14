@@ -1,7 +1,7 @@
 /**
  * @version 1.0
  * @author Liu Guo
- * @date 2018.6.9
+ * @date 2018.6.14
  * @brief
  *   1. 完成1.0开发
  * @/brief
@@ -15,6 +15,9 @@ let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
 
 uploadInstall()
+if (needCheckup()) {
+  checkupVersion()
+}
 if ($app.env == $env.today) {
   setupTodayView()
 } else {
