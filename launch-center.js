@@ -219,17 +219,17 @@ function setupMainView() {
           didSelect(sender, indexPath, data) {
             $app.openURL(data.url)
           },
-          longPressed: function(sender, indexPath, data) {
-            $("rowsShow").delete(indexPath)
-            $cache.set("localItems", $("rowsShow").data)
-          }
+          // longPressed: function(sender, indexPath, data) {
+          //   $("rowsShow").delete(indexPath)
+          //   $cache.set("localItems", $("rowsShow").data)
+          // }
         }
       },
       {
         type: "text",
         props: {
           id: "attentionText",
-          text: "注意：\n\t刷新按钮刷新功能在 iOS 11 及以下，且 JSBox 版本在 1.20.0 及以下时，有时会有问题，此为 JSBox 的 Bug，此时建议重新进入插件即可实现刷新\n\t长按可删除\n\t推荐设置为普通模式",
+          text: "注意：\n\t刷新按钮刷新功能在 iOS 11 及以下，且 JSBox 版本在 1.20.0 及以下时，有时会有问题，此为 JSBox 的 Bug，此时建议重新进入插件即可实现刷新\n\t推荐设置为普通模式",
           align: $align.left,
           textColor: $color("gray"),
           editable: false,
@@ -239,7 +239,7 @@ function setupMainView() {
         layout: function(make, view) {
           make.width.equalTo(view.super)
           make.top.equalTo($("rowsShow").bottom).inset(20)
-          make.height.equalTo(80)
+          make.height.equalTo(100)
         }
       },
       {
