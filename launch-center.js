@@ -1,17 +1,17 @@
 /**
- * @version 1.2
+ * @version 1.3
  * @author Liu Guo
- * @date 2018.6.17
+ * @date 2018.6.14
  * @brief
- *   1. 优化上传的体验，加上适当的防误传措施
- *   2. 加入图片缩小上传，大幅减小图片大小
- *   3. 上下滑出现缺少的问题正在解决
+ *   1. 修复了上下滑出现的数据缺失问题
+ *   2. 添加删除按钮，增加删除功能
+ *   3. 现在下拉即可刷新数据
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.2
+let appVersion = 1.3
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -72,7 +72,7 @@ function setupTodayView() {
             layout(make, view) {
               make.top.inset(9)
               make.centerX.equalTo(view.super)
-              make.size.equalTo(20)
+              make.size.equalTo($size(20, 20))
             }
           }
         ],
@@ -150,18 +150,28 @@ function setupMainView() {
       {
         type: "button",
         props: {
-          id: "refreshButton",
-          title: "刷新",
+          id: "deleteButton",
+          title: "删除",
           bgcolor: $color("clear"),
           titleColor: $color("#377116"),
+          info: false,
         },
         layout: function(make, view) {
           make.top.equalTo($("localLabel").bottom).inset(10)
           make.left.inset(10)
+          make.width.equalTo(50)
         },
         events: {
           tapped: function(sender) {
-            $("rowsShow").data = getCache("localItems", [])
+            if (sender.info == false) {
+              sender.info = true
+              sender.bgcolor = $color("#C70039")
+              sender.titleColor = $color("white")
+            } else {
+              sender.info = false
+              sender.bgcolor = $color("clear")
+              sender.titleColor = $color("#377116")
+            }
           }
         }
       },
@@ -206,7 +216,7 @@ function setupMainView() {
               layout(make, view) {
                 make.top.inset(9)
                 make.centerX.equalTo(view.super)
-                make.size.equalTo(20)
+                make.size.equalTo($size(20, 20))
               }
             },
           ],
@@ -214,24 +224,31 @@ function setupMainView() {
         },
         layout: function(make, view) {
           make.width.equalTo(view.super)
-          make.top.equalTo($("refreshButton").bottom).inset(10)
+          make.top.equalTo($("deleteButton").bottom).inset(10)
           make.height.equalTo(view.super).multipliedBy(0.4)
+          make.centerX.equalTo(view.super)
         },
         events: {
           didSelect(sender, indexPath, data) {
-            $app.openURL(data.url)
+            if($("deleteButton").info == false) {
+              $app.openURL(data.url)
+            } else {
+              $("rowsShow").delete(indexPath)
+              $cache.set("localItems", $("rowsShow").data)
+            }
+            
           },
-          // longPressed: function(sender, indexPath, data) {
-          //   $("rowsShow").delete(indexPath)
-          //   $cache.set("localItems", $("rowsShow").data)
-          // }
+          pulled: function(sender) {
+            $("rowsShow").data = getCache("localItems", [])
+            $("rowsShow").endRefreshing()
+          }
         }
       },
       {
         type: "text",
         props: {
           id: "attentionText",
-          text: "注意：\n\t刷新按钮刷新功能在 iOS 11 及以下，且 JSBox 版本在 1.20.0 及以下时，有时会有问题，此为 JSBox 的 Bug，此时建议重新进入插件即可实现刷新\n\t普通模式不宜添加过多，否则容易出现无法载入，性能模式无此限制",
+          text: "注意：\n\t普通模式不宜添加过多，否则容易出现无法载入，性能模式无此限制",
           align: $align.left,
           textColor: $color("gray"),
           editable: false,
@@ -340,16 +357,17 @@ function setupStoreView() {
               layout(make, view) {
                 make.top.inset(9)
                 make.centerX.equalTo(view.super)
-                make.size.equalTo(20)
+                make.size.equalTo($size(20,20))
               }
             }
           ],
-          data: [],
+          data: getCache("cloudItems", []),
         },
         layout: function(make, view) {
           make.width.equalTo(view.super)
           make.top.equalTo($("cloudLabel").bottom).inset(10)
           make.height.equalTo(view.super).multipliedBy(0.7)
+          make.centerX.equalTo(view.super)
         },
         events: {
           didSelect(sender, indexPath, data) {
@@ -366,6 +384,9 @@ function setupStoreView() {
             })
             $cache.set("localItems", array)
             $ui.toast("添加成功", 0.5)
+          },
+          pulled: function(sender) {
+            requireItems()
           }
         }
       },
@@ -463,7 +484,7 @@ function setupUploadView() {
           layout(make, view) {
             make.top.inset(9)
             make.centerX.equalTo(view.super)
-            make.size.equalTo(20)
+            make.size.equalTo($size(20,20))
           }
         }],
       },
@@ -471,7 +492,7 @@ function setupUploadView() {
         type: "text",
         props: {
           id: "attentionLabel",
-          text: "注意： \n\t上传的图片应为正方形，且为保证加载速度，图片的大小不应超过10KB，建议用缩小成 5cm x 5cm 左右。\n\t为保证文字显示完整，文字部分最好不超过8个字符或4个汉字（一个汉字=两个字母）",
+          text: "注意： \n\t为保证文字显示完整，文字部分最好不超过8个字符或4个汉字（一个汉字=两个字母）",
           align: $align.left,
           textColor: $color("gray"),
           editable: false,
@@ -1170,6 +1191,7 @@ function checkupVersion() {
       if ($app.env == $env.today && !getCache("showUi", true)) {
         $ui.loading(false)
       }
+      $console.info(str)
       if (needUpdate(appVersion, lv)) {
         sureToUpdate(str, resp.data, lv)
       }
@@ -1323,6 +1345,10 @@ function requireItems() {
           })
         }
         $("rowsCloudShow").data = array
+        $("rowsCloudShow").endRefreshing()
+        $cache.set("cloudItems", array)
+      } else {
+        $("rowsCloudShow").endRefreshing()
       }
     }
   })
