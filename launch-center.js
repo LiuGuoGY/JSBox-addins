@@ -1,15 +1,17 @@
 /**
- * @version 1.1
+ * @version 1.2
  * @author Liu Guo
- * @date 2018.6.14
+ * @date 2018.6.17
  * @brief
- *   1. 修复因为JSBox的Bug而导致的云库显示异常的问题
+ *   1. 优化上传的体验，加上适当的防误传措施
+ *   2. 加入图片缩小上传，大幅减小图片大小
+ *   3. 上下滑出现缺少的问题正在解决
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.1
+let appVersion = 1.2
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -229,7 +231,7 @@ function setupMainView() {
         type: "text",
         props: {
           id: "attentionText",
-          text: "注意：\n\t刷新按钮刷新功能在 iOS 11 及以下，且 JSBox 版本在 1.20.0 及以下时，有时会有问题，此为 JSBox 的 Bug，此时建议重新进入插件即可实现刷新\n\t推荐设置为普通模式",
+          text: "注意：\n\t刷新按钮刷新功能在 iOS 11 及以下，且 JSBox 版本在 1.20.0 及以下时，有时会有问题，此为 JSBox 的 Bug，此时建议重新进入插件即可实现刷新\n\t普通模式不宜添加过多，否则容易出现无法载入，性能模式无此限制",
           align: $align.left,
           textColor: $color("gray"),
           editable: false,
@@ -469,7 +471,7 @@ function setupUploadView() {
         type: "text",
         props: {
           id: "attentionLabel",
-          text: "注意： \n\t上传的图片应为正方形，且为保证加载速度，图片的大小不应超过20KB。\n\t为保证文字显示完整，文字部分应不超过8个字符或4个汉字（一个汉字=两个字母）",
+          text: "注意： \n\t上传的图片应为正方形，且为保证加载速度，图片的大小不应超过10KB，建议用缩小成 5cm x 5cm 左右。\n\t为保证文字显示完整，文字部分最好不超过8个字符或4个汉字（一个汉字=两个字母）",
           align: $align.left,
           textColor: $color("gray"),
           editable: false,
@@ -545,10 +547,17 @@ function setupUploadView() {
         events: {
           tapped: function(sender) {
             $photo.pick({
-              size: $size(20),
+              format: "data",
               handler: function(resp) {
-                $("icon").data = resp.image.png
-                sender.info = resp.image.png
+                let mimeType = resp.data.info.mimeType
+                let cutedIcon = cutIcon(resp.data.image)
+                if (mimeType.indexOf("png") >= 0) {
+                  sender.info = cutedIcon.png
+                  $("icon").data = cutedIcon.png
+                } else {
+                  sender.info = cutedIcon.jpg(1.0)
+                  $("icon").data = cutedIcon.jpg(1.0)
+                }
               }
             })
           }
@@ -601,7 +610,11 @@ function setupUploadView() {
         },
         events: {
           tapped: function(sender) {
-            uploadSM($("chooseButton").info)
+            if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
+              $ui.error("请补全信息")
+            } else {
+              uploadSM($("chooseButton").info)
+            }
           }
         }
       }
@@ -1315,7 +1328,13 @@ function requireItems() {
   })
 }
 
-function uploadItem(title, icon, url) {
+function uploadItem(title, icon, url, size, deviceToken) {
+  let size_k = ""
+  if (size < 1000000) {
+    size_k = size / 1000 + " K"
+  } else {
+    size_k = size / 1000000 + " M"
+  }
   $http.request({
     method: "POST",
     url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items",
@@ -1329,9 +1348,12 @@ function uploadItem(title, icon, url) {
       title: title,
       icon: icon,
       url: url,
+      size: size_k,
+      deviceToken: deviceToken,
     },
     handler: function(resp) {
       $ui.toast("上传成功")
+      $ui.pop()
     }
   })
 }
@@ -1410,6 +1432,21 @@ function uploadInstall() {
   }
 }
 
+function cutIcon(image) {
+  let canvas = $ui.create({type: "view"})
+  let canvasSize = 100
+  canvas.add({
+    type: "image",
+    props: {
+      image: image,
+      frame: $rect(0, 0, canvasSize, canvasSize)
+    }
+  })
+  canvas.frame = $rect(0, 0, canvasSize, canvasSize)
+  let snapshot = canvas.snapshot
+  return snapshot
+}
+
 function uploadSM(pic) {
   if (typeof(pic) != "undefined") {
     $ui.loading(true)
@@ -1419,7 +1456,7 @@ function uploadSM(pic) {
       handler: function(resp) {
         $ui.loading(false)
         var data = resp.data.data
-        uploadItem($("title").text, data.url, $("schemeInput").text)
+        uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue())
       }
     })
   }
