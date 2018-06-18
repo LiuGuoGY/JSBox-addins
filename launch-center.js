@@ -1,20 +1,20 @@
 /**
- * @version 1.3
+ * @version 1.4
  * @author Liu Guo
- * @date 2018.6.14
+ * @date 2018.6.18
  * @brief
- *   1. 修复了上下滑出现的数据缺失问题
- *   2. 添加删除按钮，增加删除功能
- *   3. 现在下拉即可刷新数据
+ *   1. 增加 Url Scheme 的验证按钮以确保正确
+ *   2. 现在可以查看和删除自己上传过的启动器
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.3
+let appVersion = 1.4
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
+let resumeAction = 0
 
 uploadInstall()
 if (needCheckup()) {
@@ -25,6 +25,24 @@ if ($app.env == $env.today) {
 } else {
   setupMainView()
 }
+
+$app.listen({
+  pause: function() {
+    switch(resumeAction) {
+      case 1: 
+      let nDate = new Date()
+      let sTime = getCache("begainTime", nDate.getTime())
+      let duration = (nDate.getTime() - sTime)
+      if (duration < 100) {
+        verifyStateSet(true)
+      } else {
+        verifyStateSet(false)
+      }
+      resumeAction = 0
+      break
+    }
+  }
+})
 
 function setupTodayView() {
   $ui.render({
@@ -142,8 +160,25 @@ function setupMainView() {
         },
         events: {
           tapped: function(sender) {
-            $cache.set("localItems", [])
-            $("rowsShow").data = []
+            $ui.alert({
+              title: "确定清空？",
+              message: "清空操作无法撤销",
+              actions: [
+                {
+                  title: "OK",
+                  handler: function() {
+                    $cache.set("localItems", [])
+                    $("rowsShow").data = []
+                  }
+                },
+                {
+                  title: "Cancel",
+                  handler: function() {
+            
+                  }
+                }
+              ]
+            })
           }
         }
       },
@@ -236,7 +271,6 @@ function setupMainView() {
               $("rowsShow").delete(indexPath)
               $cache.set("localItems", $("rowsShow").data)
             }
-            
           },
           pulled: function(sender) {
             $("rowsShow").data = getCache("localItems", [])
@@ -402,19 +436,177 @@ function setupStoreView() {
           borderWidth: 1,
         },
         layout: function(make, view) {
-          make.left.right.inset(20)
+          make.left.inset(20)
           make.height.equalTo(50)
           make.bottom.inset(30)
+          make.width.equalTo(view.super).multipliedBy(0.4)
         },
         events: {
           tapped: function(sender) {
             setupUploadView()
           }
         }
+      },
+      {
+        type: "button",
+        props: {
+          id: "cloudButton",
+          title: "  我上传的  ",
+          bgcolor: $color("clear"),
+          titleColor: $color("#F39C12"),
+          icon: $icon("109", $color("#F39C12"), $size(20, 20)),
+          borderColor: $color("#F39C12"),
+          borderWidth: 1,
+        },
+        layout: function(make, view) {
+          make.right.inset(20)
+          make.height.equalTo(50)
+          make.bottom.inset(30)
+          make.width.equalTo(view.super).multipliedBy(0.4)
+        },
+        events: {
+          tapped: function(sender) {
+            setupMyUpView()
+          }
+        }
       }
     ]
   })
   requireItems()
+}
+
+function setupMyUpView() {
+  $ui.push({
+    props: {
+      title: "My Upload"
+    },
+    views: [{
+      type: "label",
+      props: {
+        id: "myUploadLabel",
+        text: "我上传的：",
+        align: $align.left
+      },
+      layout: function(make, view) {
+        make.top.inset(10)
+        make.left.inset(10)
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "deleteButton",
+        title: "删除",
+        bgcolor: $color("clear"),
+        titleColor: $color("#377116"),
+        info: false,
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("myUploadLabel").bottom).inset(10)
+        make.left.inset(10)
+        make.width.equalTo(50)
+      },
+      events: {
+        tapped: function(sender) {
+          if (sender.info == false) {
+            sender.info = true
+            sender.bgcolor = $color("#C70039")
+            sender.titleColor = $color("white")
+          } else {
+            sender.info = false
+            sender.bgcolor = $color("clear")
+            sender.titleColor = $color("#377116")
+          }
+        }
+      }
+    },
+    {
+      type: "matrix",
+      props: {
+        id: "rowsMyShow",
+        columns: 5, //横行个数
+        itemHeight: 50, //图标到字之间得距离
+        spacing: 3, //每个边框与边框之间得距离
+        template: [{
+            type: "blur",
+            props: {
+              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+              style: 1 // 0 ~ 5 调整背景的颜色程度
+            },
+            layout: $layout.fill,
+          },
+          {
+            type: "label",
+            props: {
+              id: "title",
+              textColor: $color("black"),
+              bgcolor: $color("clear"),
+              font: $font(13),
+              align: $align.center,
+            },
+            layout(make, view) {
+              make.bottom.inset(0)
+              make.centerX.equalTo(view.super)
+              make.height.equalTo(25)
+              make.width.equalTo(view.super)
+            }
+          },
+          {
+            type: "image",
+            props: {
+              id: "icon",
+              bgcolor: $color("clear"),
+              size: $size(20, 20),
+            },
+            layout(make, view) {
+              make.top.inset(9)
+              make.centerX.equalTo(view.super)
+              make.size.equalTo($size(20, 20))
+            }
+          },
+        ],
+        data: [],
+      },
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.top.equalTo($("deleteButton").bottom).inset(10)
+        make.height.equalTo(view.super).multipliedBy(0.7)
+        make.centerX.equalTo(view.super)
+      },
+      events: {
+        didSelect(sender, indexPath, data) {
+          if($("deleteButton").info == false) {
+            $app.openURL(data.url)
+          } else {
+            $ui.alert({
+              title: "确定删除？",
+              message: "删除操作不可撤销，请谨慎操作",
+              actions: [
+                {
+                  title: "OK",
+                  handler: function() {
+                    deleteCloudItem(data.info.objectId)
+                    $("rowsMyShow").delete(indexPath)
+                    $cache.set("myItems", $("rowsMyShow").data)
+                  }
+                },
+                {
+                  title: "Cancel",
+                  handler: function() {
+            
+                  }
+                }
+              ]
+            })
+          }
+        },
+        pulled: function(sender) {
+          requireMyItems()
+        }
+      }
+    },]
+  })
+  requireMyItems()
 }
 
 function setupUploadView() {
@@ -526,7 +718,7 @@ function setupUploadView() {
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo($("titleLabel").bottom).inset(10)
-          make.size.equalTo($size(200, 32))
+          make.size.equalTo($size(150, 32))
         },
         events: {
           changed: function(sender) {
@@ -563,7 +755,7 @@ function setupUploadView() {
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo($("iconLabel").bottom).inset(10)
-          make.size.equalTo($size(200, 32))
+          make.size.equalTo($size(100, 32))
         },
         events: {
           tapped: function(sender) {
@@ -605,11 +797,48 @@ function setupUploadView() {
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo($("schemeLabel").bottom).inset(10)
-          make.size.equalTo($size(200, 32))
+          make.size.equalTo($size(150, 32))
         },
         events: {
           returned: function(sender) {
             sender.blur()
+          },
+          changed: function(sender) {
+            verifyStateSet()
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "verifyButton",
+          title: "验证",
+          font: $font(10),
+          bgcolor: $color("clear"),
+          titleColor: $color("gray"),
+          borderWidth: 1,
+          borderColor: $color("gray"),
+          info: false,
+        },
+        layout: function(make, view) {
+          make.centerY.equalTo($("schemeInput"))
+          make.left.equalTo($("schemeInput").right).inset(3)
+        },
+        events: {
+          tapped: function(sender) {
+            $app.openURL($("schemeInput").text)
+            let nDate = new Date()
+            $cache.set("begainTime", nDate.getTime())
+            resumeAction = 1
+            $thread.background({
+              delay: 0.2,
+              handler: function() {
+                if (resumeAction == 1) {
+                  resumeAction = 0
+                  verifyStateSet(false)
+                }
+              }
+            })
           }
         }
       },
@@ -633,6 +862,42 @@ function setupUploadView() {
           tapped: function(sender) {
             if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
               $ui.error("请补全信息")
+            } else if ($("verifyButton").info == false) {
+              $ui.alert({
+                title: "警告",
+                message: "请先点击验证按钮验证",
+                actions: [
+                  {
+                    title: "仍要上传",
+                    handler: function() {
+                      $ui.alert({
+                        title: "提醒",
+                        message: "请确认url scheme的正确性",
+                        actions: [
+                          {
+                            title: "上传",
+                            handler: function() {
+                              uploadSM($("chooseButton").info)
+                            }
+                          },
+                          {
+                            title: "取消",
+                            handler: function() {
+                              
+                            }
+                          }
+                        ]
+                      })
+                    }
+                  },
+                  {
+                    title: "取消",
+                    handler: function() {
+              
+                    }
+                  }
+                ]
+              })
             } else {
               uploadSM($("chooseButton").info)
             }
@@ -641,6 +906,26 @@ function setupUploadView() {
       }
     ]
   })
+}
+
+function verifyStateSet(isSuccess) {
+  let button = $("verifyButton")
+  if(isSuccess == undefined) {
+    button.bgcolor = $color("clear")
+    button.titleColor = $color("gray")
+    button.borderColor = $color("gray")
+    button.info = false
+  } else if (isSuccess == false) {
+    button.bgcolor = $color("red")
+    button.titleColor = $color("white")
+    button.borderColor = $color("red")
+    button.info = false
+  } else if (isSuccess == true) {
+    button.bgcolor = $color("green")
+    button.titleColor = $color("white")
+    button.borderColor = $color("green")
+    button.info = true
+  }
 }
 
 //赞赏页面
@@ -954,13 +1239,13 @@ function downloadRewardPic(way) {
             $cache.set("stopTime", nDate.getTime())
             resumeAction = 1
             $app.openURL(url)
-
           }
         }
       })
     }
   })
 }
+
 
 //反馈页面
 function setupFeedBack() {
@@ -1354,6 +1639,67 @@ function requireItems() {
   })
 }
 
+function requireMyItems() {
+  let url = "https://wcphv9sr.api.lncld.net/1.1/classes/Items?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+  $console.info(url)
+  $http.request({
+    method: "GET",
+    url: encodeURI(url),
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": appId,
+      "X-LC-Key": appKey,
+    },
+    handler: function(resp) {
+      let data = resp.data.results
+      $console.info(resp.data)
+      if (data != undefined) {        
+        let array = []
+        for (let i = 0; i < data.length; i++) {
+          array.push({
+            title: {
+              text: data[i].title
+            },
+            icon: {
+              src: data[i].icon
+            },
+            url: data[i].url,
+            info: {
+              objectId: data[i].objectId,
+            }
+          })
+        }
+        $("rowsMyShow").data = array
+        $("rowsMyShow").endRefreshing()
+        $cache.set("myItems", array)
+      } else {
+        $("rowsMyShow").endRefreshing()
+      }
+    }
+  })
+}
+
+function deleteCloudItem(objectId) {
+  if (objectId == "" || objectId == undefined) {
+    return 0;
+  }
+  $http.request({
+    method: "DELETE",
+    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items/" + objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": appId,
+      "X-LC-Key": appKey,
+    },
+    handler: function(resp) {
+      let data = resp.data.results
+      $console.info(resp.data)
+    }
+  })
+}
+
 function uploadItem(title, icon, url, size, deviceToken) {
   let size_k = ""
   if (size < 1000000) {
@@ -1460,7 +1806,7 @@ function uploadInstall() {
 
 function cutIcon(image) {
   let canvas = $ui.create({type: "view"})
-  let canvasSize = 100
+  let canvasSize = 50
   canvas.add({
     type: "image",
     props: {
