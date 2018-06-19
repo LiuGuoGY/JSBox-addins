@@ -1,16 +1,15 @@
 /**
- * @version 1.4
+ * @version 1.5
  * @author Liu Guo
- * @date 2018.6.18
+ * @date 2018.6.19
  * @brief
- *   1. 增加 Url Scheme 的验证按钮以确保正确
- *   2. 现在可以查看和删除自己上传过的启动器
+ *   1. 修复云库不能显示超过100的问题
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.4
+let appVersion = 1.5
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -1607,7 +1606,7 @@ function requireRewardNumber() {
 function requireItems() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items",
+    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -1640,7 +1639,7 @@ function requireItems() {
 }
 
 function requireMyItems() {
-  let url = "https://wcphv9sr.api.lncld.net/1.1/classes/Items?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+  let url = "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
   $console.info(url)
   $http.request({
     method: "GET",
