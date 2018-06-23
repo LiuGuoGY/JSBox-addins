@@ -1,15 +1,15 @@
 /**
- * @version 1.5
+ * @version 1.6
  * @author Liu Guo
  * @date 2018.6.19
  * @brief
- *   1. 修复云库不能显示超过100的问题
+ *   1. 新增本地库长按复制Url功能
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.5
+let appVersion = 1.6
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -274,6 +274,12 @@ function setupMainView() {
           pulled: function(sender) {
             $("rowsShow").data = getCache("localItems", [])
             $("rowsShow").endRefreshing()
+          },
+          longPressed: function(info) {
+            let location = info.location.runtimeValue().invoke("CGRectValue");
+            let indexPath = info.sender.runtimeValue().invoke("indexPathForItemAtPoint", location).rawValue();
+            $clipboard.text = getCache("localItems", [])[indexPath.row].url
+            $ui.toast("复制成功")
           }
         }
       },
