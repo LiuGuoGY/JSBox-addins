@@ -1,15 +1,16 @@
 /**
- * @version 1.6
+ * @version 1.7
  * @author Liu Guo
- * @date 2018.6.19
+ * @date 2018.7.24
  * @brief
- *   1. 新增本地库长按复制Url功能
+ *   1. 新增本地长按排序功能
+ *   2. 新增保存到桌面功能
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.6
+let appVersion = 1.7
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -216,6 +217,7 @@ function setupMainView() {
           columns: 5, //横行个数
           itemHeight: 50, //图标到字之间得距离
           spacing: 3, //每个边框与边框之间得距离
+          reorder: true,
           template: [{
               type: "blur",
               props: {
@@ -265,7 +267,21 @@ function setupMainView() {
         events: {
           didSelect(sender, indexPath, data) {
             if($("deleteButton").info == false) {
-              $app.openURL(data.url)
+              // $app.openURL(data.url)
+              $ui.menu({
+                items: ["打开","复制URL", "保存到桌面"],
+                handler: function(title, idx) {
+                  if(idx == 0) {
+                    $app.openURL(data.url)
+                  } else if(idx == 1) {
+                    $clipboard.text = getCache("localItems", [])[indexPath.row].url
+                    $ui.toast("复制成功")
+                  } else if(idx == 2) {
+                    // $ui.toast($("rowsShow").cell(indexPath).get("title").id)
+                    $system.makeIcon({ title: getCache("localItems", [])[indexPath.row].title.text, url: getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
+                  }
+                }
+              })
             } else {
               $("rowsShow").delete(indexPath)
               $cache.set("localItems", $("rowsShow").data)
@@ -275,11 +291,11 @@ function setupMainView() {
             $("rowsShow").data = getCache("localItems", [])
             $("rowsShow").endRefreshing()
           },
-          longPressed: function(info) {
-            let location = info.location.runtimeValue().invoke("CGRectValue");
-            let indexPath = info.sender.runtimeValue().invoke("indexPathForItemAtPoint", location).rawValue();
-            $clipboard.text = getCache("localItems", [])[indexPath.row].url
-            $ui.toast("复制成功")
+          reorderFinished: function(data) {
+            $cache.set("localItems", $("rowsShow").data)
+          },
+          didLongPress: function(sender, indexPath, data) {
+            $ui.toast("longPress")
           }
         }
       },
@@ -287,7 +303,7 @@ function setupMainView() {
         type: "text",
         props: {
           id: "attentionText",
-          text: "注意：\n\t普通模式不宜添加过多，否则容易出现无法载入，性能模式无此限制",
+          text: "注意：\n\t普通模式不宜添加过多，否则容易出现无法载入，性能模式无此限制\n\t如有问题，请先更新 JSBox 到最新版本再试",
           align: $align.left,
           textColor: $color("gray"),
           editable: false,
