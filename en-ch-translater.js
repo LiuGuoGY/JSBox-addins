@@ -1,20 +1,16 @@
 /**
- * @Version 3.0
+ * @Version 3.1
  * @author Liu Guo
- * @date 2018.6.9
+ * @date 2018.7.6
  * @brief
- *   1. 增加赞赏页面，支持支付宝、微信和QQ支付
- *   2. 新增炫彩模式，由作者精心挑选的颜色，“创新以换壳为本”
- *   3. 针对通知中心的UI进行了改进优化
- *   4. 现在大文本时翻译框可以缩放，并加上了顺滑的动效设计
- *   5. 其他优化和改进
- *   6. 1.19.0版本的JSBox中存在的通知中心文本框被遮挡的问题将在1.20.0正式版中解决
+ *   1. 分享到插件实现网页翻译(谷歌，代理)
+ *   1. 优化提升
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.0
+let appVersion = 3.1
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -24,9 +20,37 @@ let colors = [$rgba(120, 219, 252, 0.4), $rgba(252, 175, 230, 0.4), $rgba(252, 2
 let cardHeight = 300
 
 uploadInstall()
-if ($context.link != undefined || $context.safari != undefined) {
+if (($context.link != undefined || $context.safari != undefined) && ($app.env == $env.action || $app.env == $env.safari)) {
   let url = ($context.link != undefined)?$context.link:$context.safari.items.baseURI
-  // translateUrl(url)
+  if(url != undefined) {
+    let tUrl = "http://translate.googleusercontent.com/translate_c?depth=2&langpair=auto%7Czh-CN&nv=1&rurl=translate.google.com&sp=nmt4&u=" + encodeURI(url) + "&xid=17259,15700019,15700124,15700126,15700149,15700168,15700173,15700186,15700190,15700201,15700208&usg=ALkJrhjNujo9F9kpb17yrS0hQ0_rYZ4hng"
+    $ui.render({
+      props: {
+        title: "网页翻译",
+        navButtons: [
+          {
+            icon: "015",
+            handler: function() {
+              $context.close()
+            }
+          }
+        ]
+      },
+      views: [{
+        type: "web",
+        props: {
+          url: tUrl,
+        },
+        layout: $layout.fill
+      }],
+      events: {
+        didFail: function(sender, navigation, error) {
+          $ui.toast("message")
+        }
+      }
+    })
+  }
+  $app.tips("网页翻译使用谷歌引擎，需要使用代理！")
 } else if ($app.env == $env.keyboard) {
   setupKeyBdView()
   detectContent()
@@ -954,7 +978,7 @@ function setupSetting() {
             switch(title.templateTitle.text) {
               case "反馈与建议": setupFeedBack()
                 break
-              case "版本号": checkupVersion()
+              case "检查更新": checkupVersion()
                 break
               case "支持与赞赏": setupReward()
                 break
@@ -1872,9 +1896,8 @@ function updateAddin(app) {
     icon: currentIcon(),
     handler: function(success) {
       if(success) {
-        $cache.remove("firstInstall")
         $device.taptic(2)
-        $delay(0.2, function() {
+        $delay(0.15, function() {
           $device.taptic(2)
         })
         $ui.alert({
@@ -2155,8 +2178,25 @@ function requireInstallNumbers(){
 }
 
 function uploadInstall() {
-  if($cache.get("firstInstall") == undefined) {
-    $cache.set("firstInstall", true)
+  let info = {
+    addinVersion: appVersion.toFixed(1),
+    iosVersion: $device.info.version,
+    jsboxVersion: $app.info.version,
+    deviceType: "ios",
+    deviceToken: $objc("FCUUID").invoke("uuidForDevice").rawValue()
+  }
+  let info_pre = getCache("installInfo")
+  function isDifferent(info, info_pre) {
+    if(info == undefined || info_pre == undefined) {
+      return true
+    } else if(info.addinVersion != info_pre.addinVersion || info.iosVersion != info_pre.iosVersion || info.jsboxVersion != info_pre.jsboxVersion || info.deviceToken != info_pre.deviceToken) {
+      return true
+    } else {
+      return false
+    }
+  }
+  if(isDifferent(info, info_pre)) {
+    $cache.set("installInfo", info)
     $http.request({
       method: "POST",
       url: "https://pwqyveon.api.lncld.net/1.1/installations",
