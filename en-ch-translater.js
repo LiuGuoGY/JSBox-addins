@@ -1,16 +1,15 @@
 /**
- * @Version 3.1
+ * @Version 3.2
  * @author Liu Guo
- * @date 2018.7.6
+ * @date 2018.7.8
  * @brief
- *   1. 分享到插件实现网页翻译(谷歌，代理)
- *   2. 优化提升
+ *   1. 修复发音少第一个字的问题
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.1
+let appVersion = 3.2
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -2036,6 +2035,7 @@ function speechText(text) {
     lan = "en-US"
     rate = 0.4
   }
+  $console.info(newText)
   $text.speech({
     text: newText,
     rate: rate,
@@ -2096,8 +2096,12 @@ function copy(text) {
 function delSquCha(text) {
   let newText = text
   let result = ""
+  let index1 = newText.indexOf("▫️")
+  if(index1 < 0) {
+    return newText
+  }
   do {
-    let index1 = newText.indexOf("▫️")
+    index1 = newText.indexOf("▫️")
     let index2 = newText.indexOf("\n", index1)
     if(newText.indexOf("▫️", index1 + 2) < 0) {
       index2 = newText.length
