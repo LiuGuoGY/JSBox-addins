@@ -1,20 +1,39 @@
 /**
- * @version 1.7
+ * @version 1.8
  * @author Liu Guo
- * @date 2018.7.24
+ * @date 2018.7.8
  * @brief
- *   1. 新增本地长按排序功能
- *   2. 新增保存到桌面功能
+ *   1. 主界面重构
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.7
+let appVersion = 1.8
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
 let resumeAction = 0
+
+const mColor = {
+  gray: "#a2a2a2",
+  blue: "#3478f7",
+  black: "#303032",
+}
+const mIcon = [
+  {
+    blue: $icon("102", $color(mColor.blue), $size(25, 25)),
+    gray: $icon("102", $color(mColor.gray), $size(25, 25)),
+  },
+  {
+    blue: $icon("091", $color(mColor.blue), $size(25, 25)),
+    gray: $icon("091", $color(mColor.gray), $size(25, 25)),
+  },
+  {
+    blue: $icon("002", $color(mColor.blue), $size(25, 25)),
+    gray: $icon("002", $color(mColor.gray), $size(25, 25)),
+  },
+]
 
 uploadInstall()
 if (needCheckup()) {
@@ -106,394 +125,628 @@ function setupTodayView() {
   })
 }
 
+let contentViews = ["localView", "cloudView", "settingView"]
+
 function setupMainView() {
   $ui.render({
     props: {
-      title: "Launch Center"
+      title: "Launch Center",
+      navBarHidden: true,
+      statusBarStyle: 0,
     },
     views: [{
-        type: "button",
+        type: "view",
         props: {
-          id: "cloudButton",
-          title: "  云端库  ",
+          id: "content",
           bgcolor: $color("clear"),
-          titleColor: $color("orange"),
-          icon: $icon("091", $color("orange"), $size(20, 20)),
-          borderColor: $color("orange"),
-          borderWidth: 1,
-        },
-        layout: function(make, view) {
-          make.left.right.inset(10)
-          make.height.equalTo(50)
-          make.top.inset(5)
-        },
-        events: {
-          tapped: function(sender) {
-            setupStoreView()
-          }
-        }
-      },
-      {
-        type: "label",
-        props: {
-          id: "localLabel",
-          text: "本地库：",
-          align: $align.left
         },
         layout: function(make, view) {
           make.width.equalTo(view.super)
-          make.top.equalTo($("cloudButton").bottom).inset(5)
-          make.left.inset(10)
-        }
+          make.left.right.inset(0)
+          make.bottom.inset(50)
+          make.top.inset(20)
+        },
+        views: [genLocalView(), genCloudView(), genSettingView()],
       },
       {
-        type: "button",
+        type: "blur",
         props: {
-          id: "cleanButton",
-          title: "清空所有",
-          bgcolor: $color("clear"),
-          titleColor: $color("blue"),
+          style: 5 // 0 ~ 5 调整背景的颜色程度
         },
         layout: function(make, view) {
-          make.top.equalTo($("localLabel").bottom).inset(10)
-          make.right.inset(10)
+          make.height.equalTo(50)
+          make.left.bottom.right.inset(0)
         },
-        events: {
-          tapped: function(sender) {
-            $ui.alert({
-              title: "确定清空？",
-              message: "清空操作无法撤销",
-              actions: [
-                {
-                  title: "OK",
-                  handler: function() {
-                    $cache.set("localItems", [])
-                    $("rowsShow").data = []
-                  }
-                },
-                {
-                  title: "Cancel",
-                  handler: function() {
-            
-                  }
-                }
-              ]
-            })
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "deleteButton",
-          title: "删除",
-          bgcolor: $color("clear"),
-          titleColor: $color("#377116"),
-          info: false,
-        },
-        layout: function(make, view) {
-          make.top.equalTo($("localLabel").bottom).inset(10)
-          make.left.inset(10)
-          make.width.equalTo(50)
-        },
-        events: {
-          tapped: function(sender) {
-            if (sender.info == false) {
-              sender.info = true
-              sender.bgcolor = $color("#C70039")
-              sender.titleColor = $color("white")
-            } else {
-              sender.info = false
-              sender.bgcolor = $color("clear")
-              sender.titleColor = $color("#377116")
-            }
-          }
-        }
       },
       {
         type: "matrix",
         props: {
-          id: "rowsShow",
-          columns: 5, //横行个数
-          itemHeight: 50, //图标到字之间得距离
-          spacing: 3, //每个边框与边框之间得距离
-          reorder: true,
+          id: "tab",
+          columns: 3,
+          itemHeight: 50,
+          spacing: 0,
+          scrollEnabled: false,
+          bgcolor: $color("clear"),
           template: [{
-              type: "blur",
+              type: "image",
               props: {
-                radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-                style: 1 // 0 ~ 5 调整背景的颜色程度
+                id: "menu_image",
+                bgcolor: $color("clear")
               },
-              layout: $layout.fill,
+              layout: function(make, view) {
+                make.centerX.equalTo(view.super)
+                make.width.height.equalTo(25)
+                make.top.inset(7)
+              },
             },
             {
               type: "label",
               props: {
-                id: "title",
-                textColor: $color("black"),
-                bgcolor: $color("clear"),
-                font: $font(13),
-                align: $align.center,
+                id: "menu_label",
+                font: $font(10),
               },
-              layout(make, view) {
-                make.bottom.inset(0)
-                make.centerX.equalTo(view.super)
-                make.height.equalTo(25)
-                make.width.equalTo(view.super)
+              layout: function(make, view) {
+                var preView = view.prev
+                make.centerX.equalTo(preView)
+                make.bottom.inset(3)
               }
-            },
-            {
-              type: "image",
-              props: {
-                id: "icon",
-                bgcolor: $color("clear"),
-                size: $size(20, 20),
-              },
-              layout(make, view) {
-                make.top.inset(9)
-                make.centerX.equalTo(view.super)
-                make.size.equalTo($size(20, 20))
-              }
-            },
+            }
           ],
-          data: getCache("localItems", [])
+          data: [{
+            menu_image: {
+              icon: mIcon[0].blue,
+            },
+            menu_label: {
+              text: "本地",
+              textColor: $color(mColor.blue)
+            }
+          },
+          {
+            menu_image: {
+              icon: mIcon[1].gray,
+            },
+            menu_label: {
+              text: "云库",
+              textColor: $color(mColor.gray)
+            }
+          },
+          {
+            menu_image: {
+              icon: mIcon[2].gray,
+            },
+            menu_label: {
+              text: "设置",
+              textColor: $color(mColor.gray),
+            }
+          }
+        ],
         },
         layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.top.equalTo($("deleteButton").bottom).inset(10)
-          make.height.equalTo(view.super).multipliedBy(0.4)
-          make.centerX.equalTo(view.super)
+          make.height.equalTo(50)
+          make.left.bottom.right.inset(0)
         },
         events: {
           didSelect(sender, indexPath, data) {
-            if($("deleteButton").info == false) {
-              // $app.openURL(data.url)
-              $ui.menu({
-                items: ["打开","复制URL", "保存到桌面"],
-                handler: function(title, idx) {
-                  if(idx == 0) {
-                    $app.openURL(data.url)
-                  } else if(idx == 1) {
-                    $clipboard.text = getCache("localItems", [])[indexPath.row].url
-                    $ui.toast("复制成功")
-                  } else if(idx == 2) {
-                    // $ui.toast($("rowsShow").cell(indexPath).get("title").id)
-                    $system.makeIcon({ title: getCache("localItems", [])[indexPath.row].title.text, url: getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
-                  }
-                }
-              })
-            } else {
-              $("rowsShow").delete(indexPath)
-              $cache.set("localItems", $("rowsShow").data)
-            }
+            handleSelect(sender, indexPath.row)
           },
-          pulled: function(sender) {
-            $("rowsShow").data = getCache("localItems", [])
-            $("rowsShow").endRefreshing()
-          },
-          reorderFinished: function(data) {
-            $cache.set("localItems", $("rowsShow").data)
-          },
-          didLongPress: function(sender, indexPath, data) {
-            $ui.toast("longPress")
+        }
+      },
+      {
+        type: "canvas",
+        layout: function(make, view) {
+          var preView = view.prev
+          make.top.equalTo(preView.top)
+          make.height.equalTo(1)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("gray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
           }
         }
       },
       {
-        type: "text",
+        type: "view",
         props: {
-          id: "attentionText",
-          text: "注意：\n\t普通模式不宜添加过多，否则容易出现无法载入，性能模式无此限制\n\t如有问题，请先更新 JSBox 到最新版本再试",
-          align: $align.left,
-          textColor: $color("gray"),
-          editable: false,
-          selectable: false,
-          font: $font(13)
+          bgcolor: $color("white"),
         },
         layout: function(make, view) {
           make.width.equalTo(view.super)
-          make.top.equalTo($("rowsShow").bottom).inset(20)
-          make.height.equalTo(100)
-        }
+          make.left.right.top.inset(0)
+          make.height.equalTo(20)
+        },
       },
-      {
-        type: "button",
-        props: {
-          id: "feedbackButton",
-          title: "反馈/建议",
-          bgcolor: $color("clear"),
-          titleColor: $color("#15BCF5"),
-          borderColor: $color("#15BCF5"),
-          borderWidth: 1,
-        },
-        layout: function(make, view) {
-          make.left.right.inset(20)
-          make.height.equalTo(50)
-          make.bottom.inset(30)
-        },
-        events: {
-          tapped: function(sender) {
-            setupFeedBack()
-          }
-        }
-      }
     ]
   })
 }
 
-function setupStoreView() {
-  $ui.push({
+function handleSelect(view, row) {
+  let newData = view.data
+  for(let i = 0; i < newData.length; i++) {
+    if (i == row) {
+      newData[i].menu_label.textColor = $color(mColor.blue)
+      newData[i].menu_image.icon = mIcon[i].blue
+      $(contentViews[i]).hidden = false
+    } else {
+      newData[i].menu_label.textColor = $color(mColor.gray)
+      newData[i].menu_image.icon = mIcon[i].gray
+      $(contentViews[i]).hidden = true
+    }
+  }
+  view.data = newData
+}
+
+function genLocalView() {
+  let view = {
+    type: "view",
     props: {
-      title: "Launch Cloud"
+      id: "localView",
+      hidden: false,
     },
+    layout: $layout.fill,
     views: [{
-        type: "label",
-        props: {
-          id: "cloudLabel",
-          text: "云库:",
-          align: $align.left
-        },
-        layout: function(make, view) {
-          make.top.inset(10)
-        }
+      type: "button",
+      props: {
+        id: "cleanButton",
+        title: "清空所有",
+        bgcolor: $color("clear"),
+        titleColor: $color("blue"),
       },
-      {
-        type: "label",
-        props: {
-          id: "hint",
-          text: "点击即可添加到本地",
-          align: $align.left,
-          font: $font(13),
-          textColor: $color("gray")
-        },
-        layout: function(make, view) {
-          make.left.equalTo($("cloudLabel").right).inset(10)
-          make.bottom.equalTo($("cloudLabel").bottom)
-        }
+      layout: function(make, view) {
+        make.top.inset(10)
+        make.right.inset(10)
       },
-      {
-        type: "matrix",
-        props: {
-          id: "rowsCloudShow",
-          columns: 5, //横行个数
-          itemHeight: 50, //图标到字之间得距离
-          spacing: 3, //每个边框与边框之间得距离
-          template: [{
-              type: "blur",
-              props: {
-                radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-                style: 1 // 0 ~ 5 调整背景的颜色程度
+      events: {
+        tapped: function(sender) {
+          $ui.alert({
+            title: "确定清空？",
+            message: "清空操作无法撤销",
+            actions: [
+              {
+                title: "OK",
+                handler: function() {
+                  $cache.set("localItems", [])
+                  $("rowsShow").data = []
+                }
               },
-              layout: $layout.fill
-            },
-            {
-              type: "label",
-              props: {
-                id: "title",
-                textColor: $color("black"),
-                bgcolor: $color("clear"),
-                font: $font(13),
-                align: $align.center,
-              },
-              layout(make, view) {
-                make.bottom.inset(0)
-                make.centerX.equalTo(view.super)
-                make.height.equalTo(25)
-                make.width.equalTo(view.super)
+              {
+                title: "Cancel",
+                handler: function() {
+          
+                }
               }
-            },
-            {
-              type: "image",
-              props: {
-                id: "icon",
-                bgcolor: $color("clear"),
-                size: $size(20, 20)
-              },
-              layout(make, view) {
-                make.top.inset(9)
-                make.centerX.equalTo(view.super)
-                make.size.equalTo($size(20,20))
-              }
-            }
-          ],
-          data: getCache("cloudItems", []),
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.top.equalTo($("cloudLabel").bottom).inset(10)
-          make.height.equalTo(view.super).multipliedBy(0.7)
-          make.centerX.equalTo(view.super)
-        },
-        events: {
-          didSelect(sender, indexPath, data) {
-            let array = getCache("localItems", [])
-            let item = sender.object(indexPath)
-            array.push({
-              title: {
-                text: item.title.text
-              },
-              icon: {
-                src: item.icon.src
-              },
-              url: item.url
-            })
-            $cache.set("localItems", array)
-            $ui.toast("添加成功", 0.5)
-          },
-          pulled: function(sender) {
-            requireItems()
-          }
+            ]
+          })
         }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "deleteButton",
+        title: "删除",
+        bgcolor: $color("clear"),
+        titleColor: $color("#377116"),
+        info: false,
       },
-      {
-        type: "button",
-        props: {
-          id: "cloudButton",
-          title: "  我要上传  ",
-          bgcolor: $color("clear"),
-          titleColor: $color("#15BCF5"),
-          icon: $icon("166", $color("#15BCF5"), $size(20, 20)),
-          borderColor: $color("#15BCF5"),
-          borderWidth: 1,
-        },
-        layout: function(make, view) {
-          make.left.inset(20)
-          make.height.equalTo(50)
-          make.bottom.inset(30)
-          make.width.equalTo(view.super).multipliedBy(0.4)
-        },
-        events: {
-          tapped: function(sender) {
-            setupUploadView()
-          }
-        }
+      layout: function(make, view) {
+        make.top.inset(10)
+        make.left.inset(10)
+        make.width.equalTo(50)
       },
-      {
-        type: "button",
-        props: {
-          id: "cloudButton",
-          title: "  我上传的  ",
-          bgcolor: $color("clear"),
-          titleColor: $color("#F39C12"),
-          icon: $icon("109", $color("#F39C12"), $size(20, 20)),
-          borderColor: $color("#F39C12"),
-          borderWidth: 1,
-        },
-        layout: function(make, view) {
-          make.right.inset(20)
-          make.height.equalTo(50)
-          make.bottom.inset(30)
-          make.width.equalTo(view.super).multipliedBy(0.4)
-        },
-        events: {
-          tapped: function(sender) {
-            setupMyUpView()
+      events: {
+        tapped: function(sender) {
+          if (sender.info == false) {
+            sender.info = true
+            sender.bgcolor = $color("#C70039")
+            sender.titleColor = $color("white")
+          } else {
+            sender.info = false
+            sender.bgcolor = $color("clear")
+            sender.titleColor = $color("#377116")
           }
         }
       }
-    ]
-  })
+    },
+    {
+      type: "matrix",
+      props: {
+        id: "rowsShow",
+        columns: 5, //横行个数
+        itemHeight: 50, //图标到字之间得距离
+        spacing: 3, //每个边框与边框之间得距离
+        reorder: true,
+        template: [{
+            type: "blur",
+            props: {
+              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+              style: 1 // 0 ~ 5 调整背景的颜色程度
+            },
+            layout: $layout.fill,
+          },
+          {
+            type: "label",
+            props: {
+              id: "title",
+              textColor: $color("black"),
+              bgcolor: $color("clear"),
+              font: $font(13),
+              align: $align.center,
+            },
+            layout(make, view) {
+              make.bottom.inset(0)
+              make.centerX.equalTo(view.super)
+              make.height.equalTo(25)
+              make.width.equalTo(view.super)
+            }
+          },
+          {
+            type: "image",
+            props: {
+              id: "icon",
+              bgcolor: $color("clear"),
+              size: $size(20, 20),
+            },
+            layout(make, view) {
+              make.top.inset(9)
+              make.centerX.equalTo(view.super)
+              make.size.equalTo($size(20, 20))
+            }
+          },
+        ],
+        data: getCache("localItems", [])
+      },
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.top.equalTo($("deleteButton").bottom).inset(10)
+        make.bottom.inset(0)
+        make.centerX.equalTo(view.super)
+      },
+      events: {
+        didSelect(sender, indexPath, data) {
+          if($("deleteButton").info == false) {
+            // $app.openURL(data.url)
+            $ui.menu({
+              items: ["打开","复制URL", "保存到桌面"],
+              handler: function(title, idx) {
+                if(idx == 0) {
+                  $app.openURL(data.url)
+                } else if(idx == 1) {
+                  $clipboard.text = getCache("localItems", [])[indexPath.row].url
+                  $ui.toast("复制成功")
+                } else if(idx == 2) {
+                  // $ui.toast($("rowsShow").cell(indexPath).get("title").id)
+                  $system.makeIcon({ title: getCache("localItems", [])[indexPath.row].title.text, url: getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
+                }
+              }
+            })
+          } else {
+            $("rowsShow").delete(indexPath)
+            $cache.set("localItems", $("rowsShow").data)
+          }
+        },
+        pulled: function(sender) {
+          $("rowsShow").data = getCache("localItems", [])
+          $("rowsShow").endRefreshing()
+        },
+        reorderFinished: function(data) {
+          $cache.set("localItems", $("rowsShow").data)
+        },
+        didLongPress: function(sender, indexPath, data) {
+          $ui.toast("longPress")
+        }
+      }
+    },]
+  }
+  return view
+}
+
+function genCloudView() {
+  let view = {
+    type: "view",
+    props: {
+      id: "cloudView",
+      hidden: true,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "button",
+      props: {
+        id: "cloudButton",
+        title: "  我要上传  ",
+        bgcolor: $color("clear"),
+        titleColor: $color("#15BCF5"),
+        icon: $icon("166", $color("#15BCF5"), $size(20, 20)),
+        borderColor: $color("#15BCF5"),
+        borderWidth: 1,
+      },
+      layout: function(make, view) {
+        make.left.inset(20)
+        make.height.equalTo(50)
+        make.bottom.inset(20)
+        make.width.equalTo(view.super).multipliedBy(0.4)
+      },
+      events: {
+        tapped: function(sender) {
+          setupUploadView()
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "cloudButton",
+        title: "  我上传的  ",
+        bgcolor: $color("clear"),
+        titleColor: $color("#F39C12"),
+        icon: $icon("109", $color("#F39C12"), $size(20, 20)),
+        borderColor: $color("#F39C12"),
+        borderWidth: 1,
+      },
+      layout: function(make, view) {
+        make.right.inset(20)
+        make.height.equalTo(50)
+        make.bottom.inset(20)
+        make.width.equalTo(view.super).multipliedBy(0.4)
+      },
+      events: {
+        tapped: function(sender) {
+          setupMyUpView()
+        }
+      }
+    },{
+      type: "matrix",
+      props: {
+        id: "rowsCloudShow",
+        columns: 5, //横行个数
+        itemHeight: 50, //图标到字之间得距离
+        spacing: 3, //每个边框与边框之间得距离
+        template: [{
+            type: "blur",
+            props: {
+              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+              style: 1 // 0 ~ 5 调整背景的颜色程度
+            },
+            layout: $layout.fill
+          },
+          {
+            type: "label",
+            props: {
+              id: "title",
+              textColor: $color("black"),
+              bgcolor: $color("clear"),
+              font: $font(13),
+              align: $align.center,
+            },
+            layout(make, view) {
+              make.bottom.inset(0)
+              make.centerX.equalTo(view.super)
+              make.height.equalTo(25)
+              make.width.equalTo(view.super)
+            }
+          },
+          {
+            type: "image",
+            props: {
+              id: "icon",
+              bgcolor: $color("clear"),
+              size: $size(20, 20)
+            },
+            layout(make, view) {
+              make.top.inset(9)
+              make.centerX.equalTo(view.super)
+              make.size.equalTo($size(20,20))
+            }
+          }
+        ],
+        data: getCache("cloudItems", []),
+      },
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.top.inset(10)
+        make.bottom.equalTo(view.prev.top).inset(20)
+        make.centerX.equalTo(view.super)
+      },
+      events: {
+        didSelect(sender, indexPath, data) {
+          let array = getCache("localItems", [])
+          let item = sender.object(indexPath)
+          array.push({
+            title: {
+              text: item.title.text
+            },
+            icon: {
+              src: item.icon.src
+            },
+            url: item.url
+          })
+          $cache.set("localItems", array)
+          $ui.toast("添加成功", 0.5)
+          $("rowsShow").data = getCache("localItems", [])
+        },
+        pulled: function(sender) {
+          requireItems()
+        }
+      }
+    },],
+  }
   requireItems()
+  return view
+}
+
+function genSettingView() {
+  const feedBackTemplate = [{
+    type: "label",
+    props: {
+      id: "templateTitle",
+    },
+    layout: function(make, view) {
+      make.left.inset(15);
+      make.centerY.equalTo(view.super);
+    }
+  },
+  {
+    type: "label",
+    props: {
+      id: "templateDetails",
+      textColor: $color("#AAAAAA")
+    },
+    layout: function(make, view) {
+      make.right.inset(15);
+      make.centerY.equalTo(view.super);
+    },
+    events: {
+      tapped: function(sender, indexPath, item) {
+  
+      }
+    }
+  }]
+
+  const tabShowInstalls = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          id: "tabShowInstalls",
+          text: "安装量统计",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "label",
+        props: {
+          id: "tabShowInstallsDetail",
+          text: "",
+          textColor: $color("#AAAAAA"),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
+  let array = [{
+    templateTitle: {
+      text : "更新日志",
+    },
+    templateDetails: {
+      text : "",
+    },
+    url: "https://www.liuguogy.com/archives/launch-center.html",
+  },
+  {
+    templateTitle: {
+      text : "GitHub",
+    },
+    templateDetails: {
+      text : "",
+    },
+    url: "https://github.com/LiuGuoGY/JSBox-addins/blob/master/launch-center.js",
+  },
+  {
+    templateTitle: {
+      text : "检查更新",
+    },
+    templateDetails: {
+      text : "" + appVersion.toFixed(1),
+    },
+  },
+  {
+    templateTitle: {
+      text : "反馈与建议",
+      textColor: $color("#14BCF7"),
+    },
+    templateDetails: {
+      text : "",
+    },
+  }]
+
+  let view = {
+    type: "view",
+    props: {
+      id: "settingView",
+      hidden: true,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "list",
+      props: {
+        id: "list",
+        bgcolor: $color("clear"),
+        template: feedBackTemplate,
+        data: [
+          {
+            title: "关于",
+            rows: array,
+          },
+          {
+            title: "统计",
+            rows: [tabShowInstalls]
+          }
+        ],
+      },
+      layout: $layout.fill,
+      events: {
+        didSelect: function(sender, indexPath, title) {
+          if(title.templateTitle == undefined) {
+            return 0
+          }
+          let titleText = title.templateTitle.text
+          if(title.url) {
+            setupWebView(titleText, title.url)
+          } else {
+            switch(title.templateTitle.text) {
+              case "反馈与建议": setupFeedBack()
+                break
+              case "检查更新": checkupVersion()
+                break
+              case "支持与赞赏": setupReward()
+                break
+              default:
+            }
+          }
+        }
+      }
+    }],
+  }
+  requireInstallNumbers()
+  return view
+}
+
+function setupWebView(title, url) {
+  $ui.push({
+    props: {
+      title: title,
+    },
+    views: [{
+      type: "web",
+      props: {
+        id: "webView",
+        url: url,
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        if(isInToday()) {
+          make.height.equalTo(cardHeight)
+        } else {
+          make.height.equalTo(view.super)
+        }
+        make.width.equalTo(view.super)
+      },
+    }]
+  })
 }
 
 function setupMyUpView() {
@@ -1802,11 +2055,28 @@ function requireInstallNumbers() {
 }
 
 function uploadInstall() {
-  if ($cache.get("firstInstall") == undefined) {
-    $cache.set("firstInstall", true)
+  let info = {
+    addinVersion: appVersion.toFixed(1),
+    iosVersion: $device.info.version,
+    jsboxVersion: $app.info.version,
+    deviceType: "ios",
+    deviceToken: $objc("FCUUID").invoke("uuidForDevice").rawValue()
+  }
+  let info_pre = getCache("installInfo")
+  function isDifferent(info, info_pre) {
+    if(info == undefined || info_pre == undefined) {
+      return true
+    } else if(info.addinVersion != info_pre.addinVersion || info.iosVersion != info_pre.iosVersion || info.jsboxVersion != info_pre.jsboxVersion || info.deviceToken != info_pre.deviceToken) {
+      return true
+    } else {
+      return false
+    }
+  }
+  if(isDifferent(info, info_pre)) {
+    $cache.set("installInfo", info)
     $http.request({
       method: "POST",
-      url: "https://wcphv9sr.api.lncld.net/1.1/installations",
+      url: "https://pwqyveon.api.lncld.net/1.1/installations",
       timeout: 5,
       header: {
         "Content-Type": "application/json",
@@ -1820,7 +2090,8 @@ function uploadInstall() {
         deviceType: "ios",
         deviceToken: $objc("FCUUID").invoke("uuidForDevice").rawValue()
       },
-      handler: function(resp) {}
+      handler: function(resp) {
+      }
     })
   }
 }
