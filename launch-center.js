@@ -1,15 +1,16 @@
 /**
- * @version 1.8
+ * @version 1.9
  * @author Liu Guo
- * @date 2018.7.8
+ * @date 2018.7.9
  * @brief
- *   1. 主界面重构
+ *   1. 增加显示列数自定义设置项
+ *   2. 默认列数从5改为4
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.8
+let appVersion = 1.9
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -72,7 +73,7 @@ function setupTodayView() {
       type: "matrix",
       props: {
         id: "rowsShow",
-        columns: 5, //横行个数
+        columns: getCache("columns", 4), //横行个数
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         template: [{
@@ -358,7 +359,7 @@ function genLocalView() {
       type: "matrix",
       props: {
         id: "rowsShow",
-        columns: 5, //横行个数
+        columns: getCache("columns", 4), //横行个数
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         reorder: true,
@@ -504,7 +505,7 @@ function genCloudView() {
       type: "matrix",
       props: {
         id: "rowsCloudShow",
-        columns: 5, //横行个数
+        columns: 4, //横行个数
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         template: [{
@@ -637,6 +638,52 @@ function genSettingView() {
     layout: $layout.fill
   }
 
+  const tabSetColumns = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          id: "tabSetColumns",
+          text: "显示列数",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "stepper",
+        props: {
+          max: 6,
+          min: 2,
+          value: getCache("columns", 4),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+            $("tabSetColumnsDetail").text = sender.value
+            $cache.set("columns", sender.value)
+          }
+        }
+      },
+      {
+        type: "label",
+        props: {
+          id: "tabSetColumnsDetail",
+          text: "" + getCache("columns", 4),
+        },
+        layout: function(make, view) {
+          make.right.equalTo(view.prev.left).inset(5)
+          make.centerY.equalTo(view.super)
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
   let array = [{
     templateTitle: {
       text : "更新日志",
@@ -686,16 +733,18 @@ function genSettingView() {
         id: "list",
         bgcolor: $color("clear"),
         template: feedBackTemplate,
-        data: [
-          {
-            title: "关于",
-            rows: array,
-          },
-          {
-            title: "统计",
-            rows: [tabShowInstalls]
-          }
-        ],
+        data: [{
+          title: "功能",
+          rows: [tabSetColumns],
+        },
+        {
+          title: "关于",
+          rows: array,
+        },
+        {
+          title: "统计",
+          rows: [tabShowInstalls],
+        }],
       },
       layout: $layout.fill,
       events: {
@@ -798,7 +847,7 @@ function setupMyUpView() {
       type: "matrix",
       props: {
         id: "rowsMyShow",
-        columns: 5, //横行个数
+        columns: 4, //横行个数
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         template: [{
@@ -909,7 +958,7 @@ function setupUploadView() {
           bgcolor: $color("#E2EDF9")
         },
         layout: function(make, view) {
-          make.width.equalTo(view.super).dividedBy(5)
+          make.width.equalTo(view.super).dividedBy(4)
           make.top.equalTo($("previewLabel").bottom).inset(10)
           make.height.equalTo(50)
           make.centerX.equalTo(view.super)
@@ -955,23 +1004,6 @@ function setupUploadView() {
         }],
       },
       {
-        type: "text",
-        props: {
-          id: "attentionLabel",
-          text: "注意： \n\t为保证文字显示完整，文字部分最好不超过8个字符或4个汉字（一个汉字=两个字母）",
-          align: $align.left,
-          textColor: $color("gray"),
-          editable: false,
-          selectable: false,
-          font: $font(13)
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.top.equalTo($("preView").bottom).inset(20)
-          make.height.equalTo(100)
-        }
-      },
-      {
         type: "label",
         props: {
           id: "titleLabel",
@@ -980,7 +1012,7 @@ function setupUploadView() {
         },
         layout: function(make, view) {
           make.width.equalTo(view.super)
-          make.top.equalTo($("attentionLabel").bottom).inset(20)
+          make.top.equalTo(view.prev.bottom).inset(20)
           make.left.inset(10)
         }
       },
