@@ -1,16 +1,16 @@
 /**
- * @version 1.9
+ * @version 2.0
  * @author Liu Guo
- * @date 2018.7.9
+ * @date 2018.7.10
  * @brief
- *   1. 增加显示列数自定义设置项
- *   2. 默认列数从5改为4
+ *   1. 采用内容动态加载方式，大幅提升插件启动速度，启动“零”延迟
+ *   2. 优化反馈体验
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 1.9
+let appVersion = 2.0
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -147,7 +147,7 @@ function setupMainView() {
           make.bottom.inset(50)
           make.top.inset(20)
         },
-        views: [genLocalView(), genCloudView(), genSettingView()],
+        views: [genLocalView()], //, genCloudView(), genSettingView()
       },
       {
         type: "blur",
@@ -273,14 +273,27 @@ function handleSelect(view, row) {
     if (i == row) {
       newData[i].menu_label.textColor = $color(mColor.blue)
       newData[i].menu_image.icon = mIcon[i].blue
+      if($(contentViews[i]) == undefined) {
+        $("content").add(getContentView(i)) 
+      }
       $(contentViews[i]).hidden = false
     } else {
       newData[i].menu_label.textColor = $color(mColor.gray)
       newData[i].menu_image.icon = mIcon[i].gray
-      $(contentViews[i]).hidden = true
+      if($(contentViews[i]) != undefined) {
+        $(contentViews[i]).hidden = true
+      }
     }
   }
   view.data = newData
+}
+
+function getContentView(number) {
+  switch(number) {
+    case 0: return genLocalView()
+    case 1: return genCloudView()
+    case 2: return genSettingView()
+  }
 }
 
 function genLocalView() {
@@ -626,7 +639,7 @@ function genSettingView() {
         type: "label",
         props: {
           id: "tabShowInstallsDetail",
-          text: "",
+          text: getCache("installNumbers", 0).toString(),
           textColor: $color("#AAAAAA"),
         },
         layout: function(make, view) {
@@ -804,18 +817,6 @@ function setupMyUpView() {
       title: "My Upload"
     },
     views: [{
-      type: "label",
-      props: {
-        id: "myUploadLabel",
-        text: "我上传的：",
-        align: $align.left
-      },
-      layout: function(make, view) {
-        make.top.inset(10)
-        make.left.inset(10)
-      }
-    },
-    {
       type: "button",
       props: {
         id: "deleteButton",
@@ -825,7 +826,7 @@ function setupMyUpView() {
         info: false,
       },
       layout: function(make, view) {
-        make.top.equalTo($("myUploadLabel").bottom).inset(10)
+        make.top.inset(10)
         make.left.inset(10)
         make.width.equalTo(50)
       },
@@ -893,7 +894,7 @@ function setupMyUpView() {
       layout: function(make, view) {
         make.width.equalTo(view.super)
         make.top.equalTo($("deleteButton").bottom).inset(10)
-        make.height.equalTo(view.super).multipliedBy(0.7)
+        make.bottom.inset(20)
         make.centerX.equalTo(view.super)
       },
       events: {
@@ -1555,6 +1556,8 @@ function downloadRewardPic(way) {
 
 //反馈页面
 function setupFeedBack() {
+  $app.autoKeyboardEnabled = true
+  $app.keyboardToolbarEnabled = true
   $ui.push({
     props: {
       title: "反馈与建议",
@@ -1572,7 +1575,10 @@ function setupFeedBack() {
           make.center.equalTo(view.super)
         },
         events: {
-
+          tapped: function(sender) {
+            $("feedbackText").blur()
+            $("feedbackContact").blur()
+          }
         },
         views: [{
             type: "label",
@@ -1599,7 +1605,7 @@ function setupFeedBack() {
               borderColor: $rgba(90, 90, 90, 0.6),
               borderWidth: 1,
               insets: $insets(5, 5, 5, 5),
-              alwaysBounceVertical: false,
+              alwaysBounceVertical: true,
             },
             layout: function(make, view) {
               make.height.equalTo(160)
@@ -1646,10 +1652,8 @@ function setupFeedBack() {
             props: {
               id: "sendFeedback",
               title: "发送",
-              bgcolor: $color("white"),
-              borderColor: $rgba(90, 90, 90, 0.6),
-              borderWidth: 1,
-              titleColor: $rgba(90, 90, 90, 0.6),
+              bgcolor: $color("#62BEF2"),
+              titleColor: $color("white"),
               font: $font(15),
               titleEdgeInsets: $insets(2, 5, 2, 5)
             },
@@ -1664,7 +1668,7 @@ function setupFeedBack() {
                 if ($("feedbackText").text.length > 0) {
                   sendFeedBack($("feedbackText").text, $("feedbackContact").text)
                 }
-              }
+              },
             }
           },
         ]
@@ -1947,7 +1951,6 @@ function requireItems() {
 
 function requireMyItems() {
   let url = "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
-  $console.info(url)
   $http.request({
     method: "GET",
     url: encodeURI(url),
@@ -1959,7 +1962,6 @@ function requireMyItems() {
     },
     handler: function(resp) {
       let data = resp.data.results
-      $console.info(resp.data)
       if (data != undefined) {        
         let array = []
         for (let i = 0; i < data.length; i++) {
@@ -2080,10 +2082,37 @@ function requireInstallNumbers() {
     handler: function(resp) {
       let results = resp.data.count
       if (results != undefined) {
-        $("tabShowInstallsDetail").text = "" + results
+        let view = $("tabShowInstallsDetail")
+        $cache.set("installNumbers", results)
+        let timer = $timer.schedule({
+          interval: 0.11,
+          handler: function() {
+            if(parseInt(view.text) < results) {
+              transition(view, 0.1, 5 << 20, () => {
+                view.text = (parseInt(view.text) + 1).toString();
+              }, null);
+            } else {
+              timer.invalidate()
+            }
+          }
+        })
       }
     }
   })
+}
+
+function transition(view, duration, options, animations, completion) {
+  let animationsBlock = $block("void, void", function() {
+    if (animations) {
+      animations();
+    }
+  });
+  let completionBlock = $block("void, BOOL", function(flag) {
+    if (completion) {
+      completion();
+    }
+  });
+  $objc("UIView").$transitionWithView_duration_options_animations_completion(view, duration, options, animationsBlock, completionBlock);
 }
 
 function uploadInstall() {
