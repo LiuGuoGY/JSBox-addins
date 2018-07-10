@@ -1,15 +1,15 @@
 /**
- * @Version 3.2
+ * @Version 3.3
  * @author Liu Guo
- * @date 2018.7.8
+ * @date 2018.7.10
  * @brief
- *   1. 修复发音少第一个字的问题
+ *   1. 优化反馈体验
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.2
+let appVersion = 3.3
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -970,6 +970,9 @@ function setupSetting() {
       },
       events: {
         didSelect: function(sender, indexPath, title) {
+          if(title.templateTitle == undefined) {
+            return 0
+          }
           let titleText = title.templateTitle.text
           if(title.url) {
             setupWebView(titleText, title.url)
@@ -1414,6 +1417,8 @@ function setupWebView(title, url) {
 
 //反馈页面
 function setupFeedBack() {
+  $app.autoKeyboardEnabled = true
+  $app.keyboardToolbarEnabled = true
   $ui.push({
     props: {
       title: "反馈与建议",
@@ -1431,7 +1436,10 @@ function setupFeedBack() {
         make.center.equalTo(view.super)
       },
       events: {
-        
+        tapped: function(sender) {
+          $("feedbackText").blur()
+          $("feedbackContact").blur()
+        }
       },
       views:[{
         type: "label",
@@ -1458,7 +1466,7 @@ function setupFeedBack() {
           borderColor: $rgba(90, 90, 90, 0.6),
           borderWidth: 1,
           insets: $insets(5,5,5,5),
-          alwaysBounceVertical: false,
+          alwaysBounceVertical: true,
         },
         layout: function(make, view) {
           make.height.equalTo(160)
@@ -1505,10 +1513,8 @@ function setupFeedBack() {
         props: {
           id: "sendFeedback",
           title: "发送",
-          bgcolor: $color("white"),
-          borderColor: $rgba(90, 90, 90, 0.6),
-          borderWidth: 1,
-          titleColor: $rgba(90, 90, 90, 0.6),
+          bgcolor: $color("#62BEF2"),
+          titleColor: $color("white"),
           font: $font(15),
           titleEdgeInsets: $insets(2, 5, 2, 5)
         },
