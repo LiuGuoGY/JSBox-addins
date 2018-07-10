@@ -1,16 +1,15 @@
 /**
- * @version 2.0
+ * @version 2.1
  * @author Liu Guo
  * @date 2018.7.10
  * @brief
- *   1. 采用内容动态加载方式，大幅提升插件启动速度，启动“零”延迟
- *   2. 优化反馈体验
+ *   1. 修复过高的语法在正式版中的错误弹窗问题
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.0
+let appVersion = 2.1
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -2112,7 +2111,7 @@ function transition(view, duration, options, animations, completion) {
       completion();
     }
   });
-  $objc("UIView").$transitionWithView_duration_options_animations_completion(view, duration, options, animationsBlock, completionBlock);
+  $objc("UIView").invoke("transitionWithView:duration:options:animations:completion", view, duration, options, animationsBlock, completionBlock)
 }
 
 function uploadInstall() {
