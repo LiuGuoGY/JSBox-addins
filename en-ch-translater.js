@@ -1,15 +1,15 @@
 /**
- * @Version 3.4
+ * @Version 3.5
  * @author Liu Guo
- * @date 2018.7.10
+ * @date 2018.7.15
  * @brief
- *   1. 界面调整
+ *   1. 修复过高语法导致iOS 11以下的闪退的问题
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.4
+let appVersion = 3.5
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -240,7 +240,11 @@ function setupView() {
           make.height.equalTo(cardHeight)
         } else {
           make.top.inset(50)
-          make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+          if($device.info.version >= "11"){
+            make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+          } else {
+            make.bottom.inset(50)
+          }
         }
         make.center.equalTo(view.super)
         shadow(view)
@@ -1054,7 +1058,11 @@ function setupReward() {
           make.height.equalTo(cardHeight)
         } else {
           make.top.inset(50)
-          make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+          if($device.info.version >= "11"){
+            make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+          } else {
+            make.bottom.inset(50)
+          }
         }
         make.center.equalTo(view.super)
       },
