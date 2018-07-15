@@ -1,15 +1,15 @@
 /**
- * @Version 3.3
+ * @Version 3.4
  * @author Liu Guo
  * @date 2018.7.10
  * @brief
- *   1. 优化反馈体验
+ *   1. 界面调整
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.3
+let appVersion = 3.4
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -236,7 +236,12 @@ function setupView() {
       },
       layout: function(make, view) {
         make.left.right.inset(10)
-        make.height.equalTo(cardHeight)
+        if($app.env == $env.today) {
+          make.height.equalTo(cardHeight)
+        } else {
+          make.top.inset(50)
+          make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+        }
         make.center.equalTo(view.super)
         shadow(view)
       },
@@ -312,53 +317,142 @@ function setupView() {
         }
       },
       {
-        type: "text",
+        type: "button",
         props: {
-          id: "text",
-          text: "",
-          align: $align.left,
-          radius: 5,
-          textColor: $color("#333333"),
-          font: $font(15),
+          id: "translate",
+          title: "翻译",
+          bgcolor: $color("clear"),
           borderColor: $rgba(90, 90, 90, 0.6),
           borderWidth: 1,
-          insets: $insets(5,5,5,5),
-          alwaysBounceVertical: false,
+          titleColor: $rgba(90, 90, 90, 0.6),
+          font: $font(15),
+          titleEdgeInsets: $insets(2, 5, 2, 5)
         },
         layout: function(make, view) {
-          make.centerX.equalTo(view.center)
-          make.top.equalTo($("title").bottom).inset(20)
-          make.height.equalTo(cardHeight * 17 / 60)
-          make.left.right.inset(20)
+          make.width.equalTo(50)
+          make.height.equalTo(25)
+          make.bottom.inset(20)
+          make.centerX.equalTo(view.super)
         },
-        events:{
-          didBeginEditing: function(sender) {
-            $("textDrop1").hidden = false
-            $("textSpeech1").hidden = false
-            $("speechInput").hidden = false
-            // $("ocr").hidden = false
-            $("speechLan").hidden = false
-            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
-              $("textExpan1").hidden = false
-            }
-          },
-          didEndEditing: function(sender) {
-            $("textDrop1").hidden = true
-            $("textSpeech1").hidden = true
-            $("speechInput").hidden = true
-            // $("ocr").hidden = true
-            $("speechLan").hidden = true
-            $("textExpan1").hidden = true
-          },
-          didChange: function(sender) {
-            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
-              $("textExpan1").hidden = false
-            } else {
-              $("textExpan1").hidden = true
-            }
+        events: {
+          tapped: function(sender) {
+            $("result").text = ""
+            translate($("text").text)
           }
-        },
+        }
       },
+      {
+        type: "view",
+        layout: function(make, view) {
+          make.centerX.equalTo(view.center)
+          make.top.equalTo($("title").bottom)
+          make.bottom.equalTo($("translate").top)
+          make.left.right.inset(0)
+        },
+        views: [{
+          type: "view",
+          layout: function(make, view) {
+            make.centerX.equalTo(view.center)
+            make.top.inset(0)
+            make.left.right.inset(0)
+            make.height.equalTo(view.super).multipliedBy(0.5)
+          },
+          views: [{
+            type: "text",
+            props: {
+              id: "text",
+              text: "",
+              align: $align.left,
+              radius: 5,
+              textColor: $color("#333333"),
+              font: $font(15),
+              borderColor: $rgba(90, 90, 90, 0.6),
+              borderWidth: 1,
+              insets: $insets(5,5,5,5),
+              alwaysBounceVertical: false,
+            },
+            layout: function(make, view) {
+              make.centerX.equalTo(view.super)
+              if($app.env == $env.today) {
+                make.top.inset(15)
+              } else {
+                make.top.inset(20)
+              }
+              if($app.env == $env.today) {
+                make.bottom.inset(7.5)
+              } else {
+                make.bottom.inset(10)
+              }
+              make.left.right.inset(20)
+            },
+            events:{
+              didBeginEditing: function(sender) {
+                $("textDrop1").hidden = false
+                $("textSpeech1").hidden = false
+                $("speechInput").hidden = false
+                // $("ocr").hidden = false
+                $("speechLan").hidden = false
+              },
+              didEndEditing: function(sender) {
+                $("textDrop1").hidden = true
+                $("textSpeech1").hidden = true
+                $("speechInput").hidden = true
+                // $("ocr").hidden = true
+                $("speechLan").hidden = true
+              },
+            },
+          },]
+        },{
+          type: "view",
+          layout: function(make, view) {
+            make.centerX.equalTo(view.center)
+            make.bottom.inset(0)
+            make.left.right.inset(0)
+            make.height.equalTo(view.super).multipliedBy(0.5)
+          },
+          views: [{
+            type: "text",
+            props: {
+              id: "result",
+              text: "",
+              align: $align.left,
+              radius: 5,
+              textColor: $color("#333333"),
+              font: $font(15),
+              borderColor: $rgba(90, 90, 90, 0.6),
+              borderWidth: 1,
+              editable: true,
+              bgcolor: $color("#F3F4F5"),//$rgba(100, 100, 100, 0.07),
+              alwaysBounceVertical: false,
+            },
+            layout: function(make, view) {
+              make.centerX.equalTo(view.super)
+              if($app.env == $env.today) {
+                make.bottom.inset(15)
+              } else {
+                make.bottom.inset(20)
+              }
+              if($app.env == $env.today) {
+                make.top.inset(7.5)
+              } else {
+                make.top.inset(10)
+              }
+              make.left.right.inset(20)
+            },
+            events:{
+              didBeginEditing: function(sender) {
+                $("textCopy2").hidden = false
+                $("textSpeech2").hidden = false
+              },
+              didEndEditing: function(sender) {
+                $("textCopy2").hidden = true
+                $("textSpeech2").hidden = true
+              },
+            },
+          },],
+        },]
+      },
+      
       {
         type: "button",
         props: {
@@ -465,51 +559,6 @@ function setupView() {
       {
         type: "button",
         props: {
-          id: "textExpan1",
-          borderColor: $color("clear"),
-          borderWidth: 1,
-          bgcolor: $color("clear"),
-          icon: $icon("160", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-          info: "160",
-        },
-        layout: function(make, view) {
-          make.bottom.equalTo($("text").bottom).inset(5)
-          make.left.equalTo($("text").left).inset(5)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            let animateDura = 0.2
-            if (sender.info == "160") {
-              sender.info = "161"
-              $("result").hidden = true
-              $("text").blur()
-              $("text").animator.moveY(cardHeight * 19 / 120).thenAfter(animateDura).makeHeight(cardHeight * 3.0 / 5.0).easeInOut.animate(animateDura)
-              $delay(animateDura * 2, function() {
-                $("text").updateLayout(function(make) {
-                  make.height.equalTo(cardHeight * 3.0 / 5.0)
-                })
-              })
-            } else {
-              sender.info = "160"
-              $("text").blur()
-              $("text").animator.makeHeight(cardHeight * 17 / 60).thenAfter(animateDura).moveY(-cardHeight * 19 / 120).easeInOut.animate(animateDura)
-              $delay(animateDura * 2, function() {
-                $("text").updateLayout(function(make) {
-                  make.height.equalTo(cardHeight * 17 / 60)
-                })
-                $("result").hidden = false
-              })
-            }
-            sender.icon = $icon(sender.info, $rgba(100, 100, 100, 0.3), $size(20, 20))
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
           id: "ocr",
           borderColor: $color("clear"),
           borderWidth: 1,
@@ -533,49 +582,7 @@ function setupView() {
           }
         }
       },
-      {
-        type: "text",
-        props: {
-          id: "result",
-          text: "",
-          align: $align.left,
-          radius: 5,
-          textColor: $color("#333333"),
-          font: $font(15),
-          borderColor: $rgba(90, 90, 90, 0.6),
-          borderWidth: 1,
-          editable: true,
-          bgcolor: $color("#F3F4F5"),//$rgba(100, 100, 100, 0.07),
-          alwaysBounceVertical: false,
-        },
-        layout: function(make, view) {
-          make.centerX.equalTo(view.center)
-          make.bottom.inset(61)
-          make.height.equalTo(cardHeight * 17 / 60)
-          make.left.right.inset(20)
-        },
-        events:{
-          didBeginEditing: function(sender) {
-            $("textCopy2").hidden = false
-            $("textSpeech2").hidden = false
-            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
-              $("textExpan2").hidden = false
-            }
-          },
-          didEndEditing: function(sender) {
-            $("textCopy2").hidden = true
-            $("textSpeech2").hidden = true
-            $("textExpan2").hidden = true
-          },
-          didChange: function(sender) {
-            if(sender.contentSize.height > cardHeight * 17 / 60 || sender.frame.height > cardHeight * 17 / 60) {
-              $("textExpan2").hidden = false
-            } else {
-              $("textExpan2").hidden = true
-            }
-          }
-        },
-      },
+      
       {
         type: "button",
         props: {
@@ -618,76 +625,6 @@ function setupView() {
         events: {
           tapped: function(sender) {
             speechText($("result").text)
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "textExpan2",
-          borderColor: $color("clear"),
-          borderWidth: 1,
-          bgcolor: $color("clear"),
-          icon: $icon("160", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-          info: "160",
-        },
-        layout: function(make, view) {
-          make.bottom.equalTo($("result").bottom).inset(5)
-          make.left.equalTo($("result").left).inset(5)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            let animateDura = 0.2
-            if (sender.info == "160") {
-              sender.info = "161"
-              $("text").hidden = true
-              $("result").blur()
-              $("result").animator.moveY(-cardHeight * 19 / 120).thenAfter(animateDura).makeHeight(cardHeight * 3 / 5).easeInOut.animate(animateDura)
-              $delay(animateDura * 2, function() {
-                $("result").updateLayout(function(make) {
-                  make.height.equalTo(cardHeight * 3 / 5)
-                })
-              })
-            } else {
-              sender.info = "160"
-              $("result").blur()
-              $("result").animator.makeHeight(cardHeight * 17 / 60).thenAfter(animateDura).moveY(cardHeight * 19 / 120).easeInOut.animate(animateDura)
-              $delay(animateDura * 2, function() {
-                $("result").updateLayout(function(make) {
-                  make.height.equalTo(cardHeight * 17 / 60)
-                })
-                $("text").hidden = false
-              })
-            }
-            sender.icon = $icon(sender.info, $rgba(100, 100, 100, 0.3), $size(20, 20))
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "translate",
-          title: "翻译",
-          bgcolor: $color("clear"),
-          borderColor: $rgba(90, 90, 90, 0.6),
-          borderWidth: 1,
-          titleColor: $rgba(90, 90, 90, 0.6),
-          font: $font(15),
-          titleEdgeInsets: $insets(2, 5, 2, 5)
-        },
-        layout: function(make, view) {
-          make.width.equalTo(50)
-          make.height.equalTo(25)
-          make.bottom.inset(20)
-          make.centerX.equalTo(view.super)
-        },
-        events: {
-          tapped: function(sender) {
-            $("result").text = ""
-            translate($("text").text)
           }
         }
       },
@@ -792,7 +729,7 @@ function setupSetting() {
         type: "label",
         props: {
           id: "tabShowUiLabel",
-          text: "通知中心显示界面",
+          text: "通知中心显示卡片",
         },
         layout: function(make, view) {
           make.left.inset(15)
@@ -827,11 +764,44 @@ function setupSetting() {
     views: [{
         type: "label",
         props: {
-          id: "tabShowColorLabel",
-          text: "炫彩模式",
+          text: "炫",
+          textColor: $color("magenta"),
         },
         layout: function(make, view) {
           make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "label",
+        props: {
+          text: "彩",
+          textColor: $color("orange"),
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "label",
+        props: {
+          text: "皮",
+          textColor: $color("#32AFF6"),
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "label",
+        props: {
+          text: "肤",
+          textColor: $color("#36CD36"),
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right)
           make.centerY.equalTo(view.super)
         }
       },
@@ -946,7 +916,7 @@ function setupSetting() {
         template: feedBackTemplate,
         data: [
           {
-            title: "功能设置",
+            title: "界面",
             rows: [tabShowUiItem, tabShowColorItem]
           },
           {
@@ -1080,7 +1050,12 @@ function setupReward() {
       },
       layout: function(make, view) {
         make.left.right.inset(10)
-        make.height.equalTo(cardHeight)
+        if($app.env == $env.today) {
+          make.height.equalTo(cardHeight)
+        } else {
+          make.top.inset(50)
+          make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+        }
         make.center.equalTo(view.super)
       },
       events: {
@@ -1097,46 +1072,6 @@ function setupReward() {
         layout: function(make, view) {
           make.top.inset(10)
           make.left.inset(20)
-        }
-      },
-      {
-        type: "list",
-        props: {
-          id: "rewardList",
-          template: rewardTemplate,
-          radius: 5,
-          borderColor: $rgba(90, 90, 90, 0.4),
-          borderWidth: 1,
-          insets: $insets(5,5,5,5),
-          rowHeight: 35,
-          bgcolor: $color("clear"),
-          selectable: false,
-          data: [
-            {
-              rows: array,
-            },
-          ],
-          header: {
-            type: "label",
-            props: {
-              height: 20,
-              text: "Thank you all.",
-              textColor: $rgba(90, 90, 90, 0.6),
-              align: $align.center,
-              font: $font(12)
-            }
-          }
-        },
-        layout: function(make, view) {
-          make.height.equalTo(160)
-          make.top.equalTo($("rewardTextTitle").bottom).inset(5)
-          make.centerX.equalTo(view.center)
-          make.left.right.inset(20)
-        },
-        events: {
-          didSelect: function(sender, indexPath, data) {
-
-          }
         }
       },
       {
@@ -1241,6 +1176,46 @@ function setupReward() {
           make.bottom.inset(8)
         }
       },]
+    },
+    {
+      type: "list",
+      props: {
+        id: "rewardList",
+        template: rewardTemplate,
+        radius: 5,
+        borderColor: $rgba(90, 90, 90, 0.4),
+        borderWidth: 1,
+        insets: $insets(5,5,5,5),
+        rowHeight: 35,
+        bgcolor: $color("clear"),
+        selectable: false,
+        data: [
+          {
+            rows: array,
+          },
+        ],
+        header: {
+          type: "label",
+          props: {
+            height: 20,
+            text: "Thank you all.",
+            textColor: $rgba(90, 90, 90, 0.6),
+            align: $align.center,
+            font: $font(12)
+          }
+        }
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("rewardTextTitle").bottom).inset(5)
+        make.bottom.equalTo($("selection").top).inset(20)
+        make.centerX.equalTo(view.center)
+        make.left.right.inset(20)
+      },
+      events: {
+        didSelect: function(sender, indexPath, data) {
+
+        }
+      }
     },
     {
       type: "button",
@@ -1455,60 +1430,6 @@ function setupFeedBack() {
         }
       },
       {
-        type: "text",
-        props: {
-          id: "feedbackText",
-          text: "",
-          align: $align.left,
-          radius: 5,
-          textColor: $color("#333333"),
-          font: $font(15),
-          borderColor: $rgba(90, 90, 90, 0.6),
-          borderWidth: 1,
-          insets: $insets(5,5,5,5),
-          alwaysBounceVertical: true,
-        },
-        layout: function(make, view) {
-          make.height.equalTo(160)
-          make.top.equalTo($("feedbackTextTitle").bottom).inset(5)
-          make.centerX.equalTo(view.center)
-          make.left.right.inset(20)
-        },
-      },
-      {
-        type: "label",
-        props: {
-          id: "feedbackContactTitle",
-          text: "联系方式(选填):",
-          textColor: $color("#333333"),
-          font: $font(15),
-        },
-        layout: function(make, view) {
-          make.top.equalTo($("feedbackText").bottom).inset(20)
-          make.left.inset(20)
-        }
-      },
-      {
-        type: "text",
-        props: {
-          id: "feedbackContact",
-          textColor: $color("#333333"),
-          font: $font(15),
-          bgcolor: $color("white"),
-          borderColor: $rgba(90, 90, 90, 0.6),
-          borderWidth: 1,
-          insets: $insets(5,5,5,5),
-          radius: 5,
-          align: $align.center,
-        },
-        layout: function(make, view) {
-          make.left.equalTo($("feedbackContactTitle").right).inset(10)
-          make.right.inset(20)
-          make.centerY.equalTo($("feedbackContactTitle").centerY)
-          make.height.equalTo(30)
-        }
-      },
-      {
         type: "button",
         props: {
           id: "sendFeedback",
@@ -1531,6 +1452,59 @@ function setupFeedBack() {
             }
           }
         }
+      },
+      {
+        type: "label",
+        props: {
+          id: "feedbackContactTitle",
+          text: "联系方式(选填):",
+          textColor: $color("#333333"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.bottom.equalTo($("sendFeedback").top).inset(20)
+          make.left.inset(20)
+        }
+      },
+      {
+        type: "text",
+        props: {
+          id: "feedbackContact",
+          textColor: $color("#333333"),
+          font: $font(15),
+          bgcolor: $color("white"),
+          borderColor: $rgba(90, 90, 90, 0.6),
+          borderWidth: 1,
+          insets: $insets(5,5,5,5),
+          radius: 5,
+          align: $align.center,
+        },
+        layout: function(make, view) {
+          make.left.equalTo($("feedbackContactTitle").right).inset(10)
+          make.right.inset(20)
+          make.centerY.equalTo($("feedbackContactTitle").centerY)
+          make.height.equalTo(30)
+        }
+      },{
+        type: "text",
+        props: {
+          id: "feedbackText",
+          text: "",
+          align: $align.left,
+          radius: 5,
+          textColor: $color("#333333"),
+          font: $font(15),
+          borderColor: $rgba(90, 90, 90, 0.6),
+          borderWidth: 1,
+          insets: $insets(5,5,5,5),
+          alwaysBounceVertical: true,
+        },
+        layout: function(make, view) {
+          make.top.equalTo($("feedbackTextTitle").bottom).inset(5)
+          make.bottom.equalTo($("feedbackContact").top).inset(15)
+          make.centerX.equalTo(view.center)
+          make.left.right.inset(20)
+        },
       },]
     },
     {
@@ -2242,7 +2216,7 @@ function sendFeedBack(text, contact) {
     body: {
       status: "open",
       content: text,
-      contact: contact,
+      contact: (contact == "")?$objc("FCUUID").invoke("uuidForDevice").rawValue().toString():contact,
     },
     handler: function(resp) {
       $device.taptic(2)
