@@ -1,17 +1,16 @@
 /**
- * @version 2.2
+ * @version 2.3
  * @author Liu Guo
- * @date 2018.7.14
+ * @date 2018.7.16
  * @brief
- *   1. 优化操作逻辑，长按删除执行清空操作
- *   2. 现在设置列数可以即时预览效果
- *   3. 添加右滑退出提示文字
+ *   1. 现在可以编辑本地和上传的启动器了
+ *   2. 上线赞赏页面
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.2
+let appVersion = 2.3
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -67,16 +66,42 @@ $app.listen({
   pause: function() {
     switch(resumeAction) {
       case 1: 
-      let nDate = new Date()
-      let sTime = getCache("begainTime", nDate.getTime())
-      let duration = (nDate.getTime() - sTime)
-      if (duration < 100) {
-        verifyStateSet(true)
-      } else {
-        verifyStateSet(false)
+        let nDate = new Date()
+        let sTime = getCache("begainTime", nDate.getTime())
+        let duration = (nDate.getTime() - sTime)
+        if (duration < 100) {
+          verifyStateSet(true)
+        } else {
+          verifyStateSet(false)
+        }
+        resumeAction = 0
+        break
+    }
+  },
+  resume: function() {
+    let nDate = new Date()
+    let sTime = getCache("stopTime", nDate.getTime())
+    let tdoa = (nDate.getTime() - sTime) / 1000
+    if (tdoa > 5) {
+      switch(resumeAction) {
+        case 2:
+        sTime = getCache("stopTime", nDate.getTime())
+        let tdoa = (nDate.getTime() - sTime) / 1000
+        if (tdoa > 5) {
+          $photo.delete({
+            count: 1,
+            format: "data",
+            handler: function(success) {
+              $ui.alert({
+                title: "温馨提示",
+                message: "如果赞赏成功\n待开发者审核之后\n会将你的昵称放入赞赏名单里\n-----------\n如有匿名或其他要求请反馈给开发者",
+              })
+            }
+          })
+        }
+        break
       }
       resumeAction = 0
-      break
     }
   }
 })
@@ -241,7 +266,12 @@ function setupMainView() {
         },
         layout: function(make, view) {
           make.height.equalTo(50)
-          make.left.bottom.right.inset(0)
+          make.left.right.inset(0)
+          if($device.info.version >= "11"){
+            make.bottom.equalTo(view.super.safeAreaBottom)
+          } else {
+            make.bottom.inset(0)
+          }
         },
         events: {
           didSelect(sender, indexPath, data) {
@@ -365,7 +395,8 @@ function genRowsView(reorder, columns) {
     layout: $layout.fill,
     events: {
       didSelect(sender, indexPath, data) {
-        if($("deleteButton").info == false) {
+        let view = $("deleteLocalButton")
+        if(view == undefined || view.info == false) {
           $app.openURL(data.url)
         } else {
           $("rowsShow").delete(indexPath)
@@ -382,13 +413,15 @@ function genRowsView(reorder, columns) {
       didLongPress: function(sender, indexPath, data) {
         $device.taptic(2)
         $ui.menu({
-          items: ["复制URL", "保存到桌面"],
+          items: ["复制URL", "保存到桌面", "编辑"],
           handler: function(title, idx) {
             if(idx == 0) {
               $clipboard.text = getCache("localItems", [])[indexPath.row].url
               $ui.toast("复制成功")
             } else if(idx == 1) {
               $system.makeIcon({ title: getCache("localItems", [])[indexPath.row].title.text, url: getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
+            } else if(idx == 2) {
+              setupUploadView("edit", data.title.text, data.icon.src, data.url, undefined, indexPath)
             }
           }
         })
@@ -442,7 +475,7 @@ function genLocalView() {
     {
       type: "button",
       props: {
-        id: "deleteButton",
+        id: "deleteLocalButton",
         title: "删除",
         bgcolor: $color("clear"),
         titleColor: $color("#377116"),
@@ -456,7 +489,7 @@ function genLocalView() {
       },
       events: {
         tapped: function(sender) {
-          if (sender.info == false) {
+          if (sender.info == undefined || sender.info == false) {
             sender.info = true
             sender.bgcolor = $color("#C70039")
             sender.titleColor = $color("white")
@@ -497,7 +530,7 @@ function genLocalView() {
       type: "label",
       props: {
         id: "hintText",
-        text: "右滑可以退出脚本",
+        text: getHintText(),
         textColor: $color("lightGray"),
         align: $align.center,
         font: $font(15)
@@ -537,7 +570,7 @@ function genLocalView() {
       },
       layout: function(make, view) {
         make.width.equalTo(view.super)
-        make.top.equalTo($("deleteButton").bottom).inset(10)
+        make.top.equalTo($("deleteLocalButton").bottom).inset(10)
         make.bottom.inset(5)
         make.centerX.equalTo(view.super)
       },
@@ -575,7 +608,7 @@ function genCloudView() {
       },
       events: {
         tapped: function(sender) {
-          setupUploadView()
+          setupUploadView("upload")
         }
       }
     },
@@ -657,29 +690,54 @@ function genCloudView() {
       },
       events: {
         didSelect(sender, indexPath, data) {
-          let array = getCache("localItems", [])
-          let item = sender.object(indexPath)
-          array.push({
-            title: {
-              text: item.title.text
-            },
-            icon: {
-              src: item.icon.src
-            },
-            url: item.url
-          })
-          $cache.set("localItems", array)
-          $ui.toast("添加成功", 0.5)
-          $("rowsShow").data = getCache("localItems", [])
+          addToLocal(sender, indexPath)
         },
         pulled: function(sender) {
           requireItems()
+        },
+        didLongPress: function(sender, indexPath, data) {
+          $device.taptic(2)
+          $ui.menu({
+            items: ["添加"],
+            handler: function(title, idx) {
+              if(idx == 0) {
+                addToLocal(sender, indexPath)
+              }
+            }
+          })
         }
       }
     },],
   }
   requireItems()
   return view
+}
+
+function addToLocal(sender, indexPath) {
+  let array = getCache("localItems", [])
+  let item = sender.object(indexPath)
+  array.push({
+    title: {
+      text: item.title.text
+    },
+    icon: {
+      src: item.icon.src
+    },
+    url: item.url
+  })
+  $cache.set("localItems", array)
+  $ui.toast("添加成功", 0.5)
+  $("rowsShow").data = getCache("localItems", [])
+}
+
+function updateToLocal(sender, indexPath, title, icon, url) {
+  let array = getCache("localItems", [])
+  let item = sender.object(indexPath)
+  array[indexPath.row].title.text = title
+  array[indexPath.row].icon.src = icon
+  array[indexPath.row].url = url
+  $cache.set("localItems", array)
+  $("rowsShow").data = getCache("localItems", [])
 }
 
 function genSettingView() {
@@ -821,6 +879,15 @@ function genSettingView() {
     templateDetails: {
       text : "",
     },
+  },
+  {
+    templateTitle: {
+      text : "支持与赞赏",
+      textColor: $color("#FF823E"),
+    },
+    templateDetails: {
+      text : "",
+    },
   }]
 
   let view = {
@@ -949,7 +1016,7 @@ function setupMyUpView() {
             sender.bgcolor = $color("clear")
             sender.titleColor = $color("#377116")
           }
-        }
+        },
       }
     },
     {
@@ -1032,6 +1099,17 @@ function setupMyUpView() {
             })
           }
         },
+        didLongPress: function(sender, indexPath, data) {
+          $device.taptic(2)
+          $ui.menu({
+            items: ["编辑"],
+            handler: function(title, idx) {
+              if(idx == 0) {
+                setupUploadView("renew", data.title.text, data.icon.src, data.url, data.info.objectId)
+              }
+            }
+          })
+        },
         pulled: function(sender) {
           requireMyItems()
         }
@@ -1041,8 +1119,18 @@ function setupMyUpView() {
   requireMyItems()
 }
 
-function setupUploadView() {
+function setupUploadView(action, title, icon, url, objectId, indexPath) {
   $app.autoKeyboardEnabled = true
+  let isIconRevised = false
+  let actionText = "  开始上传  "
+  switch(action) {
+    case "upload": actionText = "  开始上传  "
+      break
+    case "edit": actionText = "  完成编辑  "
+      break
+    case "renew": actionText = "  更新上传  "
+      break
+  }
   $ui.push({
     props: {
       id: "uploadItemView",
@@ -1057,6 +1145,98 @@ function setupUploadView() {
       }
     },
     views: [{
+      type: "button",
+      props: {
+        id: "cloudButton",
+        title: actionText,
+        bgcolor: $color("clear"),
+        titleColor: $color("#1B9713"),
+        icon: $icon("049", $color("#1B9713"), $size(20, 20)),
+        borderColor: $color("#1B9713"),
+        borderWidth: 1,
+      },
+      layout: function(make, view) {
+        make.left.right.inset(20)
+        make.height.equalTo(50)
+        if($device.info.version >= "11"){
+          make.bottom.equalTo(view.super.safeAreaBottom).inset(30)
+        } else {
+          make.bottom.inset(30)
+        }
+      },
+      events: {
+        tapped: function(sender) {
+          if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
+            $ui.error("请补全信息")
+          } else if ($("verifyButton").info == false && action != "edit") {
+            $ui.alert({
+              title: "警告",
+              message: "请先点击验证按钮验证",
+              actions: [
+                {
+                  title: "仍要上传",
+                  handler: function() {
+                    $ui.alert({
+                      title: "提醒",
+                      message: "请确认url scheme的正确性",
+                      actions: [
+                        {
+                          title: "上传",
+                          handler: function() {
+                            if(action == "upload") {
+                              uploadSM($("chooseButton").info)
+                            } else if(action == "renew"){
+                              if(isIconRevised == false) {
+                                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+                              } else {
+                                uploadSM($("chooseButton").info, objectId)
+                              }
+                            }
+                          }
+                        },
+                        {
+                          title: "取消",
+                          handler: function() {
+                            
+                          }
+                        }
+                      ]
+                    })
+                  }
+                },
+                {
+                  title: "取消",
+                  handler: function() {
+            
+                  }
+                }
+              ]
+            })
+          } else {
+            if(action == "upload") {
+              uploadSM($("chooseButton").info)
+            } else if(action == "renew"){
+              if(isIconRevised == false) {
+                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+              } else {
+                uploadSM($("chooseButton").info, objectId)
+              }
+            } else if(action == "edit") {
+              updateToLocal($("rowsShow"), indexPath, $("titleInput").text, icon, $("schemeInput").text)
+              $ui.pop()
+            }
+          }
+        }
+      }
+    },
+    {
+      type: "scroll",
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.top.left.right.inset(20)
+        make.bottom.equalTo($("cloudButton").top).inset(20)
+      },
+      views: [{
         type: "label",
         props: {
           id: "previewLabel",
@@ -1096,7 +1276,7 @@ function setupUploadView() {
             textColor: $color("black"),
             bgcolor: $color("clear"),
             font: $font(13),
-            text: "未定义",
+            text: (title == undefined)?"未定义":title,
             align: $align.center
           },
           layout(make, view) {
@@ -1138,11 +1318,13 @@ function setupUploadView() {
         type: "input",
         props: {
           id: "titleInput",
+          text: (title == undefined)?"":title,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo($("titleLabel").bottom).inset(10)
-          make.size.equalTo($size(150, 32))
+          make.height.equalTo(32)
+          make.width.equalTo(view.super).multipliedBy(0.7)
         },
         events: {
           changed: function(sender) {
@@ -1175,6 +1357,7 @@ function setupUploadView() {
           titleColor: $color("#A24A11"),
           borderColor: $color("#A24A11"),
           borderWidth: 1,
+          info: icon,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -1195,6 +1378,7 @@ function setupUploadView() {
                   sender.info = cutedIcon.jpg(1.0)
                   $("icon").data = cutedIcon.jpg(1.0)
                 }
+                isIconRevised = true
               }
             })
           }
@@ -1217,11 +1401,13 @@ function setupUploadView() {
         type: "input",
         props: {
           id: "schemeInput",
+          text: (url == undefined)?"":url,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo($("schemeLabel").bottom).inset(10)
-          make.size.equalTo($size(150, 32))
+          make.height.equalTo(32)
+          make.width.equalTo(view.super).multipliedBy(0.7)
         },
         events: {
           returned: function(sender) {
@@ -1265,71 +1451,16 @@ function setupUploadView() {
             })
           }
         }
-      },
-      {
-        type: "button",
-        props: {
-          id: "cloudButton",
-          title: "  开始上传  ",
-          bgcolor: $color("clear"),
-          titleColor: $color("#1B9713"),
-          icon: $icon("049", $color("#1B9713"), $size(20, 20)),
-          borderColor: $color("#1B9713"),
-          borderWidth: 1,
-        },
-        layout: function(make, view) {
-          make.left.right.inset(20)
-          make.height.equalTo(50)
-          make.bottom.inset(30)
-        },
-        events: {
-          tapped: function(sender) {
-            if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
-              $ui.error("请补全信息")
-            } else if ($("verifyButton").info == false) {
-              $ui.alert({
-                title: "警告",
-                message: "请先点击验证按钮验证",
-                actions: [
-                  {
-                    title: "仍要上传",
-                    handler: function() {
-                      $ui.alert({
-                        title: "提醒",
-                        message: "请确认url scheme的正确性",
-                        actions: [
-                          {
-                            title: "上传",
-                            handler: function() {
-                              uploadSM($("chooseButton").info)
-                            }
-                          },
-                          {
-                            title: "取消",
-                            handler: function() {
-                              
-                            }
-                          }
-                        ]
-                      })
-                    }
-                  },
-                  {
-                    title: "取消",
-                    handler: function() {
-              
-                    }
-                  }
-                ]
-              })
-            } else {
-              uploadSM($("chooseButton").info)
-            }
-          }
-        }
-      }
+      },]
+    },
     ]
   })
+  if(icon != undefined) {
+    $("icon").src = icon
+  }
+  if(action != "upload") {
+    verifyStateSet(true)
+  }
 }
 
 function verifyStateSet(isSuccess) {
@@ -1345,266 +1476,246 @@ function verifyStateSet(isSuccess) {
     button.borderColor = $color("red")
     button.info = false
   } else if (isSuccess == true) {
-    button.bgcolor = $color("green")
+    button.bgcolor = $color("#2ECC71")
     button.titleColor = $color("white")
-    button.borderColor = $color("green")
+    button.borderColor = $color("#2ECC71")
     button.info = true
   }
+}
+
+function getHintText() {
+  let textArray = ["右滑可退出脚本", "长按图标可弹出菜单", "长按删除按钮可清空", "长按可编辑本地启动器", "上传的启动器也可编辑"]
+  return textArray[Math.floor(Math.random()*textArray.length)]
 }
 
 //赞赏页面
 function setupReward() {
   const rewardTemplate = [{
-      type: "label",
-      props: {
-        id: "templateTitle",
-        textColor: $color("#333333"),
-        font: $font("TrebuchetMS-Italic", 17)
-      },
-      layout: function(make, view) {
-        make.left.inset(40);
-        make.centerY.equalTo(view.super);
-      }
+    type: "label",
+    props: {
+      id: "templateTitle",
+      textColor: $color("#333333"),
+      font: $font("TrebuchetMS-Italic",17)
     },
-    {
-      type: "image",
-      props: {
-        id: "templateImage",
-        icon: $icon("061", $color("#FF823E"), $size(15, 15)),
-        bgcolor: $color("clear"),
-        hidden: false,
-      },
-      layout: function(make, view) {
-        make.right.inset(40);
-        make.centerY.equalTo(view.super);
-      }
+    layout: function(make, view) {
+      make.left.inset(40);
+      make.centerY.equalTo(view.super);
     }
-  ]
+  },
+  {
+    type: "image",
+    props: {
+      id: "templateImage",
+      icon: $icon("061", $color("#FF823E"), $size(15, 15)),
+      bgcolor: $color("clear"),
+      hidden: false,
+    },
+    layout: function(make, view) {
+      make.right.inset(40);
+      make.centerY.equalTo(view.super);
+    }
+  }]
   let array = $cache.get("rewardList")
-  if (array == undefined) {
+  if(array == undefined) {
     array = []
   }
   $ui.push({
     props: {
       title: "支持与赞赏",
+      navButtons: [
+        {
+          icon: "141", // Or you can use icon name
+          handler: function() {
+            $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
+          }
+        }
+      ],
       navBarHidden: isInToday(),
     },
     layout: $layout.fill,
     views: [{
-        type: "view",
+      type: "view",
+      props: {
+        id: "reward",
+      },
+      layout: function(make, view) {
+        make.left.right.inset(10)
+        if($app.env == $env.today) {
+          make.height.equalTo(cardHeight)
+        } else {
+          make.top.inset(50)
+          if($device.info.version >= "11"){
+            make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+          } else {
+            make.bottom.inset(50)
+          }
+        }
+        make.center.equalTo(view.super)
+      },
+      events: {
+        
+      },
+      views:[{
+        type: "label",
         props: {
-          id: "reward",
+          id: "rewardTextTitle",
+          text: "赞赏名单(按时间排序)：",
+          textColor: $color("#333333"),
+          font: $font(15),
         },
         layout: function(make, view) {
-          make.left.right.inset(10)
-          make.height.equalTo(300)
-          make.center.equalTo(view.super)
-        },
-        events: {
-
-        },
-        views: [{
-            type: "label",
-            props: {
-              id: "rewardTextTitle",
-              text: "赞赏名单(按时间排序)：",
-              textColor: $color("#333333"),
-              font: $font(15),
-            },
-            layout: function(make, view) {
-              make.top.inset(10)
-              make.left.inset(20)
-            }
-          },
-          {
-            type: "list",
-            props: {
-              id: "rewardList",
-              template: rewardTemplate,
-              radius: 5,
-              borderColor: $rgba(90, 90, 90, 0.4),
-              borderWidth: 1,
-              insets: $insets(5, 5, 5, 5),
-              rowHeight: 35,
-              bgcolor: $color("clear"),
-              selectable: false,
-              data: [{
-                rows: array,
-              }, ],
-              header: {
-                type: "label",
-                props: {
-                  height: 20,
-                  text: "Thank you all.",
-                  textColor: $rgba(90, 90, 90, 0.6),
-                  align: $align.center,
-                  font: $font(12)
-                }
-              }
-            },
-            layout: function(make, view) {
-              make.height.equalTo(160)
-              make.top.equalTo($("rewardTextTitle").bottom).inset(5)
-              make.centerX.equalTo(view.center)
-              make.left.right.inset(20)
-            },
-            events: {
-              didSelect: function(sender, indexPath, data) {
-
-              }
-            }
-          },
-          {
-            type: "tab",
-            props: {
-              id: "selection",
-              items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
-              tintColor: $color("#333333"),
-              index: 0,
-            },
-            layout: function(make, view) {
-              make.centerX.equalTo(view.super)
-              make.width.equalTo(200)
-              make.bottom.inset(60)
-              make.height.equalTo(25)
-            },
-            events: {
-              changed: function(sender) {}
-            }
-          },
-          {
-            type: "button",
-            props: {
-              id: "aliRewardButton",
-              title: " 支付宝 ",
-              icon: $icon("074", $color("#108EE9"), $size(20, 20)),
-              bgcolor: $color("clear"),
-              titleColor: $color("#108EE9"),
-              font: $font(15),
-            },
-            layout: function(make, view) {
-              make.centerX.equalTo(view.super)
-              make.height.equalTo(40)
-              make.bottom.inset(10)
-            },
-            events: {
-              tapped: function(sender) {
-                switch ($("selection").index) {
-                  case 0:
-                    $app.openURL("HTTPS://QR.ALIPAY.COM/FKX08935BBCTQWGRIJ7VDF")
-                    break
-                  case 1:
-                    $app.openURL("HTTPS://QR.ALIPAY.COM/FKX09116CT3WME79IRNO41")
-                    break
-                  case 2:
-                    $app.openURL("HTTPS://QR.ALIPAY.COM/FKX09563WVPH2YUGMKTX0A")
-                    break
-                }
-              }
-            }
-          },
-          {
-            type: "button",
-            props: {
-              id: "wxRewardButton",
-              title: " 微信 ",
-              icon: $icon("189", $color("#1AAD19"), $size(20, 20)),
-              bgcolor: $color("clear"),
-              titleColor: $color("#1AAD19"),
-              font: $font(15),
-            },
-            layout: function(make, view) {
-              make.left.inset(40)
-              make.height.equalTo(40)
-              make.bottom.inset(10)
-            },
-            events: {
-              tapped: function(sender) {
-                begainReward(sender.title)
-              }
-            }
-          },
-          {
-            type: "button",
-            props: {
-              id: "qqRewardButton",
-              title: " QQ ",
-              icon: $icon("070", $color("#E81F1F"), $size(20, 20)),
-              bgcolor: $color("clear"),
-              titleColor: $color("#E81F1F"),
-              font: $font(15),
-            },
-            layout: function(make, view) {
-              make.right.inset(40)
-              make.height.equalTo(40)
-              make.bottom.inset(10)
-            },
-            events: {
-              tapped: function(sender) {
-                begainReward(sender.title)
-              }
-            }
-          },
-          {
-            type: "label",
-            props: {
-              id: "recommandText",
-              text: "— 推荐方式 —",
-              textColor: $rgba(100, 100, 100, 0.5),
-              font: $font(10),
-            },
-            layout: function(make, view) {
-              make.centerX.equalTo($("aliRewardButton"))
-              make.bottom.inset(8)
-            }
-          },
-        ]
+          make.top.inset(10)
+          make.left.inset(20)
+        }
       },
       {
-        type: "button",
+        type: "tab",
         props: {
-          title: "CLOSE",
-          bgcolor: $color("clear"),
-          titleColor: $rgba(100, 100, 100, 0.2),
-          font: $font(15),
-          hidden: !isInToday(),
+          id: "selection",
+          items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
+          tintColor: $color("#333333"),
+          index: 0,
         },
         layout: function(make, view) {
-          make.right.inset(0)
-          make.width.equalTo(view.super).multipliedBy(0.5)
-          make.bottom.equalTo($("reward").top).inset(1)
-          make.height.equalTo(30)
+          make.centerX.equalTo(view.super)
+          make.width.equalTo(200)
+          make.bottom.inset(60)
+          make.height.equalTo(25)
         },
         events: {
-          tapped: function(sender) {
-            $app.close(0.1)
+          changed: function(sender) {
           }
         }
       },
       {
         type: "button",
         props: {
-          title: "BACK",
+          id: "aliRewardButton",
+          title: " 支付宝 ",
+          icon: $icon("074", $color("#108EE9"), $size(20, 20)),
           bgcolor: $color("clear"),
-          titleColor: $rgba(100, 100, 100, 0.2),
+          titleColor: $color("#108EE9"),
           font: $font(15),
-          hidden: !isInToday(),
         },
         layout: function(make, view) {
-          make.left.inset(0)
-          make.width.equalTo(view.super).multipliedBy(0.5)
-          make.bottom.equalTo($("reward").top).inset(1)
-          make.height.equalTo(30)
+          make.centerX.equalTo(view.super)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
         },
         events: {
           tapped: function(sender) {
-            $ui.pop()
+            switch($("selection").index) {
+              case 0: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX02994GPGIJ8ACYWFQD8")
+                break
+              case 1: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX075764EQ49XNSVFA0BC")
+                break
+              case 2: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX07563B7TFDJBIRDFX45")
+                break
+            }
           }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "wxRewardButton",
+          title: " 微信 ",
+          icon: $icon("189", $color("#1AAD19"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#1AAD19"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.left.inset(40)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            begainReward(sender.title)
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "qqRewardButton",
+          title: " QQ ",
+          icon: $icon("070", $color("#E81F1F"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#E81F1F"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.right.inset(40)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            begainReward(sender.title)
+          }
+        }
+      },
+      {
+        type: "label",
+        props: {
+          id: "recommandText",
+          text: "— 推荐方式 —",
+          textColor: $rgba(100, 100, 100, 0.5),
+          font: $font(10),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo($("aliRewardButton"))
+          make.bottom.inset(8)
+        }
+      },]
+    },
+    {
+      type: "list",
+      props: {
+        id: "rewardList",
+        template: rewardTemplate,
+        radius: 5,
+        borderColor: $rgba(90, 90, 90, 0.4),
+        borderWidth: 1,
+        insets: $insets(5,5,5,5),
+        rowHeight: 35,
+        bgcolor: $color("clear"),
+        selectable: false,
+        data: [
+          {
+            rows: array,
+          },
+        ],
+        header: {
+          type: "label",
+          props: {
+            height: 20,
+            text: "Thank you all.",
+            textColor: $rgba(90, 90, 90, 0.6),
+            align: $align.center,
+            font: $font(12)
+          }
+        }
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("rewardTextTitle").bottom).inset(5)
+        make.bottom.equalTo($("selection").top).inset(20)
+        make.centerX.equalTo(view.center)
+        make.left.right.inset(20)
+      },
+      events: {
+        didSelect: function(sender, indexPath, data) {
+
         }
       }
-    ]
+    },]
   })
   requireReward()
+  $delay(1, function(){
+    $("rewardList").scrollToOffset($point(0, 20))
+  })
 }
 
 function begainReward(way) {
@@ -1650,7 +1761,7 @@ function downloadRewardPic(way) {
       break
   }
   $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater/" + PicWay + "_reward_" + PicMoney + ".JPG",
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/" + PicWay + "_reward_" + PicMoney + ".JPG",
     progress: function(bytesWritten, totalBytes) {
       var percentage = bytesWritten * 1.0 / totalBytes
     },
@@ -1661,7 +1772,7 @@ function downloadRewardPic(way) {
           if (success) {
             let nDate = new Date()
             $cache.set("stopTime", nDate.getTime())
-            resumeAction = 1
+            resumeAction = 2
             $app.openURL(url)
           }
         }
@@ -2061,7 +2172,7 @@ function requireItems() {
             icon: {
               src: data[i].icon
             },
-            url: data[i].url
+            url: data[i].url,
           })
         }
         $("rowsCloudShow").data = array
@@ -2128,34 +2239,44 @@ function deleteCloudItem(objectId) {
     },
     handler: function(resp) {
       let data = resp.data.results
-      $console.info(resp.data)
     }
   })
 }
 
-function uploadItem(title, icon, url, size, deviceToken) {
-  let size_k = ""
-  if (size < 1000000) {
-    size_k = size / 1000 + " K"
-  } else {
-    size_k = size / 1000000 + " M"
+function uploadItem(title, icon, url, size, deviceToken, objectId) {
+  let json = {}
+  if(title != undefined) {
+    json.title = title
   }
+  if(icon != undefined) {
+    json.icon = icon
+  }
+  if(url != undefined) {
+    json.url = url
+  }
+  if(size != undefined) {
+    let size_k = ""
+    if (size < 1000000) {
+      size_k = size / 1000 + " K"
+    } else {
+      size_k = size / 1000000 + " M"
+    }
+    json.size = size_k
+  }
+  if(deviceToken != undefined) {
+    json.deviceToken = deviceToken
+  }
+  let objectUrl = "https://wcphv9sr.api.lncld.net/1.1/classes/Items".concat((objectId == undefined)?(""):("/" + objectId))
   $http.request({
-    method: "POST",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items",
+    method: (objectId == undefined)?"POST":"PUT",
+    url: objectUrl,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
       "X-LC-Id": appId,
       "X-LC-Key": appKey,
     },
-    body: {
-      title: title,
-      icon: icon,
-      url: url,
-      size: size_k,
-      deviceToken: deviceToken,
-    },
+    body: json,
     handler: function(resp) {
       $ui.toast("上传成功")
       $ui.pop()
@@ -2297,7 +2418,7 @@ function cutIcon(image) {
   return snapshot
 }
 
-function uploadSM(pic) {
+function uploadSM(pic, objectId) {
   if (typeof(pic) != "undefined") {
     $ui.loading(true)
     $http.upload({
@@ -2306,7 +2427,7 @@ function uploadSM(pic) {
       handler: function(resp) {
         $ui.loading(false)
         var data = resp.data.data
-        uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue())
+        uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
       }
     })
   }
@@ -2325,7 +2446,7 @@ function sendFeedBack(text, contact) {
     body: {
       status: "open",
       content: text,
-      contact: contact,
+      contact: (contact == "")?$objc("FCUUID").invoke("uuidForDevice").rawValue().toString():contact,
     },
     handler: function(resp) {
       $device.taptic(2)
