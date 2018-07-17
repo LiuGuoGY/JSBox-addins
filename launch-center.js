@@ -1,16 +1,15 @@
 /**
- * @version 2.3
+ * @version 2.4
  * @author Liu Guo
- * @date 2018.7.16
+ * @date 2018.7.17
  * @brief
- *   1. 现在可以编辑本地和上传的启动器了
- *   2. 上线赞赏页面
+ *   1. 新增云库搜索功能
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.3
+let appVersion = 2.4
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -161,6 +160,7 @@ function setupTodayView() {
       layout: $layout.fill,
       events: {
         didSelect(sender, indexPath, data) {
+          $device.taptic(1)
           $app.openURL(data.url)
         }
       }
@@ -397,6 +397,7 @@ function genRowsView(reorder, columns) {
       didSelect(sender, indexPath, data) {
         let view = $("deleteLocalButton")
         if(view == undefined || view.info == false) {
+          $device.taptic(1)
           $app.openURL(data.url)
         } else {
           $("rowsShow").delete(indexPath)
@@ -581,6 +582,123 @@ function genLocalView() {
 }
 
 function genCloudView() {
+
+  const searchBar = {
+    type: "view",
+    layout: $layout.fill,
+    views: [{
+      type: "button",
+      props: {
+        id: "cancel_button",
+        title: "取消",
+        font: $font(17),
+        titleColor: $color(mColor.blue),
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.right.inset(0)
+        make.size.equalTo($size(0, 35))
+      },
+      events: {
+        tapped: function(sender) {
+          let input = $("search_input")
+          input.blur()
+        }
+      }
+    },
+    {
+      type: "view",
+      props: {
+        bgcolor: $rgba(100, 100, 100, 0.1),
+        radius: 10,
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.left.inset(0)
+        make.right.equalTo(view.prev.left)
+        make.height.equalTo(35)
+      },
+      views: [{
+        type: "image",
+        props: {
+          icon: $icon("023", $rgba(100, 100, 100, 0.4), $size(15, 15)),
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.centerY.equalTo(view.super)
+          make.left.inset(7)
+          make.size.equalTo($size(15, 15))
+        },
+      },{
+        type: "input",
+        props: {
+          id: "search_input",
+          type: $kbType.search,
+        },
+        layout: function(make, view) {
+          make.centerY.equalTo(view.super)
+          make.right.inset(0)
+          make.height.equalTo(view.super)
+          make.left.equalTo(view.prev.right).inset(0)
+          make.width.equalTo(view.frame.width - 22)
+        },
+        events: {
+          didBeginEditing: function(sender, view) {
+            $("cancel_button").updateLayout(function(make) {
+              make.size.equalTo($size(55, 35))
+            })
+            $ui.animate({
+              duration: 0.4,
+              damping: 0.8,
+              animation: function() {
+                $("cancel_button").relayout()
+              }
+            })
+          },
+          didEndEditing: function(sender) {
+            $("cancel_button").updateLayout(function(make) {
+              make.size.equalTo($size(0, 35))
+            })
+            $ui.animate({
+              duration: 0.4,
+              damping: 0.8,
+              animation: function() {
+                $("cancel_button").relayout()
+              }
+            })
+          },
+          changed: function(sender) {
+            if(sender.text.length > 0) {
+              $("search_hint").hidden = true
+            } else {
+              $("search_hint").hidden = false
+              searchItems(sender.text)
+            }
+          },
+          returned: function(sender) {
+            sender.blur()
+            searchItems(sender.text)
+          },
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "search_hint",
+            text: " Launcher",
+            align: $align.center,
+            textColor: $rgba(100, 100, 100, 0.4),
+            hidden: false,
+          },
+          layout: function(make, view) {
+            make.left.inset(5)
+            make.centerY.equalTo(view.super)
+          }
+        }]
+      },]
+    }]
+  }
+
   let view = {
     type: "view",
     props: {
@@ -592,31 +710,6 @@ function genCloudView() {
       type: "button",
       props: {
         id: "cloudButton",
-        title: " 我要上传",
-        font: $font(17),
-        bgcolor: $color("clear"),
-        titleColor: $color("#15BCF5"),
-        icon: $icon("166", $color("#15BCF5"), $size(20, 20)),
-        // borderColor: $color("#15BCF5"),
-        // borderWidth: 1,
-      },
-      layout: function(make, view) {
-        make.left.inset(20)
-        make.height.equalTo(30)
-        make.top.inset(10)
-        make.width.equalTo(100)
-      },
-      events: {
-        tapped: function(sender) {
-          setupUploadView("upload")
-        }
-      }
-    },
-    {
-      type: "button",
-      props: {
-        id: "cloudButton",
-        title: " 我上传的",
         bgcolor: $color("clear"),
         titleColor: $color("#F39C12"),
         icon: $icon("109", $color("#F39C12"), $size(20, 20)),
@@ -628,7 +721,7 @@ function genCloudView() {
         make.right.inset(20)
         make.height.equalTo(30)
         make.top.inset(10)
-        make.width.equalTo(100)
+        make.width.equalTo(40)
       },
       events: {
         tapped: function(sender) {
@@ -636,6 +729,39 @@ function genCloudView() {
         }
       }
     },{
+      type: "button",
+      props: {
+        id: "cloudButton",
+        font: $font(17),
+        bgcolor: $color("clear"),
+        titleColor: $color("#15BCF5"),
+        icon: $icon("166", $color("#15BCF5"), $size(20, 20)),
+        // borderColor: $color("#15BCF5"),
+        // borderWidth: 1,
+      },
+      layout: function(make, view) {
+        make.right.equalTo(view.prev.left)
+        make.height.equalTo(30)
+        make.top.inset(10)
+        make.width.equalTo(40)
+      },
+      events: {
+        tapped: function(sender) {
+          setupUploadView("upload")
+        }
+      }
+    },
+    {
+      type: "view",
+      layout: function(make, view) {
+        make.left.inset(20)
+        make.height.equalTo(30)
+        make.top.inset(10)
+        make.right.equalTo(view.prev.left).inset(10)
+      },
+      views: [searchBar]
+    },
+    {
       type: "matrix",
       props: {
         id: "rowsCloudShow",
@@ -698,7 +824,7 @@ function genCloudView() {
         didLongPress: function(sender, indexPath, data) {
           $device.taptic(2)
           $ui.menu({
-            items: ["添加"],
+            items: ["添加到本地"],
             handler: function(title, idx) {
               if(idx == 0) {
                 addToLocal(sender, indexPath)
@@ -711,6 +837,29 @@ function genCloudView() {
   }
   requireItems()
   return view
+}
+
+function searchItems(text) {
+  if(text == "" || text.length <= 0) {
+    $("rowsCloudShow").data = getCache("cloudItems", [])
+  } else {
+    $text.tokenize({
+      text: text,
+      handler: function(results) {
+        let resultItems = []
+        let cloudItems = getCache("cloudItems", [])
+        for(let i = 0; i < cloudItems.length; i++) {
+          for(let j = 0; j < results.length; j++) {
+            if(cloudItems[i].title.text.toLowerCase().indexOf(results[j].toLowerCase()) >= 0 || cloudItems[i].url.toLowerCase().indexOf(results[j].toLowerCase()) >= 0) {
+              resultItems.push(cloudItems[i])
+              break
+            }
+          }
+        }
+        $("rowsCloudShow").data = resultItems
+      }
+    })
+  }
 }
 
 function addToLocal(sender, indexPath) {
@@ -1187,7 +1336,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                               uploadSM($("chooseButton").info)
                             } else if(action == "renew"){
                               if(isIconRevised == false) {
-                                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+                                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
                               } else {
                                 uploadSM($("chooseButton").info, objectId)
                               }
@@ -1217,7 +1366,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
               uploadSM($("chooseButton").info)
             } else if(action == "renew"){
               if(isIconRevised == false) {
-                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
               } else {
                 uploadSM($("chooseButton").info, objectId)
               }
