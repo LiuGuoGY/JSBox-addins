@@ -1,15 +1,15 @@
 /**
- * @version 2.4
+ * @version 2.5
  * @author Liu Guo
  * @date 2018.7.17
  * @brief
- *   1. 新增云库搜索功能
+ *   1. 适配 iPhone X
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.4
+let appVersion = 2.5
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -187,7 +187,11 @@ function setupMainView() {
           make.width.equalTo(view.super)
           make.left.right.inset(0)
           make.bottom.inset(50)
-          make.top.inset(20)
+          if($device.info.version >= "11" && $device.isIphoneX){
+            make.top.equalTo(view.super.safeAreaTop)
+          } else {
+            make.top.inset(20)
+          }
         },
         views: [genLocalView()], //, genCloudView(), genSettingView()
       },
@@ -197,8 +201,12 @@ function setupMainView() {
           style: 5 // 0 ~ 5 调整背景的颜色程度
         },
         layout: function(make, view) {
-          make.height.equalTo(50)
           make.left.bottom.right.inset(0)
+          if($device.info.version >= "11" && $device.isIphoneX){
+            make.top.equalTo(view.super.safeAreaBottom).offset(-50)
+          } else {
+            make.height.equalTo(50)
+          }
         },
       },
       {
@@ -267,7 +275,7 @@ function setupMainView() {
         layout: function(make, view) {
           make.height.equalTo(50)
           make.left.right.inset(0)
-          if($device.info.version >= "11"){
+          if($device.info.version >= "11" && $device.isIphoneX){
             make.bottom.equalTo(view.super.safeAreaBottom)
           } else {
             make.bottom.inset(0)
