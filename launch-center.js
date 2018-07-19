@@ -1,15 +1,15 @@
 /**
- * @version 2.5
+ * @version 2.6
  * @author Liu Guo
- * @date 2018.7.17
+ * @date 2018.7.19
  * @brief
- *   1. 适配 iPhone X
+ *   1. 适配最新tf(build 258)
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.5
+let appVersion = 2.6
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -40,7 +40,11 @@ if (needCheckup()) {
   checkupVersion()
 }
 if ($app.env == $env.today) {
-  setupTodayView()
+  if($app.widgetIndex == -1) {
+    setupTodayView()
+  } else {
+    setupWidgetView()
+  }
 } else {
   setupMainView()
 }
@@ -108,7 +112,76 @@ $app.listen({
 function setupTodayView() {
   $ui.render({
     props: {
-      title: "Launch Center"
+      title: "Launch Center",
+      navBarHidden: true
+    },
+    layout: function(make, view) {
+      make.top.left.right.inset(0)
+      make.height.equalTo(100)
+      // make.width.equalTo(view.super)
+    },
+    views: [{
+      type: "matrix",
+      props: {
+        id: "rowsShow",
+        columns: getCache("columns", 4), //横行个数
+        itemHeight: 50, //图标到字之间得距离
+        spacing: 3, //每个边框与边框之间得距离
+        template: [{
+            type: "blur",
+            props: {
+              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+              style: 1 // 0 ~ 5 调整背景的颜色程度
+            },
+            layout: $layout.fill
+          },
+          {
+            type: "label",
+            props: {
+              id: "title",
+              textColor: $color("black"),
+              bgcolor: $color("clear"),
+              font: $font(13),
+              align: $align.center,
+            },
+            layout(make, view) {
+              make.bottom.inset(0)
+              make.centerX.equalTo(view.super)
+              make.height.equalTo(25)
+              make.width.equalTo(view.super)
+            }
+          },
+          {
+            type: "image",
+            props: {
+              id: "icon",
+              bgcolor: $color("clear"),
+              size: $size(20, 20)
+            },
+            layout(make, view) {
+              make.top.inset(9)
+              make.centerX.equalTo(view.super)
+              make.size.equalTo($size(20, 20))
+            }
+          }
+        ],
+        data: getCache("localItems", [])
+      },
+      layout: $layout.fill,
+      events: {
+        didSelect(sender, indexPath, data) {
+          $device.taptic(1)
+          $app.openURL(data.url)
+        }
+      }
+    }]
+  })
+}
+
+function setupWidgetView() {
+  $ui.render({
+    props: {
+      title: "Launch Center",
     },
     views: [{
       type: "matrix",
@@ -642,7 +715,7 @@ function genCloudView() {
         type: "input",
         props: {
           id: "search_input",
-          type: $kbType.search,
+          returnKeyType: 6,
         },
         layout: function(make, view) {
           make.centerY.equalTo(view.super)
@@ -1110,6 +1183,10 @@ function setupWebView(title, url) {
       statusBarStyle: 0,
     },
     events: {
+      appeared: function(sender) {
+        popDelegate = $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
+        $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+      },
       didAppear: function(sender) {
         popDelegate = $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
@@ -1143,6 +1220,10 @@ function setupMyUpView() {
       statusBarStyle: 0,
     },
     events: {
+      appeared: function(sender) {
+        popDelegate = $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
+        $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+      },
       didAppear: function(sender) {
         popDelegate = $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
@@ -1296,6 +1377,10 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
       statusBarStyle: 0,
     },
     events: {
+      appeared: function(sender) {
+        popDelegate = $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
+        $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+      },
       didAppear: function(sender) {
         popDelegate = $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
@@ -1952,6 +2037,10 @@ function setupFeedBack() {
     },
     layout: $layout.fill,
     events: {
+      appeared: function(sender) {
+        popDelegate = $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
+        $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+      },
       didAppear: function(sender) {
         popDelegate = $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
