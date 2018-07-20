@@ -1,15 +1,15 @@
 /**
- * @version 2.6
+ * @version 2.7
  * @author Liu Guo
- * @date 2018.7.19
+ * @date 2018.7.20
  * @brief
- *   1. 适配最新tf(build 258)
+ *   1. 优化部分UI
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.6
+let appVersion = 2.7
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -42,6 +42,7 @@ if (needCheckup()) {
 if ($app.env == $env.today) {
   if($app.widgetIndex == -1) {
     setupTodayView()
+    $widget.height = 245
   } else {
     setupWidgetView()
   }
@@ -110,17 +111,34 @@ $app.listen({
 })
 
 function setupTodayView() {
+  let lastOffset = 0
   $ui.render({
     props: {
       title: "Launch Center",
       navBarHidden: true
     },
-    layout: function(make, view) {
-      make.top.left.right.inset(0)
-      make.height.equalTo(100)
-      // make.width.equalTo(view.super)
-    },
+    layout: $layout.fill,
     views: [{
+      type: "button",
+      props: {
+        title: "CLOSE",
+        bgcolor: $color("clear"),
+        titleColor: $rgba(100, 100, 100, 0.2),
+        font: $font(15),
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.top.inset(0)
+        make.width.equalTo(120)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          $app.close(0.1)
+        }
+      }
+    },{
       type: "matrix",
       props: {
         id: "rowsShow",
@@ -167,13 +185,26 @@ function setupTodayView() {
         ],
         data: getCache("localItems", [])
       },
-      layout: $layout.fill,
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.centerX.equalTo(view.super)
+        make.top.equalTo(view.prev.bottom)
+        make.bottom.inset(0)
+      },
       events: {
         didSelect(sender, indexPath, data) {
           $device.taptic(1)
           $app.openURL(data.url)
-        }
-      }
+        },
+        // willBeginDragging: function(sender) {
+        //   $ui.toast(sender.contentOffset.y)
+        //   if(sender.contentOffset.y <= -30) {// && lastOffset > -30
+        //     $device.taptic(2)
+        //   }
+        //   lastOffset = sender.contentOffset.y
+        // }
+      },
+      views: []
     }]
   })
 }
@@ -251,24 +282,6 @@ function setupMainView() {
       statusBarStyle: 0,
     },
     views: [{
-        type: "view",
-        props: {
-          id: "content",
-          bgcolor: $color("clear"),
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.left.right.inset(0)
-          make.bottom.inset(50)
-          if($device.info.version >= "11" && $device.isIphoneX){
-            make.top.equalTo(view.super.safeAreaTop)
-          } else {
-            make.top.inset(20)
-          }
-        },
-        views: [genLocalView()], //, genCloudView(), genSettingView()
-      },
-      {
         type: "blur",
         props: {
           style: 5 // 0 ~ 5 调整背景的颜色程度
@@ -390,6 +403,24 @@ function setupMainView() {
           make.left.right.top.inset(0)
           make.height.equalTo(20)
         },
+      },
+      {
+        type: "view",
+        props: {
+          id: "content",
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.width.equalTo(view.super)
+          make.left.right.inset(0)
+          make.bottom.equalTo($("tab").top)
+          if($device.info.version >= "11" && $device.isIphoneX){
+            make.top.equalTo(view.super.safeAreaTop)
+          } else {
+            make.top.inset(20)
+          }
+        },
+        views: [genLocalView()], //, genCloudView(), genSettingView()
       },
     ]
   })
