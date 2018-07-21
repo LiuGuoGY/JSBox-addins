@@ -1,15 +1,15 @@
 /**
- * @Version 3.6
+ * @Version 3.7
  * @author Liu Guo
  * @date 2018.7.21
  * @brief
- *   1. Widget UI优化
+ *   修复部分机型可能不出现的close按钮的问题
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.6
+let appVersion = 3.7
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -702,6 +702,9 @@ function setupView() {
       }
     }]
   })
+  if(isInToday()) {
+    $widget.height = cardHeight + 70
+  }
 }
 
 function setupSetting() {
