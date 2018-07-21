@@ -1,15 +1,17 @@
 /**
- * @version 2.7
+ * @version 2.8
  * @author Liu Guo
- * @date 2018.7.20
+ * @date 2018.7.21
  * @brief
- *   1. 优化部分UI
+ *   1. Widget 背景透明效果
+ *   2. 设置中添加分享菜单
+ *   3. 现在可以修改本地图标了
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.7
+let appVersion = 2.8
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -112,6 +114,12 @@ $app.listen({
 
 function setupTodayView() {
   let lastOffset = 0
+  $thread.background({
+    delay: 0.1,
+    handler: function() {
+      $ui.vc.runtimeValue().$view().$setBackgroundColor($color("clear"))
+    }
+  })
   $ui.render({
     props: {
       title: "Launch Center",
@@ -145,6 +153,7 @@ function setupTodayView() {
         columns: getCache("columns", 4), //横行个数
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
+        bgcolor: $color("clear"),
         template: [{
             type: "blur",
             props: {
@@ -420,7 +429,7 @@ function setupMainView() {
             make.top.inset(20)
           }
         },
-        views: [genLocalView()], //, genCloudView(), genSettingView()
+        views: [genLocalView()],
       },
     ]
   })
@@ -1149,7 +1158,15 @@ function genSettingView() {
     templateDetails: {
       text : "",
     },
-  }]
+  },
+  {
+    templateTitle: {
+      text : "分享至...",
+    },
+    templateDetails: {
+      text : "",
+    },
+  },]
 
   let view = {
     type: "view",
@@ -1194,6 +1211,8 @@ function genSettingView() {
                 break
               case "支持与赞赏": setupReward()
                 break
+              case "分享至...": share()
+                break
               default:
             }
           }
@@ -1203,6 +1222,17 @@ function genSettingView() {
   }
   requireInstallNumbers()
   return view
+}
+
+function share() {
+  $share.sheet({
+    items: ["https://xteko.com/redir?name=Launch%20Center&url=https%3A%2F%2Fraw.githubusercontent.com%2FLiuGuoGY%2FJSBox-addins%2Fmaster%2Flaunch-center.js&icon=icon_065.png"], // 也支持 item
+    handler: function(success) {
+      if(success) {
+        $ui.toast("感谢您的分享！")
+      }
+    }
+  })
 }
 
 function setupWebView(title, url) {
@@ -1457,12 +1487,12 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                           title: "上传",
                           handler: function() {
                             if(action == "upload") {
-                              uploadSM($("chooseButton").info)
+                              uploadSM(action, $("chooseButton").info)
                             } else if(action == "renew"){
                               if(isIconRevised == false) {
                                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
                               } else {
-                                uploadSM($("chooseButton").info, objectId)
+                                uploadSM(action, $("chooseButton").info, objectId)
                               }
                             }
                           }
@@ -1487,15 +1517,19 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
             })
           } else {
             if(action == "upload") {
-              uploadSM($("chooseButton").info)
+              uploadSM(action, $("chooseButton").info)
             } else if(action == "renew"){
               if(isIconRevised == false) {
                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
               } else {
-                uploadSM($("chooseButton").info, objectId)
+                uploadSM(action, $("chooseButton").info, objectId)
               }
             } else if(action == "edit") {
-              updateToLocal($("rowsShow"), indexPath, $("titleInput").text, icon, $("schemeInput").text)
+              if(isIconRevised == false) {
+                updateToLocal($("rowsShow"), indexPath, $("titleInput").text, icon, $("schemeInput").text)
+              } else {
+                uploadSM(action, $("chooseButton").info, undefined, indexPath)
+              }
               $ui.pop()
             }
           }
@@ -1688,6 +1722,19 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
           },
           changed: function(sender) {
             verifyStateSet()
+            if(sender.text.indexOf("jsbox://run") >= 0) {
+              $ui.alert({
+                title: "提示",
+                message: "请勿上传JSBox内脚本的链接，因为JSBox自带启动器，且其他人难以获取",
+              })
+              sender.text = ""
+            } else if(sender.text.indexOf("workflow://x-callback-url/run-workflow") >= 0) {
+              $ui.alert({
+                title: "提示",
+                message: "请勿上传Workflow内规则的链接，因为Workflow自带启动器，且其他人难以获取",
+              })
+              sender.text = ""
+            }
           }
         }
       },
@@ -2695,19 +2742,35 @@ function cutIcon(image) {
   return snapshot
 }
 
-function uploadSM(pic, objectId) {
-  if (typeof(pic) != "undefined") {
-    $ui.loading(true)
-    $http.upload({
-      url: "https://sm.ms/api/upload",
-      files: [{ "data": pic, "name": "smfile" }],
-      handler: function(resp) {
-        $ui.loading(false)
-        var data = resp.data.data
-        uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
-      }
-    })
+function uploadSM(action, pic, objectId, indexPath) {
+  if(action != "edit") {
+    if (typeof(pic) != "undefined") {
+      $ui.loading(true)
+      $http.upload({
+        url: "https://sm.ms/api/upload",
+        files: [{ "data": pic, "name": "smfile" }],
+        handler: function(resp) {
+          $ui.loading(false)
+          var data = resp.data.data
+          uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+        }
+      })
+    }
+  } else {
+    if (typeof(pic) != "undefined") {
+      $ui.loading(true)
+      $http.upload({
+        url: "https://sm.ms/api/upload",
+        files: [{ "data": pic, "name": "smfile" }],
+        handler: function(resp) {
+          $ui.loading(false)
+          var data = resp.data.data
+          updateToLocal($("rowsShow"), indexPath, $("titleInput").text, data.url, $("schemeInput").text)
+        }
+      })
+    }
   }
+  
 }
 
 function sendFeedBack(text, contact) {
