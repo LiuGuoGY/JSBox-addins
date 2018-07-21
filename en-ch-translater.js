@@ -1,15 +1,15 @@
 /**
- * @Version 3.5
+ * @Version 3.6
  * @author Liu Guo
- * @date 2018.7.15
+ * @date 2018.7.21
  * @brief
- *   1. 修复过高语法导致iOS 11以下闪退的问题
+ *   1. Widget UI优化
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.5
+let appVersion = 3.6
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -206,6 +206,14 @@ function sourceText() {
 function setupView() {
   $app.autoKeyboardEnabled = true
   $app.keyboardToolbarEnabled = true
+  if(isInToday()) {
+    $thread.background({
+      delay: 0.1,
+      handler: function() {
+        $ui.vc.runtimeValue().$view().$setBackgroundColor($color("clear"))
+      }
+    })
+  }
   $ui.render({
     props: {
       title: "中英互译",
@@ -1044,6 +1052,14 @@ function setupReward() {
   $ui.push({
     props: {
       title: "支持与赞赏",
+      navButtons: [
+        {
+          icon: "141", // Or you can use icon name
+          handler: function() {
+            $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
+          }
+        }
+      ],
       navBarHidden: isInToday(),
     },
     layout: $layout.fill,
@@ -1269,6 +1285,9 @@ function setupReward() {
     }]
   })
   requireReward()
+  $delay(1, function(){
+    $("rewardList").scrollToOffset($point(0, 20))
+  })
 }
 
 function begainReward(way) {
@@ -1323,7 +1342,6 @@ function downloadRewardPic(way) {
             $cache.set("stopTime", nDate.getTime())
             resumeAction = 1
             $app.openURL(url)
-            
           }
         }
       })
