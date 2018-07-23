@@ -1,15 +1,17 @@
 /**
- * @version 2.9
+ * @version 3.0
  * @author Liu Guo
  * @date 2018.7.23
  * @brief
- *   1. UI优化
+ *   1. 优化提升
+ *   2. 加入重复上传检测
+ *   3. 新增无跳转提示
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.9
+let appVersion = 3.0
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -48,23 +50,23 @@ if ($app.env == $env.today) {
   }
 } else {
   setupMainView()
+  $delay(0, function(){
+    let view = $("gradientParent")
+    let hintText = $("hintText")
+    view.remakeLayout(function(make) {
+      make.centerY.equalTo(hintText)
+      make.width.equalTo(20)
+      make.height.equalTo(hintText)
+      make.right.equalTo(hintText.right).inset(5)
+    })
+    $ui.animate({
+      duration: 2.5,
+      animation: function() {
+        view.relayout(); 
+      }
+    })
+  })
 }
-$delay(0, function(){
-  let view = $("gradientParent")
-  let hintText = $("hintText")
-  view.remakeLayout(function(make) {
-    make.centerY.equalTo(hintText)
-    make.width.equalTo(20)
-    make.height.equalTo(hintText)
-    make.right.equalTo(hintText.right).inset(5)
-  })
-  $ui.animate({
-    duration: 2.5,
-    animation: function() {
-      view.relayout(); 
-    }
-  })
-})
 
 $app.listen({
   pause: function() {
@@ -78,6 +80,9 @@ $app.listen({
         } else {
           verifyStateSet(false)
         }
+        resumeAction = 0
+        break
+      case 2:
         resumeAction = 0
         break
     }
@@ -271,6 +276,8 @@ function setupWidgetView() {
 let contentViews = ["localView", "cloudView", "settingView"]
 
 function setupMainView() {
+  $app.autoKeyboardEnabled = false
+  $app.keyboardToolbarEnabled = false
   $ui.render({
     props: {
       title: "Launch Center",
@@ -506,8 +513,21 @@ function genRowsView(reorder, columns) {
       didSelect(sender, indexPath, data) {
         let view = $("deleteLocalButton")
         if(view == undefined || view.info == false) {
-          $device.taptic(1)
-          $app.openURL(data.url)
+          if(data.url != "") {
+            $device.taptic(1)
+            $app.openURL(data.url)
+            let leaveTime = new Date().getTime()
+            resumeAction = 2
+            $thread.background({
+              delay: 0.1,
+              handler: function() {
+                if(resumeAction == 2) {
+                  resumeAction = 0
+                  $ui.toast("未安装对应APP")
+                }
+              }
+            })
+          }
         } else {
           $("rowsShow").delete(indexPath)
           $cache.set("localItems", $("rowsShow").data)
@@ -540,6 +560,21 @@ function genRowsView(reorder, columns) {
   }
   return view
 }
+
+// function getLocalItemsAndAdd() {
+//   let localItems = getCache("localItems", [])
+//   let addItem = {
+//     title: {
+//       text: "添加"
+//     },
+//     icon: {
+//       src: "https://i.loli.net/2018/07/23/5b55dc1a027dd.png"
+//     },
+//     url: ""
+//   }
+//   localItems.push(addItem)
+//   return localItems
+// }
 
 function genLocalView() {
   let view = {
@@ -794,13 +829,13 @@ function genCloudView() {
           type: "label",
           props: {
             id: "search_hint",
-            text: " Launcher",
+            text: "Launcher",
             align: $align.center,
             textColor: $rgba(100, 100, 100, 0.4),
             hidden: false,
           },
           layout: function(make, view) {
-            make.left.inset(5)
+            make.left.inset(8)
             make.centerY.equalTo(view.super)
           }
         }]
@@ -1409,8 +1444,6 @@ function setupMyUpView() {
 }
 
 function setupUploadView(action, title, icon, url, objectId, indexPath) {
-  $app.autoKeyboardEnabled = true
-  $app.keyboardToolbarEnabled = true
   let isIconRevised = false
   let actionText = "  开始上传  "
   switch(action) {
@@ -1432,10 +1465,18 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
       appeared: function(sender) {
         popDelegate = $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
       },
       didAppear: function(sender) {
         popDelegate = $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      disappeared: function() {
+        $app.autoKeyboardEnabled = false
+        $app.keyboardToolbarEnabled = false
       }
     },
     views: [{
@@ -1478,7 +1519,14 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                           title: "上传",
                           handler: function() {
                             if(action == "upload") {
-                              uploadSM(action, $("chooseButton").info)
+                              if(haveExisted($("schemeInput").text)) {
+                                $ui.alert({
+                                  title: "提示",
+                                  message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
+                                })
+                              } else {
+                                uploadSM(action, $("chooseButton").info)
+                              }
                             } else if(action == "renew"){
                               if(isIconRevised == false) {
                                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
@@ -1501,14 +1549,21 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                 {
                   title: "取消",
                   handler: function() {
-            
+                    
                   }
                 }
               ]
             })
           } else {
             if(action == "upload") {
-              uploadSM(action, $("chooseButton").info)
+              if(haveExisted($("schemeInput").text)) {
+                $ui.alert({
+                  title: "提示",
+                  message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
+                })
+              } else {
+                uploadSM(action, $("chooseButton").info)
+              }
             } else if(action == "renew"){
               if(isIconRevised == false) {
                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
@@ -1753,7 +1808,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
             $cache.set("begainTime", nDate.getTime())
             resumeAction = 1
             $thread.background({
-              delay: 0.2,
+              delay: 0.1,
               handler: function() {
                 if (resumeAction == 1) {
                   resumeAction = 0
@@ -1773,6 +1828,17 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
   if(action != "upload") {
     verifyStateSet(true)
   }
+}
+
+function haveExisted(url) {
+  let cloudItems = getCache("cloudItems", [])
+  let result = false
+  for(let i = 0; i < cloudItems.length; i++) {
+    if(cloudItems[i].url.toLowerCase().indexOf(url.toLowerCase()) >= 0) {
+      result = true
+    }
+  }
+  return result
 }
 
 function verifyStateSet(isSuccess) {
@@ -2096,8 +2162,6 @@ function downloadRewardPic(way) {
 
 //反馈页面
 function setupFeedBack() {
-  $app.autoKeyboardEnabled = true
-  $app.keyboardToolbarEnabled = true
   $ui.push({
     props: {
       id: "feedbackView",
@@ -2110,10 +2174,18 @@ function setupFeedBack() {
       appeared: function(sender) {
         popDelegate = $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
       },
       didAppear: function(sender) {
         popDelegate = $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
         $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      disappeared: function() {
+        $app.autoKeyboardEnabled = false
+        $app.keyboardToolbarEnabled = false
       }
     },
     views: [{
@@ -2780,8 +2852,8 @@ function sendFeedBack(text, contact) {
     },
     body: {
       status: "open",
-      content: text,
-      contact: (contact == "")?$objc("FCUUID").invoke("uuidForDevice").rawValue().toString():contact,
+      content: text + "\nID: " + $objc("FCUUID").invoke("uuidForDevice").rawValue().toString(),
+      contact: contact,
     },
     handler: function(resp) {
       $device.taptic(2)
