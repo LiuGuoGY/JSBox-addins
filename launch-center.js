@@ -1,17 +1,15 @@
 /**
- * @version 2.8
+ * @version 2.9
  * @author Liu Guo
- * @date 2018.7.21
+ * @date 2018.7.23
  * @brief
- *   1. Widget 背景透明效果
- *   2. 设置中添加分享菜单
- *   3. 现在可以修改本地图标了
+ *   1. UI优化
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 2.8
+let appVersion = 2.9
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -114,12 +112,6 @@ $app.listen({
 
 function setupTodayView() {
   let lastOffset = 0
-  $thread.background({
-    delay: 0.1,
-    handler: function() {
-      $ui.vc.runtimeValue().$view().$setBackgroundColor($color("clear"))
-    }
-  })
   $ui.render({
     props: {
       title: "Launch Center",
@@ -183,6 +175,7 @@ function setupTodayView() {
             props: {
               id: "icon",
               bgcolor: $color("clear"),
+              radius: 3,
               size: $size(20, 20)
             },
             layout(make, view) {
@@ -205,13 +198,6 @@ function setupTodayView() {
           $device.taptic(1)
           $app.openURL(data.url)
         },
-        // willBeginDragging: function(sender) {
-        //   $ui.toast(sender.contentOffset.y)
-        //   if(sender.contentOffset.y <= -30) {// && lastOffset > -30
-        //     $device.taptic(2)
-        //   }
-        //   lastOffset = sender.contentOffset.y
-        // }
       },
       views: []
     }]
@@ -259,6 +245,7 @@ function setupWidgetView() {
             props: {
               id: "icon",
               bgcolor: $color("clear"),
+              radius: 3,
               size: $size(20, 20)
             },
             layout(make, view) {
@@ -502,6 +489,7 @@ function genRowsView(reorder, columns) {
           props: {
             id: "icon",
             bgcolor: $color("clear"),
+            radius: 3,
             size: $size(20, 20),
           },
           layout(make, view) {
@@ -918,6 +906,7 @@ function genCloudView() {
             props: {
               id: "icon",
               bgcolor: $color("clear"),
+              radius: 3,
               size: $size(20, 20)
             },
             layout(make, view) {
@@ -1354,6 +1343,7 @@ function setupMyUpView() {
             props: {
               id: "icon",
               bgcolor: $color("clear"),
+              radius: 3,
               size: $size(20, 20),
             },
             layout(make, view) {
@@ -1598,6 +1588,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
           props: {
             id: "icon",
             bgcolor: $color("clear"),
+            radius: 3,
             size: $size(20, 20),
             icon: $icon("008", $color("gray"), $size(20, 20)),
           },
@@ -2653,6 +2644,9 @@ function requireInstallNumbers() {
       let results = resp.data.count
       if (results != undefined) {
         let view = $("tabShowInstallsDetail")
+        if(view.text == "0") {
+          view.text = results - 30
+        }
         $cache.set("installNumbers", results)
         let timer = $timer.schedule({
           interval: 0.11,
