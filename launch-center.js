@@ -1410,6 +1410,7 @@ function setupMyUpView() {
 
 function setupUploadView(action, title, icon, url, objectId, indexPath) {
   $app.autoKeyboardEnabled = true
+  $app.keyboardToolbarEnabled = true
   let isIconRevised = false
   let actionText = "  开始上传  "
   switch(action) {
