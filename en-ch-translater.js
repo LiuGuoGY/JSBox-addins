@@ -1,15 +1,15 @@
 /**
- * @Version 3.7
+ * @Version 3.8
  * @author Liu Guo
- * @date 2018.7.21
+ * @date 2018.7.24
  * @brief
- *   修复部分机型可能不出现的close按钮的问题
+ *   1. 优化widget透明显示效果
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.7
+let appVersion = 3.8
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -207,11 +207,19 @@ function setupView() {
   $app.autoKeyboardEnabled = true
   $app.keyboardToolbarEnabled = true
   if(isInToday()) {
-    $thread.background({
-      delay: 0.1,
-      handler: function() {
-        $ui.vc.runtimeValue().$view().$setBackgroundColor($color("clear"))
-      }
+    let alpha = 1
+    $delay(0.6, function(){
+      let timer = $timer.schedule({
+        interval: 0.01,
+        handler: function() {
+          if(alpha > 0) {
+            $ui.vc.runtimeValue().$view().$setBackgroundColor($rgba(255, 255, 255, alpha))
+            alpha -= 0.02
+          } else {
+            timer.invalidate()
+          }
+        }
+      })
     })
   }
   $ui.render({
@@ -230,7 +238,7 @@ function setupView() {
         tapped: function(sender) {
           $("text").blur()
           $("result").blur()
-        }
+        },
       },
     },
     {
@@ -641,7 +649,7 @@ function setupView() {
         }
       },
       {
-        type: "button",
+        type: "image",
         props: {
           id: "tools",
           bgcolor: $color("clear"),
@@ -2244,8 +2252,8 @@ function sendFeedBack(text, contact) {
     },
     body: {
       status: "open",
-      content: text,
-      contact: (contact == "")?$objc("FCUUID").invoke("uuidForDevice").rawValue().toString():contact,
+      content: text + "\nID: " + $objc("FCUUID").invoke("uuidForDevice").rawValue().toString(),
+      contact: contact,
     },
     handler: function(resp) {
       $device.taptic(2)
