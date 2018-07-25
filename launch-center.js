@@ -1,20 +1,20 @@
 /**
- * @version 3.0
+ * @version 3.1
  * @author Liu Guo
- * @date 2018.7.23
+ * @date 2018.7.25
  * @brief
- *   1. 优化提升
- *   2. 加入重复上传检测
- *   3. 新增无跳转提示
+ *   1. 精心设计的三种显示模式，可在设置中改变
+ *   2. 启动器的透明效果重新回来了
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.0
+let appVersion = 3.1
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
+let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
 let resumeAction = 0
 
 const mColor = {
@@ -117,6 +117,20 @@ $app.listen({
 
 function setupTodayView() {
   let lastOffset = 0
+  let alpha = 1
+  $delay(0.6, function(){
+    let timer = $timer.schedule({
+      interval: 0.01,
+      handler: function() {
+        if(alpha > 0) {
+          $ui.vc.runtimeValue().$view().$setBackgroundColor($rgba(255, 255, 255, alpha))
+          alpha -= 0.05
+        } else {
+          timer.invalidate()
+        }
+      }
+    })
+  })
   $ui.render({
     props: {
       title: "Launch Center",
@@ -151,45 +165,7 @@ function setupTodayView() {
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         bgcolor: $color("clear"),
-        template: [{
-            type: "blur",
-            props: {
-              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-              style: 1 // 0 ~ 5 调整背景的颜色程度
-            },
-            layout: $layout.fill
-          },
-          {
-            type: "label",
-            props: {
-              id: "title",
-              textColor: $color("black"),
-              bgcolor: $color("clear"),
-              font: $font(13),
-              align: $align.center,
-            },
-            layout(make, view) {
-              make.bottom.inset(0)
-              make.centerX.equalTo(view.super)
-              make.height.equalTo(25)
-              make.width.equalTo(view.super)
-            }
-          },
-          {
-            type: "image",
-            props: {
-              id: "icon",
-              bgcolor: $color("clear"),
-              radius: 3,
-              size: $size(20, 20)
-            },
-            layout(make, view) {
-              make.top.inset(9)
-              make.centerX.equalTo(view.super)
-              make.size.equalTo($size(20, 20))
-            }
-          }
-        ],
+        template: genTemplate(),
         data: getCache("localItems", [])
       },
       layout: function(make, view) {
@@ -221,45 +197,7 @@ function setupWidgetView() {
         columns: getCache("columns", 4), //横行个数
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
-        template: [{
-            type: "blur",
-            props: {
-              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-              style: 1 // 0 ~ 5 调整背景的颜色程度
-            },
-            layout: $layout.fill
-          },
-          {
-            type: "label",
-            props: {
-              id: "title",
-              textColor: $color("black"),
-              bgcolor: $color("clear"),
-              font: $font(13),
-              align: $align.center,
-            },
-            layout(make, view) {
-              make.bottom.inset(0)
-              make.centerX.equalTo(view.super)
-              make.height.equalTo(25)
-              make.width.equalTo(view.super)
-            }
-          },
-          {
-            type: "image",
-            props: {
-              id: "icon",
-              bgcolor: $color("clear"),
-              radius: 3,
-              size: $size(20, 20)
-            },
-            layout(make, view) {
-              make.top.inset(9)
-              make.centerX.equalTo(view.super)
-              make.size.equalTo($size(20, 20))
-            }
-          }
-        ],
+        template: genTemplate(),
         data: getCache("localItems", [])
       },
       layout: $layout.fill,
@@ -271,6 +209,10 @@ function setupWidgetView() {
       }
     }]
   })
+}
+
+function randomColor() {
+  return colors[Math.floor(Math.random()*colors.length)]
 }
 
 let contentViews = ["localView", "cloudView", "settingView"]
@@ -458,6 +400,113 @@ function getContentView(number) {
   }
 }
 
+function genTemplate() {
+  let showMode = getCache("showMode", 0)
+  let template = []
+  if(showMode == 0) {
+    template.push({
+      type: "blur",
+      props: {
+        radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+        style: 1 // 0 ~ 5 调整背景的颜色程度
+      },
+      layout: $layout.fill,
+    },{
+      type: "label",
+      props: {
+        id: "title",
+        textColor: $color("black"),
+        bgcolor: $color("clear"),
+        font: $font(13),
+        align: $align.center,
+      },
+      layout: function(make, view) {
+        make.bottom.inset(0)
+        make.centerX.equalTo(view.super)
+        make.height.equalTo(25)
+        make.width.equalTo(view.super)
+      }
+    },{
+      type: "image",
+      props: {
+        id: "icon",
+        bgcolor: $color("clear"),
+        smoothRadius: 3,
+        size: $size(20, 20),
+      },
+      layout: function(make, view) {
+        make.top.inset(9)
+        make.centerX.equalTo(view.super)
+        make.size.equalTo($size(20, 20))
+      }
+    })
+  } else if(showMode == 1) {
+    template.push({
+      type: "blur",
+      props: {
+        circular: true,
+        style: 1 // 0 ~ 5 调整背景的颜色程度
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.size.equalTo($size(40, 40))
+      },
+    },{
+      type: "image",
+      props: {
+        id: "icon",
+        bgcolor: $color("clear"),
+        smoothRadius: 3,
+        size: $size(20, 20),
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.size.equalTo($size(20, 20))
+      }
+    })
+  } else if(showMode == 2) {
+    let bgcolor = randomColor()
+    template.push({
+      type: "label",
+      props: {
+        id: "title",
+        textColor: $color("black"),
+        bgcolor: $color("clear"),
+        font: $font(13),
+        align: $align.center,
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.height.equalTo(25)
+        make.width.equalTo(view.super)
+      }
+    },{
+      type: "view",
+      props: {
+        bgcolor: bgcolor,
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.height.equalTo(1)
+        make.width.equalTo(30)
+        make.top.equalTo($("title").bottom).inset(1)
+      }
+    },{
+      type: "view",
+      props: {
+        bgcolor: bgcolor,
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.height.equalTo(1)
+        make.width.equalTo(30)
+        make.bottom.equalTo($("title").top).inset(1)
+      }
+    })
+  }
+  return template
+}
+
 function genRowsView(reorder, columns) {
   let view = {
     type: "matrix",
@@ -467,45 +516,7 @@ function genRowsView(reorder, columns) {
       itemHeight: 50, //图标到字之间得距离
       spacing: 3, //每个边框与边框之间得距离
       reorder: reorder,
-      template: [{
-          type: "blur",
-          props: {
-            radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-            style: 1 // 0 ~ 5 调整背景的颜色程度
-          },
-          layout: $layout.fill,
-        },
-        {
-          type: "label",
-          props: {
-            id: "title",
-            textColor: $color("black"),
-            bgcolor: $color("clear"),
-            font: $font(13),
-            align: $align.center,
-          },
-          layout(make, view) {
-            make.bottom.inset(0)
-            make.centerX.equalTo(view.super)
-            make.height.equalTo(25)
-            make.width.equalTo(view.super)
-          }
-        },
-        {
-          type: "image",
-          props: {
-            id: "icon",
-            bgcolor: $color("clear"),
-            radius: 3,
-            size: $size(20, 20),
-          },
-          layout(make, view) {
-            make.top.inset(9)
-            make.centerX.equalTo(view.super)
-            make.size.equalTo($size(20, 20))
-          }
-        },
-      ],
+      template: genTemplate(),
       data: getCache("localItems", [])
     },
     layout: $layout.fill,
@@ -941,7 +952,7 @@ function genCloudView() {
             props: {
               id: "icon",
               bgcolor: $color("clear"),
-              radius: 3,
+              smoothRadius: 3,
               size: $size(20, 20)
             },
             layout(make, view) {
@@ -985,7 +996,7 @@ function genCloudView() {
 }
 
 function searchItems(text) {
-  if(text == "" || text.length <= 0) {
+  if(text === "" || text.length <= 0) {
     $("rowsCloudShow").data = getCache("cloudItems", [])
   } else {
     $text.tokenize({
@@ -1107,7 +1118,7 @@ function genSettingView() {
       {
         type: "stepper",
         props: {
-          max: 6,
+          max: 10,
           min: 2,
           value: getCache("columns", 4),
         },
@@ -1135,6 +1146,70 @@ function genSettingView() {
           make.centerY.equalTo(view.super)
         }
       }
+    ],
+    layout: $layout.fill
+  }
+
+  const tabShowMode = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          id: "tabShowMode",
+          text: "显示模式",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "view",
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+          make.height.equalTo(view.super)
+          make.width.equalTo(view.super).multipliedBy(0.5)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.menu({
+              items: ["图文模式", "仅图标", "仅文字"],
+              handler: function(title, idx) {
+                $cache.set("showMode", idx)
+                $("tabShowModeDetail").text = getShowModeText()
+                $("rowsShow").remove()
+                $("rowsShowParent").add(genRowsView($("reorderButton").info, getCache("columns", 4)))
+              }
+            })
+          }
+        },
+        views: [{
+          type: "label",
+          props: {
+            align: $align.center,
+            text: ">",
+          },
+          layout: function(make, view) {
+            make.right.inset(0)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        },{
+          type: "label",
+          props: {
+            id: "tabShowModeDetail",
+            text: getShowModeText(),
+            align: $align.right,
+          },
+          layout: function(make, view) {
+            make.right.equalTo(view.prev.left).inset(5)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        },]
+      },
+      
     ],
     layout: $layout.fill
   }
@@ -1207,7 +1282,7 @@ function genSettingView() {
         template: feedBackTemplate,
         data: [{
           title: "功能",
-          rows: [tabSetColumns],
+          rows: [tabSetColumns, tabShowMode],
         },
         {
           title: "关于",
@@ -1246,6 +1321,15 @@ function genSettingView() {
   }
   requireInstallNumbers()
   return view
+}
+
+function getShowModeText() {
+  let mode = getCache("showMode", 0)
+  switch(mode) {
+    case 0: return "图文模式"
+    case 1: return "仅图标"
+    case 2: return "仅文字"
+  }
 }
 
 function share() {
@@ -1378,7 +1462,7 @@ function setupMyUpView() {
             props: {
               id: "icon",
               bgcolor: $color("clear"),
-              radius: 3,
+              smoothRadius: 3,
               size: $size(20, 20),
             },
             layout(make, view) {
@@ -1644,7 +1728,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
           props: {
             id: "icon",
             bgcolor: $color("clear"),
-            radius: 3,
+            smoothRadius: 3,
             size: $size(20, 20),
             icon: $icon("008", $color("gray"), $size(20, 20)),
           },
@@ -1834,7 +1918,7 @@ function haveExisted(url) {
   let cloudItems = getCache("cloudItems", [])
   let result = false
   for(let i = 0; i < cloudItems.length; i++) {
-    if(cloudItems[i].url.toLowerCase().indexOf(url.toLowerCase()) >= 0) {
+    if(cloudItems[i].url.toLowerCase() === url.toLowerCase()) {
       result = true
     }
   }
@@ -1862,7 +1946,7 @@ function verifyStateSet(isSuccess) {
 }
 
 function getHintText() {
-  let textArray = ["右滑可退出脚本", "长按图标可弹出菜单", "长按删除按钮可清空", "长按可编辑本地启动器", "上传的启动器也可编辑"]
+  let textArray = ["右滑可退出脚本", "长按删除按钮可清空", "长按可编辑本地启动器", "上传的启动器也可编辑", "有多种显示模式可选"]
   return textArray[Math.floor(Math.random()*textArray.length)]
 }
 
