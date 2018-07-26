@@ -1,16 +1,15 @@
 /**
- * @version 3.1
+ * @version 3.2
  * @author Liu Guo
- * @date 2018.7.25
+ * @date 2018.7.26
  * @brief
- *   1. 精心设计的三种显示模式，可在设置中改变
- *   2. 启动器的透明效果重新回来了
+ *   1. 添加启动器透明背景开关
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.1
+let appVersion = 3.2
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -117,20 +116,23 @@ $app.listen({
 
 function setupTodayView() {
   let lastOffset = 0
-  let alpha = 1
-  $delay(0.6, function(){
-    let timer = $timer.schedule({
-      interval: 0.01,
-      handler: function() {
-        if(alpha > 0) {
-          $ui.vc.runtimeValue().$view().$setBackgroundColor($rgba(255, 255, 255, alpha))
-          alpha -= 0.05
-        } else {
-          timer.invalidate()
+  if(getCache("backgroundTranparent", true)) {
+    let alpha = 1
+    $delay(0.6, function(){
+      let timer = $timer.schedule({
+        interval: 0.01,
+        handler: function() {
+          if(alpha > 0) {
+            $ui.vc.runtimeValue().$view().$setBackgroundColor($rgba(255, 255, 255, alpha))
+            alpha -= 0.05
+          } else {
+            timer.invalidate()
+          }
         }
-      }
+      })
     })
-  })
+  }
+  
   $ui.render({
     props: {
       title: "Launch Center",
@@ -1214,6 +1216,42 @@ function genSettingView() {
     layout: $layout.fill
   }
 
+  const tabBackgroundTranparent = {
+    type: "view",
+    props: {
+
+    },
+    views: [{
+        type: "label",
+        props: {
+          id: "tabBackgroundTranparent",
+          text: "JSBox 启动器透明背景",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "switch",
+        props: {
+          id: "tabBackgroundTranparentSwitch",
+          on: getCache("backgroundTranparent", true),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+              $cache.set("backgroundTranparent", sender.on)
+          }
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
   let array = [{
     templateTitle: {
       text : "更新日志",
@@ -1282,7 +1320,7 @@ function genSettingView() {
         template: feedBackTemplate,
         data: [{
           title: "功能",
-          rows: [tabSetColumns, tabShowMode],
+          rows: [tabSetColumns, tabShowMode, tabBackgroundTranparent],
         },
         {
           title: "关于",
