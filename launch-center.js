@@ -1,15 +1,17 @@
 /**
- * @version 3.2
+ * @version 3.3
  * @author Liu Guo
- * @date 2018.7.26
+ * @date 2018.7.27
  * @brief
- *   1. 添加启动器透明背景开关
+ *   1. 优化只有一行启动器的显示
+ *   2. 云库现在将按更新时间顺序显示
+ *   3. 添加云库新增提示
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.2
+let appVersion = 3.3
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -37,9 +39,6 @@ const mIcon = [
 ]
 
 uploadInstall()
-if (needCheckup()) {
-  checkupVersion()
-}
 if ($app.env == $env.today) {
   if($app.widgetIndex == -1) {
     setupTodayView()
@@ -49,6 +48,9 @@ if ($app.env == $env.today) {
   }
 } else {
   setupMainView()
+  if (needCheckup()) {
+    checkupVersion()
+  }
   $delay(0, function(){
     let view = $("gradientParent")
     let hintText = $("hintText")
@@ -132,6 +134,9 @@ function setupTodayView() {
       })
     })
   }
+  let items = getCache("localItems", [])
+  let columns = getCache("columns", 4)
+  let itemHeight = (items.length <= columns)?(200):50
   
   $ui.render({
     props: {
@@ -163,12 +168,12 @@ function setupTodayView() {
       type: "matrix",
       props: {
         id: "rowsShow",
-        columns: getCache("columns", 4), //横行个数
-        itemHeight: 50, //图标到字之间得距离
+        columns: columns, //横行个数
+        itemHeight: itemHeight, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         bgcolor: $color("clear"),
         template: genTemplate(),
-        data: getCache("localItems", [])
+        data: items,
       },
       layout: function(make, view) {
         make.width.equalTo(view.super)
@@ -182,13 +187,16 @@ function setupTodayView() {
           $app.openURL(data.url)
         },
       },
-      views: []
     }]
   })
 }
 
 function setupWidgetView() {
-  $ui.render({
+  let items = getCache("localItems", [])
+  let columns = getCache("columns", 4)
+  let height = 100
+  let itemHeight = (items.length <= columns)?(height):50
+  let view = {
     props: {
       title: "Launch Center",
     },
@@ -196,11 +204,11 @@ function setupWidgetView() {
       type: "matrix",
       props: {
         id: "rowsShow",
-        columns: getCache("columns", 4), //横行个数
-        itemHeight: 50, //图标到字之间得距离
+        columns: columns, //横行个数
+        itemHeight: itemHeight, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         template: genTemplate(),
-        data: getCache("localItems", [])
+        data: items,
       },
       layout: $layout.fill,
       events: {
@@ -210,7 +218,8 @@ function setupWidgetView() {
         }
       }
     }]
-  })
+  }
+  $ui.render(view)
 }
 
 function randomColor() {
@@ -447,7 +456,7 @@ function genTemplate() {
       type: "blur",
       props: {
         circular: true,
-        style: 1 // 0 ~ 5 调整背景的颜色程度
+        style: 1, // 0 ~ 5 调整背景的颜色程度
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
@@ -919,52 +928,9 @@ function genCloudView() {
       views: [searchBar]
     },
     {
-      type: "matrix",
+      type: "view",
       props: {
-        id: "rowsCloudShow",
-        columns: 4, //横行个数
-        itemHeight: 50, //图标到字之间得距离
-        spacing: 3, //每个边框与边框之间得距离
-        template: [{
-            type: "blur",
-            props: {
-              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-              style: 1 // 0 ~ 5 调整背景的颜色程度
-            },
-            layout: $layout.fill
-          },
-          {
-            type: "label",
-            props: {
-              id: "title",
-              textColor: $color("black"),
-              bgcolor: $color("clear"),
-              font: $font(13),
-              align: $align.center,
-            },
-            layout(make, view) {
-              make.bottom.inset(0)
-              make.centerX.equalTo(view.super)
-              make.height.equalTo(25)
-              make.width.equalTo(view.super)
-            }
-          },
-          {
-            type: "image",
-            props: {
-              id: "icon",
-              bgcolor: $color("clear"),
-              smoothRadius: 3,
-              size: $size(20, 20)
-            },
-            layout(make, view) {
-              make.top.inset(9)
-              make.centerX.equalTo(view.super)
-              make.size.equalTo($size(20,20))
-            }
-          }
-        ],
-        data: getCache("cloudItems", []),
+        id: "rowsCloudShowParent",
       },
       layout: function(make, view) {
         make.width.equalTo(view.super)
@@ -972,25 +938,75 @@ function genCloudView() {
         make.bottom.inset(5)
         make.centerX.equalTo(view.super)
       },
-      events: {
-        didSelect(sender, indexPath, data) {
-          addToLocal(sender, indexPath)
-        },
-        pulled: function(sender) {
-          requireItems()
-        },
-        didLongPress: function(sender, indexPath, data) {
-          $device.taptic(2)
-          $ui.menu({
-            items: ["添加到本地"],
-            handler: function(title, idx) {
-              if(idx == 0) {
-                addToLocal(sender, indexPath)
+      views: [{
+        type: "matrix",
+        props: {
+          id: "rowsCloudShow",
+          columns: 4, //横行个数
+          itemHeight: 50, //图标到字之间得距离
+          spacing: 3, //每个边框与边框之间得距离
+          template: [{
+              type: "blur",
+              props: {
+                radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+                style: 1 // 0 ~ 5 调整背景的颜色程度
+              },
+              layout: $layout.fill
+            },
+            {
+              type: "label",
+              props: {
+                id: "title",
+                textColor: $color("black"),
+                bgcolor: $color("clear"),
+                font: $font(13),
+                align: $align.center,
+              },
+              layout(make, view) {
+                make.bottom.inset(0)
+                make.centerX.equalTo(view.super)
+                make.height.equalTo(25)
+                make.width.equalTo(view.super)
+              }
+            },
+            {
+              type: "image",
+              props: {
+                id: "icon",
+                bgcolor: $color("clear"),
+                smoothRadius: 3,
+                size: $size(20, 20)
+              },
+              layout(make, view) {
+                make.top.inset(9)
+                make.centerX.equalTo(view.super)
+                make.size.equalTo($size(20,20))
               }
             }
-          })
+          ],
+          data: getCache("cloudItems", []),
+        },
+        layout: $layout.fill,
+        events: {
+          didSelect(sender, indexPath, data) {
+            addToLocal(sender, indexPath)
+          },
+          pulled: function(sender) {
+            requireItems()
+          },
+          didLongPress: function(sender, indexPath, data) {
+            $device.taptic(2)
+            $ui.menu({
+              items: ["添加到本地"],
+              handler: function(title, idx) {
+                if(idx == 0) {
+                  addToLocal(sender, indexPath)
+                }
+              }
+            })
+          }
         }
-      }
+      }]
     },],
   }
   requireItems()
@@ -1158,7 +1174,7 @@ function genSettingView() {
         type: "label",
         props: {
           id: "tabShowMode",
-          text: "显示模式",
+          text: "显示样式",
         },
         layout: function(make, view) {
           make.left.inset(15)
@@ -1984,7 +2000,7 @@ function verifyStateSet(isSuccess) {
 }
 
 function getHintText() {
-  let textArray = ["右滑可退出脚本", "长按删除按钮可清空", "长按可编辑本地启动器", "上传的启动器也可编辑", "有多种显示模式可选"]
+  let textArray = ["右滑可退出脚本", "长按删除按钮可清空", "长按可编辑本地启动器", "上传的启动器也可编辑", "有多种显示样式可选"]
   return textArray[Math.floor(Math.random()*textArray.length)]
 }
 
@@ -2663,7 +2679,7 @@ function requireRewardNumber() {
 function requireItems() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000",
+    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2671,6 +2687,7 @@ function requireItems() {
       "X-LC-Key": appKey,
     },
     handler: function(resp) {
+      let view = $("rowsCloudShow")
       let data = resp.data.results
       if (data != undefined) {
         let array = []
@@ -2685,14 +2702,64 @@ function requireItems() {
             url: data[i].url,
           })
         }
-        $("rowsCloudShow").data = array
-        $("rowsCloudShow").endRefreshing()
+        view.data = array
+        view.endRefreshing()
+        let cloudItems = getCache("cloudItems", [])
+        if(array.length > cloudItems.length) {
+          showFoundNewItems($("rowsCloudShowParent"), array.length - cloudItems.length)
+        }
         $cache.set("cloudItems", array)
       } else {
-        $("rowsCloudShow").endRefreshing()
+        view.endRefreshing()
       }
     }
   })
+}
+
+function showFoundNewItems(view, number) {
+  let showView = {
+    type: "label",
+    props: {
+      id: "foundNew",
+      text: " 发现 " + number + " 个新启动器 ",
+      bgcolor: $color("black"),
+      textColor: $color("white"),
+      font: $font(15),
+      radius: 5,
+      alpha: 0,
+    },
+    layout: function(make, view) {
+      make.centerX.equalTo(view.super)
+      make.top.inset(20)
+    }
+  }
+  if($("foundNew") != undefined) {
+    $("foundNew").remove()
+  }
+  view.add(showView)
+  $ui.animate({
+    duration: 0.5,
+    animation: function() {
+      $("foundNew").alpha = 1.0
+    },
+    completion: function() {
+      $delay(2, function() {
+        $ui.animate({
+          duration: 0.5,
+          animation: function() {
+            if($("foundNew") != undefined) {
+              $("foundNew").alpha = 0.0
+            }
+          },
+          completion: function() {
+            if($("foundNew") != undefined) {
+              $("foundNew").remove()
+            }
+          }
+        });
+      })
+    }
+  });
 }
 
 function requireMyItems() {
