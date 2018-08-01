@@ -1,17 +1,16 @@
 /**
- * @version 3.3
+ * @version 3.4
  * @author Liu Guo
- * @date 2018.7.27
+ * @date 2018.8.1
  * @brief
- *   1. 优化只有一行启动器的显示
- *   2. 云库现在将按更新时间顺序显示
- *   3. 添加云库新增提示
+ *   1. 完美支持透明背景的png图片上传
+ *   2. 优化增加提示动画
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.3
+let appVersion = 3.4
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -1582,6 +1581,7 @@ function setupMyUpView() {
 }
 
 function setupUploadView(action, title, icon, url, objectId, indexPath) {
+  let fileName = ""
   let isIconRevised = false
   let actionText = "  开始上传  "
   switch(action) {
@@ -1663,13 +1663,13 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                                   message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
                                 })
                               } else {
-                                uploadSM(action, $("chooseButton").info)
+                                uploadSM(action, $("chooseButton").info, undefined, undefined, fileName)
                               }
                             } else if(action == "renew"){
                               if(isIconRevised == false) {
                                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
                               } else {
-                                uploadSM(action, $("chooseButton").info, objectId)
+                                uploadSM(action, $("chooseButton").info, objectId, undefined, fileName)
                               }
                             }
                           }
@@ -1700,19 +1700,19 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                   message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
                 })
               } else {
-                uploadSM(action, $("chooseButton").info)
+                uploadSM(action, $("chooseButton").info, undefined, undefined, fileName)
               }
             } else if(action == "renew"){
               if(isIconRevised == false) {
                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
               } else {
-                uploadSM(action, $("chooseButton").info, objectId)
+                uploadSM(action, $("chooseButton").info, objectId, undefined, fileName)
               }
             } else if(action == "edit") {
               if(isIconRevised == false) {
                 updateToLocal($("rowsShow"), indexPath, $("titleInput").text, icon, $("schemeInput").text)
               } else {
-                uploadSM(action, $("chooseButton").info, undefined, indexPath)
+                uploadSM(action, $("chooseButton").info, undefined, indexPath, fileName)
               }
               $ui.pop()
             }
@@ -1845,6 +1845,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
         props: {
           id: "chooseButton",
           title: "  选择图片  ",
+          icon: $icon("014", $color("#A24A11"), $size(16, 16)),
           bgcolor: $color("clear"),
           titleColor: $color("#A24A11"),
           borderColor: $color("#A24A11"),
@@ -1854,23 +1855,27 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo($("iconLabel").bottom).inset(10)
-          make.size.equalTo($size(100, 32))
+          make.size.equalTo($size(150, 32))
         },
         events: {
           tapped: function(sender) {
             $photo.pick({
               format: "data",
               handler: function(resp) {
-                let mimeType = resp.data.info.mimeType
-                let cutedIcon = cutIcon(resp.data.image)
-                if (mimeType.indexOf("png") >= 0) {
-                  sender.info = cutedIcon.png
-                  $("icon").data = cutedIcon.png
-                } else {
-                  sender.info = cutedIcon.jpg(1.0)
-                  $("icon").data = cutedIcon.jpg(1.0)
+                if(resp.data != undefined) {
+                  let mimeType = resp.data.info.mimeType
+                  let cutedIcon = cutIcon(resp.data.image)
+                  if (mimeType.indexOf("png") >= 0) {
+                    fileName = "1.png"
+                    sender.info = cutedIcon.png
+                    $("icon").data = cutedIcon.png
+                  } else {
+                    fileName = "1.jpg"
+                    sender.info = cutedIcon.jpg(1.0)
+                    $("icon").data = cutedIcon.jpg(1.0)
+                  }
+                  isIconRevised = true
                 }
-                isIconRevised = true
               }
             })
           }
@@ -2000,7 +2005,7 @@ function verifyStateSet(isSuccess) {
 }
 
 function getHintText() {
-  let textArray = ["右滑可退出脚本", "长按删除按钮可清空", "长按可编辑本地启动器", "上传的启动器也可编辑", "有多种显示样式可选"]
+  let textArray = ["右滑可退出脚本", "长按删除按钮可清空", "可以上传透明背景的图标哦"]
   return textArray[Math.floor(Math.random()*textArray.length)]
 }
 
@@ -2730,22 +2735,23 @@ function showFoundNewItems(view, number) {
     },
     layout: function(make, view) {
       make.centerX.equalTo(view.super)
-      make.top.inset(20)
+      make.top.inset(0)
     }
   }
   if($("foundNew") != undefined) {
     $("foundNew").remove()
   }
   view.add(showView)
-  $ui.animate({
-    duration: 0.5,
-    animation: function() {
-      $("foundNew").alpha = 1.0
-    },
-    completion: function() {
-      $delay(2, function() {
+  $delay(0.1, function(){
+    $ui.animate({
+      duration: 0.5,
+      animation: function() {
+        $("foundNew").alpha = 1.0
+      },
+      completion: function() {
         $ui.animate({
           duration: 0.5,
+          delay: 3,
           animation: function() {
             if($("foundNew") != undefined) {
               $("foundNew").alpha = 0.0
@@ -2756,10 +2762,11 @@ function showFoundNewItems(view, number) {
               $("foundNew").remove()
             }
           }
-        });
-      })
-    }
-  });
+        })
+      }
+    })
+    $("foundNew").animator.moveY(20).easeIn.thenAfter(0.5).moveY(-20).easeIn.wait(3).animate(0.5)
+  })
 }
 
 function requireMyItems() {
@@ -2990,7 +2997,8 @@ function cutIcon(image) {
     type: "image",
     props: {
       image: image,
-      frame: $rect(0, 0, canvasSize, canvasSize)
+      frame: $rect(0, 0, canvasSize, canvasSize),
+      bgcolor: $color("clear"),
     }
   })
   canvas.frame = $rect(0, 0, canvasSize, canvasSize)
@@ -2998,13 +3006,13 @@ function cutIcon(image) {
   return snapshot
 }
 
-function uploadSM(action, pic, objectId, indexPath) {
+function uploadSM(action, pic, objectId, indexPath, fileName) {
   if(action != "edit") {
     if (typeof(pic) != "undefined") {
       $ui.loading(true)
       $http.upload({
         url: "https://sm.ms/api/upload",
-        files: [{ "data": pic, "name": "smfile" }],
+        files: [{ "data": pic, "name": "smfile", "filename": fileName}],
         handler: function(resp) {
           $ui.loading(false)
           var data = resp.data.data
@@ -3017,7 +3025,7 @@ function uploadSM(action, pic, objectId, indexPath) {
       $ui.loading(true)
       $http.upload({
         url: "https://sm.ms/api/upload",
-        files: [{ "data": pic, "name": "smfile" }],
+        files: [{ "data": pic, "name": "smfile", "filename": fileName}],
         handler: function(resp) {
           $ui.loading(false)
           var data = resp.data.data
