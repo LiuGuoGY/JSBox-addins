@@ -1,19 +1,21 @@
 /**
- * @version 3.4
+ * @version 3.5
  * @author Liu Guo
- * @date 2018.8.1
+ * @date 2018.8.3
  * @brief
- *   1. 完美支持透明背景的png图片上传
- *   2. 优化增加提示动画
+ *   1. 新增本地重复添加检测
+ *   2. 新增上传时的进度条显示
+ *   3. 使用TinyPNG压缩上传图片
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.4
+let appVersion = 3.5
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
+let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
 let resumeAction = 0
 
@@ -219,10 +221,6 @@ function setupWidgetView() {
     }]
   }
   $ui.render(view)
-}
-
-function randomColor() {
-  return colors[Math.floor(Math.random()*colors.length)]
 }
 
 let contentViews = ["localView", "cloudView", "settingView"]
@@ -475,7 +473,7 @@ function genTemplate() {
       }
     })
   } else if(showMode == 2) {
-    let bgcolor = randomColor()
+    let bgcolor = randomValue(colors)
     template.push({
       type: "label",
       props: {
@@ -1038,18 +1036,29 @@ function searchItems(text) {
 function addToLocal(sender, indexPath) {
   let array = getCache("localItems", [])
   let item = sender.object(indexPath)
-  array.push({
-    title: {
-      text: item.title.text
-    },
-    icon: {
-      src: item.icon.src
-    },
-    url: item.url
-  })
-  $cache.set("localItems", array)
-  $ui.toast("添加成功", 0.5)
-  $("rowsShow").data = getCache("localItems", [])
+  let isExist = false
+  for(let i = 0; i < array.length; i++) {
+    if(item.url === array[i].url) {
+      isExist = true
+    }
+  }
+  if(isExist === false) {
+    array.push({
+      title: {
+        text: item.title.text
+      },
+      icon: {
+        src: item.icon.src
+      },
+      url: item.url
+    })
+    $cache.set("localItems", array)
+    $ui.toast("添加成功", 0.5)
+    $("rowsShow").data = getCache("localItems", [])
+  } else {
+    $ui.toast("本地已存在")
+  }
+  
 }
 
 function updateToLocal(sender, indexPath, title, icon, url) {
@@ -1462,7 +1471,7 @@ function setupMyUpView() {
       },
       layout: function(make, view) {
         make.top.inset(30)
-        make.left.inset(10)
+        make.left.inset(20)
         make.width.equalTo(50)
       },
       events: {
@@ -1627,6 +1636,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
         icon: $icon("049", $color("#1B9713"), $size(20, 20)),
         borderColor: $color("#1B9713"),
         borderWidth: 1,
+        info: {isfinish: false}
       },
       layout: function(make, view) {
         make.left.right.inset(20)
@@ -1663,13 +1673,15 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                                   message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
                                 })
                               } else {
-                                uploadSM(action, $("chooseButton").info, undefined, undefined, fileName)
+                                $("uploadItemView").add(genProgress(sender))
+                                uploadTinyPng(action, $("chooseButton").info, undefined, undefined, fileName)
                               }
                             } else if(action == "renew"){
                               if(isIconRevised == false) {
                                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
                               } else {
-                                uploadSM(action, $("chooseButton").info, objectId, undefined, fileName)
+                                $("uploadItemView").add(genProgress(sender))
+                                uploadTinyPng(action, $("chooseButton").info, objectId, undefined, fileName)
                               }
                             }
                           }
@@ -1700,13 +1712,15 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
                   message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
                 })
               } else {
-                uploadSM(action, $("chooseButton").info, undefined, undefined, fileName)
+                $("uploadItemView").add(genProgress(sender))
+                uploadTinyPng(action, $("chooseButton").info, undefined, undefined, fileName)
               }
             } else if(action == "renew"){
               if(isIconRevised == false) {
                 uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
               } else {
-                uploadSM(action, $("chooseButton").info, objectId, undefined, fileName)
+                $("uploadItemView").add(genProgress(sender))
+                uploadTinyPng(action, $("chooseButton").info, objectId, undefined, fileName)
               }
             } else if(action == "edit") {
               if(isIconRevised == false) {
@@ -1971,6 +1985,51 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
   if(action != "upload") {
     verifyStateSet(true)
   }
+}
+
+function genProgress(baseView) {
+  if($("progress") != undefined) {
+    $("progress").super.remove()
+  }
+  let progress = {
+    type: "gradient",
+    props: {
+      colors: colors,
+      locations: [0, 0.15, 0.3, 0.45, 0.6, 0.75, 1],
+      startPoint: $point(0, 0.5),
+      endPoint: $point(1, 0.5),
+    },
+    layout: function(make, view) {
+      make.height.equalTo(2)
+      make.left.right.inset(20)
+      make.bottom.equalTo(baseView.top).inset(8)
+      make.centerX.equalTo(view.super)
+    },
+    views: [{
+      type: "progress",
+      props: {
+        id: "progress",
+        value: 0,
+        progressColor: $color("darkGray"),
+        trackColor: $color("clear"),
+      },
+      layout: $layout.fill,
+    }]
+  }
+  let progressTimer = $timer.schedule({
+    interval: 0.05,
+    handler: function() {
+      let view = $("progress")
+      if(view != undefined) {
+        if(view.value < 0.8 && $("cloudButton").info.isfinish == false) {
+          view.value += 0.001
+        } else {
+          progressTimer.invalidate()
+        }
+      }
+    }
+  })
+  return progress
 }
 
 function haveExisted(url) {
@@ -2684,7 +2743,7 @@ function requireRewardNumber() {
 function requireItems() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt",
+    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt&keys=-deviceToken,-size,-objectId",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2862,8 +2921,31 @@ function uploadItem(title, icon, url, size, deviceToken, objectId) {
     },
     body: json,
     handler: function(resp) {
-      $ui.toast("上传成功")
-      $ui.pop()
+      $("cloudButton").info = {isfinish: true}
+      let view = $("progress")
+      if(view != undefined) {
+        let finishTimer = $timer.schedule({
+          interval: 0.001,
+          handler: function() {
+            if(view != undefined) {
+              if(view.value < 1) {
+                view.value += 0.001
+              } else {
+                finishTimer.invalidate()
+                $ui.toast("上传成功")
+                $delay(0.5, function() {
+                  $ui.pop()
+                })
+              }
+            }
+          }
+        });
+      } else {
+        $ui.toast("上传成功")
+        $delay(0.5, function() {
+          $ui.pop()
+        })
+      }
     }
   })
 }
@@ -3016,7 +3098,11 @@ function uploadSM(action, pic, objectId, indexPath, fileName) {
         handler: function(resp) {
           $ui.loading(false)
           var data = resp.data.data
-          uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+          if(action == "renew") {
+            uploadItem($("title").text, data.url, $("schemeInput").text, data.size, undefined, objectId)
+          } else {
+            uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+          }
         }
       })
     }
@@ -3034,7 +3120,38 @@ function uploadSM(action, pic, objectId, indexPath, fileName) {
       })
     }
   }
-  
+}
+
+function uploadTinyPng(action, pic, objectId, indexPath, fileName) {
+  $ui.toast("压缩上传中，请耐心等候...", 3)
+  $http.request({
+    method: "POST",
+    url: "https://api.tinify.com/shrink",
+    header: {
+      Authorization: "Basic " + $text.base64Encode("api:" + randomValue(apiKeys)),
+    },
+    body: pic,
+    handler: function (resp) {
+      let response = resp.response;
+      if (response.statusCode === 201 || response.statusCode === 200) {
+        let compressedImageUrl = response.headers["Location"]
+        $http.download({
+          url: compressedImageUrl,
+          handler: function (resp_) {
+            if (resp_.data) {
+              imageData = resp_.data
+              uploadSM(action, imageData, objectId, indexPath, fileName)
+            }
+          }
+        })
+      }
+    }
+  })
+}
+
+function randomValue(object) {
+  let x = Math.floor(Math.random()*object.length)
+  return object[x]
 }
 
 function sendFeedBack(text, contact) {
