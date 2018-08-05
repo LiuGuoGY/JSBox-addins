@@ -1,17 +1,16 @@
 /**
- * @version 3.5
+ * @version 3.6
  * @author Liu Guo
- * @date 2018.8.3
+ * @date 2018.8.6
  * @brief
- *   1. 新增本地重复添加检测
- *   2. 新增上传时的进度条显示
- *   3. 使用TinyPNG压缩上传图片
+ *   1. 美化提示条
+ *   2. 其他UI优化和改进
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.5
+let appVersion = 3.6
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -23,6 +22,8 @@ const mColor = {
   gray: "#a2a2a2",
   blue: "#3478f7",
   black: "#303032",
+  green: "#27AE60",
+  red: "#E74C3C",
 }
 const mIcon = [
   {
@@ -230,6 +231,7 @@ function setupMainView() {
   $app.keyboardToolbarEnabled = false
   $ui.render({
     props: {
+      id: "mainView",
       title: "Launch Center",
       navBarHidden: true,
       statusBarStyle: 0,
@@ -439,7 +441,7 @@ function genTemplate() {
       props: {
         id: "icon",
         bgcolor: $color("clear"),
-        smoothRadius: 3,
+        smoothRadius: 5,
         size: $size(20, 20),
       },
       layout: function(make, view) {
@@ -464,7 +466,7 @@ function genTemplate() {
       props: {
         id: "icon",
         bgcolor: $color("clear"),
-        smoothRadius: 3,
+        smoothRadius: 5,
         size: $size(20, 20),
       },
       layout: function(make, view) {
@@ -542,7 +544,7 @@ function genRowsView(reorder, columns) {
               handler: function() {
                 if(resumeAction == 2) {
                   resumeAction = 0
-                  $ui.toast("未安装对应APP")
+                  showToastView($("mainView"), mColor.red, "未安装对应APP", 2)
                 }
               }
             })
@@ -566,7 +568,7 @@ function genRowsView(reorder, columns) {
           handler: function(title, idx) {
             if(idx == 0) {
               $clipboard.text = getCache("localItems", [])[indexPath.row].url
-              $ui.toast("复制成功")
+              showToastView($("mainView"), mColor.green, "复制成功", 1)
             } else if(idx == 1) {
               $system.makeIcon({ title: getCache("localItems", [])[indexPath.row].title.text, url: getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
             } else if(idx == 2) {
@@ -579,21 +581,6 @@ function genRowsView(reorder, columns) {
   }
   return view
 }
-
-// function getLocalItemsAndAdd() {
-//   let localItems = getCache("localItems", [])
-//   let addItem = {
-//     title: {
-//       text: "添加"
-//     },
-//     icon: {
-//       src: "https://i.loli.net/2018/07/23/5b55dc1a027dd.png"
-//     },
-//     url: ""
-//   }
-//   localItems.push(addItem)
-//   return localItems
-// }
 
 function genLocalView() {
   let view = {
@@ -820,16 +807,18 @@ function genCloudView() {
             })
           },
           didEndEditing: function(sender) {
-            $("cancel_button").updateLayout(function(make) {
-              make.size.equalTo($size(0, 35))
-            })
-            $ui.animate({
-              duration: 0.4,
-              damping: 0.8,
-              animation: function() {
-                $("cancel_button").relayout()
-              }
-            })
+            if($("cancel_button") != undefined) {
+              $("cancel_button").updateLayout(function(make) {
+                make.size.equalTo($size(0, 35))
+              })
+              $ui.animate({
+                duration: 0.4,
+                damping: 0.8,
+                animation: function() {
+                  $("cancel_button").relayout()
+                }
+              })
+            }
           },
           changed: function(sender) {
             if(sender.text.length > 0) {
@@ -971,7 +960,7 @@ function genCloudView() {
               props: {
                 id: "icon",
                 bgcolor: $color("clear"),
-                smoothRadius: 3,
+                smoothRadius: 5,
                 size: $size(20, 20)
               },
               layout(make, view) {
@@ -1028,6 +1017,9 @@ function searchItems(text) {
           }
         }
         $("rowsCloudShow").data = resultItems
+        if(resultItems.length == 0) {
+          showToastView($("mainView"), mColor.blue, "无搜索结果，试试其他词吧", 2)
+        }
       }
     })
   }
@@ -1053,12 +1045,11 @@ function addToLocal(sender, indexPath) {
       url: item.url
     })
     $cache.set("localItems", array)
-    $ui.toast("添加成功", 0.5)
+    showToastView($("mainView"), mColor.green, "添加成功", 1)
     $("rowsShow").data = getCache("localItems", [])
   } else {
-    $ui.toast("本地已存在")
+    showToastView($("mainView"), mColor.red, "本地已存在", 2)
   }
-  
 }
 
 function updateToLocal(sender, indexPath, title, icon, url) {
@@ -1399,7 +1390,7 @@ function share() {
     items: ["https://xteko.com/redir?name=Launch%20Center&url=https%3A%2F%2Fraw.githubusercontent.com%2FLiuGuoGY%2FJSBox-addins%2Fmaster%2Flaunch-center.js&icon=icon_065.png"], // 也支持 item
     handler: function(success) {
       if(success) {
-        $ui.toast("感谢您的分享！")
+        showToastView($("mainView"), mColor.blue, "感谢您的分享", 2)
       }
     }
   })
@@ -1524,7 +1515,7 @@ function setupMyUpView() {
             props: {
               id: "icon",
               bgcolor: $color("clear"),
-              smoothRadius: 3,
+              smoothRadius: 5,
               size: $size(20, 20),
             },
             layout(make, view) {
@@ -1650,7 +1641,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
       events: {
         tapped: function(sender) {
           if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
-            $ui.error("请补全信息")
+            showToastView($("uploadItemView"), mColor.red, "请补全信息", 2)
           } else if ($("verifyButton").info == false && action != "edit") {
             $ui.alert({
               title: "警告",
@@ -1796,7 +1787,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
           props: {
             id: "icon",
             bgcolor: $color("clear"),
-            smoothRadius: 3,
+            smoothRadius: 5,
             size: $size(20, 20),
             icon: $icon("008", $color("gray"), $size(20, 20)),
           },
@@ -2017,7 +2008,7 @@ function genProgress(baseView) {
     }]
   }
   let progressTimer = $timer.schedule({
-    interval: 0.05,
+    interval: 0.04,
     handler: function() {
       let view = $("progress")
       if(view != undefined) {
@@ -2770,7 +2761,7 @@ function requireItems() {
         view.endRefreshing()
         let cloudItems = getCache("cloudItems", [])
         if(array.length > cloudItems.length) {
-          showFoundNewItems($("rowsCloudShowParent"), array.length - cloudItems.length)
+          showToastView($("mainView"), mColor.blue, "发现 " + (array.length - cloudItems.length) + " 个新启动器", 3)
         }
         $cache.set("cloudItems", array)
       } else {
@@ -2780,56 +2771,117 @@ function requireItems() {
   })
 }
 
-function showFoundNewItems(view, number) {
+function showToastView(view, color, text, duration) {
+  let time = new Date().getTime()
+  let topInset = 60
+  let textSize = $text.sizeThatFits({
+    text: text,
+    width: view.width,
+    font: $font(15),
+  })
   let showView = {
-    type: "label",
+    type: "view",
     props: {
-      id: "foundNew",
-      text: " 发现 " + number + " 个新启动器 ",
-      bgcolor: $color("black"),
-      textColor: $color("white"),
-      font: $font(15),
-      radius: 5,
+      id: "toastView",
+      bgcolor: $color("clear"),
       alpha: 0,
+      info: time,
     },
     layout: function(make, view) {
       make.centerX.equalTo(view.super)
-      make.top.inset(0)
-    }
+      make.top.inset(topInset)
+      make.width.equalTo(textSize.width + 60)
+      make.height.equalTo(30)
+    },
+    views: [{
+      type: "blur",
+      props: {
+        style: 1, // 0 ~ 5
+        radius: 5,
+      },
+      layout: $layout.fill
+    },{
+      type: "image",
+      props: {
+        icon: $icon("009", $color(color), $size(16, 16)),
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.size.equalTo($size(16, 16))
+        make.left.inset(10)
+      }
+    },{
+      type: "view",
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.left.equalTo(view.prev.right).inset(0)
+        make.right.inset(10)
+        make.height.equalTo(view.super)
+      },
+      views: [{
+        type: "label",
+        props: {
+          text: text,
+          bgcolor: $color("clear"),
+          textColor: $color(mColor.black),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.center.equalTo(view.super)
+        },
+      }]
+    }]
   }
-  if($("foundNew") != undefined) {
-    $("foundNew").remove()
+  if($("toastView") != undefined) {
+    $("toastView").remove()
   }
   view.add(showView)
-  $delay(0.1, function(){
+  $delay(0.05, function(){
+    let fView = $("toastView")
+    if(fView == undefined) {
+      return 0
+    }
+    fView.updateLayout(function(make) {
+      make.top.inset(topInset + 20)
+    })
     $ui.animate({
-      duration: 0.5,
+      duration: 0.4,
       animation: function() {
-        $("foundNew").alpha = 1.0
+        fView.alpha = 1.0
+        fView.relayout()
       },
       completion: function() {
-        $ui.animate({
-          duration: 0.5,
-          delay: 3,
-          animation: function() {
-            if($("foundNew") != undefined) {
-              $("foundNew").alpha = 0.0
-            }
-          },
-          completion: function() {
-            if($("foundNew") != undefined) {
-              $("foundNew").remove()
-            }
+        $delay((duration == undefined)?3:duration, function() {
+          let fView = $("toastView")
+          if(fView == undefined) {
+            return 0
+          } else if(fView.info != time) {
+            return 0
           }
+          fView.updateLayout(function(make) {
+            make.top.inset(topInset)
+          })
+          $ui.animate({
+            duration: 0.4,
+            animation: function() {
+              fView.alpha = 0.0
+              fView.relayout()
+            },
+            completion: function() {
+              if(fView != undefined) {
+                fView.remove()
+              }
+            }
+          })
         })
       }
     })
-    $("foundNew").animator.moveY(20).easeIn.thenAfter(0.5).moveY(-20).easeIn.wait(3).animate(0.5)
   })
 }
 
 function requireMyItems() {
-  let url = "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+  let url = "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt&where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
   $http.request({
     method: "GET",
     url: encodeURI(url),
@@ -2923,16 +2975,16 @@ function uploadItem(title, icon, url, size, deviceToken, objectId) {
     handler: function(resp) {
       $("cloudButton").info = {isfinish: true}
       let view = $("progress")
+      showToastView($("uploadItemView"), mColor.green, "上传成功", 2)
       if(view != undefined) {
         let finishTimer = $timer.schedule({
           interval: 0.001,
           handler: function() {
             if(view != undefined) {
               if(view.value < 1) {
-                view.value += 0.001
+                view.value += 0.002
               } else {
                 finishTimer.invalidate()
-                $ui.toast("上传成功")
                 $delay(0.5, function() {
                   $ui.pop()
                 })
@@ -2941,7 +2993,6 @@ function uploadItem(title, icon, url, size, deviceToken, objectId) {
           }
         });
       } else {
-        $ui.toast("上传成功")
         $delay(0.5, function() {
           $ui.pop()
         })
@@ -3123,7 +3174,7 @@ function uploadSM(action, pic, objectId, indexPath, fileName) {
 }
 
 function uploadTinyPng(action, pic, objectId, indexPath, fileName) {
-  $ui.toast("压缩上传中，请耐心等候...", 3)
+  showToastView($("uploadItemView"), mColor.blue, "压缩上传中，请耐心等候", 5)
   $http.request({
     method: "POST",
     url: "https://api.tinify.com/shrink",
