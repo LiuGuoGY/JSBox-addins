@@ -1,16 +1,16 @@
 /**
- * @version 3.6
+ * @version 3.7
  * @author Liu Guo
  * @date 2018.8.6
  * @brief
- *   1. 美化提示条
- *   2. 其他UI优化和改进
+ *   1. 增加启动器中下拉关闭功能（默认打开），可在设置中关闭
+ *   2. 优化部分UI
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.6
+let appVersion = 3.7
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -119,7 +119,6 @@ $app.listen({
 })
 
 function setupTodayView() {
-  let lastOffset = 0
   if(getCache("backgroundTranparent", true)) {
     let alpha = 1
     $delay(0.6, function(){
@@ -139,14 +138,66 @@ function setupTodayView() {
   let items = getCache("localItems", [])
   let columns = getCache("columns", 4)
   let itemHeight = (items.length <= columns)?(200):50
-  
-  $ui.render({
-    props: {
-      title: "Launch Center",
-      navBarHidden: true
-    },
-    layout: $layout.fill,
-    views: [{
+
+  let showView = []
+  if(getCache("pullToClose", true)) {
+    showView = [{
+      type: "matrix",
+      props: {
+        id: "rowsShow",
+        columns: columns, //横行个数
+        itemHeight: itemHeight, //图标到字之间得距离
+        spacing: 3, //每个边框与边框之间得距离
+        bgcolor: $color("clear"),
+        template: genTemplate(),
+        data: items,
+      },
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.centerX.equalTo(view.super)
+        make.top.bottom.inset(0)
+      },
+      events: {
+        didSelect(sender, indexPath, data) {
+          $device.taptic(1)
+          $app.openURL(data.url)
+        },
+        didScroll: function(sender) {
+          if($("rowsShow").contentOffset.y < -30) {
+            if($("closeView").bgcolor === $color("clear")) {
+              $device.taptic(2)
+              $("closeView").bgcolor = randomValue(colors)
+            }
+          } else{
+            $("closeView").bgcolor = $color("clear")
+          }
+        },
+        didEndDragging: function(sender, decelerate) {
+          if($("closeView").bgcolor !== $color("clear")) {
+            $app.close()
+          }
+        }
+      },
+      views: [{
+        type: "button",
+        props: {
+          id: "closeView",
+          title: "CLOSE",
+          bgcolor: $color("clear"),
+          titleColor: $rgba(100, 100, 100, 0.4),
+          font: $font(15),
+          hidden: false,
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.top.inset(0).offset(-30)
+          make.width.equalTo(80)
+          make.height.equalTo(30)
+        },
+      }]
+    }]
+  } else {
+    showView = [{
       type: "button",
       props: {
         title: "CLOSE",
@@ -190,6 +241,16 @@ function setupTodayView() {
         },
       },
     }]
+  }
+  
+  $ui.render({
+    props: {
+      id: "todayView",
+      title: "Launch Center",
+      navBarHidden: true
+    },
+    layout: $layout.fill,
+    views: showView,
   })
 }
 
@@ -554,10 +615,6 @@ function genRowsView(reorder, columns) {
           $cache.set("localItems", $("rowsShow").data)
         }
       },
-      pulled: function(sender) {
-        $("rowsShow").data = getCache("localItems", [])
-        $("rowsShow").endRefreshing()
-      },
       reorderFinished: function(data) {
         $cache.set("localItems", $("rowsShow").data)
       },
@@ -576,7 +633,10 @@ function genRowsView(reorder, columns) {
             }
           }
         })
-      }
+      },
+      didScroll: function(sender) {
+        
+      },
     }
   }
   return view
@@ -747,8 +807,8 @@ function genCloudView() {
       },
       layout: function(make, view) {
         make.centerY.equalTo(view.super)
-        make.right.inset(0)
-        make.size.equalTo($size(0, 35))
+        make.right.inset(0).offset(55)
+        make.size.equalTo($size(55, 35))
       },
       events: {
         tapped: function(sender) {
@@ -796,7 +856,7 @@ function genCloudView() {
         events: {
           didBeginEditing: function(sender, view) {
             $("cancel_button").updateLayout(function(make) {
-              make.size.equalTo($size(55, 35))
+              make.right.inset(0).offset(0)
             })
             $ui.animate({
               duration: 0.4,
@@ -809,7 +869,7 @@ function genCloudView() {
           didEndEditing: function(sender) {
             if($("cancel_button") != undefined) {
               $("cancel_button").updateLayout(function(make) {
-                make.size.equalTo($size(0, 35))
+                make.right.inset(0).offset(55)
               })
               $ui.animate({
                 duration: 0.4,
@@ -905,9 +965,12 @@ function genCloudView() {
     },
     {
       type: "view",
+      props: {
+        clipsToBounds: true,
+      },
       layout: function(make, view) {
         make.left.inset(20)
-        make.height.equalTo(30)
+        make.height.equalTo(35)
         make.top.inset(10)
         make.right.equalTo(view.prev.left).inset(10)
       },
@@ -1267,6 +1330,42 @@ function genSettingView() {
     layout: $layout.fill
   }
 
+  const tabPullToClose = {
+    type: "view",
+    props: {
+
+    },
+    views: [{
+        type: "label",
+        props: {
+          id: "tabPullToClose",
+          text: "JSBox 启动器下拉关闭",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "switch",
+        props: {
+          id: "tabPullToCloseSwitch",
+          on: getCache("pullToClose", true),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+              $cache.set("pullToClose", sender.on)
+          }
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
   let array = [{
     templateTitle: {
       text : "更新日志",
@@ -1335,7 +1434,11 @@ function genSettingView() {
         template: feedBackTemplate,
         data: [{
           title: "功能",
-          rows: [tabSetColumns, tabShowMode, tabBackgroundTranparent],
+          rows: [tabSetColumns, tabShowMode],
+        },
+        {
+          title: "启动器",
+          rows: [tabBackgroundTranparent, tabPullToClose],
         },
         {
           title: "关于",
@@ -2785,6 +2888,7 @@ function showToastView(view, color, text, duration) {
       id: "toastView",
       bgcolor: $color("clear"),
       alpha: 0,
+      userInteractionEnabled: false,
       info: time,
     },
     layout: function(make, view) {
