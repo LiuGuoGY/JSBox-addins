@@ -1,16 +1,16 @@
 /**
- * @version 3.7
+ * @version 3.8
  * @author Liu Guo
- * @date 2018.8.6
+ * @date 2018.8.7
  * @brief
- *   1. 增加启动器中下拉关闭功能（默认打开），可在设置中关闭
+ *   1. 由于 1.26.0 商店版的 Bug ，所以下拉关闭功能默认禁用
  *   2. 优化部分UI
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.7
+let appVersion = 3.8
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -44,7 +44,11 @@ uploadInstall()
 if ($app.env == $env.today) {
   if($app.widgetIndex == -1) {
     setupTodayView()
-    $widget.height = 245
+    if(getCache("pullToClose", false)) {
+      $widget.height = 215
+    } else {
+      $widget.height = 245
+    }
   } else {
     setupWidgetView()
   }
@@ -140,7 +144,7 @@ function setupTodayView() {
   let itemHeight = (items.length <= columns)?(200):50
 
   let showView = []
-  if(getCache("pullToClose", true)) {
+  if(getCache("pullToClose", false)) {
     showView = [{
       type: "matrix",
       props: {
@@ -151,6 +155,7 @@ function setupTodayView() {
         bgcolor: $color("clear"),
         template: genTemplate(),
         data: items,
+        showsVerticalIndicator: false,
       },
       layout: function(make, view) {
         make.width.equalTo(view.super)
@@ -187,6 +192,7 @@ function setupTodayView() {
           titleColor: $rgba(100, 100, 100, 0.4),
           font: $font(15),
           hidden: false,
+          radius: 15,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -227,6 +233,7 @@ function setupTodayView() {
         bgcolor: $color("clear"),
         template: genTemplate(),
         data: items,
+        showsVerticalIndicator: false,
       },
       layout: function(make, view) {
         make.width.equalTo(view.super)
@@ -1350,7 +1357,7 @@ function genSettingView() {
         type: "switch",
         props: {
           id: "tabPullToCloseSwitch",
-          on: getCache("pullToClose", true),
+          on: getCache("pullToClose", false),
         },
         layout: function(make, view) {
           make.right.inset(15)
@@ -1358,7 +1365,10 @@ function genSettingView() {
         },
         events: {
           changed: function(sender) {
-              $cache.set("pullToClose", sender.on)
+            $cache.set("pullToClose", sender.on)
+            if(sender.on == true) {
+              showToastView($("mainView"), mColor.blue, "JSBox 1.26.0 及以下该功能不会起效", 3)
+            }
           }
         }
       }
@@ -3086,7 +3096,7 @@ function uploadItem(title, icon, url, size, deviceToken, objectId) {
           handler: function() {
             if(view != undefined) {
               if(view.value < 1) {
-                view.value += 0.002
+                view.value += 0.001
               } else {
                 finishTimer.invalidate()
                 $delay(0.5, function() {
