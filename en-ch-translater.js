@@ -1,15 +1,16 @@
 /**
- * @Version 3.8
+ * @Version 3.9
  * @author Liu Guo
- * @date 2018.7.24
+ * @date 2018.8.8
  * @brief
- *   1. 优化widget透明显示效果
+ *   1. 现在输入完成即刻翻译，无需点击翻译按钮
+ *   2. 金山翻译结果展示优化
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.8
+let appVersion = 3.9
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -419,6 +420,7 @@ function setupView() {
                 $("speechInput").hidden = true
                 // $("ocr").hidden = true
                 $("speechLan").hidden = true
+                translate(sender.text)
               },
             },
           },]
@@ -1823,7 +1825,9 @@ function analyseKData(data) {
       meanText += mess.means[i].means[j]
       meanText += "; "
     }
-    meanText += ";"
+    if (i < length - 1) {
+      meanText += "\n"
+    }
   }
   showResult(mess.key, meanText)
 }
