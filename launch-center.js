@@ -1,22 +1,24 @@
 /**
- * @version 3.8
+ * @version 3.9
  * @author Liu Guo
- * @date 2018.8.7
+ * @date 2018.8.8
  * @brief
- *   1. 由于 1.26.0 商店版的 Bug ，所以下拉关闭功能默认禁用
- *   2. 优化部分UI
+ *   1. 新增浏览器的选择项（默认Safari），用于选择打开网页启动器时使用的浏览器
+ *   2. UI优化及错误修复
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.8
+let appVersion = 3.9
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
 let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
-let resumeAction = 0
+let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
+let showMode = ["图文模式", "仅图标", "仅文字"]
+let broswers = ["Safari", "Chrome", "UC", "Firefox", "QQ", "Opera", "Quark", "iCab", "Maxthon", "Dolphin", "2345", "Alook"]
 
 const mColor = {
   gray: "#a2a2a2",
@@ -89,20 +91,18 @@ $app.listen({
         }
         resumeAction = 0
         break
-      case 2:
+      case 3:
         resumeAction = 0
         break
     }
   },
   resume: function() {
-    let nDate = new Date()
-    let sTime = getCache("stopTime", nDate.getTime())
-    let tdoa = (nDate.getTime() - sTime) / 1000
-    if (tdoa > 5) {
-      switch(resumeAction) {
-        case 2:
-        sTime = getCache("stopTime", nDate.getTime())
+    switch(resumeAction) {
+      case 2:
+        let nDate = new Date()
+        let sTime = getCache("stopTime", nDate.getTime())
         let tdoa = (nDate.getTime() - sTime) / 1000
+        $console.info(tdoa)
         if (tdoa > 5) {
           $photo.delete({
             count: 1,
@@ -115,9 +115,8 @@ $app.listen({
             }
           })
         }
+        resumeAction = 0
         break
-      }
-      resumeAction = 0
     }
   }
 })
@@ -165,7 +164,7 @@ function setupTodayView() {
       events: {
         didSelect(sender, indexPath, data) {
           $device.taptic(1)
-          $app.openURL(data.url)
+          myOpenUrl(data.url)
         },
         didScroll: function(sender) {
           if($("rowsShow").contentOffset.y < -30) {
@@ -244,7 +243,7 @@ function setupTodayView() {
       events: {
         didSelect(sender, indexPath, data) {
           $device.taptic(1)
-          $app.openURL(data.url)
+          myOpenUrl(data.url)
         },
       },
     }]
@@ -259,6 +258,15 @@ function setupTodayView() {
     layout: $layout.fill,
     views: showView,
   })
+
+  if(getCache("pullToClose") == true && !getCache("isPullToCloseToasted", false)) {
+    $cache.set("isPullToCloseToasted", true);
+    $delay(1, function(){
+      showToastView($("todayView"), mColor.blue, "下拉即可关闭 ↓")
+    })
+  }
+  
+
 }
 
 function setupWidgetView() {
@@ -284,7 +292,7 @@ function setupWidgetView() {
       events: {
         didSelect(sender, indexPath, data) {
           $device.taptic(1)
-          $app.openURL(data.url)
+          myOpenUrl(data.url)
         }
       }
     }]
@@ -604,15 +612,15 @@ function genRowsView(reorder, columns) {
         if(view == undefined || view.info == false) {
           if(data.url != "") {
             $device.taptic(1)
-            $app.openURL(data.url)
+            myOpenUrl(data.url)
             let leaveTime = new Date().getTime()
-            resumeAction = 2
+            resumeAction = 3
             $thread.background({
               delay: 0.1,
               handler: function() {
-                if(resumeAction == 2) {
+                if(resumeAction == 3) {
                   resumeAction = 0
-                  showToastView($("mainView"), mColor.red, "未安装对应APP", 2)
+                  showToastView($("mainView"), mColor.red, "未安装对应APP")
                 }
               }
             })
@@ -632,7 +640,7 @@ function genRowsView(reorder, columns) {
           handler: function(title, idx) {
             if(idx == 0) {
               $clipboard.text = getCache("localItems", [])[indexPath.row].url
-              showToastView($("mainView"), mColor.green, "复制成功", 1)
+              showToastView($("mainView"), mColor.green, "复制成功")
             } else if(idx == 1) {
               $system.makeIcon({ title: getCache("localItems", [])[indexPath.row].title.text, url: getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
             } else if(idx == 2) {
@@ -1048,15 +1056,24 @@ function genCloudView() {
             addToLocal(sender, indexPath)
           },
           pulled: function(sender) {
+            if($("search_input").text.length > 0) {
+              $("search_input").text = ""
+              $("search_hint").hidden = false
+            }
             requireItems()
           },
           didLongPress: function(sender, indexPath, data) {
             $device.taptic(2)
             $ui.menu({
-              items: ["添加到本地"],
+              items: ["添加到本地", "搜索相关项"],
               handler: function(title, idx) {
                 if(idx == 0) {
                   addToLocal(sender, indexPath)
+                } else if(idx == 1) {
+                  let text = data.url.substring(0, data.url.indexOf("://"))
+                  $("search_input").text = text
+                  $("search_hint").hidden = true
+                  searchItems(text)
                 }
               }
             })
@@ -1088,7 +1105,7 @@ function searchItems(text) {
         }
         $("rowsCloudShow").data = resultItems
         if(resultItems.length == 0) {
-          showToastView($("mainView"), mColor.blue, "无搜索结果，试试其他词吧", 2)
+          showToastView($("mainView"), mColor.blue, "无搜索结果，试试其他词吧")
         }
       }
     })
@@ -1115,10 +1132,10 @@ function addToLocal(sender, indexPath) {
       url: item.url
     })
     $cache.set("localItems", array)
-    showToastView($("mainView"), mColor.green, "添加成功", 1)
+    showToastView($("mainView"), mColor.green, "添加成功")
     $("rowsShow").data = getCache("localItems", [])
   } else {
-    showToastView($("mainView"), mColor.red, "本地已存在", 2)
+    showToastView($("mainView"), mColor.red, "本地已存在")
   }
 }
 
@@ -1261,7 +1278,7 @@ function genSettingView() {
         events: {
           tapped: function(sender) {
             $ui.menu({
-              items: ["图文模式", "仅图标", "仅文字"],
+              items: showMode,
               handler: function(title, idx) {
                 $cache.set("showMode", idx)
                 $("tabShowModeDetail").text = getShowModeText()
@@ -1301,6 +1318,68 @@ function genSettingView() {
     layout: $layout.fill
   }
 
+  const tabOpenBroswer = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          id: "tabOpenBroswer",
+          text: "启动浏览器",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "view",
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+          make.height.equalTo(view.super)
+          make.width.equalTo(view.super).multipliedBy(0.5)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.menu({
+              items: broswers,
+              handler: function(title, idx) {
+                $cache.set("openBroswer", idx)
+                $("tabOpenBroswerDetail").text = getOpenBroswer()
+              }
+            })
+          }
+        },
+        views: [{
+          type: "label",
+          props: {
+            align: $align.center,
+            text: ">",
+          },
+          layout: function(make, view) {
+            make.right.inset(0)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        },{
+          type: "label",
+          props: {
+            id: "tabOpenBroswerDetail",
+            text: getOpenBroswer(),
+            align: $align.right,
+          },
+          layout: function(make, view) {
+            make.right.equalTo(view.prev.left).inset(5)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        },]
+      },
+      
+    ],
+    layout: $layout.fill
+  }
+
   const tabBackgroundTranparent = {
     type: "view",
     props: {
@@ -1310,7 +1389,7 @@ function genSettingView() {
         type: "label",
         props: {
           id: "tabBackgroundTranparent",
-          text: "JSBox 启动器透明背景",
+          text: "透明背景",
         },
         layout: function(make, view) {
           make.left.inset(15)
@@ -1346,7 +1425,7 @@ function genSettingView() {
         type: "label",
         props: {
           id: "tabPullToClose",
-          text: "JSBox 启动器下拉关闭",
+          text: "下拉关闭",
         },
         layout: function(make, view) {
           make.left.inset(15)
@@ -1366,8 +1445,8 @@ function genSettingView() {
         events: {
           changed: function(sender) {
             $cache.set("pullToClose", sender.on)
-            if(sender.on == true) {
-              showToastView($("mainView"), mColor.blue, "JSBox 1.26.0 及以下该功能不会起效", 3)
+            if(sender.on == true && $app.info.build < 266) {
+              showToastView($("mainView"), mColor.blue, "当前JSBox版本低，该功能可能不起效")
             }
           }
         }
@@ -1444,10 +1523,10 @@ function genSettingView() {
         template: feedBackTemplate,
         data: [{
           title: "功能",
-          rows: [tabSetColumns, tabShowMode],
+          rows: [tabSetColumns, tabShowMode, tabOpenBroswer],
         },
         {
-          title: "启动器",
+          title: "JSBox 启动器",
           rows: [tabBackgroundTranparent, tabPullToClose],
         },
         {
@@ -1491,11 +1570,12 @@ function genSettingView() {
 
 function getShowModeText() {
   let mode = getCache("showMode", 0)
-  switch(mode) {
-    case 0: return "图文模式"
-    case 1: return "仅图标"
-    case 2: return "仅文字"
-  }
+  return showMode[mode]
+}
+
+function getOpenBroswer() {
+  let mode = getCache("openBroswer", 0)
+  return broswers[mode]
 }
 
 function share() {
@@ -1503,7 +1583,7 @@ function share() {
     items: ["https://xteko.com/redir?name=Launch%20Center&url=https%3A%2F%2Fraw.githubusercontent.com%2FLiuGuoGY%2FJSBox-addins%2Fmaster%2Flaunch-center.js&icon=icon_065.png"], // 也支持 item
     handler: function(success) {
       if(success) {
-        showToastView($("mainView"), mColor.blue, "感谢您的分享", 2)
+        showToastView($("mainView"), mColor.blue, "感谢您的分享")
       }
     }
   })
@@ -1649,7 +1729,7 @@ function setupMyUpView() {
       events: {
         didSelect(sender, indexPath, data) {
           if($("deleteButton").info == false) {
-            $app.openURL(data.url)
+            myOpenUrl(data.url)
           } else {
             $ui.alert({
               title: "确定删除？",
@@ -1754,7 +1834,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
       events: {
         tapped: function(sender) {
           if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
-            showToastView($("uploadItemView"), mColor.red, "请补全信息", 2)
+            showToastView($("uploadItemView"), mColor.red, "请补全信息")
           } else if ($("verifyButton").info == false && action != "edit") {
             $ui.alert({
               title: "警告",
@@ -2660,6 +2740,28 @@ function getCache(key, def) {
   }
 }
 
+function myOpenUrl(url) {
+  if(!url.startsWith("http")) {
+    $app.openURL(url)
+  } else {
+    let bNumber = getCache("openBroswer", 0)
+    if(bNumber == 0) {
+      $app.openURL(url)
+    } else if(bNumber < 11) {
+      $app.openBrowser({
+        type: 10000 + bNumber - 1,
+        url: url,
+      })
+    } else {
+      switch(bNumber) {
+        case 11: $app.openURL("alook://" + url)
+          break
+        case 12: $app.openURL("wuxiang://open?" + url)
+      }
+    }
+  }
+}
+
 function isInToday() {
   return ($app.env == $env.today) ? true : false
 }
@@ -2805,23 +2907,10 @@ function myLog(text) {
     $console.log(text)
   }
 }
-
-//myloading
-function myLoading(text) {
-  $ui.loading(text)
-}
-
 //myAlert
 function myAlert(text) {
   if ($app.env == $env.today && !getCache("showUi", true)) {
     $ui.alert(text)
-  }
-}
-
-//myToast
-function myToast(text, duration) {
-  if ($app.env == $env.today && !getCache("showUi", true)) {
-    $ui.toast(text, duration)
   }
 }
 
@@ -2874,7 +2963,7 @@ function requireItems() {
         view.endRefreshing()
         let cloudItems = getCache("cloudItems", [])
         if(array.length > cloudItems.length) {
-          showToastView($("mainView"), mColor.blue, "发现 " + (array.length - cloudItems.length) + " 个新启动器", 3)
+          showToastView($("mainView"), mColor.blue, "发现 " + (array.length - cloudItems.length) + " 个新启动器")
         }
         $cache.set("cloudItems", array)
       } else {
@@ -2886,12 +2975,15 @@ function requireItems() {
 
 function showToastView(view, color, text, duration) {
   let time = new Date().getTime()
-  let topInset = 60
+  let topInset = view.frame.height / 10
   let textSize = $text.sizeThatFits({
     text: text,
     width: view.width,
     font: $font(15),
   })
+  if(duration === undefined) {
+    duration = text.length / 5
+  }
   let showView = {
     type: "view",
     props: {
@@ -2966,7 +3058,7 @@ function showToastView(view, color, text, duration) {
         fView.relayout()
       },
       completion: function() {
-        $delay((duration == undefined)?3:duration, function() {
+        $delay(duration, function() {
           let fView = $("toastView")
           if(fView == undefined) {
             return 0
@@ -3089,7 +3181,7 @@ function uploadItem(title, icon, url, size, deviceToken, objectId) {
     handler: function(resp) {
       $("cloudButton").info = {isfinish: true}
       let view = $("progress")
-      showToastView($("uploadItemView"), mColor.green, "上传成功", 2)
+      showToastView($("uploadItemView"), mColor.green, "上传成功")
       if(view != undefined) {
         let finishTimer = $timer.schedule({
           interval: 0.001,
