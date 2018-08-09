@@ -1,16 +1,15 @@
 /**
- * @version 3.9
+ * @version 4.0
  * @author Liu Guo
- * @date 2018.8.8
+ * @date 2018.8.9
  * @brief
- *   1. 新增浏览器的选择项（默认Safari），用于选择打开网页启动器时使用的浏览器
- *   2. UI优化及错误修复
+ *   1. 上线黑名单封禁系统
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.9
+let appVersion = 4.0
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -43,38 +42,42 @@ const mIcon = [
 ]
 
 uploadInstall()
-if ($app.env == $env.today) {
-  if($app.widgetIndex == -1) {
-    setupTodayView()
-    if(getCache("pullToClose", false)) {
-      $widget.height = 215
+checkBlackList()
+
+function main() {
+  if ($app.env == $env.today) {
+    if($app.widgetIndex == -1) {
+      setupTodayView()
+      if(getCache("pullToClose", false)) {
+        $widget.height = 215
+      } else {
+        $widget.height = 245
+      }
     } else {
-      $widget.height = 245
+      setupWidgetView()
     }
   } else {
-    setupWidgetView()
-  }
-} else {
-  setupMainView()
-  if (needCheckup()) {
-    checkupVersion()
-  }
-  $delay(0, function(){
-    let view = $("gradientParent")
-    let hintText = $("hintText")
-    view.remakeLayout(function(make) {
-      make.centerY.equalTo(hintText)
-      make.width.equalTo(20)
-      make.height.equalTo(hintText)
-      make.right.equalTo(hintText.right).inset(5)
+    setupMainView()
+    if (needCheckup()) {
+      checkupVersion()
+    }
+    $delay(0, function(){
+      let view = $("gradientParent")
+      let hintText = $("hintText")
+      view.remakeLayout(function(make) {
+        make.centerY.equalTo(hintText)
+        make.width.equalTo(20)
+        make.height.equalTo(hintText)
+        make.right.equalTo(hintText.right).inset(5)
+      })
+      $ui.animate({
+        duration: 2.5,
+        animation: function() {
+          view.relayout(); 
+        }
+      })
     })
-    $ui.animate({
-      duration: 2.5,
-      animation: function() {
-        view.relayout(); 
-      }
-    })
-  })
+  }
 }
 
 $app.listen({
@@ -1289,15 +1292,15 @@ function genSettingView() {
           }
         },
         views: [{
-          type: "label",
+          type: "image",
           props: {
-            align: $align.center,
-            text: ">",
+            src: "https://i.loli.net/2018/08/09/5b6b8982cf02e.png",
+            bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.right.inset(0)
             make.centerY.equalTo(view.super)
-            make.height.equalTo(view.super)
+            make.size.equalTo($size(15, 15))
           },
         },{
           type: "label",
@@ -1351,15 +1354,15 @@ function genSettingView() {
           }
         },
         views: [{
-          type: "label",
+          type: "image",
           props: {
-            align: $align.center,
-            text: ">",
+            src: "https://i.loli.net/2018/08/09/5b6b8982cf02e.png",
+            bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.right.inset(0)
             make.centerY.equalTo(view.super)
-            make.height.equalTo(view.super)
+            make.size.equalTo($size(15, 15))
           },
         },{
           type: "label",
@@ -3441,6 +3444,65 @@ function sendFeedBack(text, contact) {
           }
         }]
       })
+    }
+  })
+}
+
+function checkBlackList() {
+  let nowTime = new Date().getTime()
+  let lastCheckTime = getCache("lastCheckBlackTime")
+  let needCheckBlackList = true
+  if(lastCheckTime != undefined) {
+    if((nowTime - lastCheckTime) / (60 * 1000) < 30) {
+      needCheckBlackList = false
+    }
+  }
+  if(needCheckBlackList) {
+    $cache.remove("haveBanned")
+    $cache.set("lastCheckBlackTime", nowTime)
+    let url = "https://wcphv9sr.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+    $http.request({
+      method: "GET",
+      url: encodeURI(url),
+      timeout: 5,
+      header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
+        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+      },
+      handler: function(resp) {
+        let data = resp.data.results
+        $console.info(data)
+        if(data.length > 0) {
+          $cache.set("haveBanned", true)
+        } else {
+          $cache.set("haveBanned", false)
+        }
+      }
+    })
+  }
+  var checkBlackTimer = $timer.schedule({
+    interval: 0.01,
+    handler: function() {
+      let value = getCache("haveBanned")
+      if(value === false) {
+        checkBlackTimer.invalidate()
+        main()
+      } else if(value === true){
+        checkBlackTimer.invalidate()
+        $ui.alert({
+          title: "Warning",
+          message: "You have been banned!",
+          actions: [
+            {
+              title: "OK",
+              handler: function() {
+                $app.close(0.1)
+              }
+            },
+          ]
+        })
+      }
     }
   })
 }
