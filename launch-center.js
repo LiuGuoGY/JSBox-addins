@@ -1,23 +1,23 @@
 /**
- * @version 4.1
+ * @version 4.2
  * @author Liu Guo
  * @date 2018.8.10
  * @brief
- *   1. 新增长条图文显示样式
- *   2. 现在必须通过URL验证才能上传
+ *   1. 优化黑名单封禁功能
+ *   2. 新增中图标显示样式
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.1
+let appVersion = 4.2
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
 let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
 let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
-let showMode = ["图文模式", "小图标", "仅文字", "长条图文"]
+let showMode = ["图文模式", "小图标", "仅文字", "横向图文", "中图标"]
 let broswers = ["Safari", "Chrome", "UC", "Firefox", "QQ", "Opera", "Quark", "iCab", "Maxthon", "Dolphin", "2345", "Alook"]
 
 const mColor = {
@@ -42,11 +42,10 @@ const mIcon = [
   },
 ]
 
-uploadInstall()
-checkBlackList()
-
-function main() {
-  if ($app.env == $env.today) {
+if ($app.env == $env.today) {
+  if(getCache("haveBanned") === true) {
+    showBannedAlert()
+  } else {
     if($app.widgetIndex == -1) {
       setupTodayView()
       if(getCache("pullToClose", false)) {
@@ -57,28 +56,33 @@ function main() {
     } else {
       setupWidgetView()
     }
-  } else {
-    setupMainView()
-    if (needCheckup()) {
-      checkupVersion()
-    }
-    $delay(0, function(){
-      let view = $("gradientParent")
-      let hintText = $("hintText")
-      view.remakeLayout(function(make) {
-        make.centerY.equalTo(hintText)
-        make.width.equalTo(20)
-        make.height.equalTo(hintText)
-        make.right.equalTo(hintText.right).inset(5)
-      })
-      $ui.animate({
-        duration: 2.5,
-        animation: function() {
-          view.relayout(); 
-        }
-      })
-    })
   }
+} else {
+  uploadInstall()
+  checkBlackList()
+}
+
+function main() {
+  setupMainView()
+  if (needCheckup()) {
+    checkupVersion()
+  }
+  $delay(0, function(){
+    let view = $("gradientParent")
+    let hintText = $("hintText")
+    view.remakeLayout(function(make) {
+      make.centerY.equalTo(hintText)
+      make.width.equalTo(20)
+      make.height.equalTo(hintText)
+      make.right.equalTo(hintText.right).inset(5)
+    })
+    $ui.animate({
+      duration: 2.5,
+      animation: function() {
+        view.relayout(); 
+      }
+    })
+  })
 }
 
 $app.listen({
@@ -634,8 +638,53 @@ function genTemplate() {
         make.right.inset(8)
       }
     })
+  } else if(showMode == 4) {
+    template.push({
+      type: "blur",
+      props: {
+        radius: 12, //调整边框是什么形状的如:方形圆形什么的
+        style: 5, // 0 ~ 5 调整背景的颜色程度
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.size.equalTo($size(46, 46))
+      },
+      views: [{
+        type: "view",
+        props: {
+          clipsToBounds: false,
+        },
+        layout: function(make, view) {
+          make.center.equalTo(view.super)
+          make.size.equalTo(view.super)
+          shadow(view)
+        },
+        views: [{
+          type: "image",
+          props: {
+            id: "icon",
+            bgcolor: $color("white"),
+            size: $size(29, 29),
+            radius: 5,
+          },
+          layout: function(make, view) {
+            make.center.equalTo(view.super)
+            make.size.equalTo($size(29, 29))
+          }
+        }]
+      }]
+    })
   }
   return template
+}
+
+function shadow(view) {
+  var layer = view.runtimeValue().invoke("layer")
+  layer.invoke("setCornerRadius", 0)
+  layer.invoke("setShadowOffset", $size(5, 5))
+  layer.invoke("setShadowColor", $color("gray").runtimeValue().invoke("CGColor"))
+  layer.invoke("setShadowOpacity", 0.3)
+  layer.invoke("setShadowRadius", 5)
 }
 
 function genRowsView(reorder, columns) {
@@ -3482,19 +3531,23 @@ function checkBlackList() {
         checkBlackTimer.invalidate()
       } else if(value === true){
         checkBlackTimer.invalidate()
-        $ui.alert({
-          title: "Warning",
-          message: "You have been banned!",
-          actions: [
-            {
-              title: "OK",
-              handler: function() {
-                $app.close()
-              }
-            },
-          ]
-        })
+        showBannedAlert()
       }
     }
+  })
+}
+
+function showBannedAlert() {
+  $ui.alert({
+    title: "Warning",
+    message: "You have been banned!",
+    actions: [
+      {
+        title: "OK",
+        handler: function() {
+          $app.close()
+        }
+      },
+    ]
   })
 }
