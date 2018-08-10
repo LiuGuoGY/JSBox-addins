@@ -1,22 +1,23 @@
 /**
- * @version 4.0
+ * @version 4.1
  * @author Liu Guo
- * @date 2018.8.9
+ * @date 2018.8.10
  * @brief
- *   1. 上线黑名单封禁系统
+ *   1. 新增长条图文显示样式
+ *   2. 现在必须通过URL验证才能上传
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.0
+let appVersion = 4.1
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
 let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
 let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
-let showMode = ["图文模式", "仅图标", "仅文字"]
+let showMode = ["图文模式", "小图标", "仅文字", "长条图文"]
 let broswers = ["Safari", "Chrome", "UC", "Firefox", "QQ", "Opera", "Quark", "iCab", "Maxthon", "Dolphin", "2345", "Alook"]
 
 const mColor = {
@@ -170,7 +171,7 @@ function setupTodayView() {
           myOpenUrl(data.url)
         },
         didScroll: function(sender) {
-          if($("rowsShow").contentOffset.y < -30) {
+          if($("rowsShow").contentOffset.y < -35) {
             if($("closeView").bgcolor === $color("clear")) {
               $device.taptic(2)
               $("closeView").bgcolor = randomValue(colors)
@@ -198,7 +199,7 @@ function setupTodayView() {
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
-          make.top.inset(0).offset(-30)
+          make.top.inset(0).offset(-35)
           make.width.equalTo(80)
           make.height.equalTo(30)
         },
@@ -590,6 +591,47 @@ function genTemplate() {
         make.height.equalTo(1)
         make.width.equalTo(30)
         make.bottom.equalTo($("title").top).inset(1)
+      }
+    })
+  } else if(showMode == 3) {
+    template.push({
+      type: "blur",
+      props: {
+        radius: 5, //调整边框是什么形状的如:方形圆形什么的
+        style: 1 // 0 ~ 5 调整背景的颜色程度
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.height.equalTo(view.super)
+        make.width.equalTo(view.super)
+      },
+    },{
+      type: "image",
+      props: {
+        id: "icon",
+        bgcolor: $color("clear"),
+        smoothRadius: 5,
+        size: $size(20, 20),
+      },
+      layout: function(make, view) {
+        make.left.inset(8)
+        make.centerY.equalTo(view.super)
+        make.size.equalTo($size(20, 20))
+      }
+    },{
+      type: "label",
+      props: {
+        id: "title",
+        textColor: $color("black"),
+        bgcolor: $color("clear"),
+        font: $font(13),
+        align: $align.center,
+      },
+      layout: function(make, view) {
+        make.left.equalTo(view.prev.right).inset(0)
+        make.centerY.equalTo(view.super)
+        make.height.equalTo(25)
+        make.right.inset(8)
       }
     })
   }
@@ -1839,58 +1881,7 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
           if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
             showToastView($("uploadItemView"), mColor.red, "请补全信息")
           } else if ($("verifyButton").info == false && action != "edit") {
-            $ui.alert({
-              title: "警告",
-              message: "请先点击验证按钮验证",
-              actions: [
-                {
-                  title: "仍要上传",
-                  handler: function() {
-                    $ui.alert({
-                      title: "提醒",
-                      message: "请确认url scheme的正确性",
-                      actions: [
-                        {
-                          title: "上传",
-                          handler: function() {
-                            if(action == "upload") {
-                              if(haveExisted($("schemeInput").text)) {
-                                $ui.alert({
-                                  title: "提示",
-                                  message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
-                                })
-                              } else {
-                                $("uploadItemView").add(genProgress(sender))
-                                uploadTinyPng(action, $("chooseButton").info, undefined, undefined, fileName)
-                              }
-                            } else if(action == "renew"){
-                              if(isIconRevised == false) {
-                                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
-                              } else {
-                                $("uploadItemView").add(genProgress(sender))
-                                uploadTinyPng(action, $("chooseButton").info, objectId, undefined, fileName)
-                              }
-                            }
-                          }
-                        },
-                        {
-                          title: "取消",
-                          handler: function() {
-                            
-                          }
-                        }
-                      ]
-                    })
-                  }
-                },
-                {
-                  title: "取消",
-                  handler: function() {
-                    
-                  }
-                }
-              ]
-            })
+            showToastView($("uploadItemView"), mColor.red, "未通过验证")
           } else {
             if(action == "upload") {
               if(haveExisted($("schemeInput").text)) {
@@ -3453,7 +3444,7 @@ function checkBlackList() {
   let lastCheckTime = getCache("lastCheckBlackTime")
   let needCheckBlackList = true
   if(lastCheckTime != undefined) {
-    if((nowTime - lastCheckTime) / (60 * 1000) < 30) {
+    if((nowTime - lastCheckTime) / (60 * 1000) < 60) {
       needCheckBlackList = false
     }
   }
@@ -3481,13 +3472,14 @@ function checkBlackList() {
       }
     })
   }
-  var checkBlackTimer = $timer.schedule({
+  
+  let checkBlackTimer = $timer.schedule({
     interval: 0.01,
     handler: function() {
       let value = getCache("haveBanned")
       if(value === false) {
-        checkBlackTimer.invalidate()
         main()
+        checkBlackTimer.invalidate()
       } else if(value === true){
         checkBlackTimer.invalidate()
         $ui.alert({
@@ -3497,7 +3489,7 @@ function checkBlackList() {
             {
               title: "OK",
               handler: function() {
-                $app.close(0.1)
+                $app.close()
               }
             },
           ]
