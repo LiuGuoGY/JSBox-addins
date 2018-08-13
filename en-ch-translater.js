@@ -1,16 +1,16 @@
 /**
- * @Version 3.9
+ * @Version 4.0
  * @author Liu Guo
- * @date 2018.8.8
+ * @date 2018.8.13
  * @brief
- *   1. 现在输入完成即刻翻译，无需点击翻译按钮
- *   2. 金山翻译结果展示优化
+ *   1. 接入黑名单封禁系统
+ *   2. 增加loading界面进行翻译提示
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 3.9
+let appVersion = 4.0
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -20,52 +20,56 @@ let colors = [$rgba(120, 219, 252, 0.4), $rgba(252, 175, 230, 0.4), $rgba(252, 2
 let cardHeight = 300
 
 uploadInstall()
-if (($context.link != undefined || $context.safari != undefined) && ($app.env == $env.action || $app.env == $env.safari)) {
-  let url = ($context.link != undefined)?$context.link:$context.safari.items.baseURI
-  if(url != undefined) {
-    let tUrl = "http://translate.googleusercontent.com/translate_c?depth=2&langpair=auto%7Czh-CN&nv=1&rurl=translate.google.com&sp=nmt4&u=" + encodeURI(url) + "&xid=17259,15700019,15700124,15700126,15700149,15700168,15700173,15700186,15700190,15700201,15700208&usg=ALkJrhjNujo9F9kpb17yrS0hQ0_rYZ4hng"
-    $ui.render({
-      props: {
-        title: "网页翻译",
-        navButtons: [
-          {
-            icon: "015",
-            handler: function() {
-              $context.close()
-            }
-          }
-        ]
-      },
-      views: [{
-        type: "web",
+checkBlackList()
+
+function main() {
+  requireLoadingHtml()
+  if (($context.link != undefined || $context.safari != undefined) && ($app.env == $env.action || $app.env == $env.safari)) {
+    let url = ($context.link != undefined)?$context.link:$context.safari.items.baseURI
+    if(url != undefined) {
+      let tUrl = "http://translate.googleusercontent.com/translate_c?depth=2&langpair=auto%7Czh-CN&nv=1&rurl=translate.google.com&sp=nmt4&u=" + encodeURI(url) + "&xid=17259,15700019,15700124,15700126,15700149,15700168,15700173,15700186,15700190,15700201,15700208&usg=ALkJrhjNujo9F9kpb17yrS0hQ0_rYZ4hng"
+      $ui.render({
         props: {
-          url: tUrl,
+          title: "网页翻译",
+          navButtons: [
+            {
+              icon: "015",
+              handler: function() {
+                $context.close()
+              }
+            }
+          ]
         },
-        layout: $layout.fill
-      }],
-      events: {
-        didFail: function(sender, navigation, error) {
-          $ui.toast("message")
+        views: [{
+          type: "web",
+          props: {
+            url: tUrl,
+          },
+          layout: $layout.fill
+        }],
+        events: {
+          didFail: function(sender, navigation, error) {
+            $ui.toast("message")
+          }
         }
-      }
-    })
+      })
+    }
+    $app.tips("网页翻译使用谷歌引擎，需要使用代理！")
+  } else if ($app.env == $env.keyboard) {
+    setupKeyBdView()
+    detectContent()
+  } else {
+    if ($app.env != $env.today || getCache("showUi", true)) {
+      setupView()
+    }
+    if(query.action != null) {
+      solveAction(query.action)
+    }
+    if (needCheckup()) {
+      checkupVersion()
+    }
+    translate(sourceText())
   }
-  $app.tips("网页翻译使用谷歌引擎，需要使用代理！")
-} else if ($app.env == $env.keyboard) {
-  setupKeyBdView()
-  detectContent()
-} else {
-  if ($app.env != $env.today || getCache("showUi", true)) {
-    setupView()
-  }
-  if(query.action != null) {
-    solveAction(query.action)
-  }
-  if (needCheckup()) {
-    checkupVersion()
-  }
-  translate(sourceText())
-  // translateUrl("https://stackoverflow.com")
 }
 
 $app.listen({
@@ -2073,7 +2077,16 @@ function myLog(text) {
 
 //myloading
 function myLoading(text) {
-  $ui.loading(text)
+  // $ui.loading(text)
+  if(!getCache("showUi", true)) {
+    $ui.loading(text)
+  } else {
+    if(text !== false) {
+      addLodingView($("card"), 40, text)
+    } else {
+      removeLoadingView()
+    }
+  }
 }
 
 //myAlert
@@ -2276,5 +2289,146 @@ function sendFeedBack(text, contact) {
         ]
       })
     }
+  })
+}
+
+function requireLoadingHtml() {
+  if(getCache("loadingHtml") === undefined) {
+    $http.download({
+      url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater/loading.html",
+      handler: function(resp) {
+        if(resp.data.string) {
+          $cache.set("loadingHtml", resp.data.string)
+        }
+      }
+    })
+  }
+}
+
+function loadingView(id, size, title) {
+  return {
+    type: "blur",
+    props: {
+      id: id,
+      alpha: 0,
+      style: 1,
+      radius: 12,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "web",
+      props: {
+        bounces: 0,
+        transparent: 1,
+        scrollEnabled: 0,
+        html: getCache("loadingHtml", "")
+      },
+      layout: (make, view) => {
+        make.center.equalTo(view.super)
+        make.size.equalTo($size(size, size))
+      }
+    }, {
+      type: "label",
+      props: {
+        id: "tips",
+        text: title ? title : "LOADING..."
+      },
+      layout: function (make, view) {
+        make.centerX.equalTo(view.super)
+        make.centerY.equalTo(view.super).offset(40)
+      }
+    }]
+  }
+}
+
+function addLodingView(views, size, title) {
+  $("loadingView") ? 0 : views.add(loadingView("loadingView", size, title));
+  $ui.animate({
+    duration: 0.4,
+    animation: function () {
+      $("loadingView") ? $("loadingView").alpha = 1 : 0;
+    },
+    completion: function () {
+
+    }
+  })
+}
+
+function removeLoadingView() {
+  $ui.animate({
+    duration: 0.4,
+    animation: function () {
+      $("loadingView") ? $("loadingView").alpha = 0 : 0;
+    },
+    completion: function () {
+      $("loadingView") ? $("loadingView").remove() : 0;
+    }
+  })
+}
+
+function checkBlackList() {
+  let nowTime = new Date().getTime()
+  let lastCheckTime = getCache("lastCheckBlackTime")
+  let needCheckBlackList = true
+  if(lastCheckTime != undefined) {
+    if((nowTime - lastCheckTime) / (60 * 1000) < 60) {
+      needCheckBlackList = false
+    }
+  }
+  if(needCheckBlackList) {
+    $ui.loading("授权验证中...")
+    $cache.remove("haveBanned")
+    $cache.set("lastCheckBlackTime", nowTime)
+    let url = "https://wcphv9sr.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+    $http.request({
+      method: "GET",
+      url: encodeURI(url),
+      timeout: 5,
+      header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
+        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+      },
+      handler: function(resp) {
+        let data = resp.data.results
+        $console.info(data)
+        if(data.length > 0) {
+          $cache.set("haveBanned", true)
+        } else {
+          $cache.set("haveBanned", false)
+        }
+      }
+    })
+  }
+  
+  let checkBlackTimer = $timer.schedule({
+    interval: 0.01,
+    handler: function() {
+      let value = getCache("haveBanned")
+      if(value !== undefined) {
+        checkBlackTimer.invalidate()
+        $ui.loading(false)
+      }
+      if(value === false) {
+        main()
+      } else if(value === true){
+        showBannedAlert()
+      }
+    }
+  })
+}
+
+function showBannedAlert() {
+  $ui.alert({
+    title: "Warning",
+    message: "You have been banned!",
+    actions: [
+      {
+        title: "OK",
+        handler: function() {
+          $app.close()
+        }
+      },
+    ]
   })
 }
