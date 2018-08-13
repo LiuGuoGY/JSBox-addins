@@ -1,23 +1,23 @@
 /**
- * @version 4.2
+ * @version 4.3
  * @author Liu Guo
- * @date 2018.8.10
+ * @date 2018.8.13
  * @brief
- *   1. 优化黑名单封禁功能
- *   2. 新增中图标显示样式
+ *   1. 更换大图标显示样式
+ *   2. 微调横向显示样式
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.2
+let appVersion = 4.3
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
 let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
 let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
-let showMode = ["图文模式", "小图标", "仅文字", "横向图文", "中图标"]
+let showMode = ["图文模式", "小图标", "仅文字", "横向图文", "大图标"]
 let broswers = ["Safari", "Chrome", "UC", "Firefox", "QQ", "Opera", "Quark", "iCab", "Maxthon", "Dolphin", "2345", "Alook"]
 
 const mColor = {
@@ -132,7 +132,7 @@ $app.listen({
 function setupTodayView() {
   if(getCache("backgroundTranparent", true)) {
     let alpha = 1
-    $delay(0.6, function(){
+    $delay(0.7, function(){
       let timer = $timer.schedule({
         interval: 0.01,
         handler: function() {
@@ -606,7 +606,7 @@ function genTemplate() {
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
-        make.height.equalTo(view.super)
+        make.top.bottom.inset(0.5)
         make.width.equalTo(view.super)
       },
     },{
@@ -640,10 +640,10 @@ function genTemplate() {
     })
   } else if(showMode == 4) {
     template.push({
-      type: "blur",
+      type: "view",
       props: {
         radius: 12, //调整边框是什么形状的如:方形圆形什么的
-        style: 5, // 0 ~ 5 调整背景的颜色程度
+        // bgcolor: $color("white"),
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
@@ -657,13 +657,13 @@ function genTemplate() {
         layout: function(make, view) {
           make.center.equalTo(view.super)
           make.size.equalTo(view.super)
-          shadow(view)
+          // shadow(view)
         },
         views: [{
           type: "image",
           props: {
             id: "icon",
-            bgcolor: $color("white"),
+            bgcolor: $color("clear"),
             size: $size(29, 29),
             radius: 5,
           },
@@ -3498,6 +3498,7 @@ function checkBlackList() {
     }
   }
   if(needCheckBlackList) {
+    $ui.loading("授权验证中...")
     $cache.remove("haveBanned")
     $cache.set("lastCheckBlackTime", nowTime)
     let url = "https://wcphv9sr.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
@@ -3526,11 +3527,13 @@ function checkBlackList() {
     interval: 0.01,
     handler: function() {
       let value = getCache("haveBanned")
+      if(value !== undefined) {
+        checkBlackTimer.invalidate()
+        $ui.loading(false)
+      }
       if(value === false) {
         main()
-        checkBlackTimer.invalidate()
       } else if(value === true){
-        checkBlackTimer.invalidate()
         showBannedAlert()
       }
     }
