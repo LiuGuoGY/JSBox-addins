@@ -1,16 +1,16 @@
 /**
- * @Version 4.0
+ * @Version 4.1
  * @author Liu Guo
- * @date 2018.8.13
+ * @date 2018.8.14
  * @brief
- *   1. 接入黑名单封禁系统
- *   2. 增加loading界面进行翻译提示
+ *   1. 现在点击左上角的工具按钮可以截图分享了
+ *   2. 修复和优化
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.0
+let appVersion = 4.1
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -213,7 +213,7 @@ function setupView() {
   $app.keyboardToolbarEnabled = true
   if(isInToday()) {
     let alpha = 1
-    $delay(0.6, function(){
+    $delay(0.7, function(){
       let timer = $timer.schedule({
         interval: 0.01,
         handler: function() {
@@ -281,7 +281,7 @@ function setupView() {
         props: {
           colors: [randomColor(), $rgba(255, 255, 255, 0.0), randomColor()],
           locations: [0.0, 0.5, 1.0],
-          radius: 15,
+          smoothRadius: 10,
           startPoint: $point(0.1, 0),
           endPoint: $point(0.7, 1),
           hidden: !getCache("showColor", true)
@@ -292,7 +292,7 @@ function setupView() {
         type: "blur",
         props: {
           style: 1,
-          radius: 10,
+          smoothRadius: 10,
           hidden: !getCache("showColor", true)
         },
         layout: $layout.fill
@@ -361,6 +361,7 @@ function setupView() {
         },
         events: {
           tapped: function(sender) {
+            $device.taptic(1)
             $("result").text = ""
             translate($("text").text)
           }
@@ -655,7 +656,7 @@ function setupView() {
         }
       },
       {
-        type: "image",
+        type: "button",
         props: {
           id: "tools",
           bgcolor: $color("clear"),
@@ -670,7 +671,15 @@ function setupView() {
         },
         events: {
           tapped: function(sender) {
-
+            $ui.menu({
+              items: ["截图分享"],
+              handler: function(title, idx) {
+                switch(idx) {
+                  case 0: share()
+                    break
+                }
+              }
+            })
           }
         }
       },
@@ -711,6 +720,7 @@ function setupView() {
       },
       events: {
         tapped: function(sender) {
+          $device.taptic(1)
           $app.close(0.1)
         }
       }
@@ -719,6 +729,11 @@ function setupView() {
   if(isInToday()) {
     $widget.height = cardHeight + 70
   }
+}
+
+function share() {
+  let image = $("card").snapshot
+  $share.universal(image)
 }
 
 function setupSetting() {
@@ -2078,7 +2093,7 @@ function myLog(text) {
 //myloading
 function myLoading(text) {
   // $ui.loading(text)
-  if(!getCache("showUi", true)) {
+  if($app.env == $env.today && !getCache("showUi", true)) {
     $ui.loading(text)
   } else {
     if(text !== false) {
@@ -2312,7 +2327,7 @@ function loadingView(id, size, title) {
       id: id,
       alpha: 0,
       style: 1,
-      radius: 12,
+      smoothRadius: 10,
     },
     layout: $layout.fill,
     views: [{
@@ -2370,7 +2385,7 @@ function checkBlackList() {
   let nowTime = new Date().getTime()
   let lastCheckTime = getCache("lastCheckBlackTime")
   let needCheckBlackList = true
-  if(lastCheckTime != undefined) {
+  if(lastCheckTime !== undefined && getCache("haveBanned") !== undefined) {
     if((nowTime - lastCheckTime) / (60 * 1000) < 60) {
       needCheckBlackList = false
     }
