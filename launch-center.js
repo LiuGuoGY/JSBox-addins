@@ -1,16 +1,15 @@
 /**
- * @version 4.3
+ * @version 4.4
  * @author Liu Guo
- * @date 2018.8.13
+ * @date 2018.8.15
  * @brief
- *   1. 更换大图标显示样式
- *   2. 微调横向显示样式
+ *   1. 优化及修复bug
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.3
+let appVersion = 4.4
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -1598,7 +1597,7 @@ function genSettingView() {
       text : "分享至...",
     },
     templateDetails: {
-      text : "",
+      text : "t.cn/RDe2qSq",
     },
   },]
 
@@ -1615,6 +1614,16 @@ function genSettingView() {
         id: "list",
         bgcolor: $color("clear"),
         template: feedBackTemplate,
+        footer: {
+          type: "label",
+          props: {
+            height: 30,
+            text: "Designed  by  Linger.",
+            textColor: $color("#AAAAAA"),
+            align: $align.center,
+            font: $font("HoeflerText-Italic", 15)
+          }
+        },
         data: [{
           title: "功能",
           rows: [tabSetColumns, tabShowMode, tabOpenBroswer],
@@ -1642,14 +1651,14 @@ function genSettingView() {
           if(title.url) {
             setupWebView(titleText, title.url)
           } else {
-            switch(title.templateTitle.text) {
-              case "反馈与建议": setupFeedBack()
+            switch(indexPath.row) {
+              case 2: checkupVersion()
                 break
-              case "检查更新": checkupVersion()
+              case 3: setupFeedBack()
                 break
-              case "支持与赞赏": setupReward()
+              case 4: setupReward()
                 break
-              case "分享至...": share()
+              case 5: share()
                 break
               default:
             }
@@ -1674,7 +1683,7 @@ function getOpenBroswer() {
 
 function share() {
   $share.sheet({
-    items: ["https://xteko.com/redir?name=Launch%20Center&url=https%3A%2F%2Fraw.githubusercontent.com%2FLiuGuoGY%2FJSBox-addins%2Fmaster%2Flaunch-center.js&icon=icon_065.png"], // 也支持 item
+    items: ["https://t.cn/RDe2qSq"], // 也支持 item
     handler: function(success) {
       if(success) {
         showToastView($("mainView"), mColor.blue, "感谢您的分享")
@@ -3492,7 +3501,7 @@ function checkBlackList() {
   let nowTime = new Date().getTime()
   let lastCheckTime = getCache("lastCheckBlackTime")
   let needCheckBlackList = true
-  if(lastCheckTime != undefined) {
+  if(lastCheckTime !== undefined && getCache("haveBanned") !== undefined) {
     if((nowTime - lastCheckTime) / (60 * 1000) < 60) {
       needCheckBlackList = false
     }
