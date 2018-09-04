@@ -1,15 +1,15 @@
 /**
- * @version 4.4
+ * @version 4.5
  * @author Liu Guo
- * @date 2018.8.15
+ * @date 2018.9.4
  * @brief
- *   1. 优化及修复bug
+ *   1. 优化授权验证体验
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.4
+let appVersion = 4.5
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -59,6 +59,11 @@ if ($app.env == $env.today) {
 } else {
   uploadInstall()
   checkBlackList()
+  if(!getCache("haveBanned", false)) {
+    main()
+  } else {
+    showBannedAlert()
+  }
 }
 
 function main() {
@@ -3507,7 +3512,6 @@ function checkBlackList() {
     }
   }
   if(needCheckBlackList) {
-    $ui.loading("授权验证中...")
     $cache.remove("haveBanned")
     $cache.set("lastCheckBlackTime", nowTime)
     let url = "https://wcphv9sr.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
@@ -3525,28 +3529,13 @@ function checkBlackList() {
         $console.info(data)
         if(data.length > 0) {
           $cache.set("haveBanned", true)
+          showBannedAlert()
         } else {
           $cache.set("haveBanned", false)
         }
       }
     })
   }
-  
-  let checkBlackTimer = $timer.schedule({
-    interval: 0.01,
-    handler: function() {
-      let value = getCache("haveBanned")
-      if(value !== undefined) {
-        checkBlackTimer.invalidate()
-        $ui.loading(false)
-      }
-      if(value === false) {
-        main()
-      } else if(value === true){
-        showBannedAlert()
-      }
-    }
-  })
 }
 
 function showBannedAlert() {
