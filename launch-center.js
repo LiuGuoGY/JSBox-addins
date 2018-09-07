@@ -1,15 +1,17 @@
 /**
- * @version 4.5
+ * @version 4.6
  * @author Liu Guo
- * @date 2018.9.4
+ * @date 2018.9.8
  * @brief
- *   1. 优化授权验证体验
+ *   1. 去掉了搜索相关项功能
+ *   2. 上传时可添加说明信息（可选）
+ *   3. 新增添加启动器的展示卡片
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.5
+let appVersion = 4.6
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -742,7 +744,7 @@ function genRowsView(reorder, columns) {
             } else if(idx == 1) {
               $system.makeIcon({ title: getCache("localItems", [])[indexPath.row].title.text, url: getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
             } else if(idx == 2) {
-              setupUploadView("edit", data.title.text, data.icon.src, data.url, undefined, indexPath)
+              setupUploadView("edit", data.title.text, data.icon.src, data.url, data.descript, undefined, indexPath)
             }
           }
         })
@@ -1151,7 +1153,8 @@ function genCloudView() {
         layout: $layout.fill,
         events: {
           didSelect(sender, indexPath, data) {
-            addToLocal(sender, indexPath)
+            // addToLocal(sender, indexPath)
+            showInfoView($("mainView"), data, indexPath)
           },
           pulled: function(sender) {
             if($("search_input").text.length > 0) {
@@ -1163,15 +1166,10 @@ function genCloudView() {
           didLongPress: function(sender, indexPath, data) {
             $device.taptic(2)
             $ui.menu({
-              items: ["添加到本地", "搜索相关项"],
+              items: ["添加到本地"],
               handler: function(title, idx) {
                 if(idx == 0) {
-                  addToLocal(sender, indexPath)
-                } else if(idx == 1) {
-                  let text = data.url.substring(0, data.url.indexOf("://"))
-                  $("search_input").text = text
-                  $("search_hint").hidden = true
-                  searchItems(text)
+                  addToLocal(data, true)
                 }
               }
             })
@@ -1210,39 +1208,55 @@ function searchItems(text) {
   }
 }
 
-function addToLocal(sender, indexPath) {
+function addToLocal(data, showToast) {
   let array = getCache("localItems", [])
-  let item = sender.object(indexPath)
   let isExist = false
   for(let i = 0; i < array.length; i++) {
-    if(item.url === array[i].url) {
+    if(data.url === array[i].url) {
       isExist = true
     }
   }
   if(isExist === false) {
     array.push({
       title: {
-        text: item.title.text
+        text: data.title.text
       },
       icon: {
-        src: item.icon.src
+        src: data.icon.src
       },
-      url: item.url
+      url: data.url,
+      descript: data.descript,
     })
     $cache.set("localItems", array)
-    showToastView($("mainView"), mColor.green, "添加成功")
+    if(showToast) {
+      showToastView($("mainView"), mColor.green, "添加成功")
+    }
     $("rowsShow").data = getCache("localItems", [])
   } else {
-    showToastView($("mainView"), mColor.red, "本地已存在")
+    if(showToast) {
+      showToastView($("mainView"), mColor.red, "本地已存在")
+    }
   }
 }
 
-function updateToLocal(sender, indexPath, title, icon, url) {
+function isExist(data) {
+  let array = getCache("localItems", [])
+  let isExist = false
+  for(let i = 0; i < array.length; i++) {
+    if(data.url === array[i].url) {
+      isExist = true
+    }
+  }
+  return isExist
+}
+
+function updateToLocal(sender, indexPath, title, icon, url, descript) {
   let array = getCache("localItems", [])
   let item = sender.object(indexPath)
   array[indexPath.row].title.text = title
   array[indexPath.row].icon.src = icon
   array[indexPath.row].url = url
+  array[indexPath.row].descript = descript
   $cache.set("localItems", array)
   $("rowsShow").data = getCache("localItems", [])
 }
@@ -1867,7 +1881,7 @@ function setupMyUpView() {
             items: ["编辑"],
             handler: function(title, idx) {
               if(idx == 0) {
-                setupUploadView("renew", data.title.text, data.icon.src, data.url, data.info.objectId)
+                setupUploadView("renew", data.title.text, data.icon.src, data.url, data.descript, data.info.objectId)
               }
             }
           })
@@ -1881,7 +1895,7 @@ function setupMyUpView() {
   requireMyItems()
 }
 
-function setupUploadView(action, title, icon, url, objectId, indexPath) {
+function setupUploadView(action, title, icon, url, descript, objectId, indexPath) {
   let fileName = ""
   let isIconRevised = false
   let actionText = "  开始上传  "
@@ -1944,8 +1958,14 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
           if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
             showToastView($("uploadItemView"), mColor.red, "请补全信息")
           } else if ($("verifyButton").info == false && action != "edit") {
-            showToastView($("uploadItemView"), mColor.red, "未通过验证")
+            showToastView($("uploadItemView"), mColor.red, "请先通过验证")
+          } else if ($("descriptInput").text.length > 80) {
+            showToastView($("uploadItemView"), mColor.red, "说明文字过长")
           } else {
+            let descriptText = $("descriptInput").text
+            if(descriptText.length == 0) {
+              descriptText = undefined
+            }
             if(action == "upload") {
               if(haveExisted($("schemeInput").text)) {
                 $ui.alert({
@@ -1958,14 +1978,14 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
               }
             } else if(action == "renew"){
               if(isIconRevised == false) {
-                uploadItem($("titleInput").text, undefined, $("schemeInput").text, undefined, undefined, objectId)
+                uploadItem($("titleInput").text, undefined, $("schemeInput").text, descriptText, undefined, undefined, objectId)
               } else {
                 $("uploadItemView").add(genProgress(sender))
                 uploadTinyPng(action, $("chooseButton").info, objectId, undefined, fileName)
               }
             } else if(action == "edit") {
               if(isIconRevised == false) {
-                updateToLocal($("rowsShow"), indexPath, $("titleInput").text, icon, $("schemeInput").text)
+                updateToLocal($("rowsShow"), indexPath, $("titleInput").text, icon, $("schemeInput").text, descriptText)
               } else {
                 uploadSM(action, $("chooseButton").info, undefined, indexPath, fileName)
               }
@@ -2216,7 +2236,61 @@ function setupUploadView(action, title, icon, url, objectId, indexPath) {
             })
           }
         }
-      },]
+      },{
+        type: "label",
+        props: {
+          id: "descriptLabel",
+          text: "说明部分(可选)：",
+          align: $align.left,
+        },
+        layout: function(make, view) {
+          make.width.equalTo(view.super)
+          make.top.equalTo($("schemeInput").bottom).inset(20)
+          make.left.inset(10)
+        }
+      },{
+        type: "text",
+        props: {
+          id: "descriptInput",
+          text: (descript)?descript:"",
+          borderColor: $rgba(100, 100, 100, 0.3),
+          bgcolor: $rgba(100, 100, 100, 0.08),
+          borderWidth: 1,
+          radius: 5,
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.top.equalTo($("descriptLabel").bottom).inset(10)
+          make.height.equalTo(100)
+          make.width.equalTo(view.super).multipliedBy(0.9)
+        },
+        events: {
+          didChange: function(sender) {
+            let length = sender.text.length
+            $("descriptNumberHint").text = length + "/80"
+            if(length > 80) {
+              $("descriptNumberHint").textColor = $color("red")
+            } else {
+              $("descriptNumberHint").textColor = $color("darkGray")
+            }
+          }
+        }
+      },{
+        type: "label",
+        props: {
+          id: "descriptNumberHint",
+          text: ((descript)?descript.length:0).toString() + "/80",
+          align: $align.center,
+          font: $font(12),
+          textColor: $color("darkGray"),
+        },
+        layout: function(make, view) {
+          make.right.equalTo(view.prev).inset(3)
+          make.bottom.equalTo(view.prev)
+          make.height.equalTo(20)
+        }
+      }]
     },
     ]
   })
@@ -2786,6 +2860,212 @@ function setupFeedBack() {
   })
 }
 
+function showInfoView(superView, data) {
+  let exist = isExist(data)
+  superView.add({
+    type: "view",
+    props: {
+      id: "infoView",
+      alpha: 0,
+      clipsToBounds: true,
+    },
+    layout: function(make, view) {
+      make.size.equalTo(view.super)
+      make.center.equalTo(view.super)
+    },
+    views: [{
+      type: "view",
+      props: {
+        bgcolor: $rgba(0, 0, 0, 0.3)
+      },
+      layout: $layout.fill,
+      events: {
+        tapped: sender => {
+          hideView()
+        }
+      }
+    },{
+      type: "view",
+      props: {
+        id: "windowView",
+        bgcolor: $color("#f5f5f5"),
+        
+      },
+      layout: function(make, view) {
+        make.height.equalTo(260)
+        make.width.equalTo(view.super)
+        make.centerX.equalTo(view.super)
+        make.top.equalTo(view.super.bottom)
+        // AView.shadow(view, 10)
+      },
+      views: [{
+        type: "button",
+        props: {
+          title: "关闭",
+          font: $font(17),
+          titleColor: $color(mColor.blue),
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.right.inset(20)
+          make.top.inset(0)
+          make.size.equalTo($size(50, 35))
+        },
+        events: {
+          tapped: function(sender) {
+            hideView()
+          }
+        }
+      },{
+        type: "canvas",
+        layout: function(make, view) {
+          var preView = view.prev
+          make.top.equalTo(preView.bottom)
+          make.height.equalTo(1)
+          make.left.right.inset(20)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("gray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },{
+        type: "image",
+        props: {
+          bgcolor: $color("clear"),
+          radius: 12,
+          size: $size(50, 50),
+          src: data.icon.src,
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev).inset(12)
+          make.left.inset(30)
+          make.size.equalTo($size(50, 50))
+        }
+      },{
+        type: "label",
+        props: {
+          text: data.title.text,
+          font: $font("bold", 18),
+          textColor: $color("#555555"),
+          align: $align.left,
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right).inset(15)
+          make.right.inset(30)
+          make.top.equalTo(view.prev.top).inset(3)
+        }
+      },
+      {
+        type: "label",
+        props: {
+          text: data.url,
+          font: $font(15),
+          textColor: $color("#aaaaaa"),
+          align: $align.left,
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.left)
+          make.right.inset(30)
+          make.bottom.equalTo(view.prev.prev.bottom).inset(3)
+        }
+      },{
+        type: "label",
+        props: {
+          text: (data.descript)?data.descript:"暂无说明",
+          font: $font(15),
+          textColor: $color("#555555"),
+          bgcolor: $color("clear"),
+          align: $align.left,
+          lines: 0,
+        },
+        layout: function(make, view) {
+          make.left.right.inset(30)
+          make.top.equalTo(view.prev.prev.prev.bottom).inset(10)
+          let height = $text.sizeThatFits({
+            text: (data.descript)?data.descript:"暂无说明",
+            width: $device.info.screen.width - 60,
+            font: $font(15),
+          }).height
+          if(height > 72) {
+            height = 72
+          }
+          make.height.equalTo(height)
+        }
+      },{
+        type: "button",
+        props: {
+          title: exist?"本地已存在":"添加到本地",
+          bgcolor: exist?$color("clear"):$color("#3897E6"),
+          borderColor: exist?$color(mColor.gray):$color("clear"),
+          borderWidth: exist?1:0,
+          titleColor: exist?$color(mColor.gray):$color("white"),
+        },
+        layout: function(make, view) {
+          make.left.right.inset(25)
+          make.height.equalTo(40)
+          make.bottom.inset(20)
+        },
+        events: {
+          tapped: function(sender) {
+            if(!exist) {
+              $device.taptic(0)
+              exist = !exist
+              sender.title = "本地已存在"
+              sender.bgcolor = $color("clear")
+              sender.borderColor = $color(mColor.gray)
+              sender.borderWidth = 1
+              sender.titleColor = $color(mColor.gray)
+              addToLocal(data)
+            }
+          }
+        }
+      }],
+    }],
+  })
+  $("windowView").relayout()
+  $("windowView").remakeLayout(function(make) {
+    make.height.equalTo(260)
+    make.width.equalTo(superView)
+    make.centerX.equalTo(superView)
+    make.bottom.inset(0)
+  })
+  $ui.animate({
+    duration: 0.3,
+    damping: 0.9,
+    velocity: 0.4,
+    animation: () => {
+      $("infoView").alpha = 1
+      $("windowView").relayout()
+    }
+  })
+  function hideView() {
+    $("windowView").remakeLayout(function(make) {
+      make.height.equalTo(260)
+      make.width.equalTo($("infoView"))
+      make.centerX.equalTo($("infoView"))
+      make.top.equalTo($("infoView").bottom)
+    })
+    $ui.animate({
+      duration: 0.2,
+      velocity: 0.5,
+      animation: () => {
+        $("infoView").alpha = 0;
+        $("windowView").relayout()
+      },
+      completion: () => {
+        $("infoView").remove();
+      }
+    });
+  }
+}
+
 //获取缓存 def为默认值
 function getCache(key, def) {
   let temp = $cache.get(key)
@@ -3014,6 +3294,7 @@ function requireItems() {
               src: data[i].icon
             },
             url: data[i].url,
+            descript: data[i].descript,
           })
         }
         view.data = array
@@ -3100,46 +3381,45 @@ function showToastView(view, color, text, duration) {
     $("toastView").remove()
   }
   view.add(showView)
-  $delay(0.05, function(){
-    let fView = $("toastView")
-    if(fView == undefined) {
-      return 0
-    }
-    fView.updateLayout(function(make) {
-      make.top.inset(topInset + 20)
-    })
-    $ui.animate({
-      duration: 0.4,
-      animation: function() {
-        fView.alpha = 1.0
-        fView.relayout()
-      },
-      completion: function() {
-        $delay(duration, function() {
-          let fView = $("toastView")
-          if(fView == undefined) {
-            return 0
-          } else if(fView.info != time) {
-            return 0
-          }
-          fView.updateLayout(function(make) {
-            make.top.inset(topInset)
-          })
-          $ui.animate({
-            duration: 0.4,
-            animation: function() {
-              fView.alpha = 0.0
-              fView.relayout()
-            },
-            completion: function() {
-              if(fView != undefined) {
-                fView.remove()
-              }
-            }
-          })
+  let fView = $("toastView")
+  if(fView == undefined) {
+    return 0
+  }
+  fView.relayout()
+  fView.updateLayout(function(make) {
+    make.top.inset(topInset + 20)
+  })
+  $ui.animate({
+    duration: 0.4,
+    animation: function() {
+      fView.alpha = 1.0
+      fView.relayout()
+    },
+    completion: function() {
+      $delay(duration, function() {
+        let fView = $("toastView")
+        if(fView == undefined) {
+          return 0
+        } else if(fView.info != time) {
+          return 0
+        }
+        fView.updateLayout(function(make) {
+          make.top.inset(topInset)
         })
-      }
-    })
+        $ui.animate({
+          duration: 0.4,
+          animation: function() {
+            fView.alpha = 0.0
+            fView.relayout()
+          },
+          completion: function() {
+            if(fView != undefined) {
+              fView.remove()
+            }
+          }
+        })
+      })
+    }
   })
 }
 
@@ -3167,6 +3447,7 @@ function requireMyItems() {
               src: data[i].icon
             },
             url: data[i].url,
+            descript: data[i].descript,
             info: {
               objectId: data[i].objectId,
             }
@@ -3201,7 +3482,7 @@ function deleteCloudItem(objectId) {
   })
 }
 
-function uploadItem(title, icon, url, size, deviceToken, objectId) {
+function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
   let json = {}
   if(title != undefined) {
     json.title = title
@@ -3211,6 +3492,9 @@ function uploadItem(title, icon, url, size, deviceToken, objectId) {
   }
   if(url != undefined) {
     json.url = url
+  }
+  if(descript != undefined) {
+    json.descript = descript
   }
   if(size != undefined) {
     let size_k = ""
@@ -3412,11 +3696,11 @@ function uploadSM(action, pic, objectId, indexPath, fileName) {
         handler: function(resp) {
           $ui.loading(false)
           var data = resp.data.data
-          if(action == "renew") {
-            uploadItem($("title").text, data.url, $("schemeInput").text, data.size, undefined, objectId)
-          } else {
-            uploadItem($("title").text, data.url, $("schemeInput").text, data.size, $objc("FCUUID").invoke("uuidForDevice").rawValue(), objectId)
+          let deviceId = undefined
+          if(action != "renew") {
+            deviceId = $objc("FCUUID").invoke("uuidForDevice").rawValue()
           }
+          uploadItem($("title").text, data.url, $("schemeInput").text, $("descriptInput").text, data.size, deviceId, objectId)
         }
       })
     }
@@ -3429,7 +3713,7 @@ function uploadSM(action, pic, objectId, indexPath, fileName) {
         handler: function(resp) {
           $ui.loading(false)
           var data = resp.data.data
-          updateToLocal($("rowsShow"), indexPath, $("titleInput").text, data.url, $("schemeInput").text)
+          updateToLocal($("rowsShow"), indexPath, $("titleInput").text, data.url, $("schemeInput").text, $("descriptInput").text)
         }
       })
     }
@@ -3526,7 +3810,6 @@ function checkBlackList() {
       },
       handler: function(resp) {
         let data = resp.data.results
-        $console.info(data)
         if(data.length > 0) {
           $cache.set("haveBanned", true)
           showBannedAlert()
