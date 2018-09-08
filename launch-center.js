@@ -1,17 +1,18 @@
 /**
- * @version 4.6
+ * @version 4.7
  * @author Liu Guo
  * @date 2018.9.8
  * @brief
- *   1. 去掉了搜索相关项功能
- *   2. 上传时可添加说明信息（可选）
- *   3. 新增添加启动器的展示卡片
+ *   1. 修复上传或修改时可能导致闪退的bug
+ *   2. 增强搜索功能
+ *   3. 调整卡片显示界面
+ *   4. 卡片加入复制url按钮
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.6
+let appVersion = 4.7
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -687,7 +688,7 @@ function genTemplate() {
 function shadow(view) {
   var layer = view.runtimeValue().invoke("layer")
   layer.invoke("setCornerRadius", 0)
-  layer.invoke("setShadowOffset", $size(5, 5))
+  layer.invoke("setShadowOffset", $size(0, -5))
   layer.invoke("setShadowColor", $color("gray").runtimeValue().invoke("CGColor"))
   layer.invoke("setShadowOpacity", 0.3)
   layer.invoke("setShadowRadius", 5)
@@ -1193,7 +1194,8 @@ function searchItems(text) {
         let cloudItems = getCache("cloudItems", [])
         for(let i = 0; i < cloudItems.length; i++) {
           for(let j = 0; j < results.length; j++) {
-            if(cloudItems[i].title.text.toLowerCase().indexOf(results[j].toLowerCase()) >= 0 || cloudItems[i].url.toLowerCase().indexOf(results[j].toLowerCase()) >= 0) {
+            let descript = (cloudItems[i].descript)?(cloudItems[i].descript):"";
+            if(cloudItems[i].title.text.toLowerCase().indexOf(results[j].toLowerCase()) >= 0 || cloudItems[i].url.toLowerCase().indexOf(results[j].toLowerCase()) >= 0 || descript.toLowerCase().indexOf(results[j].toLowerCase()) >= 0) {
               resultItems.push(cloudItems[i])
               break
             }
@@ -2876,7 +2878,7 @@ function showInfoView(superView, data) {
     views: [{
       type: "view",
       props: {
-        bgcolor: $rgba(0, 0, 0, 0.3)
+        bgcolor: $rgba(0, 0, 0, 0.25)
       },
       layout: $layout.fill,
       events: {
@@ -2888,15 +2890,14 @@ function showInfoView(superView, data) {
       type: "view",
       props: {
         id: "windowView",
-        bgcolor: $color("#f5f5f5"),
-        
+        bgcolor: $color("#f6f6f6"),
       },
       layout: function(make, view) {
         make.height.equalTo(260)
         make.width.equalTo(view.super)
         make.centerX.equalTo(view.super)
         make.top.equalTo(view.super.bottom)
-        // AView.shadow(view, 10)
+        shadow(view)
       },
       views: [{
         type: "button",
@@ -2928,7 +2929,7 @@ function showInfoView(superView, data) {
           draw: function(view, ctx) {
             var width = view.frame.width
             var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("gray")
+            ctx.strokeColor = $color("#bbbbbb")
             ctx.setLineWidth(1 / scale)
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
@@ -2952,14 +2953,14 @@ function showInfoView(superView, data) {
         type: "label",
         props: {
           text: data.title.text,
-          font: $font("bold", 18),
+          font: $font("bold", 17),
           textColor: $color("#555555"),
           align: $align.left,
         },
         layout: function(make, view) {
           make.left.equalTo(view.prev.right).inset(15)
           make.right.inset(30)
-          make.top.equalTo(view.prev.top).inset(3)
+          make.top.equalTo(view.prev.top).inset(2)
         }
       },
       {
@@ -2969,12 +2970,47 @@ function showInfoView(superView, data) {
           font: $font(15),
           textColor: $color("#aaaaaa"),
           align: $align.left,
+          userInteractionEnabled: true,
         },
         layout: function(make, view) {
           make.left.equalTo(view.prev.left)
           make.right.inset(30)
           make.bottom.equalTo(view.prev.prev.bottom).inset(3)
-        }
+        },
+        views: [{
+          type: "gradient",
+          props: {
+            colors: [$rgba(246,246,246,0.0), $rgba(246,246,246,1.0)],
+            locations: [0.0, 0.4],
+            startPoint: $point(0, 0.5),
+            endPoint: $point(1, 0.5),
+          },
+          layout: function(make, view) {
+            make.right.inset(0)
+            make.height.equalTo(view.super)
+            make.width.equalTo(45)
+            make.centerY.equalTo(view.super)
+          },
+          views: [{
+            type: "button",
+            props: {
+              title: "复制",
+              font: $font(13),
+              titleColor: $color(mColor.blue),
+              bgcolor: $color("clear"),
+              radius: 0,
+              contentEdgeInsets: $insets(2, 5, 2, 5),
+            },
+            layout: $layout.fill,
+            events: {
+              tapped: function(sender) {
+                $device.taptic(0)
+                $clipboard.text = data.url
+                showToastView($("windowView"), mColor.green, "复制成功", 0.2)
+              }
+            }
+          }],
+        }]
       },{
         type: "label",
         props: {
@@ -3533,14 +3569,20 @@ function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
               } else {
                 finishTimer.invalidate()
                 $delay(0.5, function() {
+                  if($("toastView") != undefined) {
+                    $("toastView").remove()
+                  }
                   $ui.pop()
                 })
               }
             }
           }
-        });
+        })
       } else {
         $delay(0.5, function() {
+          if($("toastView") != undefined) {
+            $("toastView").remove()
+          }
           $ui.pop()
         })
       }
