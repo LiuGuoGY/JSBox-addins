@@ -1,16 +1,15 @@
 /**
- * @Version 4.1
+ * @Version 4.2
  * @author Liu Guo
- * @date 2018.8.14
+ * @date 2018.9.11
  * @brief
- *   1. 现在点击左上角的工具按钮可以截图分享了
- *   2. 修复和优化
+ *   1. 优化启动授权方式
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.1
+let appVersion = 4.2
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -20,7 +19,14 @@ let colors = [$rgba(120, 219, 252, 0.4), $rgba(252, 175, 230, 0.4), $rgba(252, 2
 let cardHeight = 300
 
 uploadInstall()
-checkBlackList()
+if ($app.env == $env.app) {
+  checkBlackList()
+}
+if(!getCache("haveBanned", false)) {
+  main()
+} else {
+  showBannedAlert()
+}
 
 function main() {
   requireLoadingHtml()
@@ -2254,6 +2260,7 @@ function uploadInstall() {
       method: "POST",
       url: "https://pwqyveon.api.lncld.net/1.1/installations",
       timeout: 5,
+      showsProgress: false,
       header: {
         "Content-Type": "application/json",
         "X-LC-Id": appId,
@@ -2311,6 +2318,7 @@ function requireLoadingHtml() {
   if(getCache("loadingHtml") === undefined) {
     $http.download({
       url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater/loading.html",
+      showsProgress: false,
       handler: function(resp) {
         if(resp.data.string) {
           $cache.set("loadingHtml", resp.data.string)
@@ -2391,7 +2399,6 @@ function checkBlackList() {
     }
   }
   if(needCheckBlackList) {
-    $ui.loading("授权验证中...")
     $cache.remove("haveBanned")
     $cache.set("lastCheckBlackTime", nowTime)
     let url = "https://wcphv9sr.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
@@ -2399,6 +2406,7 @@ function checkBlackList() {
       method: "GET",
       url: encodeURI(url),
       timeout: 5,
+      showsProgress: false,
       header: {
         "Content-Type": "application/json",
         "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
@@ -2406,31 +2414,15 @@ function checkBlackList() {
       },
       handler: function(resp) {
         let data = resp.data.results
-        $console.info(data)
         if(data.length > 0) {
           $cache.set("haveBanned", true)
+          showBannedAlert()
         } else {
           $cache.set("haveBanned", false)
         }
       }
     })
   }
-  
-  let checkBlackTimer = $timer.schedule({
-    interval: 0.01,
-    handler: function() {
-      let value = getCache("haveBanned")
-      if(value !== undefined) {
-        checkBlackTimer.invalidate()
-        $ui.loading(false)
-      }
-      if(value === false) {
-        main()
-      } else if(value === true){
-        showBannedAlert()
-      }
-    }
-  })
 }
 
 function showBannedAlert() {
