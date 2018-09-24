@@ -1,18 +1,17 @@
 /**
- * @version 4.7
+ * @version 4.8
  * @author Liu Guo
- * @date 2018.9.8
+ * @date 2018.9.24
  * @brief
- *   1. 修复上传或修改时可能导致闪退的bug
- *   2. 增强搜索功能
- *   3. 调整卡片显示界面
- *   4. 卡片加入复制url按钮
+ *   1. 现在启动器下拉关闭功能默认打开
+ *   2. 微调主界面
+ *   3. 改变启动器详情页样式
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.7
+let appVersion = 4.8
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -50,7 +49,7 @@ if ($app.env == $env.today) {
   } else {
     if($app.widgetIndex == -1) {
       setupTodayView()
-      if(getCache("pullToClose", false)) {
+      if(getCache("pullToClose", true)) {
         $widget.height = 215
       } else {
         $widget.height = 245
@@ -74,6 +73,7 @@ function main() {
   if (needCheckup()) {
     checkupVersion()
   }
+  checkStarJson()
   $delay(0, function(){
     let view = $("gradientParent")
     let hintText = $("hintText")
@@ -158,7 +158,7 @@ function setupTodayView() {
   let itemHeight = (items.length <= columns)?(200):50
 
   let showView = []
-  if(getCache("pullToClose", false)) {
+  if(getCache("pullToClose", true)) {
     showView = [{
       type: "matrix",
       props: {
@@ -274,7 +274,7 @@ function setupTodayView() {
     views: showView,
   })
 
-  if(getCache("pullToClose") == true && !getCache("isPullToCloseToasted", false)) {
+  if(getCache("pullToClose", true) == true && !getCache("isPullToCloseToasted", false)) {
     $cache.set("isPullToCloseToasted", true);
     $delay(1, function(){
       showToastView($("todayView"), mColor.blue, "下拉即可关闭 ↓")
@@ -371,7 +371,7 @@ function setupMainView() {
               layout: function(make, view) {
                 var preView = view.prev
                 make.centerX.equalTo(preView)
-                make.bottom.inset(3)
+                make.bottom.inset(5)
               }
             }
           ],
@@ -690,7 +690,7 @@ function shadow(view) {
   layer.invoke("setCornerRadius", 0)
   layer.invoke("setShadowOffset", $size(0, -5))
   layer.invoke("setShadowColor", $color("gray").runtimeValue().invoke("CGColor"))
-  layer.invoke("setShadowOpacity", 0.3)
+  layer.invoke("setShadowOpacity", 0.2)
   layer.invoke("setShadowRadius", 5)
 }
 
@@ -714,7 +714,6 @@ function genRowsView(reorder, columns) {
           if(data.url != "") {
             $device.taptic(1)
             myOpenUrl(data.url)
-            let leaveTime = new Date().getTime()
             resumeAction = 3
             $thread.background({
               delay: 0.1,
@@ -898,7 +897,7 @@ function genLocalView() {
       layout: function(make, view) {
         make.width.equalTo(view.super)
         make.top.equalTo($("deleteLocalButton").bottom).inset(10)
-        make.bottom.inset(5)
+        make.bottom.inset(0)
         make.centerX.equalTo(view.super)
       },
       views: [genRowsView(false, getCache("columns", 4))]
@@ -1100,7 +1099,7 @@ function genCloudView() {
       layout: function(make, view) {
         make.width.equalTo(view.super)
         make.top.equalTo(view.prev.bottom).inset(10)
-        make.bottom.inset(5)
+        make.bottom.inset(0)
         make.centerX.equalTo(view.super)
       },
       views: [{
@@ -1177,6 +1176,25 @@ function genCloudView() {
           }
         }
       }]
+    },{
+      type: "canvas",
+      layout: function(make, view) {
+        var preView = view.prev
+        make.top.equalTo(preView.top)
+        make.height.equalTo(1)
+        make.left.right.inset(0)
+      },
+      events: {
+        draw: function(view, ctx) {
+          var width = view.frame.width
+          var scale = $device.info.screen.scale
+          ctx.strokeColor = $color("#c0c0c0")
+          ctx.setLineWidth(1 / scale)
+          ctx.moveToPoint(0, 0)
+          ctx.addLineToPoint(width, 0)
+          ctx.strokePath()
+        }
+      }
     },],
   }
   requireItems()
@@ -1238,6 +1256,20 @@ function addToLocal(data, showToast) {
     if(showToast) {
       showToastView($("mainView"), mColor.red, "本地已存在")
     }
+  }
+}
+
+function deleteLocalItem(data) {
+  let array = getCache("localItems", [])
+  for(let i = 0; i < array.length; i++) {
+    if(data.url === array[i].url) {
+      array.splice(i, 1)
+      $cache.set("localItems", array)
+    }
+  }
+  if($("rowsShow") != undefined) {
+    $("rowsShow").remove()
+    $("rowsShowParent").add(genRowsView($("reorderButton").info, getCache("columns", 4)))
   }
 }
 
@@ -1550,7 +1582,7 @@ function genSettingView() {
         type: "switch",
         props: {
           id: "tabPullToCloseSwitch",
-          on: getCache("pullToClose", false),
+          on: getCache("pullToClose", true),
         },
         layout: function(make, view) {
           make.right.inset(15)
@@ -1853,7 +1885,14 @@ function setupMyUpView() {
       events: {
         didSelect(sender, indexPath, data) {
           if($("deleteButton").info == false) {
-            myOpenUrl(data.url)
+            $ui.menu({
+              items: ["打开"],
+              handler: function(title, idx) {
+                if(idx == 0) {
+                  myOpenUrl(data.url)
+                }
+              }
+            })
           } else {
             $ui.alert({
               title: "确定删除？",
@@ -2864,6 +2903,53 @@ function setupFeedBack() {
 
 function showInfoView(superView, data) {
   let exist = isExist(data)
+  let html = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Document</title>
+  </head>
+  <style>
+      #svgContainer,
+      html {
+          background-color: rgba(255,255,255,0)//透明背景
+      }
+      html {
+          margin: 0;
+          padding: 0
+      }
+      body,
+      html {
+          overflow: hidden
+      }
+      #svgContainer {
+          width: 55px;
+          height: 55px;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto
+      }
+  </style>
+  </head>
+  <body>
+      <div id="svgContainer"></div>
+      <script src="https://www.lottiefiles.com/js/lottie.min.js"></script>
+      <script>
+          var animationData = ${JSON.stringify(getCache("starJson", []))};//在这修改应用的动画json
+          var svgContainer = document.getElementById("svgContainer");
+          animItem = bodymovin.loadAnimation({ wrapper: svgContainer, animType: "svg", loop: !0, animationData: JSON.parse(animationData) });
+          if(${exist} == true) {
+            animItem.goToAndStop(76,true);
+          } else
+            animItem.stop();//初始状态是停止的
+      </script>
+  </body>
+  </html>`
   superView.add({
     type: "view",
     props: {
@@ -2940,7 +3026,7 @@ function showInfoView(superView, data) {
         type: "image",
         props: {
           bgcolor: $color("clear"),
-          radius: 12,
+          smoothRadius: 13,
           size: $size(50, 50),
           src: data.icon.src,
         },
@@ -2950,6 +3036,57 @@ function showInfoView(superView, data) {
           make.size.equalTo($size(50, 50))
         }
       },{
+        type:'view',
+        props:{
+          userInteractionEnabled: true,
+          bgcolor: $color('clear'),
+        },
+        views: [{
+          type: 'web',
+          props: {
+            id: "starWeb",
+            scrollEnabled: false,
+            showsProgress: false,
+            transparent: false,
+            userInteractionEnabled: false,
+            html: html,
+          },
+          layout: $layout.fill,
+        }],
+        layout: function(make, view) {
+          make.top.equalTo(view.prev)
+          make.right.inset(30)
+          make.size.equalTo($size(50, 50))
+        },
+        events:{
+          tapped:(sender)=>{
+            if(exist){
+              $('starWeb').eval({
+                script: `animItem.stop()`,
+                handler: function(result, error) {
+                  deleteLocalItem(data)
+                }
+              })
+            } else {
+              $device.taptic(1);
+              $delay(0.4, function() {
+                $device.taptic(1);
+              });
+              $('starWeb').eval({
+                script: `
+                  animItem.play();
+                  animItem.setSpeed(2);
+                  animItem.loop = 0;
+                  `,
+                handler: function(result, error) {
+                  addToLocal(data)
+                }
+              })
+            }
+            exist = !exist
+          },
+        },
+      },{
         type: "label",
         props: {
           text: data.title.text,
@@ -2958,9 +3095,9 @@ function showInfoView(superView, data) {
           align: $align.left,
         },
         layout: function(make, view) {
-          make.left.equalTo(view.prev.right).inset(15)
-          make.right.inset(30)
-          make.top.equalTo(view.prev.top).inset(2)
+          make.left.equalTo(view.prev.prev.right).inset(15)
+          make.right.equalTo(view.prev.left).inset(0)
+          make.top.equalTo(view.prev.prev.top).inset(2)
         }
       },
       {
@@ -2969,48 +3106,30 @@ function showInfoView(superView, data) {
           text: data.url,
           font: $font(15),
           textColor: $color("#aaaaaa"),
+          bgcolor: $color("clear"),
           align: $align.left,
           userInteractionEnabled: true,
         },
         layout: function(make, view) {
           make.left.equalTo(view.prev.left)
-          make.right.inset(30)
-          make.bottom.equalTo(view.prev.prev.bottom).inset(3)
+          make.right.equalTo(view.prev.prev.left).inset(0)
+          make.bottom.equalTo(view.prev.prev.prev.bottom).inset(3)
         },
-        views: [{
-          type: "gradient",
-          props: {
-            colors: [$rgba(246,246,246,0.0), $rgba(246,246,246,1.0)],
-            locations: [0.0, 0.4],
-            startPoint: $point(0, 0.5),
-            endPoint: $point(1, 0.5),
-          },
-          layout: function(make, view) {
-            make.right.inset(0)
-            make.height.equalTo(view.super)
-            make.width.equalTo(45)
-            make.centerY.equalTo(view.super)
-          },
-          views: [{
-            type: "button",
-            props: {
-              title: "复制",
-              font: $font(13),
-              titleColor: $color(mColor.blue),
-              bgcolor: $color("clear"),
-              radius: 0,
-              contentEdgeInsets: $insets(2, 5, 2, 5),
-            },
-            layout: $layout.fill,
-            events: {
-              tapped: function(sender) {
-                $device.taptic(0)
-                $clipboard.text = data.url
-                showToastView($("windowView"), mColor.green, "复制成功", 0.2)
+        events: {
+          tapped: function(sender) {
+            $device.taptic(0)
+            $clipboard.text = data.url
+            sender.bgcolor = $color("#aaaaaa")
+            sender.textColor = $color("#f6f6f6")
+            $delay(0.15, function(){
+              if(sender != undefined) {
+                sender.bgcolor = $color("clear")
+                sender.textColor = $color("#aaaaaa")
               }
-            }
-          }],
-        }]
+            })
+            showToastView($("windowView"), mColor.green, "复制成功", 0.2)
+          }
+        },
       },{
         type: "label",
         props: {
@@ -3037,11 +3156,11 @@ function showInfoView(superView, data) {
       },{
         type: "button",
         props: {
-          title: exist?"本地已存在":"添加到本地",
-          bgcolor: exist?$color("clear"):$color("#3897E6"),
-          borderColor: exist?$color(mColor.gray):$color("clear"),
-          borderWidth: exist?1:0,
-          titleColor: exist?$color(mColor.gray):$color("white"),
+          title: "直接打开",
+          bgcolor: $color("#3897E6"),
+          borderColor: $color("clear"),
+          borderWidth: 0,
+          titleColor: $color("white"),
         },
         layout: function(make, view) {
           make.left.right.inset(25)
@@ -3050,16 +3169,26 @@ function showInfoView(superView, data) {
         },
         events: {
           tapped: function(sender) {
-            if(!exist) {
-              $device.taptic(0)
-              exist = !exist
-              sender.title = "本地已存在"
-              sender.bgcolor = $color("clear")
-              sender.borderColor = $color(mColor.gray)
-              sender.borderWidth = 1
-              sender.titleColor = $color(mColor.gray)
-              addToLocal(data)
-            }
+            $device.taptic(0)
+            myOpenUrl(data.url)
+            resumeAction = 3
+            $thread.background({
+              delay: 0.1,
+              handler: function() {
+                if(resumeAction == 3) {
+                  resumeAction = 0
+                  sender.title = "未安装对应APP"
+                  sender.bgcolor = $color(mColor.red)
+                  $device.taptic(2)
+                  $delay(0.6, function(){
+                    if(sender != undefined) {
+                      sender.bgcolor = $color("#3897E6")
+                      sender.title = "直接打开"
+                    }
+                  })
+                }
+              }
+            })
           }
         }
       }],
@@ -3099,6 +3228,20 @@ function showInfoView(superView, data) {
         $("infoView").remove();
       }
     });
+  }
+}
+
+function checkStarJson() {
+  if(getCache("starJson") === undefined) {
+    $http.download({
+      url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/star.json",
+      showsProgress: false,
+      handler: function(resp) {
+        if(resp.data.string) {
+          $cache.set("starJson", resp.data.string)
+        }
+      }
+    })
   }
 }
 
