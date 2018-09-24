@@ -1,15 +1,16 @@
 /**
- * @Version 4.2
+ * @Version 4.3
  * @author Liu Guo
- * @date 2018.9.11
+ * @date 2018.9.24
  * @brief
- *   1. 优化启动授权方式
+ *   1. 增加启动器中下拉关闭功能（默认开启）
+ *   2. 多项优化
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.2
+let appVersion = 4.3
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -233,6 +234,471 @@ function setupView() {
       })
     })
   }
+  let lastTran = ""
+  let colorInst = [randomColor(), $rgba(255, 255, 255, 0.0), randomColor()]
+  let cardView = {
+    type: "view",
+    props: {
+      id: "card",
+      bgcolor: $color("white"),
+      borderColor: $rgba(100, 100, 100, 0.4),
+      borderWidth: 0,
+      clipsToBounds: false,
+    },
+    layout: function(make, view) {
+      make.left.right.inset(10)
+      if($app.env == $env.today) {
+        make.height.equalTo(cardHeight)
+      } else {
+        make.top.inset(50)
+        if($device.info.version >= "11"){
+          make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+        } else {
+          make.bottom.inset(50)
+        }
+      }
+      make.center.equalTo(view.super)
+      shadow(view)
+    },
+    events: {
+      tapped: function(sender) {
+        $("text").blur()
+        $("result").blur()
+      }
+    },
+    views: [{
+      type: "gradient",
+      props: {
+        colors: colorInst,
+        locations: [0.0, 0.5, 1.0],
+        smoothRadius: 10,
+        startPoint: $point(0.1, 0),
+        endPoint: $point(0.7, 1),
+        hidden: !getCache("showColor", true)
+      },
+      layout: $layout.fill,
+    },
+    {
+      type: "blur",
+      props: {
+        style: 1,
+        smoothRadius: 10,
+        hidden: !getCache("showColor", true)
+      },
+      layout: $layout.fill
+    },
+    {
+      type: "label",
+      props: {
+        id: "title",
+        text: "中英互译",
+        align: $align.center,
+        textColor: $color("#333333"),
+        font: $font(20),
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.center)
+        make.top.inset(15)
+      }
+    },
+    {
+      type: "label",
+      props: {
+        id: "version",
+        text: "V" + appVersion,
+        align: $align.center,
+        textColor: $color("#333333"),
+        font: $font(8),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.left.inset(40)
+        make.bottom.inset(10)
+      }
+    },
+    {
+      type: "label",
+      props: {
+        id: "copyright",
+        text: "Linger",
+        align: $align.center,
+        textColor: $color("#333333"),
+        font: $font(8),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.right.inset(40)
+        make.bottom.inset(10)
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "translate",
+        title: "翻译",
+        bgcolor: $color("clear"),
+        borderColor: $rgba(90, 90, 90, 0.6),
+        borderWidth: 1,
+        titleColor: $rgba(90, 90, 90, 0.6),
+        font: $font(15),
+        titleEdgeInsets: $insets(2, 5, 2, 5)
+      },
+      layout: function(make, view) {
+        make.width.equalTo(50)
+        make.height.equalTo(25)
+        make.bottom.inset(20)
+        make.centerX.equalTo(view.super)
+      },
+      events: {
+        tapped: function(sender) {
+          $device.taptic(1)
+          $("result").text = ""
+          translate($("text").text)
+        }
+      }
+    },
+    {
+      type: "view",
+      layout: function(make, view) {
+        make.centerX.equalTo(view.center)
+        make.top.equalTo($("title").bottom)
+        make.bottom.equalTo($("translate").top)
+        make.left.right.inset(0)
+      },
+      views: [{
+        type: "view",
+        layout: function(make, view) {
+          make.centerX.equalTo(view.center)
+          make.top.inset(0)
+          make.left.right.inset(0)
+          make.height.equalTo(view.super).multipliedBy(0.5)
+        },
+        views: [{
+          type: "text",
+          props: {
+            id: "text",
+            text: "",
+            align: $align.left,
+            radius: 5,
+            textColor: $color("#333333"),
+            font: $font(15),
+            borderColor: $rgba(90, 90, 90, 0.6),
+            borderWidth: 1,
+            insets: $insets(5,5,5,5),
+            alwaysBounceVertical: false,
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            if($app.env == $env.today) {
+              make.top.inset(15)
+            } else {
+              make.top.inset(20)
+            }
+            if($app.env == $env.today) {
+              make.bottom.inset(7.5)
+            } else {
+              make.bottom.inset(10)
+            }
+            make.left.right.inset(20)
+          },
+          events:{
+            didBeginEditing: function(sender) {
+              $("textDrop1").hidden = false
+              $("textSpeech1").hidden = false
+              $("speechInput").hidden = false
+              // $("ocr").hidden = false
+              $("speechLan").hidden = false
+            },
+            didEndEditing: function(sender) {
+              $("textDrop1").hidden = true
+              $("textSpeech1").hidden = true
+              $("speechInput").hidden = true
+              // $("ocr").hidden = true
+              $("speechLan").hidden = true
+              if(lastTran !== sender.text) {
+                translate(sender.text)
+              }
+              lastTran = sender.text
+            },
+          },
+        },]
+      },{
+        type: "view",
+        layout: function(make, view) {
+          make.centerX.equalTo(view.center)
+          make.bottom.inset(0)
+          make.left.right.inset(0)
+          make.height.equalTo(view.super).multipliedBy(0.5)
+        },
+        views: [{
+          type: "text",
+          props: {
+            id: "result",
+            text: "",
+            align: $align.left,
+            radius: 5,
+            textColor: $color("#333333"),
+            font: $font(15),
+            borderColor: $rgba(90, 90, 90, 0.6),
+            borderWidth: 1,
+            editable: true,
+            bgcolor: $color("#F3F4F5"),//$rgba(100, 100, 100, 0.07),
+            alwaysBounceVertical: false,
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            if($app.env == $env.today) {
+              make.bottom.inset(15)
+            } else {
+              make.bottom.inset(20)
+            }
+            if($app.env == $env.today) {
+              make.top.inset(7.5)
+            } else {
+              make.top.inset(10)
+            }
+            make.left.right.inset(20)
+          },
+          events:{
+            didBeginEditing: function(sender) {
+              $("textCopy2").hidden = false
+              $("textSpeech2").hidden = false
+            },
+            didEndEditing: function(sender) {
+              $("textCopy2").hidden = true
+              $("textSpeech2").hidden = true
+            },
+          },
+        },],
+      },]
+    },
+    
+    {
+      type: "button",
+      props: {
+        id: "textDrop1",
+        borderColor: $rgba(255, 255, 255, 0.0),
+        borderWidth: 1,
+        bgcolor: $rgba(255, 255, 255, 0.0),
+        icon: $icon("027", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("text").top).inset(5)
+        make.right.equalTo($("text").right).inset(5)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          $("text").text = ""
+          $("result").text = ""
+          $device.taptic(2)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "textSpeech1",
+        borderColor: $color("clear"),
+        borderWidth: 1,
+        bgcolor: $color("clear"),
+        icon: $icon("012", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.bottom.equalTo($("text").bottom).inset(5)
+        make.right.equalTo($("text").right).inset(5)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          speechText($("text").text)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "speechInput",
+        borderColor: $color("clear"),
+        borderWidth: 1,
+        bgcolor: $color("clear"),
+        icon: $icon("044", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("textSpeech1").top)
+        make.right.equalTo($("textSpeech1").left).inset(15)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          $app.tips("长按录音按钮可以切换语言")
+          let language = ($("speechLan").text == "英")?"en-US":"zh-CN"
+          if($app.env != $env.app) {
+            $app.openURL("jsbox://run?name=" + encodeURI(currentName()) + "&action=inputSpeech");
+          } else {
+            $input.speech({
+              locale: language,
+              handler:function(text) {
+                translate(text)
+              }
+            })
+          }
+        },
+        longPressed: function(sender) {
+          if($("speechLan").text == "英") {
+            $("speechLan").text = "中"
+            $cache.set("speechLan", "中")
+          } else {
+            $("speechLan").text = "英"
+            $cache.set("speechLan", "英")
+          }
+          $device.taptic(2)
+        }
+      }
+    },
+    {
+      type: "label",
+      props: {
+        id: "speechLan",
+        text: getSpeechLan(),
+        textColor: $rgba(200, 100, 100, 0.8),
+        font: $font("bold", 8),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.right.equalTo($("speechInput").right)
+        make.bottom.equalTo($("speechInput").bottom)
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "ocr",
+        borderColor: $color("clear"),
+        borderWidth: 1,
+        bgcolor: $color("clear"),
+        icon: $icon("018", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("speechInput").top)
+        make.right.equalTo($("speechInput").left).inset(15)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          $photo.prompt({
+            handler: function(resp) {
+              var image = resp.image
+            }
+          })
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "textCopy2",
+        borderColor: $color("clear"),
+        borderWidth: 1,
+        bgcolor: $color("clear"),
+        icon: $icon("019", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("result").top).inset(5)
+        make.right.equalTo($("result").right).inset(5)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          copy($("result").text)
+          $device.taptic(2)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "textSpeech2",
+        borderColor: $color("clear"),
+        borderWidth: 1,
+        bgcolor: $color("clear"),
+        icon: $icon("012", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.bottom.equalTo($("result").bottom).inset(5)
+        make.right.equalTo($("result").right).inset(5)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          speechText($("result").text)
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "tools",
+        bgcolor: $color("clear"),
+        icon: $icon("102", $rgba(100, 100, 100, 0.4), $size(20, 20)),
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.top.inset(17)
+        make.left.inset(20)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          $ui.menu({
+            items: ["截图分享"],
+            handler: function(title, idx) {
+              switch(idx) {
+                case 0: share()
+                  break
+              }
+            }
+          })
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "setting",
+        bgcolor: $color("clear"),
+        icon: $icon("002", $rgba(100, 100, 100, 0.4), $size(20, 20)),
+      },
+      layout: function(make, view) {
+        make.top.inset(17)
+        make.right.inset(20)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          if(isInToday()) {
+            $app.openURL("jsbox://run?name=" + encodeURI(currentName()));
+          } else 
+            setupSetting()
+        }
+      }
+    }]
+  }
+  let wantToClose = false
   $ui.render({
     props: {
       title: "中英互译",
@@ -253,475 +719,54 @@ function setupView() {
       },
     },
     {
-      type: "view",
+      type: "scroll",
       props: {
-        id: "card",
-        bgcolor: $color("white"),
-        borderColor: $rgba(100, 100, 100, 0.4),
-        borderWidth: 0,
-        clipsToBounds: false,
+        id: "scrollView",
+        scrollEnabled: (isInToday() && getCache("pullToClose", true)),
       },
       layout: function(make, view) {
-        make.left.right.inset(10)
-        if($app.env == $env.today) {
-          make.height.equalTo(cardHeight)
-        } else {
-          make.top.inset(50)
-          if($device.info.version >= "11"){
-            make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
-          } else {
-            make.bottom.inset(50)
-          }
-        }
         make.center.equalTo(view.super)
-        shadow(view)
+        make.width.equalTo(view.super)
+        make.height.equalTo(view.super)
       },
+      views: [cardView],
       events: {
-        tapped: function(sender) {
-          $("text").blur()
-          $("result").blur()
-        }
-      },
-      views: [{
-        type: "gradient",
-        props: {
-          colors: [randomColor(), $rgba(255, 255, 255, 0.0), randomColor()],
-          locations: [0.0, 0.5, 1.0],
-          smoothRadius: 10,
-          startPoint: $point(0.1, 0),
-          endPoint: $point(0.7, 1),
-          hidden: !getCache("showColor", true)
-        },
-        layout: $layout.fill,
-      },
-      {
-        type: "blur",
-        props: {
-          style: 1,
-          smoothRadius: 10,
-          hidden: !getCache("showColor", true)
-        },
-        layout: $layout.fill
-      },
-      {
-        type: "label",
-        props: {
-          id: "title",
-          text: "中英互译",
-          align: $align.center,
-          textColor: $color("#333333"),
-          font: $font(20),
-        },
-        layout: function(make, view) {
-          make.centerX.equalTo(view.center)
-          make.top.inset(15)
-        }
-      },
-      {
-        type: "label",
-        props: {
-          id: "version",
-          text: "V" + appVersion,
-          align: $align.center,
-          textColor: $color("#333333"),
-          font: $font(8),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.left.inset(40)
-          make.bottom.inset(10)
-        }
-      },
-      {
-        type: "label",
-        props: {
-          id: "copyright",
-          text: "Linger",
-          align: $align.center,
-          textColor: $color("#333333"),
-          font: $font(8),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.right.inset(40)
-          make.bottom.inset(10)
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "translate",
-          title: "翻译",
-          bgcolor: $color("clear"),
-          borderColor: $rgba(90, 90, 90, 0.6),
-          borderWidth: 1,
-          titleColor: $rgba(90, 90, 90, 0.6),
-          font: $font(15),
-          titleEdgeInsets: $insets(2, 5, 2, 5)
-        },
-        layout: function(make, view) {
-          make.width.equalTo(50)
-          make.height.equalTo(25)
-          make.bottom.inset(20)
-          make.centerX.equalTo(view.super)
-        },
-        events: {
-          tapped: function(sender) {
-            $device.taptic(1)
-            $("result").text = ""
-            translate($("text").text)
-          }
-        }
-      },
-      {
-        type: "view",
-        layout: function(make, view) {
-          make.centerX.equalTo(view.center)
-          make.top.equalTo($("title").bottom)
-          make.bottom.equalTo($("translate").top)
-          make.left.right.inset(0)
-        },
-        views: [{
-          type: "view",
-          layout: function(make, view) {
-            make.centerX.equalTo(view.center)
-            make.top.inset(0)
-            make.left.right.inset(0)
-            make.height.equalTo(view.super).multipliedBy(0.5)
-          },
-          views: [{
-            type: "text",
-            props: {
-              id: "text",
-              text: "",
-              align: $align.left,
-              radius: 5,
-              textColor: $color("#333333"),
-              font: $font(15),
-              borderColor: $rgba(90, 90, 90, 0.6),
-              borderWidth: 1,
-              insets: $insets(5,5,5,5),
-              alwaysBounceVertical: false,
-            },
-            layout: function(make, view) {
-              make.centerX.equalTo(view.super)
-              if($app.env == $env.today) {
-                make.top.inset(15)
-              } else {
-                make.top.inset(20)
-              }
-              if($app.env == $env.today) {
-                make.bottom.inset(7.5)
-              } else {
-                make.bottom.inset(10)
-              }
-              make.left.right.inset(20)
-            },
-            events:{
-              didBeginEditing: function(sender) {
-                $("textDrop1").hidden = false
-                $("textSpeech1").hidden = false
-                $("speechInput").hidden = false
-                // $("ocr").hidden = false
-                $("speechLan").hidden = false
-              },
-              didEndEditing: function(sender) {
-                $("textDrop1").hidden = true
-                $("textSpeech1").hidden = true
-                $("speechInput").hidden = true
-                // $("ocr").hidden = true
-                $("speechLan").hidden = true
-                translate(sender.text)
-              },
-            },
-          },]
-        },{
-          type: "view",
-          layout: function(make, view) {
-            make.centerX.equalTo(view.center)
-            make.bottom.inset(0)
-            make.left.right.inset(0)
-            make.height.equalTo(view.super).multipliedBy(0.5)
-          },
-          views: [{
-            type: "text",
-            props: {
-              id: "result",
-              text: "",
-              align: $align.left,
-              radius: 5,
-              textColor: $color("#333333"),
-              font: $font(15),
-              borderColor: $rgba(90, 90, 90, 0.6),
-              borderWidth: 1,
-              editable: true,
-              bgcolor: $color("#F3F4F5"),//$rgba(100, 100, 100, 0.07),
-              alwaysBounceVertical: false,
-            },
-            layout: function(make, view) {
-              make.centerX.equalTo(view.super)
-              if($app.env == $env.today) {
-                make.bottom.inset(15)
-              } else {
-                make.bottom.inset(20)
-              }
-              if($app.env == $env.today) {
-                make.top.inset(7.5)
-              } else {
-                make.top.inset(10)
-              }
-              make.left.right.inset(20)
-            },
-            events:{
-              didBeginEditing: function(sender) {
-                $("textCopy2").hidden = false
-                $("textSpeech2").hidden = false
-              },
-              didEndEditing: function(sender) {
-                $("textCopy2").hidden = true
-                $("textSpeech2").hidden = true
-              },
-            },
-          },],
-        },]
-      },
-      
-      {
-        type: "button",
-        props: {
-          id: "textDrop1",
-          borderColor: $rgba(255, 255, 255, 0.0),
-          borderWidth: 1,
-          bgcolor: $rgba(255, 255, 255, 0.0),
-          icon: $icon("027", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.top.equalTo($("text").top).inset(5)
-          make.right.equalTo($("text").right).inset(5)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            $("text").text = ""
-            $("result").text = ""
-            $device.taptic(2)
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "textSpeech1",
-          borderColor: $color("clear"),
-          borderWidth: 1,
-          bgcolor: $color("clear"),
-          icon: $icon("012", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.bottom.equalTo($("text").bottom).inset(5)
-          make.right.equalTo($("text").right).inset(5)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            speechText($("text").text)
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "speechInput",
-          borderColor: $color("clear"),
-          borderWidth: 1,
-          bgcolor: $color("clear"),
-          icon: $icon("044", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.top.equalTo($("textSpeech1").top)
-          make.right.equalTo($("textSpeech1").left).inset(15)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            $app.tips("长按录音按钮可以切换语言")
-            let language = ($("speechLan").text == "英")?"en-US":"zh-CN"
-            if($app.env != $env.app) {
-              $app.openURL("jsbox://run?name=" + encodeURI(currentName()) + "&action=inputSpeech");
-            } else {
-              $input.speech({
-                locale: language,
-                handler:function(text) {
-                  translate(text)
-                }
-              })
+        didScroll: function(sender) {
+          if($("scrollView").contentOffset.y < -25) {
+            if(!wantToClose) {
+              wantToClose = true
+              $device.taptic(2)
+              $("closeView").icon = $icon("225", colorInst[0], $size(17, 17))
+              $("closeView").titleColor = colorInst[0]
             }
-          },
-          longPressed: function(sender) {
-            if($("speechLan").text == "英") {
-              $("speechLan").text = "中"
-              $cache.set("speechLan", "中")
-            } else {
-              $("speechLan").text = "英"
-              $cache.set("speechLan", "英")
-            }
-            $device.taptic(2)
+          } else{
+            wantToClose = false
+            $("closeView").icon = $icon("225", $rgba(100, 100, 100, 0.4), $size(17, 17))
+            $("closeView").titleColor = $rgba(100, 100, 100, 0.4)
+          }
+        },
+        didEndDragging: function(sender, decelerate) {
+          if(wantToClose) {
+            $app.close()
           }
         }
-      },
-      {
-        type: "label",
-        props: {
-          id: "speechLan",
-          text: getSpeechLan(),
-          textColor: $rgba(200, 100, 100, 0.8),
-          font: $font("bold", 8),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.right.equalTo($("speechInput").right)
-          make.bottom.equalTo($("speechInput").bottom)
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "ocr",
-          borderColor: $color("clear"),
-          borderWidth: 1,
-          bgcolor: $color("clear"),
-          icon: $icon("018", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.top.equalTo($("speechInput").top)
-          make.right.equalTo($("speechInput").left).inset(15)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            $photo.prompt({
-              handler: function(resp) {
-                var image = resp.image
-              }
-            })
-          }
-        }
-      },
-      
-      {
-        type: "button",
-        props: {
-          id: "textCopy2",
-          borderColor: $color("clear"),
-          borderWidth: 1,
-          bgcolor: $color("clear"),
-          icon: $icon("019", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.top.equalTo($("result").top).inset(5)
-          make.right.equalTo($("result").right).inset(5)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            copy($("result").text)
-            $device.taptic(2)
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "textSpeech2",
-          borderColor: $color("clear"),
-          borderWidth: 1,
-          bgcolor: $color("clear"),
-          icon: $icon("012", $rgba(100, 100, 100, 0.3), $size(20, 20)),
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.bottom.equalTo($("result").bottom).inset(5)
-          make.right.equalTo($("result").right).inset(5)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            speechText($("result").text)
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "tools",
-          bgcolor: $color("clear"),
-          icon: $icon("102", $rgba(100, 100, 100, 0.4), $size(20, 20)),
-          hidden: false,
-        },
-        layout: function(make, view) {
-          make.top.inset(17)
-          make.left.inset(20)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.menu({
-              items: ["截图分享"],
-              handler: function(title, idx) {
-                switch(idx) {
-                  case 0: share()
-                    break
-                }
-              }
-            })
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "setting",
-          bgcolor: $color("clear"),
-          icon: $icon("002", $rgba(100, 100, 100, 0.4), $size(20, 20)),
-        },
-        layout: function(make, view) {
-          make.top.inset(17)
-          make.right.inset(20)
-          make.width.equalTo(20)
-          make.height.equalTo(20)
-        },
-        events: {
-          tapped: function(sender) {
-            setupSetting()
-          }
-        }
-      }]
-    },
-    {
+      }
+    },{
       type: "button",
       props: {
-        title: "CLOSE",
+        id: "closeView",
+        title: " CLOSE",
         bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
+        icon: $icon("225", $rgba(100, 100, 100, 0.4), $size(17, 17)),
+        titleColor: $rgba(100, 100, 100, 0.4),
+        font: $font("bold", 15),
         hidden: !isInToday(),
+        radius: 15,
       },
       layout: function(make, view) {
         make.centerX.equalTo(view.super)
-        make.bottom.equalTo($("card").top).inset(1)
-        make.width.equalTo(120)
+        make.bottom.equalTo($("card").top).inset((getCache("pullToClose", true)?5:1))
+        make.width.equalTo(80)
         make.height.equalTo(30)
       },
       events: {
@@ -733,7 +778,7 @@ function setupView() {
     }]
   })
   if(isInToday()) {
-    $widget.height = cardHeight + 70
+    $widget.height = cardHeight + ((getCache("pullToClose", true))?20:70)
   }
 }
 
@@ -798,7 +843,43 @@ function setupSetting() {
         },
         events: {
           changed: function(sender) {
-              $cache.set("showUi", sender.on)
+            $cache.set("showUi", sender.on)
+          }
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
+  const tabPullToCloseItem = {
+    type: "view",
+    props: {
+
+    },
+    views: [{
+        type: "label",
+        props: {
+          id: "tabPullToCloseLabel",
+          text: "下拉卡片关闭",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "switch",
+        props: {
+          id: "tabPullToCloseSwitch",
+          on: getCache("pullToClose", true),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+            $cache.set("pullToClose", sender.on)
           }
         }
       }
@@ -867,10 +948,10 @@ function setupSetting() {
         },
         events: {
           changed: function(sender) {
-              $cache.set("showColor", sender.on)
-              $delay(0.3, function() {
-                $app.openExtension($addin.current.name)
-              })
+            $cache.set("showColor", sender.on)
+            $delay(0.3, function() {
+              $app.openExtension($addin.current.name)
+            })
           }
         }
       }
@@ -967,7 +1048,7 @@ function setupSetting() {
         data: [
           {
             title: "界面",
-            rows: [tabShowUiItem, tabShowColorItem]
+            rows: [tabShowUiItem, tabPullToCloseItem, tabShowColorItem]
           },
           {
             title: "关于",
