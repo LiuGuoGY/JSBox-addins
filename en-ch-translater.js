@@ -1,16 +1,17 @@
 /**
- * @Version 4.3
+ * @Version 4.4
  * @author Liu Guo
- * @date 2018.9.24
+ * @date 2018.9.29
  * @brief
- *   1. 增加启动器中下拉关闭功能（默认开启）
- *   2. 多项优化
+ *   1. 修复作为键盘时无法翻译的问题
+ *   2. 增加英式美式发音（翻译英语单词时）
+ *   3. 界面微调
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.3
+let appVersion = 4.4
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -109,8 +110,8 @@ function detectContent() {
   let selectedText = ""
   let copyedText = $clipboard.text
   let preCopyed = $clipboard.text
-  var timer = $timer.schedule({
-    interval: 0.2,
+  $timer.schedule({
+    interval: 0.1,
     handler: function() {
       selectedText = $keyboard.selectedText
       copyedText = $clipboard.text
@@ -125,6 +126,7 @@ function detectContent() {
           preCopyed = copyedText
         }
       }
+      
     }
   })
 }
@@ -133,6 +135,7 @@ function setupKeyBdView() {
   $ui.render({
     props: {
       title: "中英互译",
+      bgcolor: $color("white"),
     },
     views: [{
       type: "gradient",
@@ -163,11 +166,11 @@ function setupKeyBdView() {
         radius: 10,
         textColor: $color("#333333"),
         font: $font(15),
-        borderColor: $rgba(90, 90, 90, 0.6),
+        borderColor: $rgba(100, 100, 100, 0.4),
         borderWidth: 1,
         editable: false,
         selectable: false,
-        bgcolor: $color("#F3F4F5"),
+        bgcolor: $color("#F4F4F4"),
         alwaysBounceVertical: false,
       },
       layout: function(make, view) {
@@ -264,7 +267,7 @@ function setupView() {
       tapped: function(sender) {
         $("text").blur()
         $("result").blur()
-      }
+      },
     },
     views: [{
       type: "gradient",
@@ -337,9 +340,9 @@ function setupView() {
         id: "translate",
         title: "翻译",
         bgcolor: $color("clear"),
-        borderColor: $rgba(90, 90, 90, 0.6),
+        borderColor: $rgba(100, 100, 100, 0.5),
         borderWidth: 1,
-        titleColor: $rgba(90, 90, 90, 0.6),
+        titleColor: $rgba(100, 100, 100, 0.5),
         font: $font(15),
         titleEdgeInsets: $insets(2, 5, 2, 5)
       },
@@ -382,9 +385,10 @@ function setupView() {
             radius: 5,
             textColor: $color("#333333"),
             font: $font(15),
-            borderColor: $rgba(90, 90, 90, 0.6),
+            borderColor: $rgba(100, 100, 100, 0.4),
             borderWidth: 1,
             insets: $insets(5,5,5,5),
+            bgcolor: $color("#FFFFFF"),
             alwaysBounceVertical: false,
           },
           layout: function(make, view) {
@@ -406,14 +410,14 @@ function setupView() {
               $("textDrop1").hidden = false
               $("textSpeech1").hidden = false
               $("speechInput").hidden = false
-              // $("ocr").hidden = false
+              $("ocr").hidden = false
               $("speechLan").hidden = false
             },
             didEndEditing: function(sender) {
               $("textDrop1").hidden = true
               $("textSpeech1").hidden = true
               $("speechInput").hidden = true
-              // $("ocr").hidden = true
+              $("ocr").hidden = true
               $("speechLan").hidden = true
               if(lastTran !== sender.text) {
                 translate(sender.text)
@@ -439,10 +443,10 @@ function setupView() {
             radius: 5,
             textColor: $color("#333333"),
             font: $font(15),
-            borderColor: $rgba(90, 90, 90, 0.6),
+            borderColor: $rgba(100, 100, 100, 0.4),
             borderWidth: 1,
             editable: true,
-            bgcolor: $color("#F3F4F5"),//$rgba(100, 100, 100, 0.07),
+            bgcolor: $color("#F4F4F4"),//$rgba(100, 100, 100, 0.07),
             alwaysBounceVertical: false,
           },
           layout: function(make, view) {
@@ -515,7 +519,17 @@ function setupView() {
       },
       events: {
         tapped: function(sender) {
-          speechText($("text").text)
+          if(sender.info != undefined && sender.info.length == 2) {
+            $audio.play({
+              url: sender.info[0],
+              events: {
+                didPlayToEndTime: function() {
+                  $audio.play({url: sender.info[1]})
+                },
+              }
+            })
+          } else 
+            speechText($("text").text)
         }
       }
     },
@@ -594,11 +608,15 @@ function setupView() {
       },
       events: {
         tapped: function(sender) {
-          $photo.prompt({
-            handler: function(resp) {
-              var image = resp.image
-            }
-          })
+          // $photo.prompt({
+          //   handler: function(resp) {
+          //     var image = resp.image
+          //   }
+          // })
+          $ui.alert({
+            title: "敬请期待",
+            message: "ocr",
+          });
         }
       }
     },
@@ -691,7 +709,18 @@ function setupView() {
       events: {
         tapped: function(sender) {
           if(isInToday()) {
-            $app.openURL("jsbox://run?name=" + encodeURI(currentName()));
+            $ui.menu({
+              items: ["设置"],
+              handler: function(title, idx) {
+                switch(idx) {
+                  case 0:
+                    $delay(0.2, function(){
+                      $app.openURL("jsbox://run?name=" + encodeURI(currentName() + "&action=setting"));
+                    })
+                    break
+                }
+              }
+            })
           } else 
             setupSetting()
         }
@@ -736,8 +765,13 @@ function setupView() {
             if(!wantToClose) {
               wantToClose = true
               $device.taptic(2)
-              $("closeView").icon = $icon("225", colorInst[0], $size(17, 17))
-              $("closeView").titleColor = colorInst[0]
+              if (getCache("showColor", true)) {
+                $("closeView").icon = $icon("225", colorInst[0], $size(17, 17))
+                $("closeView").titleColor = colorInst[0]
+              } else {
+                $("closeView").icon = $icon("225", $color("#666666"), $size(17, 17))
+                $("closeView").titleColor = $color("#666666")
+              }
             }
           } else{
             wantToClose = false
@@ -749,7 +783,7 @@ function setupView() {
           if(wantToClose) {
             $app.close()
           }
-        }
+        },
       }
     },{
       type: "button",
@@ -1090,48 +1124,6 @@ function setupSetting() {
           }
         }
       }
-    },
-    {
-      type: "button",
-      props: {
-        title: "CLOSE",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.right.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("list").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $app.close(0.1)
-        }
-      }
-    },
-    {
-      type: "button",
-      props: {
-        title: "BACK",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.left.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("list").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $ui.pop()
-        }
-      }
     }]
   })
   requireInstallNumbers()
@@ -1359,48 +1351,6 @@ function setupReward() {
 
         }
       }
-    },
-    {
-      type: "button",
-      props: {
-        title: "CLOSE",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.right.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("reward").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $app.close(0.1)
-        }
-      }
-    },
-    {
-      type: "button",
-      props: {
-        title: "BACK",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.left.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("reward").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $ui.pop()
-        }
-      }
     }]
   })
   requireReward()
@@ -1489,48 +1439,6 @@ function setupWebView(title, url) {
         }
         make.width.equalTo(view.super)
       },
-    },
-    {
-      type: "button",
-      props: {
-        title: "CLOSE",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.right.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("webView").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $app.close(0.1)
-        }
-      }
-    },
-    {
-      type: "button",
-      props: {
-        title: "BACK",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.left.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("webView").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $ui.pop()
-        }
-      }
     }]
   })
 }
@@ -1651,48 +1559,6 @@ function setupFeedBack() {
           make.left.right.inset(20)
         },
       },]
-    },
-    {
-      type: "button",
-      props: {
-        title: "CLOSE",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.right.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("feedback").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $app.close(0.1)
-        }
-      }
-    },
-    {
-      type: "button",
-      props: {
-        title: "BACK",
-        bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
-        hidden: !isInToday(),
-      },
-      layout: function(make, view) {
-        make.left.inset(0)
-        make.width.equalTo(view.super).multipliedBy(0.5)
-        make.bottom.equalTo($("feedback").top).inset(1)
-        make.height.equalTo(30)
-      },
-      events: {
-        tapped: function(sender) {
-          $ui.pop()
-        }
-      }
     }]
   })
 }
@@ -1735,7 +1601,10 @@ function solveAction(action) {
           translate(text)
         }
       })
-      break
+    break
+    case "setting":
+      setupSetting()
+    break
     default:
   }
 }
@@ -1859,6 +1728,7 @@ function googleTran(text) {
     },
     showsProgress: false,
     handler: function(resp) {
+      $console.info(resp.data)
       myLoading(false)
       analyseGData(resp.data)
     }
@@ -1874,6 +1744,7 @@ function kingsoftTran(text) {
     timeout: 5,
     showsProgress: false,
     handler: function(resp) {
+      $console.info(resp.data)
       let data = resp.data
       if (data.status == 1) {
         myLoading(false)
@@ -1898,7 +1769,7 @@ function analyseGData(data) {
       }
       meanTitle += data.sentences[i].orig
     }
-    showResult(meanTitle, meanText)
+    showResult(meanTitle, meanText, undefined)
   }
 }
 
@@ -1915,7 +1786,11 @@ function analyseBData(data) {
       meanText += "\n"
     }
   }
-  showResult(data.word, meanText)
+  if(data.pronunciation != null) {
+    showResult(data.word, meanText, [data.pronunciation.BrEmp3, data.pronunciation.AmEmp3])
+  } else {
+    showResult(data.word, meanText, undefined)
+  }
 }
 
 //分析金山数据
@@ -1935,11 +1810,11 @@ function analyseKData(data) {
       meanText += "\n"
     }
   }
-  showResult(mess.key, meanText)
+  showResult(mess.key, meanText, undefined)
 }
 
 //展示翻译结果
-function showResult(title, msg) {
+function showResult(title, msg, sound) {
   if(!getCache("showUi", true) && $app.env == $env.today) {
     $ui.alert({
       title: shortDisplay(title),
@@ -1962,6 +1837,10 @@ function showResult(title, msg) {
     $("result").text = msg
     $device.taptic(0)
   } else {
+    $("textSpeech1").info = undefined
+    if(sound) {
+      $("textSpeech1").info = sound
+    }
     $("text").text = title
     $("result").text = msg
   }
@@ -2183,10 +2062,12 @@ function myLoading(text) {
   if($app.env == $env.today && !getCache("showUi", true)) {
     $ui.loading(text)
   } else {
-    if(text !== false) {
-      addLodingView($("card"), 40, text)
-    } else {
-      removeLoadingView()
+    if($("card") != undefined) {
+      if(text !== false) {
+        addLodingView($("card"), 40, text)
+      } else {
+        removeLoadingView()
+      }
     }
   }
 }
