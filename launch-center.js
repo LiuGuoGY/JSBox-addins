@@ -1,17 +1,15 @@
 /**
- * @version 4.8
+ * @version 4.9
  * @author Liu Guo
- * @date 2018.9.24
+ * @date 2018.9.30
  * @brief
- *   1. 现在启动器下拉关闭功能默认打开
- *   2. 微调主界面
- *   3. 改变启动器详情页样式
+ *   1. 修复收藏动画加载过慢的问题
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.8
+let appVersion = 4.9
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -2903,6 +2901,7 @@ function setupFeedBack() {
 
 function showInfoView(superView, data) {
   let exist = isExist(data)
+  let lottieJs = getCache("lottieJs", "")
   let html = `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -2938,7 +2937,7 @@ function showInfoView(superView, data) {
   </head>
   <body>
       <div id="svgContainer"></div>
-      <script src="https://www.lottiefiles.com/js/lottie.min.js"></script>
+      <script type="text/javascript">${lottieJs}</script>
       <script>
           var animationData = ${JSON.stringify(getCache("starJson", []))};//在这修改应用的动画json
           var svgContainer = document.getElementById("svgContainer");
@@ -3239,6 +3238,17 @@ function checkStarJson() {
       handler: function(resp) {
         if(resp.data.string) {
           $cache.set("starJson", resp.data.string)
+        }
+      }
+    })
+  }
+  if(getCache("lottieJs") === undefined) {
+    $http.download({
+      url: "https://www.lottiefiles.com/js/lottie.min.js",
+      showsProgress: false,
+      handler: function(resp) {
+        if(resp.data.string) {
+          $cache.set("lottieJs", resp.data.string)
         }
       }
     })
