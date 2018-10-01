@@ -1,17 +1,17 @@
 /**
- * @Version 4.4
+ * @Version 4.5
  * @author Liu Guo
- * @date 2018.9.29
+ * @date 2018.10.1
  * @brief
- *   1. 修复作为键盘时无法翻译的问题
- *   2. 增加英式美式发音（翻译英语单词时）
- *   3. 界面微调
+ *   1. 修复作为键盘时剪切板检测不起作用的问题
+ *   2. 键盘模式下，加入翻译结果上屏按钮
+ *   3. 其他优化
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.4
+let appVersion = 4.5
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -108,8 +108,8 @@ $app.listen({
 function detectContent() {
   let preSelected = ""
   let selectedText = ""
-  let copyedText = $clipboard.text
-  let preCopyed = $clipboard.text
+  let copyedText = ""
+  let preCopyed = ""
   $timer.schedule({
     interval: 0.1,
     handler: function() {
@@ -120,7 +120,8 @@ function detectContent() {
           translate(selectedText)
           preSelected = selectedText
         }
-      } else if (copyedText != preCopyed) {
+      }
+      if (copyedText != preCopyed) {
         if(copyedText != "" && copyedText != undefined) {
           translate(copyedText)
           preCopyed = copyedText
@@ -134,6 +135,7 @@ function detectContent() {
 function setupKeyBdView() {
   $ui.render({
     props: {
+      id: "card",
       title: "中英互译",
       bgcolor: $color("white"),
     },
@@ -152,7 +154,6 @@ function setupKeyBdView() {
       type: "blur",
       props: {
         style: 1,
-        radius: 10,
         hidden: !getCache("showColor", true)
       },
       layout: $layout.fill
@@ -206,7 +207,29 @@ function setupKeyBdView() {
           speechText($("result").text)
         }
       }
-    }]
+    },{
+      type: "button",
+      props: {
+        id: "textFly2",
+        borderColor: $color("clear"),
+        borderWidth: 1,
+        bgcolor: $color("clear"),
+        icon: $icon("047", $rgba(100, 100, 100, 0.3), $size(20, 20)),
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("result").top).inset(5)
+        make.right.equalTo($("result").right).inset(5)
+        make.width.equalTo(20)
+        make.height.equalTo(20)
+      },
+      events: {
+        tapped: function(sender) {
+          $keyboard.insert(delSquCha(($("result").text)))
+          $device.taptic(2)
+        }
+      }
+    },]
   })
 }
 
@@ -274,7 +297,7 @@ function setupView() {
       props: {
         colors: colorInst,
         locations: [0.0, 0.5, 1.0],
-        smoothRadius: 10,
+        smoothRadius: 12,
         startPoint: $point(0.1, 0),
         endPoint: $point(0.7, 1),
         hidden: !getCache("showColor", true)
@@ -412,6 +435,10 @@ function setupView() {
               $("speechInput").hidden = false
               $("ocr").hidden = false
               $("speechLan").hidden = false
+              if(isInToday() && getCache("pullToClose", true)) {
+                $("scrollView").runtimeValue().$setScrollEnabled(false)
+              }
+              
             },
             didEndEditing: function(sender) {
               $("textDrop1").hidden = true
@@ -423,6 +450,9 @@ function setupView() {
                 translate(sender.text)
               }
               lastTran = sender.text
+              if(isInToday() && getCache("pullToClose", true)) {
+                $("scrollView").runtimeValue().$setScrollEnabled(true)
+              }
             },
           },
         },]
@@ -467,16 +497,21 @@ function setupView() {
             didBeginEditing: function(sender) {
               $("textCopy2").hidden = false
               $("textSpeech2").hidden = false
+              if(isInToday() && getCache("pullToClose", true)) {
+                $("scrollView").runtimeValue().$setScrollEnabled(false)
+              }
             },
             didEndEditing: function(sender) {
               $("textCopy2").hidden = true
               $("textSpeech2").hidden = true
+              if(isInToday() && getCache("pullToClose", true)) {
+                $("scrollView").runtimeValue().$setScrollEnabled(true)
+              }
             },
           },
         },],
       },]
     },
-    
     {
       type: "button",
       props: {
@@ -2099,11 +2134,11 @@ function chooseEn(t1, t2) {
 //复制到剪贴板
 function copy(text) {
   $clipboard.text = delSquCha(text)
-  $text.tokenize({
-    text: $clipboard.text,
-    handler: function(results) {
-    }
-  })
+  // $text.tokenize({
+  //   text: $clipboard.text,
+  //   handler: function(results) {
+  //   }
+  // })
   $delay(0.1, function() {
     myToast("已复制到剪切板", 1)
   })
