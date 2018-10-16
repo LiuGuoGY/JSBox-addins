@@ -139,6 +139,12 @@ function setupTodayView() {
     views: showView,
   })
 
+  if(utils.getCache("pullToClose", true)) {
+    $widget.height = 215
+  } else {
+    $widget.height = 245
+  }
+
   if(utils.getCache("pullToClose", true) == true && !utils.getCache("isPullToCloseToasted", false)) {
     $cache.set("isPullToCloseToasted", true);
     $delay(1, function(){

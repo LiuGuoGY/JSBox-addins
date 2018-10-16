@@ -3,9 +3,6 @@ let utils = require('scripts/utils')
 let update = require('scripts/update')
 
 function show() {
-  let appVersion = 4.9
-  let appBuild = 40
-  let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
   let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
   let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
   let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
@@ -36,23 +33,9 @@ function show() {
       gray: $icon("002", $color(mColor.gray), $size(25, 25)),
     },
   ]
-
-  update.checkUpdate()
-  
   if ($app.env == $env.today) {
     if(utils.getCache("haveBanned") === true) {
       showBannedAlert()
-    } else {
-      if($app.widgetIndex == -1) {
-        setupTodayView()
-        if(utils.getCache("pullToClose", true)) {
-          $widget.height = 215
-        } else {
-          $widget.height = 245
-        }
-      } else {
-        setupWidgetView()
-      }
     }
   } else {
     uploadInstall()
@@ -60,16 +43,13 @@ function show() {
     if(!utils.getCache("haveBanned", false)) {
       main()
     } else {
-      showBannedAlert()
+      ui.showBannedAlert()
     }
   }
   
   function main() {
     setupMainView()
-    if (needCheckup()) {
-      checkupVersion()
-    }
-    checkStarJson()
+    update.checkUpdate()
   }
   
   $app.listen({
@@ -1341,7 +1321,7 @@ function show() {
     {
       type: "image",
       props: {
-        src: "https://i.loli.net/2018/10/14/5bc2f87b65ac8.png",
+        src: "assets/enter.png",
         bgcolor: $color("clear"),
       },
       layout: function(make, view) {
@@ -1466,7 +1446,7 @@ function show() {
           views: [{
             type: "image",
             props: {
-              src: "https://i.loli.net/2018/10/14/5bc2f87b65ac8.png",
+              src: "assets/enter.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
@@ -1528,7 +1508,7 @@ function show() {
           views: [{
             type: "image",
             props: {
-              src: "https://i.loli.net/2018/10/14/5bc2f87b65ac8.png",
+              src: "assets/enter.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
@@ -1639,7 +1619,7 @@ function show() {
       templateTitle: {
         text : "GitHub",
       },
-      url: "https://github.com/LiuGuoGY/JSBox-addins/blob/master/launch-center.js",
+      url: "https://github.com/LiuGuoGY/JSBox-addins/tree/master/launch-center-new",
     },
     {
       templateTitle: {
@@ -1741,7 +1721,7 @@ function show() {
             views: [{
               type: "label",
               props: {
-                text: "Version " + appVersion.toFixed(1) + " (Build " + appBuild + ") © Linger.",
+                text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
                 textColor: $color("#BBBBBB"),
                 align: $align.center,
                 font: $font(13)
@@ -1784,7 +1764,7 @@ function show() {
               setupWebView(titleText, title.url)
             } else {
               switch(indexPath.row) {
-                case 2: checkupVersion()
+                case 2: update.checkUpdate(true)
                   break
                 case 3: setupFeedBack()
                   break
@@ -1912,7 +1892,7 @@ function show() {
           views:[{
             type: "image",
             props: {
-              src: "https://i.loli.net/2018/10/14/5bc30ed15392f.png",
+              src: "assets/back.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
@@ -2030,7 +2010,7 @@ function show() {
           views:[{
             type: "image",
             props: {
-              src: "https://i.loli.net/2018/10/14/5bc30ed15392f.png",
+              src: "assets/back.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
@@ -2259,7 +2239,7 @@ function show() {
           views:[{
             type: "image",
             props: {
-              src: "https://i.loli.net/2018/10/14/5bc30ed15392f.png",
+              src: "assets/back.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
@@ -2286,12 +2266,12 @@ function show() {
         type: "scroll",
         props: {
           id: "uploadScroll",
-          alwaysBounceHorizontal: false,
           bgcolor: $color("#F9F9F8"),
+          showsVerticalIndicator: true,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
-          make.left.right.inset(0)
+          make.width.equalTo(view.super)
           make.top.equalTo(view.prev.bottom)
           if($device.info.version >= "11"){
             make.bottom.equalTo(view.super.safeAreaBottom)
@@ -2303,12 +2283,11 @@ function show() {
           type: "label",
           props: {
             id: "previewLabel",
-            text: "启动器预览：",
+            text: "启动器预览",
             align: $align.left,
-            font: $font(15),
+            font: $font(16),
           },
           layout: function(make, view) {
-            make.width.equalTo(view.super)
             make.top.inset(10)
             make.height.equalTo(20)
             make.left.inset(10)
@@ -2318,64 +2297,72 @@ function show() {
           type: "view",
           props: {
             id: "preView",
+            bgcolor: $color("white"),
           },
           layout: function(make, view) {
-            make.width.equalTo(view.super).dividedBy(4)
-            make.top.equalTo($("previewLabel").bottom).inset(10)
-            make.height.equalTo(50)
+            make.left.right.inset(0)
+            make.top.equalTo(view.prev.bottom).inset(10)
+            make.height.equalTo(80)
             make.centerX.equalTo(view.super)
           },
           views: [{
-            type: "blur",
-            props: {
-              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-              style: 1 // 0 ~ 5 调整背景的颜色程度
+            type: "view",
+            layout: function(make, view) {
+              make.left.right.inset(0)
+              make.height.equalTo(50)
+              make.center.equalTo(view.super)
             },
-            layout: $layout.fill
-          },
-          {
-            type: "label",
-            props: {
-              id: "title",
-              textColor: $color("black"),
-              bgcolor: $color("clear"),
-              font: $font(13),
-              text: (title == undefined)?"未定义":title,
-              align: $align.center
+            views: [{
+              type: "blur",
+              props: {
+                radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+                style: 1 // 0 ~ 5 调整背景的颜色程度
+              },
+              layout: $layout.fill
             },
-            layout(make, view) {
-              make.bottom.inset(0)
-              make.centerX.equalTo(view.super)
-              make.height.equalTo(25)
-              make.width.equalTo(view.super)
-            }
-          },
-          {
-            type: "image",
-            props: {
-              id: "icon",
-              bgcolor: $color("clear"),
-              smoothRadius: 5,
-              size: $size(20, 20),
-              icon: $icon("008", $color("gray"), $size(20, 20)),
+            {
+              type: "label",
+              props: {
+                id: "title",
+                textColor: $color("black"),
+                bgcolor: $color("clear"),
+                font: $font(13),
+                text: (title == undefined)?"未定义":title,
+                align: $align.center
+              },
+              layout(make, view) {
+                make.bottom.inset(0)
+                make.centerX.equalTo(view.super)
+                make.height.equalTo(25)
+                make.width.equalTo(view.super)
+              }
             },
-            layout(make, view) {
-              make.top.inset(9)
-              make.centerX.equalTo(view.super)
-              make.size.equalTo($size(20,20))
-            }
+            {
+              type: "image",
+              props: {
+                id: "icon",
+                bgcolor: $color("clear"),
+                smoothRadius: 5,
+                size: $size(20, 20),
+                icon: $icon("008", $color("gray"), $size(20, 20)),
+              },
+              layout(make, view) {
+                make.top.inset(9)
+                make.centerX.equalTo(view.super)
+                make.size.equalTo($size(20,20))
+              }
+            },]
           }],
         },
         {
           type: "label",
           props: {
-            id: "titleLabel",
-            text: "名称：",
+            id: "descriptLabel",
+            text: "启动器参数",
             align: $align.left,
-            font: $font(15),
+            font: $font(16),
           },
           layout: function(make, view) {
-            make.width.equalTo(view.super)
             make.top.equalTo(view.prev.bottom).inset(20)
             make.height.equalTo(20)
             make.left.inset(10)
@@ -2393,6 +2380,20 @@ function show() {
             make.left.right.inset(0)
           },
           views: [{
+            type: "label",
+            props: {
+              id: "titleLabel",
+              text: "名称",
+              align: $align.left,
+              font: $font(16),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(20)
+              make.left.inset(15)
+              make.width.equalTo(40)
+            }
+          },{
             type: "input",
             props: {
               id: "titleInput",
@@ -2401,9 +2402,10 @@ function show() {
               text: (title == undefined)?"":title,
             },
             layout: function(make, view) {
-              make.center.equalTo(view.super)
+              make.centerY.equalTo(view.super)
               make.height.equalTo(32)
-              make.left.right.inset(20)
+              make.left.equalTo(view.prev.right)
+              make.right.inset(15)
             },
             events: {
               changed: function(sender) {
@@ -2416,75 +2418,93 @@ function show() {
           },],
         },
         {
-          type: "label",
+          type: "view",
           props: {
-            id: "iconLabel",
-            text: "图标：",
-            align: $align.left,
-            font: $font(15),
-          },
-          layout: function(make, view) {
-            make.width.equalTo(view.super)
-            make.top.equalTo(view.prev.bottom).inset(10)
-            make.height.equalTo(20)
-            make.left.inset(10)
-          }
-        },
-        {
-          type: "button",
-          props: {
-            id: "chooseButton",
-            title: "  选择图片  ",
-            icon: $icon("014", $color("#A24A11"), $size(16, 16)),
-            bgcolor: $color("clear"),
-            titleColor: $color("#A24A11"),
-            borderColor: $color("#A24A11"),
-            borderWidth: 1,
-            info: icon,
+            bgcolor: $color("white"),
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
-            make.top.equalTo($("iconLabel").bottom).inset(10)
-            make.size.equalTo($size(150, 32))
+            make.top.equalTo(view.prev.bottom).inset(1)
+            make.height.equalTo(50)
+            make.left.right.inset(0)
           },
-          events: {
-            tapped: function(sender) {
-              $photo.pick({
-                format: "data",
-                handler: function(resp) {
-                  if(resp.data != undefined) {
-                    let mimeType = resp.data.info.mimeType
-                    let cutedIcon = cutIcon(resp.data.image)
-                    if (mimeType.indexOf("png") >= 0) {
-                      fileName = "1.png"
-                      sender.info = cutedIcon.png
-                      $("icon").data = cutedIcon.png
-                    } else {
-                      fileName = "1.jpg"
-                      sender.info = cutedIcon.jpg(1.0)
-                      $("icon").data = cutedIcon.jpg(1.0)
-                    }
-                    isIconRevised = true
-                  }
-                }
-              })
+          views: [{
+            type: "label",
+            props: {
+              id: "iconLabel",
+              text: "图标",
+              align: $align.left,
+              font: $font(16),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(20)
+              make.left.inset(15)
+              make.width.equalTo(50)
             }
-          }
-        },
-        {
-          type: "label",
-          props: {
-            id: "schemeLabel",
-            text: "url scheme：",
-            align: $align.left,
-            font: $font(15),
-          },
-          layout: function(make, view) {
-            make.width.equalTo(view.super)
-            make.top.equalTo($("chooseButton").bottom).inset(20)
-            make.height.equalTo(20)
-            make.left.inset(10)
-          }
+          },{
+            type: "button",
+            props: {
+              id: "chooseButton",
+              bgcolor: $color("clear"),
+              info: icon,
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(32)
+              make.left.equalTo(view.prev.right)
+              make.right.inset(15)
+            },
+            events: {
+              tapped: function(sender) {
+                $photo.pick({
+                  format: "data",
+                  handler: function(resp) {
+                    if(resp.data != undefined) {
+                      let mimeType = resp.data.info.mimeType
+                      let cutedIcon = cutIcon(resp.data.image)
+                      if (mimeType.indexOf("png") >= 0) {
+                        fileName = "1.png"
+                        sender.info = cutedIcon.png
+                        $("icon").data = cutedIcon.png
+                      } else {
+                        fileName = "1.jpg"
+                        sender.info = cutedIcon.jpg(1.0)
+                        $("icon").data = cutedIcon.jpg(1.0)
+                      }
+                      isIconRevised = true
+                    }
+                  }
+                })
+              }
+            },
+            views: [{
+              type: "image",
+              props: {
+                src: "assets/enter.png",
+                bgcolor: $color("clear"),
+              },
+              layout: function(make, view) {
+                make.right.inset(0)
+                make.centerY.equalTo(view.super)
+                make.size.equalTo($size(8, 18))
+              },
+            },{
+              type: "label",
+              props: {
+                text: "选择图片",
+                font: $font(15),
+                align: $align.right,
+                textColor: $color("lightGray"),
+              },
+              layout: function(make, view) {
+                make.centerY.equalTo(view.super)
+                make.height.equalTo(view.super)
+                make.left.inset(0)
+                make.right.equalTo(view.prev.left).inset(10)
+              }
+            }]
+          },],
         },
         {
           type: "view",
@@ -2493,22 +2513,38 @@ function show() {
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
-            make.top.equalTo(view.prev.bottom).inset(10)
+            make.top.equalTo(view.prev.bottom).inset(1)
             make.height.equalTo(50)
             make.left.right.inset(0)
           },
           views: [{
+            type: "label",
+            props: {
+              id: "schemeLabel",
+              text: "Url Scheme",
+              align: $align.left,
+              font: $font(16),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(20)
+              make.left.inset(15)
+              make.width.equalTo(90)
+            }
+          },{
             type: "input",
             props: {
               id: "schemeInput",
               text: (url == undefined)?"":url,
               bgcolor: $color("white"),
               radius: 0,
+              type: $kbType.url,
             },
             layout: function(make, view) {
-              make.center.equalTo(view.super)
+              make.centerY.equalTo(view.super)
               make.height.equalTo(32)
-              make.left.right.inset(20)
+              make.left.equalTo(view.prev.right)
+              make.right.inset(15)
             },
             events: {
               returned: function(sender) {
@@ -2534,6 +2570,64 @@ function show() {
           },],
         },
         {
+          type: "view",
+          props: {
+            bgcolor: $color("white"),
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            make.top.equalTo(view.prev.bottom).inset(1)
+            make.height.equalTo(50)
+            make.left.right.inset(0)
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "验证",
+              align: $align.left,
+              font: $font(16),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(20)
+              make.left.inset(15)
+              make.width.equalTo(80)
+            }
+          },{
+            type: "button",
+            props: {
+              id: "verifyButton",
+              font: $font(10),
+              bgcolor: $color("lightGray"),
+              circular: true,
+              info: false,
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(32)
+              make.width.equalTo(32)
+              make.right.inset(15)
+            },
+            events: {
+              tapped: function(sender) {
+                $app.openURL($("schemeInput").text)
+                let nDate = new Date()
+                $cache.set("begainTime", nDate.getTime())
+                resumeAction = 1
+                $thread.background({
+                  delay: 0.1,
+                  handler: function() {
+                    if (resumeAction == 1) {
+                      resumeAction = 0
+                      verifyStateSet(false)
+                    }
+                  }
+                })
+              }
+            }
+          },],
+        },
+        {
           type: "label",
           props: {
             id: "schemeLabel",
@@ -2546,114 +2640,90 @@ function show() {
             make.width.equalTo(view.super)
             make.top.equalTo(view.prev.bottom).inset(10)
             make.height.equalTo(20)
+            make.left.inset(15)
+          }
+        },
+        {
+          type: "label",
+          props: {
+            id: "descriptLabel",
+            text: "启动器说明(可选)",
+            align: $align.left,
+            font: $font(16),
+          },
+          layout: function(make, view) {
+            make.top.equalTo(view.prev.bottom).inset(20)
+            make.height.equalTo(20)
             make.left.inset(10)
           }
         },
         {
-          type: "button",
+          type: "view",
           props: {
-            id: "verifyButton",
-            title: "验证",
-            font: $font(10),
-            bgcolor: $color("clear"),
-            titleColor: $color("gray"),
-            borderWidth: 1,
-            borderColor: $color("gray"),
-            info: false,
-          },
-          layout: function(make, view) {
-            make.centerY.equalTo($("schemeInput"))
-            make.height.equalTo(32)
-            make.left.equalTo($("schemeInput").right).inset(3)
-          },
-          events: {
-            tapped: function(sender) {
-              $app.openURL($("schemeInput").text)
-              let nDate = new Date()
-              $cache.set("begainTime", nDate.getTime())
-              resumeAction = 1
-              $thread.background({
-                delay: 0.1,
-                handler: function() {
-                  if (resumeAction == 1) {
-                    resumeAction = 0
-                    verifyStateSet(false)
-                  }
-                }
-              })
-            }
-          }
-        },{
-          type: "label",
-          props: {
-            id: "descriptLabel",
-            text: "说明(可选)：",
-            align: $align.left,
-            font: $font(15),
-          },
-          layout: function(make, view) {
-            make.width.equalTo(view.super)
-            make.top.equalTo(view.prev.prev.bottom).inset(20)
-            make.height.equalTo(20)
-            make.left.inset(10)
-          }
-        },{
-          type: "text",
-          props: {
-            id: "descriptInput",
-            text: (descript)?descript:"",
-            borderColor: $rgba(100, 100, 100, 0.3),
-            bgcolor: $rgba(100, 100, 100, 0.08),
-            borderWidth: 1,
-            radius: 5,
-            font: $font(15),
+            bgcolor: $color("white"),
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
-            make.top.equalTo($("descriptLabel").bottom).inset(10)
-            make.height.equalTo(100)
-            make.width.equalTo(view.super).multipliedBy(0.9)
+            make.top.equalTo(view.prev.bottom).inset(10)
+            make.height.equalTo(140)
+            make.left.right.inset(0)
           },
-          events: {
-            didChange: function(sender) {
-              let length = sender.text.length
-              $("descriptNumberHint").text = length + "/80"
-              if(length > 80) {
-                $("descriptNumberHint").textColor = $color("red")
-              } else {
-                $("descriptNumberHint").textColor = $color("darkGray")
+          views: [{
+            type: "text",
+            props: {
+              id: "descriptInput",
+              text: (descript)?descript:"",
+              bgcolor: $color("white"),
+              radius: 0,
+              font: $font(15),
+            },
+            layout: function(make, view) {
+              make.center.equalTo(view.super)
+              make.height.equalTo(110)
+              make.left.right.inset(15)
+            },
+            events: {
+              didChange: function(sender) {
+                let length = sender.text.length
+                $("descriptNumberHint").text = length + "/80"
+                if(length > 80) {
+                  $("descriptNumberHint").textColor = $color("red")
+                } else {
+                  $("descriptNumberHint").textColor = $color("darkGray")
+                }
               }
             }
-          }
-        },{
-          type: "label",
-          props: {
-            id: "descriptNumberHint",
-            text: ((descript)?descript.length:0).toString() + "/80",
-            align: $align.center,
-            font: $font(12),
-            textColor: $color("darkGray"),
-          },
-          layout: function(make, view) {
-            make.right.equalTo(view.prev).inset(3)
-            make.bottom.equalTo(view.prev)
-            make.height.equalTo(20)
-          }
-        },{
+          },{
+            type: "label",
+            props: {
+              id: "descriptNumberHint",
+              text: ((descript)?descript.length:0).toString() + "/80",
+              align: $align.center,
+              font: $font(12),
+              textColor: $color("darkGray"),
+            },
+            layout: function(make, view) {
+              make.right.equalTo(view.prev).inset(3)
+              make.bottom.equalTo(view.prev)
+              make.height.equalTo(20)
+            }
+          },],
+        },
+        {
           type: "button",
           props: {
             id: "cloudButton",
             title: actionText,
-            bgcolor: $color("#649AFE"),
+            bgcolor: $color("#62BEF2"),
             titleColor: $color("white"),
-            radius: 22.5,
+            circular: true,
             info: {isfinish: false}
           },
           layout: function(make, view) {
             make.left.right.inset(20)
             make.centerX.equalTo(view.super)
             make.height.equalTo(45)
-            make.top.equalTo($("descriptInput").bottom).inset(30)
+            make.top.equalTo(view.prev.bottom).inset(30)
           },
           events: {
             tapped: function(sender) {
@@ -2706,6 +2776,8 @@ function show() {
     if(action != "upload") {
       verifyStateSet(true)
     }
+    $("uploadScroll").resize()
+    $("uploadScroll").contentSize = $size(0, 750)
   }
   
   function genProgress(baseView) {
@@ -2767,19 +2839,13 @@ function show() {
   function verifyStateSet(isSuccess) {
     let button = $("verifyButton")
     if(isSuccess == undefined) {
-      button.bgcolor = $color("clear")
-      button.titleColor = $color("gray")
-      button.borderColor = $color("gray")
+      button.bgcolor = $color("lightGray")
       button.info = false
     } else if (isSuccess == false) {
       button.bgcolor = $color("red")
-      button.titleColor = $color("white")
-      button.borderColor = $color("red")
       button.info = false
     } else if (isSuccess == true) {
       button.bgcolor = $color("#2ECC71")
-      button.titleColor = $color("white")
-      button.borderColor = $color("#2ECC71")
       button.info = true
     }
   }
@@ -2912,7 +2978,7 @@ function show() {
           views:[{
             type: "image",
             props: {
-              src: "https://i.loli.net/2018/10/14/5bc30ed15392f.png",
+              src: "assets/back.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
@@ -3267,7 +3333,7 @@ function show() {
           views:[{
             type: "image",
             props: {
-              src: "https://i.loli.net/2018/10/14/5bc30ed15392f.png",
+              src: "assets/back.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
@@ -3297,7 +3363,7 @@ function show() {
           layout: function(make, view) {
             make.left.right.inset(10)
             make.height.equalTo(300)
-            make.center.equalTo(view.super)
+            make.top.equalTo(view.prev.bottom).inset(20)
           },
           events: {
             tapped: function(sender) {
@@ -3404,7 +3470,7 @@ function show() {
   
   function showInfoView(superView, data) {
     let exist = isExist(data)
-    let lottieJs = utils.getCache("lottieJs", "")
+    let lottieJs = $file.read("assets/lottie.min.js").string
     let html = `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -3442,7 +3508,7 @@ function show() {
         <div id="svgContainer"></div>
         <script type="text/javascript">${lottieJs}</script>
         <script>
-            var animationData = ${JSON.stringify(utils.getCache("starJson", []))};//在这修改应用的动画json
+            var animationData = ${JSON.stringify($file.read("assets/star.json").string)};//在这修改应用的动画json
             var svgContainer = document.getElementById("svgContainer");
             animItem = bodymovin.loadAnimation({ wrapper: svgContainer, animType: "svg", loop: !0, animationData: JSON.parse(animationData) });
             if(${exist} == true) {
@@ -3733,31 +3799,6 @@ function show() {
     }
   }
   
-  function checkStarJson() {
-    if(utils.getCache("starJson") === undefined) {
-      $http.download({
-        url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/star.json",
-        showsProgress: false,
-        handler: function(resp) {
-          if(resp.data.string) {
-            $cache.set("starJson", resp.data.string)
-          }
-        }
-      })
-    }
-    if(utils.getCache("lottieJs") === undefined) {
-      $http.download({
-        url: "https://www.lottiefiles.com/js/lottie.min.js",
-        showsProgress: false,
-        handler: function(resp) {
-          if(resp.data.string) {
-            $cache.set("lottieJs", resp.data.string)
-          }
-        }
-      })
-    }
-  }
-  
   function isInToday() {
     return ($app.env == $env.today) ? true : false
   }
@@ -3797,104 +3838,6 @@ function show() {
         }
       }
     })
-  }
-  
-  //检查版本
-  function checkupVersion() {
-    if ($app.env == $env.today && !utils.getCache("showUi", true)) {
-      $ui.loading("检查更新")
-    }
-    $http.download({
-      url: addinURL,
-      showsProgress: false,
-      timeout: 5,
-      handler: function(resp) {
-        let str = resp.data.string
-        let lv = getVFS(str)
-        if ($app.env == $env.today && !utils.getCache("showUi", true)) {
-          $ui.loading(false)
-        }
-        $console.info(str)
-        if (needUpdate(appVersion, lv)) {
-          sureToUpdate(str, resp.data, lv)
-        }
-      }
-    })
-  }
-  
-  //获取版本号
-  function getVFS(str) {
-    let vIndex = str.indexOf("@version ")
-    let start = vIndex + 9
-    let end = str.indexOf("\n", start)
-    let lv = str.substring(start, end)
-    return lv
-  }
-  
-  //获取更新说明
-  function getUpDes(str) {
-    let bIndex = str.indexOf("@brief")
-    let eIndex = str.indexOf("@/brief")
-    let des = str.substring(bIndex + 6, eIndex)
-    let fixDes = des.replace(/\*/g, "")
-    return fixDes
-  }
-  
-  //当前插件名
-  function currentName() {
-    let name = $addin.current.name
-    let end = name.length - 3
-    return name.substring(0, end)
-  }
-  
-  //当前插件图标
-  function currentIcon() {
-    return $addin.current.icon
-  }
-  
-  //确定升级？
-  function sureToUpdate(str, app, version) {
-    let des = getUpDes(str)
-    $ui.alert({
-      title: "发现新版本 V" + version,
-      message: des + "\n是否更新？",
-      actions: [{
-          title: "否",
-          handler: function() {
-  
-          }
-        },
-        {
-          title: "是",
-          handler: function() {
-            updateAddin(app)
-          }
-        },
-      ]
-    })
-  }
-  
-  //需要检查更新？
-  function needCheckup() {
-    let nDate = new Date()
-    let lastCT = $cache.get("lastCT")
-    if (lastCT == undefined) {
-      $cache.set("lastCT", nDate)
-      return true
-    } else {
-      let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000)
-      let interval = 1440
-      if ($app.env == $env.app) {
-        interval = 30
-      }
-      myLog("离下次检测更新: " + (interval - tdoa) + "  分钟")
-      if (tdoa > interval) {
-        $cache.set("lastCT", nDate)
-        return true
-      } else {
-        return false
-      }
-    }
   }
   
   //myLog
@@ -4149,7 +4092,7 @@ function show() {
   
   function uploadInstall() {
     let info = {
-      addinVersion: appVersion.toFixed(1),
+      addinVersion: update.getCurVersion(),
       iosVersion: $device.info.version,
       jsboxVersion: $app.info.version,
       deviceType: "ios",
@@ -4177,7 +4120,7 @@ function show() {
           "X-LC-Key": appKey,
         },
         body: {
-          addinVersion: appVersion.toFixed(1),
+          addinVersion: update.getCurVersion(),
           iosVersion: $device.info.version,
           jsboxVersion: $app.info.version,
           deviceType: "ios",
@@ -4329,28 +4272,13 @@ function show() {
           let data = resp.data.results
           if(data.length > 0) {
             $cache.set("haveBanned", true)
-            showBannedAlert()
+            ui.showBannedAlert()
           } else {
             $cache.set("haveBanned", false)
           }
         }
       })
     }
-  }
-  
-  function showBannedAlert() {
-    $ui.alert({
-      title: "Warning",
-      message: "You have been banned!",
-      actions: [
-        {
-          title: "OK",
-          handler: function() {
-            $app.close()
-          }
-        },
-      ]
-    })
   }
 }
 

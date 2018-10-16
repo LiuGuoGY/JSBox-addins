@@ -5,45 +5,100 @@ function getCurVersion() {
   return version;
 }
 
-function getLatestVersion(params) {
-  $http.get({
-    url:
-      "https://raw.githubusercontent.com/lcolok/Catcher/master/version.lcolok",
-    handler: res => {
-      params.handler(res.data);
-    }
-  });
+function getCurBuild() {
+  let build = $file.exists("app.json")
+    ? JSON.parse($file.read("app.json").string).build
+    : "0";
+  return build;
 }
 
-function updateScript(version) {
-  let url =
-    "https://github.com/lcolok/Catcher/blob/master/.output/Catcher.box?raw=true";
-  const scriptName = $addin.current.name;
-  let downloadBox = $http.download({
-    url: url
-  });
-  Promise.all([downloadBox, needRestart()]).then(res => {
-    let box = res[0].data;
-    let restart = /true/.test(res[1].data);
-    console.log(restart);
-    $addin.save({
-      name: scriptName,
-      data: box,
-      handler: success => {
-        if (success) {
-          // let donateList = $file.read("donate.md").string;
-          // let names = donateList.split(/[\r\n]+/).filter(i => i!== '');
-          // $ui.toast(`静默更新完成，感谢${names.length - 3}位老板`);
-          $ui.toast($l10n("静默更新完成"));
-          if (restart) {
-            $delay(0.3, () => {
-              $addin.run(scriptName);
-            });
-          }
+function getCurDate() {
+  let date = $file.exists("app.json")
+    ? JSON.parse($file.read("app.json").string).date
+    : "000000";
+  return date;
+}
+
+function getLatestVersion() {
+  $http.download({
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/app.json",
+    showsProgress: false,
+    timeout: 5,
+    handler: function(resp) {
+      if(resp.data) {
+        let updateVersion = JSON.parse(resp.data.string).version
+        if(needUpdate(updateVersion, getCurVersion())) {
+          $http.download({
+            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/updateDetail.md",
+            showsProgress: false,
+            timeout: 5,
+            handler: function(resp) {
+              if(resp.data) {
+                sureToUpdate(updateVersion, resp.data.string)
+              }
+            }
+          })
         }
       }
-    });
-  });
+    }
+  })
+}
+
+//确定升级？
+function sureToUpdate(version, des) {
+  $ui.alert({
+    title: "发现新版本 V" + version,
+    message: "\n" + des + "\n\n是否更新？",
+    actions: [{
+        title: "否",
+        handler: function() {
+
+        }
+      },
+      {
+        title: "是",
+        handler: function() {
+          updateScript()
+        }
+      },
+    ]
+  })
+}
+
+function updateScript() {
+  let url =
+    "https://github.com/LiuGuoGY/JSBox-addins/blob/master/launch-center-new/.output/Launch%20Center%20New.box?raw=true";
+  const scriptName = $addin.current.name;
+  $http.download({
+    url: url,
+    showsProgress: false,
+    timeout: 5,
+    handler: function(resp) {
+      let box = resp.data
+      $addin.save({
+        name: scriptName,
+        data: box,
+        handler: success => {
+          if (success) {
+            $cache.remove("lastCT")
+            $device.taptic(2)
+            $delay(0.2, function() {
+              $device.taptic(2)
+            })
+            $ui.alert({
+              title: "安装完成",
+              actions: [{
+                title: "OK",
+                handler: function() {
+                  $app.openExtension($addin.current.name)
+                }
+              }]
+            })
+          }
+        }
+      });
+    }
+  })
 }
 
 function needUpdate(nv, ov) {
@@ -56,11 +111,10 @@ function needUpdate(nv, ov) {
   return getVersionWeight(nv) > getVersionWeight(ov);
 }
 
-function checkUpdate() {
-  // if(needCheckup()) {
-  //   getLatestVersion(params)
-  // }
-  $console.info(getCurVersion())
+function checkUpdate(now) {
+  if(needCheckup() || now) {
+    getLatestVersion()
+  }
 }
 
 //需要检查更新？
@@ -76,7 +130,7 @@ function needCheckup() {
     if ($app.env == $env.app) {
       interval = 30
     }
-    myLog("离下次检测更新: " + (interval - tdoa) + "  分钟")
+    $console.info("离下次检测更新: " + (interval - tdoa) + "  分钟")
     if (tdoa > interval) {
       $cache.set("lastCT", nDate)
       return true
@@ -87,5 +141,8 @@ function needCheckup() {
 }
 
 module.exports = {
-  checkUpdate: checkUpdate
+  checkUpdate: checkUpdate,
+  getCurVersion: getCurVersion,
+  getCurBuild: getCurBuild,
+  getCurDate: getCurDate,
 }
