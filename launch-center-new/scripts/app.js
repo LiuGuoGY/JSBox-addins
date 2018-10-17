@@ -1802,7 +1802,7 @@ function show() {
   
   function share() {
     $share.sheet({
-      items: ["https://t.cn/RDe2qSq"], // 也支持 item
+      items: ["http://t.cn/E7kdTkv"], // 也支持 item
       handler: function(success) {
         if(success) {
           ui.showToastView($("mainView"), mColor.blue, "感谢您的分享")
@@ -2598,7 +2598,7 @@ function show() {
             props: {
               id: "verifyButton",
               font: $font(10),
-              bgcolor: $color("lightGray"),
+              bgcolor: $color("#D8D8D8"),
               circular: true,
               info: false,
             },
@@ -2839,7 +2839,7 @@ function show() {
   function verifyStateSet(isSuccess) {
     let button = $("verifyButton")
     if(isSuccess == undefined) {
-      button.bgcolor = $color("lightGray")
+      button.bgcolor = $color("#D8D8D8")
       button.info = false
     } else if (isSuccess == false) {
       button.bgcolor = $color("red")

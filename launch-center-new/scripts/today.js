@@ -20,7 +20,7 @@ function setupTodayView() {
   }
   let items = utils.getCache("localItems", [])
   let columns = utils.getCache("columns", 4)
-  let itemHeight = (items.length <= columns)?(200):50
+  let itemHeight = 50
 
   let showView = []
   if(utils.getCache("pullToClose", true)) {
@@ -110,7 +110,7 @@ function setupTodayView() {
         itemHeight: itemHeight, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         bgcolor: $color("clear"),
-        template: genTemplate(),
+        template: ui.genTemplate(),
         data: items,
         showsVerticalIndicator: false,
       },
@@ -148,7 +148,7 @@ function setupTodayView() {
   if(utils.getCache("pullToClose", true) == true && !utils.getCache("isPullToCloseToasted", false)) {
     $cache.set("isPullToCloseToasted", true);
     $delay(1, function(){
-      ui.showToastView($("todayView"), mColor.blue, "下拉即可关闭 ↓")
+      ui.showToastView($("todayView"), utils.mColor.blue, "下拉即可关闭 ↓")
     })
   }
 }

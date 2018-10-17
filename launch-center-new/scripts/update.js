@@ -44,6 +44,33 @@ function getLatestVersion() {
   })
 }
 
+function getLatestBuild() {
+  $http.download({
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/app.json",
+    showsProgress: false,
+    timeout: 5,
+    handler: function(resp) {
+      if(resp.data) {
+        let appJson = JSON.parse(resp.data.string)
+        let updateBuild = appJson.build
+        let updateVersion = appJson.version
+        if(parseInt(updateBuild) > parseInt(getCurBuild())) {
+          $http.download({
+            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/updateDetail.md",
+            showsProgress: false,
+            timeout: 5,
+            handler: function(resp) {
+              if(resp.data) {
+                sureToUpdate(updateVersion, resp.data.string)
+              }
+            }
+          })
+        }
+      }
+    }
+  })
+}
+
 //确定升级？
 function sureToUpdate(version, des) {
   $ui.alert({
@@ -113,7 +140,7 @@ function needUpdate(nv, ov) {
 
 function checkUpdate(now) {
   if(needCheckup() || now) {
-    getLatestVersion()
+    getLatestBuild()
   }
 }
 

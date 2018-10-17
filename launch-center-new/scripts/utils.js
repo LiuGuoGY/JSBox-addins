@@ -19,7 +19,7 @@ function getCache(key, def) {
 }
 
 function myOpenUrl(url) {
-  if(!url.startsWith("http")) {
+  if(!url.startsWith("http") || checkUrlScheme(url)) {
     $app.openURL(url)
   } else {
     let bNumber = getCache("openBroswer", 0)
@@ -38,6 +38,16 @@ function myOpenUrl(url) {
       }
     }
   }
+}
+
+function checkUrlScheme(url) {
+  let array = ["itunes.apple.com"]
+  for(let i = 0; i < array.length; i++) {
+    if(url.indexOf(array[i])) {
+      return true
+    }
+  }
+  return false
 }
 
 function randomValue(object) {
