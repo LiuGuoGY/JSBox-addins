@@ -19,7 +19,7 @@ function getCache(key, def) {
 }
 
 function myOpenUrl(url) {
-  if(!url.startsWith("http") || checkUrlScheme(url)) {
+  if(!url.startsWith("http")|| checkUrlScheme(url)) {
     $app.openURL(url)
   } else {
     let bNumber = getCache("openBroswer", 0)
@@ -43,7 +43,7 @@ function myOpenUrl(url) {
 function checkUrlScheme(url) {
   let array = ["itunes.apple.com"]
   for(let i = 0; i < array.length; i++) {
-    if(url.indexOf(array[i])) {
+    if(url.indexOf(array[i]) >= 0) {
       return true
     }
   }
