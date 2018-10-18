@@ -5,7 +5,7 @@ setupWidgetView()
 
 function setupWidgetView() {
   let items = utils.getCache("localItems", [])
-  let columns = utils.getCache("columns", 4)
+  let columns = utils.getCache("columns")
   let itemHeight = 50
   let view = {
     props: {

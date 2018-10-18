@@ -33,18 +33,12 @@ function show() {
       gray: $icon("002", $color(mColor.gray), $size(25, 25)),
     },
   ]
-  if ($app.env == $env.today) {
-    if(utils.getCache("haveBanned") === true) {
-      showBannedAlert()
-    }
+  uploadInstall()
+  checkBlackList()
+  if(!utils.getCache("haveBanned", false)) {
+    main()
   } else {
-    uploadInstall()
-    checkBlackList()
-    if(!utils.getCache("haveBanned", false)) {
-      main()
-    } else {
-      ui.showBannedAlert()
-    }
+    ui.showBannedAlert()
   }
   
   function main() {
@@ -95,181 +89,6 @@ function show() {
       }
     }
   })
-  
-  function setupTodayView() {
-    if(utils.getCache("backgroundTranparent", true)) {
-      let alpha = 1
-      $delay(0.7, function(){
-        let timer = $timer.schedule({
-          interval: 0.01,
-          handler: function() {
-            if(alpha > 0) {
-              $ui.vc.runtimeValue().$view().$setBackgroundColor($rgba(255, 255, 255, alpha))
-              alpha -= 0.05
-            } else {
-              timer.invalidate()
-            }
-          }
-        })
-      })
-    }
-    let items = utils.getCache("localItems", [])
-    let columns = utils.getCache("columns", 4)
-    let itemHeight = (items.length <= columns)?(200):50
-  
-    let showView = []
-    if(utils.getCache("pullToClose", true)) {
-      showView = [{
-        type: "matrix",
-        props: {
-          id: "rowsShow",
-          columns: columns, //横行个数
-          itemHeight: itemHeight, //图标到字之间得距离
-          spacing: 3, //每个边框与边框之间得距离
-          bgcolor: $color("clear"),
-          template: genTemplate(),
-          data: items,
-          showsVerticalIndicator: false,
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.centerX.equalTo(view.super)
-          make.top.bottom.inset(0)
-        },
-        events: {
-          didSelect(sender, indexPath, data) {
-            $device.taptic(1)
-            utils.myOpenUrl(data.url)
-          },
-          didScroll: function(sender) {
-            if($("rowsShow").contentOffset.y < -35) {
-              if($("closeView").bgcolor === $color("clear")) {
-                $device.taptic(2)
-                $("closeView").bgcolor = randomValue(colors)
-              }
-            } else{
-              $("closeView").bgcolor = $color("clear")
-            }
-          },
-          didEndDragging: function(sender, decelerate) {
-            if($("closeView").bgcolor !== $color("clear")) {
-              $app.close()
-            }
-          }
-        },
-        views: [{
-          type: "button",
-          props: {
-            id: "closeView",
-            title: "CLOSE",
-            bgcolor: $color("clear"),
-            titleColor: $rgba(100, 100, 100, 0.4),
-            font: $font(15),
-            hidden: false,
-            radius: 15,
-          },
-          layout: function(make, view) {
-            make.centerX.equalTo(view.super)
-            make.top.inset(0).offset(-35)
-            make.width.equalTo(80)
-            make.height.equalTo(30)
-          },
-        }]
-      }]
-    } else {
-      showView = [{
-        type: "button",
-        props: {
-          title: "CLOSE",
-          bgcolor: $color("clear"),
-          titleColor: $rgba(100, 100, 100, 0.2),
-          font: $font(15),
-          hidden: false,
-        },
-        layout: function(make, view) {
-          make.centerX.equalTo(view.super)
-          make.top.inset(0)
-          make.width.equalTo(120)
-          make.height.equalTo(30)
-        },
-        events: {
-          tapped: function(sender) {
-            $app.close(0.1)
-          }
-        }
-      },{
-        type: "matrix",
-        props: {
-          id: "rowsShow",
-          columns: columns, //横行个数
-          itemHeight: itemHeight, //图标到字之间得距离
-          spacing: 3, //每个边框与边框之间得距离
-          bgcolor: $color("clear"),
-          template: genTemplate(),
-          data: items,
-          showsVerticalIndicator: false,
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.centerX.equalTo(view.super)
-          make.top.equalTo(view.prev.bottom)
-          make.bottom.inset(0)
-        },
-        events: {
-          didSelect(sender, indexPath, data) {
-            $device.taptic(1)
-            utils.myOpenUrl(data.url)
-          },
-        },
-      }]
-    }
-    
-    $ui.render({
-      props: {
-        id: "todayView",
-        title: "Launch Center",
-        navBarHidden: true
-      },
-      layout: $layout.fill,
-      views: showView,
-    })
-  
-    if(utils.getCache("pullToClose", true) == true && !utils.getCache("isPullToCloseToasted", false)) {
-      $cache.set("isPullToCloseToasted", true);
-      $delay(1, function(){
-        ui.showToastView($("todayView"), mColor.blue, "下拉即可关闭 ↓")
-      })
-    }
-  
-  }
-  
-  function setupWidgetView() {
-    let items = utils.getCache("localItems", [])
-    let columns = utils.getCache("columns", 4)
-    let height = 100
-    let itemHeight = (items.length <= columns)?(height):50
-    let view = {
-      views: [{
-        type: "matrix",
-        props: {
-          id: "rowsShow",
-          columns: columns, //横行个数
-          itemHeight: itemHeight, //图标到字之间得距离
-          spacing: 3, //每个边框与边框之间得距离
-          template: genTemplate(),
-          data: items,
-        },
-        layout: $layout.fill,
-        events: {
-          didSelect(sender, indexPath, data) {
-            $device.taptic(1)
-            utils.myOpenUrl(data.url)
-          }
-        }
-      }]
-    }
-    $ui.render(view)
-  }
   
   let contentViews = ["localView", "cloudView", "settingView"]
   
@@ -458,190 +277,6 @@ function show() {
     }
   }
   
-  function genTemplate() {
-    let showMode = utils.getCache("showMode", 0)
-    let template = []
-    if(showMode == 0) {
-      template.push({
-        type: "blur",
-        props: {
-          radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-          style: 1 // 0 ~ 5 调整背景的颜色程度
-        },
-        layout: $layout.fill,
-      },{
-        type: "label",
-        props: {
-          id: "title",
-          textColor: $color("black"),
-          bgcolor: $color("clear"),
-          font: $font(13),
-          align: $align.center,
-        },
-        layout: function(make, view) {
-          make.bottom.inset(0)
-          make.centerX.equalTo(view.super)
-          make.height.equalTo(25)
-          make.width.equalTo(view.super)
-        }
-      },{
-        type: "image",
-        props: {
-          id: "icon",
-          bgcolor: $color("clear"),
-          smoothRadius: 5,
-          size: $size(20, 20),
-        },
-        layout: function(make, view) {
-          make.top.inset(9)
-          make.centerX.equalTo(view.super)
-          make.size.equalTo($size(20, 20))
-        }
-      })
-    } else if(showMode == 1) {
-      template.push({
-        type: "blur",
-        props: {
-          circular: true,
-          style: 1, // 0 ~ 5 调整背景的颜色程度
-        },
-        layout: function(make, view) {
-          make.center.equalTo(view.super)
-          make.size.equalTo($size(40, 40))
-        },
-      },{
-        type: "image",
-        props: {
-          id: "icon",
-          bgcolor: $color("clear"),
-          smoothRadius: 5,
-          size: $size(20, 20),
-        },
-        layout: function(make, view) {
-          make.center.equalTo(view.super)
-          make.size.equalTo($size(20, 20))
-        }
-      })
-    } else if(showMode == 2) {
-      let bgcolor = randomValue(colors)
-      template.push({
-        type: "label",
-        props: {
-          id: "title",
-          textColor: $color("black"),
-          bgcolor: $color("clear"),
-          font: $font(13),
-          align: $align.center,
-        },
-        layout: function(make, view) {
-          make.center.equalTo(view.super)
-          make.height.equalTo(25)
-          make.width.equalTo(view.super)
-        }
-      },{
-        type: "view",
-        props: {
-          bgcolor: bgcolor,
-        },
-        layout: function(make, view) {
-          make.centerX.equalTo(view.super)
-          make.height.equalTo(1)
-          make.width.equalTo(30)
-          make.top.equalTo($("title").bottom).inset(1)
-        }
-      },{
-        type: "view",
-        props: {
-          bgcolor: bgcolor,
-        },
-        layout: function(make, view) {
-          make.centerX.equalTo(view.super)
-          make.height.equalTo(1)
-          make.width.equalTo(30)
-          make.bottom.equalTo($("title").top).inset(1)
-        }
-      })
-    } else if(showMode == 3) {
-      template.push({
-        type: "blur",
-        props: {
-          radius: 5, //调整边框是什么形状的如:方形圆形什么的
-          style: 1 // 0 ~ 5 调整背景的颜色程度
-        },
-        layout: function(make, view) {
-          make.center.equalTo(view.super)
-          make.top.bottom.inset(0.5)
-          make.width.equalTo(view.super)
-        },
-      },{
-        type: "image",
-        props: {
-          id: "icon",
-          bgcolor: $color("clear"),
-          smoothRadius: 5,
-          size: $size(20, 20),
-        },
-        layout: function(make, view) {
-          make.left.inset(8)
-          make.centerY.equalTo(view.super)
-          make.size.equalTo($size(20, 20))
-        }
-      },{
-        type: "label",
-        props: {
-          id: "title",
-          textColor: $color("black"),
-          bgcolor: $color("clear"),
-          font: $font(13),
-          align: $align.center,
-        },
-        layout: function(make, view) {
-          make.left.equalTo(view.prev.right).inset(0)
-          make.centerY.equalTo(view.super)
-          make.height.equalTo(25)
-          make.right.inset(8)
-        }
-      })
-    } else if(showMode == 4) {
-      template.push({
-        type: "view",
-        props: {
-          radius: 12, //调整边框是什么形状的如:方形圆形什么的
-          // bgcolor: $color("white"),
-        },
-        layout: function(make, view) {
-          make.center.equalTo(view.super)
-          make.size.equalTo($size(46, 46))
-        },
-        views: [{
-          type: "view",
-          props: {
-            clipsToBounds: false,
-          },
-          layout: function(make, view) {
-            make.center.equalTo(view.super)
-            make.size.equalTo(view.super)
-            // shadow(view)
-          },
-          views: [{
-            type: "image",
-            props: {
-              id: "icon",
-              bgcolor: $color("clear"),
-              size: $size(29, 29),
-              radius: 5,
-            },
-            layout: function(make, view) {
-              make.center.equalTo(view.super)
-              make.size.equalTo($size(29, 29))
-            }
-          }]
-        }]
-      })
-    }
-    return template
-  }
-  
   function shadow(view) {
     var layer = view.runtimeValue().invoke("layer")
     layer.invoke("setCornerRadius", 0)
@@ -660,7 +295,7 @@ function show() {
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         reorder: reorder,
-        template: genTemplate(),
+        template: ui.genTemplate(),
         data: utils.getCache("localItems", [])
       },
       layout: $layout.fill,
@@ -744,13 +379,13 @@ function show() {
               sender.bgcolor = $color("#C70039")
               sender.titleColor = $color("white")
               $("rowsShow").remove()
-              $("rowsShowParent").add(genRowsView(true, utils.getCache("columns", 4)))
+              $("rowsShowParent").add(genRowsView(true, utils.getCache("columns")))
             } else {
               sender.info = false
               sender.bgcolor = $color("clear")
               sender.titleColor = $color("orange")
               $("rowsShow").remove()
-              $("rowsShowParent").add(genRowsView(false, utils.getCache("columns", 4)))
+              $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
             }
           }
         }
@@ -820,7 +455,7 @@ function show() {
           make.bottom.inset(0)
           make.centerX.equalTo(view.super)
         },
-        views: [genRowsView(false, utils.getCache("columns", 4))]
+        views: [genRowsView(false, utils.getCache("columns"))]
       },]
     }
     return view
@@ -829,7 +464,7 @@ function show() {
   
   
   function genCloudView() {
-    let isHeaderHidden = false
+    let needRelayout = true
     let prevPosition = 0
     const searchBar = {
       type: "view",
@@ -1169,32 +804,34 @@ function show() {
               })
             },
             didScroll: function(sender) {
-              if((sender.contentOffset.y <= 0 || (prevPosition - sender.contentOffset.y > 10  && sender.dragging == true)) && isHeaderHidden == true) {
-                $("headerView").updateLayout(function(make) {
-                  make.top.inset(0).offset(0)
-                })
-                $ui.animate({
-                  duration: 0.2,
-                  animation: function() {
-                    $("headerView").relayout()
-                  },
-                  completion: function() {
-                    isHeaderHidden = false
-                  }
-                })
-              } else if((sender.contentOffset.y > 0 && sender.contentOffset.y - prevPosition > 0 && sender.contentSize.height > sender.frame.height && sender.dragging == true) && isHeaderHidden == false){
+              if(sender.contentOffset.y - prevPosition > 0 && sender.contentOffset.y >= 0 && needRelayout == true) {
+                let pos = sender.contentOffset.y
+                if(pos > 65) {
+                  pos = 65
+                  needRelayout = false
+                }
                 $("search_input").blur()
                 $("headerView").updateLayout(function(make) {
-                  make.top.inset(0).offset(-65)
+                  make.top.inset(0).offset(-pos)
                 })
                 $ui.animate({
-                  duration: 0.2,
+                  duration: 0.1,
                   animation: function() {
                     $("headerView").relayout()
                   },
-                  completion: function() {
-                    isHeaderHidden = true
-                  }
+                })
+              } else if(sender.contentOffset.y - prevPosition < 0 && sender.contentOffset.y <= 65) {
+                needRelayout = true
+                let pos = (sender.contentOffset.y < 0)?0:sender.contentOffset.y
+                $console.info("" + sender.contentOffset.y);
+                $("headerView").updateLayout(function(make) {
+                  make.top.inset(0).offset(-pos)
+                })
+                $ui.animate({
+                  duration: 0.1,
+                  animation: function() {
+                    $("headerView").relayout()
+                  },
                 })
               }
               prevPosition = sender.contentOffset.y
@@ -1281,7 +918,7 @@ function show() {
     }
     if($("rowsShow") != undefined) {
       $("rowsShow").remove()
-      $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns", 4)))
+      $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns")))
     }
   }
   
@@ -1379,7 +1016,7 @@ function show() {
             max: 10,
             min: 2,
             tintColor: $color("black"),
-            value: utils.getCache("columns", 4),
+            value: utils.getCache("columns"),
           },
           layout: function(make, view) {
             make.right.inset(15)
@@ -1390,7 +1027,7 @@ function show() {
               $("tabSetColumnsDetail").text = sender.value
               $cache.set("columns", sender.value)
               $("rowsShow").remove()
-              $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns", 4)))
+              $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns")))
             }
           }
         },
@@ -1398,7 +1035,7 @@ function show() {
           type: "label",
           props: {
             id: "tabSetColumnsDetail",
-            text: "" + utils.getCache("columns", 4),
+            text: "" + utils.getCache("columns"),
           },
           layout: function(make, view) {
             make.right.equalTo(view.prev.left).inset(5)
@@ -1438,7 +1075,7 @@ function show() {
                   $cache.set("showMode", idx)
                   $("tabShowModeDetail").text = getShowModeText()
                   $("rowsShow").remove()
-                  $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns", 4)))
+                  $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns")))
                 }
               })
             }
@@ -1556,7 +1193,7 @@ function show() {
           props: {
             id: "tabBackgroundTranparentSwitch",
             onColor: $color(mColor.iosGreen),
-            on: utils.getCache("backgroundTranparent", true),
+            on: utils.getCache("backgroundTranparent"),
           },
           layout: function(make, view) {
             make.right.inset(15)
@@ -1593,7 +1230,7 @@ function show() {
           props: {
             id: "tabPullToCloseSwitch",
             onColor: $color(mColor.iosGreen),
-            on: utils.getCache("pullToClose", true),
+            on: utils.getCache("pullToClose"),
           },
           layout: function(make, view) {
             make.right.inset(15)
@@ -1602,6 +1239,78 @@ function show() {
           events: {
             changed: function(sender) {
               $cache.set("pullToClose", sender.on)
+            }
+          }
+        }
+      ],
+      layout: $layout.fill
+    }
+
+    const tabStaticHeight = {
+      type: "view",
+      props: {
+  
+      },
+      views: [{
+          type: "label",
+          props: {
+            id: "tabStaticHeight",
+            text: "高度跟随",
+          },
+          layout: function(make, view) {
+            make.left.inset(15)
+            make.centerY.equalTo(view.super)
+          }
+        },{
+          type: "button",
+          props: {
+            icon: $icon("008", $color("white"), $size(14, 14)),
+            bgcolor: $color("lightGray"),
+            borderWidth: 1,
+            borderColor: $color("lightGray"),
+            circular: true,
+          },
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.right).inset(10)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(14,14))
+          },
+          events: {
+            tapped: function(sender) {
+              $ui.alert({
+                title: "高度跟随",
+                message: "即通知中心打开不改变原来的高度",
+              });
+            }
+          }
+        },
+        {
+          type: "switch",
+          props: {
+            id: "tabStaticHeightSwitch",
+            onColor: $color(mColor.iosGreen),
+            on: utils.getCache("staticHeight"),
+          },
+          layout: function(make, view) {
+            make.right.inset(15)
+            make.centerY.equalTo(view.super)
+          },
+          events: {
+            changed: function(sender) {
+              $cache.set("staticHeight", sender.on)
+              let file = $file.read("config.json")
+              if(file) {
+                let json = JSON.parse(file.string)
+                json.widget.staticSize = sender.on
+                $console.info(json);
+                $file.write({
+                  data: $data({string: JSON.stringify(json, null, 2)}),
+                  path: "config.json"
+                });
+              }
+              if($app.info.build < 339 && sender.on == true) {
+                ui.showToastView($("mainView"), mColor.blue, "当前JSBox版本低，当前设置不会生效")
+              }
             }
           }
         }
@@ -1738,14 +1447,14 @@ function show() {
           },
           {
             title: "JSBox 启动器",
-            rows: [tabBackgroundTranparent, tabPullToClose],
+            rows: [tabBackgroundTranparent, tabPullToClose, tabStaticHeight],
           },
           {
             title: "关于",
             rows: array,
           },
           {
-            title: "统计",
+            title: "其他",
             rows: [tabShowInstalls],
           }],
         },
@@ -1791,12 +1500,12 @@ function show() {
   }
   
   function getShowModeText() {
-    let mode = utils.getCache("showMode", 0)
+    let mode = utils.getCache("showMode")
     return showMode[mode]
   }
   
   function getOpenBroswer() {
-    let mode = utils.getCache("openBroswer", 0)
+    let mode = utils.getCache("openBroswer")
     return broswers[mode]
   }
   
@@ -3797,47 +3506,6 @@ function show() {
         }
       });
     }
-  }
-  
-  function isInToday() {
-    return ($app.env == $env.today) ? true : false
-  }
-  
-  //需要更新？
-  function needUpdate(nv, lv) {
-    let m = parseFloat(nv) - parseFloat(lv)
-    if (m < 0) {
-      return true
-    } else {
-      return false
-    }
-  }
-  
-  //升级插件
-  function updateAddin(app) {
-    $addin.save({
-      name: currentName(),
-      data: app,
-      icon: currentIcon(),
-      handler: function(success) {
-        if (success) {
-          $cache.remove("firstInstall")
-          $device.taptic(2)
-          $delay(0.2, function() {
-            $device.taptic(2)
-          })
-          $ui.alert({
-            title: "安装完成",
-            actions: [{
-              title: "OK",
-              handler: function() {
-                $app.openExtension($addin.current.name)
-              }
-            }]
-          })
-        }
-      }
-    })
   }
   
   //myLog

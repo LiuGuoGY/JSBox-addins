@@ -11,6 +11,16 @@ const mColor = {
 function getCache(key, def) {
   let temp = $cache.get(key)
   if (temp == undefined) {
+    if(def == undefined){
+      switch(key) { 
+        case "columns": def = 4; break;
+        case "showMode": def = 0; break;
+        case "openBroswer": def = 0; break;
+        case "backgroundTranparent": def = true; break;
+        case "pullToClose": def = true; break;
+        case "staticHeight": def = false; break;
+      }
+    }
     $cache.set(key, def)
     return def
   } else {
@@ -22,7 +32,7 @@ function myOpenUrl(url) {
   if(!url.startsWith("http")|| checkUrlScheme(url)) {
     $app.openURL(url)
   } else {
-    let bNumber = getCache("openBroswer", 0)
+    let bNumber = getCache("openBroswer")
     if(bNumber == 0) {
       $app.openURL(url)
     } else if(bNumber < 11) {
@@ -34,7 +44,6 @@ function myOpenUrl(url) {
       switch(bNumber) {
         case 11: $app.openURL("alook://" + url)
           break
-        case 12: $app.openURL("wuxiang://open?" + url)
       }
     }
   }

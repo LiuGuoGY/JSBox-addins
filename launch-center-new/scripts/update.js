@@ -79,7 +79,7 @@ function sureToUpdate(version, des) {
     actions: [{
         title: "否",
         handler: function() {
-
+          
         }
       },
       {
