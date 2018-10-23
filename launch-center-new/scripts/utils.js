@@ -29,6 +29,7 @@ function getCache(key, def) {
 }
 
 function myOpenUrl(url) {
+  url = spliceUrlPara(url)
   if(!url.startsWith("http")|| checkUrlScheme(url)) {
     $app.openURL(url)
   } else {
@@ -46,6 +47,14 @@ function myOpenUrl(url) {
           break
       }
     }
+  }
+}
+
+function spliceUrlPara(url) {
+  if(url.indexOf("[clipboard]") >= 0) {
+    return url.replace(/\[clipboard\]/g, $text.URLEncode($clipboard.text))
+  } else {
+    return url
   }
 }
 

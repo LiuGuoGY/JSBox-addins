@@ -52,7 +52,7 @@ function main() {
 $app.listen({
   pause: function() {
     switch(resumeAction) {
-      case 1: 
+      case 1: {
         let nDate = new Date()
         let sTime = utils.getCache("begainTime", nDate.getTime())
         let duration = (nDate.getTime() - sTime)
@@ -61,16 +61,18 @@ $app.listen({
         } else {
           verifyStateSet(false)
         }
+      };
         resumeAction = 0
-        break
-      case 3:
+        break;
+      case 3: 
         resumeAction = 0
         break
     }
+    
   },
   resume: function() {
     switch(resumeAction) {
-      case 2:
+      case 2: {
         let nDate = new Date()
         let sTime = utils.getCache("stopTime", nDate.getTime())
         let tdoa = (nDate.getTime() - sTime) / 1000
@@ -88,7 +90,7 @@ $app.listen({
           })
         }
         resumeAction = 0
-        break
+      };break;
     }
   },
   exit: function() {
@@ -657,6 +659,19 @@ function genCloudView() {
           make.top.inset(0)
           make.width.equalTo(40)
         },
+        views: [{
+          type: "image",
+          props: {
+            src: "assets/vip.png",
+            bgcolor: $color("clear"),
+            hidden: (utils.getCache("myItems", []).length > 15)?false:true,
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super).offset(8)
+            make.centerY.equalTo(view.super).offset(6)
+            make.size.equalTo($size(12, 12))
+          },
+        }],
         events: {
           tapped: function(sender) {
             setupMyUpView()
@@ -711,7 +726,6 @@ function genCloudView() {
       {
         type: "canvas",
         layout: function(make, view) {
-          var preView = view.prev
           make.bottom.inset(0)
           make.height.equalTo(1)
           make.left.right.inset(0)
@@ -804,7 +818,7 @@ function genCloudView() {
           didLongPress: function(sender, indexPath, data) {
             $device.taptic(2)
             $ui.menu({
-              items: ["添加到本地"],
+              items: ["收藏到本地"],
               handler: function(title, idx) {
                 if(idx == 0) {
                   addToLocal(data, true)
@@ -859,8 +873,9 @@ function genCloudView() {
 }
 
 function searchItems(text) {
+  let view = $("rowsCloudShow")
   if(text === "" || text.length <= 0) {
-    $("rowsCloudShow").data = utils.getCache("cloudItems", [])
+    view.data = utils.getCache("cloudItems", [])
   } else {
     $text.tokenize({
       text: text,
@@ -876,7 +891,7 @@ function searchItems(text) {
             }
           }
         }
-        $("rowsCloudShow").data = resultItems
+        view.data = resultItems
         if(resultItems.length == 0) {
           ui.showToastView($("mainView"), mColor.blue, "无搜索结果，试试其他词吧")
         }
@@ -943,7 +958,6 @@ function isExist(data) {
 
 function updateToLocal(sender, indexPath, title, icon, url, descript) {
   let array = utils.getCache("localItems", [])
-  let item = sender.object(indexPath)
   array[indexPath.row].title.text = title
   array[indexPath.row].icon.src = icon
   array[indexPath.row].url = url
@@ -1565,16 +1579,6 @@ function setupWebView(title, url) {
       navBarHidden: true,
       statusBarStyle: 0,
     },
-    events: {
-      appeared: function(sender) {
-        popDelegate = $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
-      },
-      didAppear: function(sender) {
-        popDelegate = $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("myWebView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
-      }
-    },
     views: [{
       type: "view",
       layout: function(make, view) {
@@ -1615,9 +1619,9 @@ function setupWebView(title, url) {
           }
         }
       },{
-        type: "view",
+        type: "button",
         props: {
-          userInteractionEnabled: true,
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.left.inset(0)
@@ -1627,12 +1631,6 @@ function setupWebView(title, url) {
         events: {
           tapped: function(sender) {
             $ui.pop()
-          },
-          touchesBegan: function(sender, location) {
-            sender.alpha = 0.5
-          },
-          touchesEnded: function(sender, location) {
-            sender.alpha = 1.0
           },
         },
         views:[{
@@ -1683,16 +1681,6 @@ function setupMyUpView() {
       navBarHidden: true,
       statusBarStyle: 0,
     },
-    events: {
-      appeared: function(sender) {
-        popDelegate = $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
-      },
-      didAppear: function(sender) {
-        popDelegate = $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("myUploadView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
-      }
-    },
     views: [{
       type: "view",
       layout: function(make, view) {
@@ -1733,9 +1721,9 @@ function setupMyUpView() {
           }
         }
       },{
-        type: "view",
+        type: "button",
         props: {
-          userInteractionEnabled: true,
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.left.inset(0)
@@ -1745,12 +1733,6 @@ function setupMyUpView() {
         events: {
           tapped: function(sender) {
             $ui.pop()
-          },
-          touchesBegan: function(sender, location) {
-            sender.alpha = 0.5
-          },
-          touchesEnded: function(sender, location) {
-            sender.alpha = 1.0
           },
         },
         views:[{
@@ -1906,14 +1888,10 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
     },
     events: {
       appeared: function(sender) {
-        popDelegate = $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
       didAppear: function(sender) {
-        popDelegate = $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("uploadItemView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
@@ -1962,9 +1940,9 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           }
         }
       },{
-        type: "view",
+        type: "button",
         props: {
-          userInteractionEnabled: true,
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.left.inset(0)
@@ -1974,12 +1952,6 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         events: {
           tapped: function(sender) {
             $ui.pop()
-          },
-          touchesBegan: function(sender, location) {
-            sender.alpha = 0.5
-          },
-          touchesEnded: function(sender, location) {
-            sender.alpha = 1.0
           },
         },
         views:[{
@@ -2291,6 +2263,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
             make.height.equalTo(32)
             make.left.equalTo(view.prev.right)
             make.right.inset(15)
+            setUrlInputTool()
           },
           events: {
             returned: function(sender) {
@@ -2356,7 +2329,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           },
           events: {
             tapped: function(sender) {
-              $app.openURL($("schemeInput").text)
+              utils.myOpenUrl($("schemeInput").text)
               let nDate = new Date()
               $cache.set("begainTime", nDate.getTime())
               resumeAction = 1
@@ -2526,6 +2499,101 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
   $("uploadScroll").contentSize = $size(0, 750)
 }
 
+function setUrlInputTool() {
+  let inputView = $("schemeInput")
+  var toolView = $ui.create({
+    type: "view",
+    props: {
+      frame: $rect(0, 0, 0, 40),
+      bgcolor: $color("clear"),
+      borderWidth: 0.5,
+      borderColor: $color("#cccccc")
+    },
+    views: [{
+      type: "blur",
+      props: {
+        style: 5,
+      },
+      layout: $layout.fill
+    },{
+      type: "button",
+      props: {
+        title: "完成",
+        font: $font(16.5),
+        titleColor: $color("#222222"),
+        radius: 0,
+        bgcolor: $color("clear")
+      },
+      layout: function(make, view) {
+        make.top.bottom.inset(0);
+        make.right.inset(15)
+      },
+      events: {
+        tapped: function(sender) {
+          inputView.blur();
+        }
+      }
+    },{
+      type: "view",
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.height.equalTo(view.super)
+        make.left.inset(5)
+        make.right.equalTo(view.prev.left).inset(15)
+      },
+      views: [{
+        type: "button",
+        props: {
+          bgcolor: $color("white"),
+          smoothRadius: 8,
+        },
+        layout: function(make, view) {
+          make.centerY.equalTo(view.super)
+          make.top.bottom.inset(5)
+          make.left.inset(3)
+          make.width.equalTo(110)
+        },
+        views: [{
+          type: "image",
+          props: {
+            icon: $icon("104", $color("#bbbbbb"), $size(18, 18)),
+            bgcolor: $color("clear"),
+            smoothRadius: 5,
+            size: $size(18, 18),
+          },
+          layout: function(make, view) {
+            make.left.inset(8)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(18, 18))
+          }
+        },{
+          type: "label",
+          props: {
+            text: "剪切板参数",
+            textColor: $color("black"),
+            bgcolor: $color("clear"),
+            font: $font(13),
+            align: $align.center,
+          },
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.right).inset(0)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(25)
+            make.right.inset(5)
+          }
+        },],
+        events: {
+          tapped: function(sender) {
+            inputView.text = inputView.text + "[clipboard]"
+          }
+        },
+      },],
+    },]
+  });
+  inputView.runtimeValue().$setInputAccessoryView(toolView);
+  inputView.runtimeValue().$reloadInputViews();
+}
+
 function genProgress(baseView) {
   if($("progress") != undefined) {
     $("progress").super.remove()
@@ -2631,28 +2699,16 @@ function setupReward() {
     props: {
       id: "rewardMainView",
       title: "支持与赞赏",
-      navButtons: [
-        {
-          icon: "141", // Or you can use icon name
-          handler: function() {
-            $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
-          }
-        }
-      ],
       navBarHidden: true,
       statusBarStyle: 0,
     },
     layout: $layout.fill,
     events: {
       appeared: function(sender) {
-        popDelegate = $("rewardMainView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("rewardMainView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
       didAppear: function(sender) {
-        popDelegate = $("rewardMainView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("rewardMainView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
@@ -2701,9 +2757,9 @@ function setupReward() {
           }
         }
       },{
-        type: "view",
+        type: "button",
         props: {
-          userInteractionEnabled: true,
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.left.inset(0)
@@ -2713,12 +2769,6 @@ function setupReward() {
         events: {
           tapped: function(sender) {
             $ui.pop()
-          },
-          touchesBegan: function(sender, location) {
-            sender.alpha = 0.5
-          },
-          touchesEnded: function(sender, location) {
-            sender.alpha = 1.0
           },
         },
         views:[{
@@ -2845,9 +2895,9 @@ function setupReward() {
       {
         type: "button",
         props: {
-          id: "qqRewardButton",
-          title: " QQ ",
-          icon: $icon("070", $color("#E81F1F"), $size(20, 20)),
+          id: "aliRedPackButton",
+          title: " 红包 ",
+          icon: $icon("204", $color("#E81F1F"), $size(20, 20)),
           bgcolor: $color("clear"),
           titleColor: $color("#E81F1F"),
           font: $font(15),
@@ -2859,7 +2909,7 @@ function setupReward() {
         },
         events: {
           tapped: function(sender) {
-            begainReward(sender.title)
+            $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
           }
         }
       },
@@ -2873,6 +2923,18 @@ function setupReward() {
         },
         layout: function(make, view) {
           make.centerX.equalTo($("aliRewardButton"))
+          make.bottom.inset(8)
+        }
+      },{
+        type: "label",
+        props: {
+          id: "recommandText",
+          text: "— 零成本支持 —",
+          textColor: $rgba(100, 100, 100, 0.5),
+          font: $font(10),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo($("aliRedPackButton"))
           make.bottom.inset(8)
         }
       },]
@@ -2968,9 +3030,6 @@ function downloadRewardPic(way) {
   }
   $http.download({
     url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/" + PicWay + "_reward_" + PicMoney + ".JPG",
-    progress: function(bytesWritten, totalBytes) {
-      var percentage = bytesWritten * 1.0 / totalBytes
-    },
     handler: function(resp) {
       $photo.save({
         data: resp.data,
@@ -3000,14 +3059,10 @@ function setupFeedBack() {
     layout: $layout.fill,
     events: {
       appeared: function(sender) {
-        popDelegate = $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
       didAppear: function(sender) {
-        popDelegate = $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$delegate()
-        $("feedbackView").runtimeValue().$viewController().$navigationController().$interactivePopGestureRecognizer().$setDelegate(null)
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
@@ -3056,9 +3111,9 @@ function setupFeedBack() {
           }
         }
       },{
-        type: "view",
+        type: "button",
         props: {
-          userInteractionEnabled: true,
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.left.inset(0)
@@ -3068,12 +3123,6 @@ function setupFeedBack() {
         events: {
           tapped: function(sender) {
             $ui.pop()
-          },
-          touchesBegan: function(sender, location) {
-            sender.alpha = 0.5
-          },
-          touchesEnded: function(sender, location) {
-            sender.alpha = 1.0
           },
         },
         views:[{
@@ -3216,54 +3265,6 @@ function setupFeedBack() {
 
 function showInfoView(superView, data) {
   let exist = isExist(data)
-  let lottieJs = $file.read("assets/lottie.min.js").string
-  let html = `<!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-      <meta http-equiv="X-UA-Compatible" content="ie=edge">
-      <title>Document</title>
-  </head>
-  <style>
-      #svgContainer,
-      html {
-          background-color: rgba(255,255,255,0)//透明背景
-      }
-      html {
-          margin: 0;
-          padding: 0
-      }
-      body,
-      html {
-          overflow: hidden
-      }
-      #svgContainer {
-          width: 55px;
-          height: 55px;
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          margin: auto
-      }
-  </style>
-  </head>
-  <body>
-      <div id="svgContainer"></div>
-      <script type="text/javascript">${lottieJs}</script>
-      <script>
-          var animationData = ${JSON.stringify($file.read("assets/star.json").string)};//在这修改应用的动画json
-          var svgContainer = document.getElementById("svgContainer");
-          animItem = bodymovin.loadAnimation({ wrapper: svgContainer, animType: "svg", loop: !0, animationData: JSON.parse(animationData) });
-          if(${exist} == true) {
-            animItem.goToAndStop(76,true);
-          } else
-            animItem.stop();//初始状态是停止的
-      </script>
-  </body>
-  </html>`
   superView.add({
     type: "view",
     props: {
@@ -3350,52 +3351,32 @@ function showInfoView(superView, data) {
           make.size.equalTo($size(50, 50))
         }
       },{
-        type:'view',
-        props:{
-          userInteractionEnabled: true,
-          bgcolor: $color('clear'),
+        type: "lottie",
+        props: {
+          src: "assets/star.json",
+          loop: false,
+          autoReverse: false,
+          speed: 2,
+          bgcolor: $color("clear"),
+          progress: (exist)?1:0,
         },
-        views: [{
-          type: 'web',
-          props: {
-            id: "starWeb",
-            scrollEnabled: false,
-            showsProgress: false,
-            transparent: false,
-            userInteractionEnabled: false,
-            html: html,
-          },
-          layout: $layout.fill,
-        }],
         layout: function(make, view) {
-          make.top.equalTo(view.prev)
+          make.centerY.equalTo(view.prev)
           make.right.inset(30)
-          make.size.equalTo($size(50, 50))
+          make.size.equalTo($size(60, 60))
         },
         events:{
           tapped:(sender)=>{
             if(exist){
-              $('starWeb').eval({
-                script: `animItem.stop()`,
-                handler: function(result, error) {
-                  deleteLocalItem(data)
-                }
-              })
+              sender.stop();
+              deleteLocalItem(data)
             } else {
               $device.taptic(1);
-              $delay(0.4, function() {
+              $delay(0.4, ()=>{
                 $device.taptic(1);
-              });
-              $('starWeb').eval({
-                script: `
-                  animItem.play();
-                  animItem.setSpeed(2);
-                  animItem.loop = 0;
-                  `,
-                handler: function(result, error) {
-                  addToLocal(data)
-                }
               })
+              sender.play();
+              addToLocal(data)
             }
             exist = !exist
           },
@@ -3433,15 +3414,17 @@ function showInfoView(superView, data) {
           tapped: function(sender) {
             $device.taptic(0)
             $clipboard.text = data.url
-            sender.bgcolor = $color("#aaaaaa")
-            sender.textColor = $color("#f6f6f6")
-            $delay(0.15, function(){
-              if(sender != undefined) {
-                sender.bgcolor = $color("clear")
-                sender.textColor = $color("#aaaaaa")
-              }
-            })
             ui.showToastView($("windowView"), mColor.green, "复制成功", 0.2)
+            sender.bgcolor = $color("clear")
+            sender.textColor = $color("#aaaaaa")
+          },
+          touchesBegan: function(sender, location) {
+            sender.bgcolor = $color("clear")
+            sender.textColor = $color("#555555")
+          },
+          touchesEnded: function(sender, location) {
+            sender.bgcolor = $color("clear")
+            sender.textColor = $color("#aaaaaa")
           }
         },
       },{
@@ -3470,7 +3453,7 @@ function showInfoView(superView, data) {
       },{
         type: "button",
         props: {
-          title: "直接打开",
+          title: "打 开",
           bgcolor: $color("#3897E6"),
           borderColor: $color("clear"),
           borderWidth: 0,
@@ -3497,7 +3480,7 @@ function showInfoView(superView, data) {
                   $delay(0.6, function(){
                     if(sender != undefined) {
                       sender.bgcolor = $color("#3897E6")
-                      sender.title = "直接打开"
+                      sender.title = "打 开"
                     }
                   })
                 }
@@ -3545,13 +3528,6 @@ function showInfoView(superView, data) {
   }
 }
 
-//myLog
-function myLog(text) {
-  if ($app.env == $env.app) {
-    $console.log(text)
-  }
-}
-
 function requireRewardNumber() {
   $http.request({
     method: "GET",
@@ -3564,9 +3540,6 @@ function requireRewardNumber() {
     },
     handler: function(resp) {
       let results = resp.data.count
-      if (results != undefined) {
-
-      }
     }
   })
 }
@@ -3666,7 +3639,6 @@ function deleteCloudItem(objectId) {
       "X-LC-Key": appKey,
     },
     handler: function(resp) {
-      let data = resp.data.results
     }
   })
 }
@@ -3902,7 +3874,7 @@ function uploadTinyPng(action, pic, objectId, indexPath, fileName) {
           url: compressedImageUrl,
           handler: function (resp_) {
             if (resp_.data) {
-              imageData = resp_.data
+              let imageData = resp_.data
               uploadSM(action, imageData, objectId, indexPath, fileName)
             }
           }

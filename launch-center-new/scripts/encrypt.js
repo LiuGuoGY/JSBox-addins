@@ -1,4 +1,4 @@
-const CryptoJS = require('crypto-js');
+const CryptoJS = require('scripts/crypto-js');
     
 const key = CryptoJS.enc.Utf8.parse("LAUNCHCENTERBYLG");  //十六位十六进制数作为密钥
 const iv = CryptoJS.enc.Utf8.parse('LAUNCHCENTERBYLG');   //十六位十六进制数作为密钥偏移量
