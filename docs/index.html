@@ -1,12 +1,12 @@
 <html lang="zh-cmn-hans">
-<head>    
-    <meta charset="UTF-8">    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-    <meta http-equiv="X-UA-Compatible" content="ie=edge, chrome=1">    
-    <title>正在打开Launch Center...</title>    
-    <script src="https://open.mobile.qq.com/sdk/qqapi.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge, chrome=1">
+    <title>正在打开Launch Center...</title>
 </head>
 <body>
+	<p>正在拉起 JSBox...</p>
     <script>    
     var qrurl = "jsbox://run?name=Launch%20Center";    
     function is_weixin() {        
@@ -63,7 +63,25 @@
             ios_auto_jump();            
             return false        
         }    
-    }    
+    }
+	function getRequest() {
+		var url = location.search; //获取url中"?"符后的字串
+		var theRequest = new Object();
+		if (url.indexOf("?") != -1) {
+			var str = url.substr(1);
+			strs = str.split("&");
+			for(var i = 0; i < strs.length; i ++) {
+				theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+			}
+		}
+		return theRequest;
+	}
+	var request = new Object();
+	request = getRequest();
+	var id = request['objectId'];
+	if(id) {
+		qrurl = qrurl + "&objectId=" + id;
+	}
     if (is_weixin()) {        
         if (typeof WeixinJSBridge == "undefined") {            
             if (document.addEventListener) {                
