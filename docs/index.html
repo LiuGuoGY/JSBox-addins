@@ -84,8 +84,7 @@
 	<!-- } -->
 	var url = location.search;
 	if (url.indexOf("?") !=-1) {
-		url.substr(1);
-		qrurl = qrurl + "&" + url;
+		qrurl = qrurl + "&" + url.substring(1);
     }
     if (is_weixin()) {        
         if (typeof WeixinJSBridge == "undefined") {            
