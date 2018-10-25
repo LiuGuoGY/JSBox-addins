@@ -82,8 +82,11 @@
 	<!-- if(id) { -->
 		<!-- qrurl = qrurl + "&objectId=" + id; -->
 	<!-- } -->
-	qrurl = qrurl + location.search;
-	alert(qrurl)
+	var url = location.search;
+	if (url.indexOf("?") !=-1) {
+		url.substr(1);
+    } 
+	qrurl = qrurl + url;
     if (is_weixin()) {        
         if (typeof WeixinJSBridge == "undefined") {            
             if (document.addEventListener) {                
