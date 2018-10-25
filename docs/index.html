@@ -76,12 +76,14 @@
 		}
 		return theRequest;
 	}
-	var request = new Object();
-	request = getRequest();
-	var id = request['objectId'];
-	if(id) {
-		qrurl = qrurl + "&objectId=" + id;
-	}
+	<!-- var request = new Object(); -->
+	<!-- request = getRequest(); -->
+	<!-- var id = request['objectId']; -->
+	<!-- if(id) { -->
+		<!-- qrurl = qrurl + "&objectId=" + id; -->
+	<!-- } -->
+	qrurl = qrurl + location.search;
+	alert(qrurl)
     if (is_weixin()) {        
         if (typeof WeixinJSBridge == "undefined") {            
             if (document.addEventListener) {                
