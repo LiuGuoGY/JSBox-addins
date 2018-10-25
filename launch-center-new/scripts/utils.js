@@ -52,7 +52,11 @@ function myOpenUrl(url) {
 
 function spliceUrlPara(url) {
   if(url.indexOf("[clipboard]") >= 0) {
-    return url.replace(/\[clipboard\]/g, $text.URLEncode($clipboard.text))
+    let clipboard = $clipboard.text
+    if(clipboard == undefined) {
+      clipboard = ""
+    }
+    return url.replace(/\[clipboard\]/g, $text.URLEncode(clipboard))
   } else {
     return url
   }

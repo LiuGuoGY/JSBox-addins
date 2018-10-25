@@ -295,6 +295,19 @@ function genTemplate() {
   return template
 }
 
+function addButtonMore(items) {
+  items.push({
+    title: {
+      text: "更多"
+    },
+    icon: {
+      src: "assets/more.png"
+    },
+    url: "jsbox://run?name=" + encodeURI($addin.current.name + "&action=more"),
+  })
+  return items
+}
+
 function showBannedAlert() {
   $ui.alert({
     title: "Warning",
@@ -314,4 +327,5 @@ module.exports = {
   showToastView: showToastView,
   genTemplate: genTemplate,
   showBannedAlert: showBannedAlert,
+  addButtonMore: addButtonMore,
 }

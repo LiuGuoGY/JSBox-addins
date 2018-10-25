@@ -4,7 +4,7 @@ let utils = require('scripts/utils')
 setupWidgetView()
 
 function setupWidgetView() {
-  let items = utils.getCache("localItems", [])
+  let items = ui.addButtonMore(utils.getCache("localItems", []))
   let columns = utils.getCache("columns")
   let itemHeight = 50
   let view = {

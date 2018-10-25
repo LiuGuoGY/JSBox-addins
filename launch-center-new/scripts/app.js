@@ -46,6 +46,7 @@ function show() {
 function main() {
   sync.download()
   setupMainView()
+  solveQuery()
   update.checkUpdate()
 }
 
@@ -254,6 +255,17 @@ function setupMainView() {
       },
     ]
   })
+}
+
+function solveQuery() {
+  let query = $context.query
+  if(query) {
+    switch(query.q) {
+      case "show":
+      showOneItem(query.objectId);break;
+      default:break;
+    }
+  }
 }
 
 function handleSelect(view, row) {
@@ -1530,7 +1542,7 @@ function genSettingView() {
                 break
               case 4: setupReward()
                 break
-              case 5: share()
+              case 5: share("http://t.cn/E7kdTkv")
                 break
               default:
             }
@@ -1560,9 +1572,9 @@ function getOpenBroswer() {
   return broswers[mode]
 }
 
-function share() {
+function share(link) {
   $share.sheet({
-    items: ["http://t.cn/E7kdTkv"], // 也支持 item
+    items: [link], // 也支持 item
     handler: function(success) {
       if(success) {
         ui.showToastView($("mainView"), mColor.blue, "感谢您的分享")
@@ -3451,44 +3463,75 @@ function showInfoView(superView, data) {
           make.height.equalTo(height)
         }
       },{
-        type: "button",
+        type: "view",
         props: {
-          title: "打 开",
-          bgcolor: $color("#3897E6"),
-          borderColor: $color("clear"),
-          borderWidth: 0,
-          titleColor: $color("white"),
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.left.right.inset(25)
           make.height.equalTo(40)
           make.bottom.inset(20)
         },
-        events: {
-          tapped: function(sender) {
-            $device.taptic(0)
-            utils.myOpenUrl(data.url)
-            resumeAction = 3
-            $thread.background({
-              delay: 0.1,
-              handler: function() {
-                if(resumeAction == 3) {
-                  resumeAction = 0
-                  sender.title = "未安装对应APP"
-                  sender.bgcolor = $color(mColor.red)
-                  $device.taptic(2)
-                  $delay(0.6, function(){
-                    if(sender != undefined) {
-                      sender.bgcolor = $color("#3897E6")
-                      sender.title = "打 开"
-                    }
-                  })
+        views: [{
+          type: "button",
+          props: {
+            title: "打 开",
+            bgcolor: $color("#3897E6"),
+            borderColor: $color("clear"),
+            borderWidth: 0,
+            titleColor: $color("white"),
+            circular: true,
+          },
+          layout: function(make, view) {
+            make.top.bottom.inset(0)
+            make.width.equalTo(view.super).multipliedBy(0.83)
+            make.centerY.equalTo(view.super)
+            make.left.inset(0)
+          },
+          events: {
+            tapped: function(sender) {
+              $device.taptic(0)
+              utils.myOpenUrl(data.url)
+              resumeAction = 3
+              $thread.background({
+                delay: 0.1,
+                handler: function() {
+                  if(resumeAction == 3) {
+                    resumeAction = 0
+                    sender.title = "未安装对应APP"
+                    sender.bgcolor = $color(mColor.red)
+                    $device.taptic(2)
+                    $delay(0.6, function(){
+                      if(sender != undefined) {
+                        sender.bgcolor = $color("#3897E6")
+                        sender.title = "打 开"
+                      }
+                    })
+                  }
                 }
-              }
-            })
+              })
+            }
           }
-        }
-      }],
+        },{
+          type: "button",
+          props: {
+            bgcolor: $color("clear"),
+            icon: $icon("022", $rgba(100, 100, 100, 0.4), $size(20, 20)),
+          },
+          layout: function(make, view) {
+            make.top.bottom.inset(0)
+            make.centerY.equalTo(view.super)
+            make.left.equalTo(view.prev.right).inset(0)
+            make.right.inset(0)
+          },
+          events: {
+            tapped: function(sender) {
+              let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
+              share(shareLink)
+            },
+          },
+        }]
+      },],
     }],
   })
   $("windowView").relayout()
@@ -3544,10 +3587,50 @@ function requireRewardNumber() {
   })
 }
 
+function showOneItem(objectId) {
+  let cloudItems = utils.getCache("cloudItems", [])
+  for(let i = 0; i < cloudItems.length; i++) {
+    if(cloudItems[i].objectId == objectId) {
+      if($("mainView")) {
+        showInfoView($("mainView"), cloudItems[i])
+      }
+      return 0
+    }
+  }
+  $http.request({
+    method: "GET",
+    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items/" + objectId + "?keys=-deviceToken,-size,-objectId,-createdAt",
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": appId,
+      "X-LC-Key": appKey,
+    },
+    handler: function(resp) {
+      let data = resp.data
+      if (data != undefined && data.url != undefined) {
+        let itemInfo = {
+          title: {
+            text: data.title
+          },
+          icon: {
+            src: data.icon
+          },
+          url: data.url,
+          descript: data.descript,
+        }
+        showInfoView($("mainView"), itemInfo)
+      } else {
+        ui.showToastView($("mainView"), mColor.red, "未找到该启动器")
+      }
+    }
+  })
+}
+
 function requireItems() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt&keys=-deviceToken,-size,-objectId",
+    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt&keys=-deviceToken,-size",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -3569,6 +3652,7 @@ function requireItems() {
             },
             url: data[i].url,
             descript: data[i].descript,
+            objectId: data[i].objectId,
           })
         }
         view.data = array
