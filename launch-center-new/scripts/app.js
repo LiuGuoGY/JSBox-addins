@@ -3060,7 +3060,7 @@ function downloadRewardPic(way) {
 
 
 //反馈页面
-function setupFeedBack() {
+function setupFeedBack(text) {
   $ui.push({
     props: {
       id: "feedbackView",
@@ -3195,7 +3195,7 @@ function setupFeedBack() {
             type: "text",
             props: {
               id: "feedbackText",
-              text: "",
+              text: (text)?text:"",
               align: $align.left,
               radius: 5,
               textColor: $color("#333333"),
@@ -3313,23 +3313,73 @@ function showInfoView(superView, data) {
         shadow(view)
       },
       views: [{
-        type: "button",
-        props: {
-          title: "×",
-          font: $font(27),
-          titleColor: $color("#bbbbbb"),
-          bgcolor: $color("clear"),
-        },
+        type: "view",  //top view
         layout: function(make, view) {
-          make.right.inset(20)
+          make.left.right.inset(0)
           make.top.inset(0)
-          make.size.equalTo($size(50, 35))
+          make.height.equalTo(35)
         },
-        events: {
-          tapped: function(sender) {
-            hideView()
+        views: [{
+          type: "button",
+          props: {
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.left.inset(20)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(50, 35))
+          },
+          events: {
+            tapped: function(sender) {
+              setupFeedBack("应用失效(objectId)：\n\t" + data.objectId + "\n描述(原因或现象)：\n\t")
+            }
+          },
+          views: [{
+            type: "image",
+            props: {
+              src: "assets/lapse.png",
+              bgcolor: $color("clear"),
+            },
+            layout: function(make, view) {
+              make.center.equalTo(view.super)
+              make.size.equalTo($size(15, 15))
+            },
+          }]
+        },{
+          type: "button",
+          props: {
+            bgcolor: $color("clear"),
+            icon: $icon("022", $color("#cccccc"), $size(16, 16)),
+          },
+          layout: function(make, view) {
+            make.center.equalTo(view.super)
+            make.size.equalTo($size(50, 35))
+          },
+          events: {
+            tapped: function(sender) {
+              let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
+              share(shareLink)
+            },
+          },
+        },{
+          type: "button",
+          props: {
+            title: "×",
+            font: $font(27),
+            titleColor: $color("#bbbbbb"),
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.right.inset(20)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(50, 35))
+          },
+          events: {
+            tapped: function(sender) {
+              hideView()
+            }
           }
-        }
+        },],
       },{
         type: "canvas",
         layout: function(make, view) {
@@ -3350,95 +3400,107 @@ function showInfoView(superView, data) {
           }
         }
       },{
-        type: "image",
+        type: "view",
         props: {
           bgcolor: $color("clear"),
-          smoothRadius: 13,
-          size: $size(50, 50),
-          src: data.icon.src,
+          clipsToBounds: false,
         },
         layout: function(make, view) {
+          make.left.right.inset(30)
+          make.height.equalTo(50)
           make.top.equalTo(view.prev).inset(12)
-          make.left.inset(30)
-          make.size.equalTo($size(50, 50))
-        }
-      },{
-        type: "lottie",
-        props: {
-          src: "assets/star.json",
-          loop: false,
-          autoReverse: false,
-          speed: 2,
-          bgcolor: $color("clear"),
-          progress: (exist)?1:0,
         },
-        layout: function(make, view) {
-          make.centerY.equalTo(view.prev)
-          make.right.inset(30)
-          make.size.equalTo($size(60, 60))
-        },
-        events:{
-          tapped:(sender)=>{
-            if(exist){
-              sender.stop();
-              deleteLocalItem(data)
-            } else {
-              $device.taptic(1);
-              $delay(0.4, ()=>{
+        views: [{
+          type: "image",
+          props: {
+            bgcolor: $color("clear"),
+            smoothRadius: 13,
+            size: $size(50, 50),
+            src: data.icon.src,
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.left.inset(0)
+            make.size.equalTo($size(50, 50))
+          }
+        },{
+          type: "lottie",
+          props: {
+            src: "assets/star.json",
+            loop: false,
+            autoReverse: false,
+            speed: 2,
+            bgcolor: $color("clear"),
+            progress: (exist)?1:0,
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.right.inset(0)
+            make.size.equalTo($size(60, 60))
+          },
+          events:{
+            tapped:(sender)=>{
+              if(exist){
+                sender.stop();
+                deleteLocalItem(data)
+              } else {
                 $device.taptic(1);
-              })
-              sender.play();
-              addToLocal(data)
-            }
-            exist = !exist
+                $delay(0.4, ()=>{
+                  $device.taptic(1);
+                })
+                sender.play();
+                addToLocal(data)
+              }
+              exist = !exist
+            },
           },
-        },
-      },{
-        type: "label",
-        props: {
-          text: data.title.text,
-          font: $font("bold", 17),
-          textColor: $color("#555555"),
-          align: $align.left,
-        },
-        layout: function(make, view) {
-          make.left.equalTo(view.prev.prev.right).inset(15)
-          make.right.equalTo(view.prev.left).inset(0)
-          make.top.equalTo(view.prev.prev.top).inset(2)
-        }
-      },
-      {
-        type: "label",
-        props: {
-          text: data.url,
-          font: $font(15),
-          textColor: $color("#aaaaaa"),
-          bgcolor: $color("clear"),
-          align: $align.left,
-          userInteractionEnabled: true,
-        },
-        layout: function(make, view) {
-          make.left.equalTo(view.prev.left)
-          make.right.equalTo(view.prev.prev.left).inset(0)
-          make.bottom.equalTo(view.prev.prev.prev.bottom).inset(3)
-        },
-        events: {
-          tapped: function(sender) {
-            $device.taptic(0)
-            $clipboard.text = data.url
-            ui.showToastView($("windowView"), mColor.green, "复制成功", 0.2)
-            sender.bgcolor = $color("clear")
-            sender.textColor = $color("#aaaaaa")
+        },{
+          type: "label",
+          props: {
+            text: data.title.text,
+            font: $font("bold", 17),
+            textColor: $color("#555555"),
+            align: $align.left,
           },
-          touchesBegan: function(sender, location) {
-            sender.bgcolor = $color("clear")
-            sender.textColor = $color("#555555")
-          },
-          touchesEnded: function(sender, location) {
-            sender.bgcolor = $color("clear")
-            sender.textColor = $color("#aaaaaa")
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.prev.right).inset(15)
+            make.right.equalTo(view.prev.left).inset(0)
+            make.top.inset(2)
           }
         },
+        {
+          type: "label",
+          props: {
+            text: data.url,
+            font: $font(15),
+            textColor: $color("#aaaaaa"),
+            bgcolor: $color("clear"),
+            align: $align.left,
+            userInteractionEnabled: true,
+          },
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.left)
+            make.right.equalTo(view.prev.prev.left).inset(0)
+            make.bottom.inset(3)
+          },
+          events: {
+            tapped: function(sender) {
+              $device.taptic(0)
+              $clipboard.text = data.url
+              ui.showToastView($("windowView"), mColor.green, "复制成功", 0.2)
+              sender.bgcolor = $color("clear")
+              sender.textColor = $color("#aaaaaa")
+            },
+            touchesBegan: function(sender, location) {
+              sender.bgcolor = $color("clear")
+              sender.textColor = $color("#555555")
+            },
+            touchesEnded: function(sender, location) {
+              sender.bgcolor = $color("clear")
+              sender.textColor = $color("#aaaaaa")
+            }
+          },
+        },],
       },{
         type: "label",
         props: {
@@ -3451,7 +3513,7 @@ function showInfoView(superView, data) {
         },
         layout: function(make, view) {
           make.left.right.inset(30)
-          make.top.equalTo(view.prev.prev.prev.bottom).inset(10)
+          make.top.equalTo(view.prev.bottom).inset(10)
           let height = $text.sizeThatFits({
             text: (data.descript)?data.descript:"暂无说明",
             width: $device.info.screen.width - 60,
@@ -3480,11 +3542,11 @@ function showInfoView(superView, data) {
             borderColor: $color("clear"),
             borderWidth: 0,
             titleColor: $color("white"),
-            circular: true,
+            // circular: true,
           },
           layout: function(make, view) {
             make.top.bottom.inset(0)
-            make.width.equalTo(view.super).multipliedBy(0.83)
+            make.width.equalTo(view.super)
             make.centerY.equalTo(view.super)
             make.left.inset(0)
           },
@@ -3512,25 +3574,7 @@ function showInfoView(superView, data) {
               })
             }
           }
-        },{
-          type: "button",
-          props: {
-            bgcolor: $color("clear"),
-            icon: $icon("022", $rgba(100, 100, 100, 0.4), $size(20, 20)),
-          },
-          layout: function(make, view) {
-            make.top.bottom.inset(0)
-            make.centerY.equalTo(view.super)
-            make.left.equalTo(view.prev.right).inset(0)
-            make.right.inset(0)
-          },
-          events: {
-            tapped: function(sender) {
-              let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
-              share(shareLink)
-            },
-          },
-        }]
+        },]
       },],
     }],
   })
@@ -3599,7 +3643,7 @@ function showOneItem(objectId) {
   }
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items/" + objectId + "?keys=-deviceToken,-size,-objectId,-createdAt",
+    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items/" + objectId + "?keys=-deviceToken,-size,-createdAt",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
