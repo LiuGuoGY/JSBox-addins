@@ -770,7 +770,7 @@ function genCloudView() {
         type: "matrix",
         props: {
           id: "rowsCloudShow",
-          columns: 4, //横行个数
+          columns: ($device.info.screen.width < 400)?4:6, //横行个数
           itemHeight: 50, //图标到字之间得距离
           spacing: 3, //每个边框与边框之间得距离
           template: [{
@@ -880,6 +880,7 @@ function genCloudView() {
       }]
     },],
   }
+  
   requireItems()
   return view
 }
@@ -3331,36 +3332,37 @@ function showInfoView(superView, data) {
           },
           events: {
             tapped: function(sender) {
-              setupFeedBack("应用失效(objectId)：\n\t" + data.objectId + "\n描述(原因或现象)：\n\t")
+              $ui.menu({
+                items: ["分享", "失效反馈"],
+                handler: function(title, idx) {
+                  switch (idx) {
+                    case 0:
+                      let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
+                      share(shareLink)
+                      break;
+                    case 1:
+                      setupFeedBack("应用失效(objectId)：\n\t" + data.objectId + "\n描述(原因或现象)：\n\t")
+                      break;
+                    default:
+                      break;
+                  }
+                },
+                finished: function(cancelled) {}
+              })
             }
           },
           views: [{
             type: "image",
             props: {
-              src: "assets/lapse.png",
+              src: "assets/more.png",
               bgcolor: $color("clear"),
+              alpha: 0.7,
             },
             layout: function(make, view) {
               make.center.equalTo(view.super)
-              make.size.equalTo($size(15, 15))
+              make.size.equalTo($size(17, 17))
             },
           }]
-        },{
-          type: "button",
-          props: {
-            bgcolor: $color("clear"),
-            icon: $icon("022", $color("#cccccc"), $size(16, 16)),
-          },
-          layout: function(make, view) {
-            make.center.equalTo(view.super)
-            make.size.equalTo($size(50, 35))
-          },
-          events: {
-            tapped: function(sender) {
-              let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
-              share(shareLink)
-            },
-          },
         },{
           type: "button",
           props: {
@@ -3635,9 +3637,11 @@ function showOneItem(objectId) {
   let cloudItems = utils.getCache("cloudItems", [])
   for(let i = 0; i < cloudItems.length; i++) {
     if(cloudItems[i].objectId == objectId) {
-      if($("mainView")) {
-        showInfoView($("mainView"), cloudItems[i])
-      }
+      $delay(0.3, ()=>{
+        if($("mainView")) {
+          showInfoView($("mainView"), cloudItems[i])
+        }
+      })
       return 0
     }
   }
@@ -3663,7 +3667,9 @@ function showOneItem(objectId) {
           url: data.url,
           descript: data.descript,
         }
-        showInfoView($("mainView"), itemInfo)
+        $delay(0.3, ()=>{
+          showInfoView($("mainView"), itemInfo)
+        })
       } else {
         ui.showToastView($("mainView"), mColor.red, "未找到该启动器")
       }

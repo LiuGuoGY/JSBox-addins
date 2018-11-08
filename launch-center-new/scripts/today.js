@@ -2,6 +2,29 @@ let ui = require('scripts/ui')
 let utils = require('scripts/utils')
 
 function setupTodayView() {
+  let items = ui.addButtonMore(utils.getCache("localItems", []))
+  let columns = utils.getCache("columns")
+  let itemHeight = 50
+  let wantToClose = false
+  let showView = []
+
+  // if(!utils.getCache("staticHeight")) {
+  //   let totalHeight = Math.ceil(items.length / columns) * itemHeight + 15
+  //   if(!utils.getCache("pullToClose")) {
+  //     totalHeight += 30
+  //   }
+  //   $widget.height = totalHeight
+  // }
+
+  if(!utils.getCache("staticHeight")) {
+    if(utils.getCache("pullToClose")) {
+      $widget.height = 215
+    } else {
+      $widget.height = 245
+    }
+  }
+  
+
   if(utils.getCache("backgroundTranparent")) {
     let alpha = 1
     $delay(0.7, function(){
@@ -18,11 +41,7 @@ function setupTodayView() {
       })
     })
   }
-  let items = ui.addButtonMore(utils.getCache("localItems", []))
-  let columns = utils.getCache("columns")
-  let itemHeight = 50
-  let wantToClose = false
-  let showView = []
+  
   if(utils.getCache("pullToClose")) {
     showView = [{
       type: "matrix",
@@ -37,9 +56,8 @@ function setupTodayView() {
         showsVerticalIndicator: false,
       },
       layout: function(make, view) {
-        make.width.equalTo(view.super)
-        make.centerX.equalTo(view.super)
-        make.top.bottom.inset(0)
+        make.center.equalTo(view.super)
+        make.size.equalTo(view.super)
       },
       events: {
         didSelect(sender, indexPath, data) {
@@ -146,14 +164,6 @@ function setupTodayView() {
     layout: $layout.fill,
     views: showView,
   })
-
-  if(!utils.getCache("staticHeight")) {
-    if(utils.getCache("pullToClose")) {
-      $widget.height = 215
-    } else {
-      $widget.height = 245
-    }
-  }
 
   if(utils.getCache("pullToClose") == true && !utils.getCache("isPullToCloseToasted", false)) {
     $cache.set("isPullToCloseToasted", true);
