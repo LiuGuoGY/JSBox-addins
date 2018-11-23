@@ -28,6 +28,15 @@ function getCache(key, def) {
   }
 }
 
+function getWidgetHeight() {
+  let standardHeight = ($device.isIpadPro ? 130.0 : 110.0);
+  let bodyFontSize = $objc("UIFont").$preferredFontForTextStyle("UICTFontTextStyleBody").$pointSize();
+  let standardFontSize = 17.0;
+  let fontSizeDiff = (bodyFontSize - standardFontSize);
+  let compactModeHeight = standardHeight + fontSizeDiff;
+  return compactModeHeight
+}
+
 function myOpenUrl(url) {
   url = spliceUrlPara(url)
   if(!url.startsWith("http")|| checkUrlScheme(url)) {
@@ -83,4 +92,5 @@ module.exports = {
   mColor: mColor,
   colors: colors,
   myOpenUrl: myOpenUrl,
+  getWidgetHeight: getWidgetHeight,
 }
