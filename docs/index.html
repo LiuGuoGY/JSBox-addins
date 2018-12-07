@@ -104,11 +104,30 @@
             style: 0        
         });    
     }else {        
-        if (qrurl != "") {            
-            location.href = qrurl        
-        } else {            
-            window.close()        
-        }    
+        <!-- if (qrurl != "") {             -->
+            <!-- location.href = qrurl         -->
+        <!-- } else {             -->
+            <!-- window.close()         -->
+        <!-- }     -->
+		executeProtocol(qrurl);
+    }
+	
+	const executeProtocol = function(e) {
+      if (e) {
+        console.log(e);
+        /** @type {!Element} */
+        var iframe = document.createElement("iframe");
+        /** @type {string} */
+        iframe.style.cssText = "display:none;width:0px;height:0px;";
+        /** @type {string} */
+        iframe.src = e;
+        (document.body || document.documentElement).appendChild(iframe);
+        setTimeout(function() {
+          if (iframe && iframe.parentNode) {
+            iframe.parentNode.removeChild(iframe);
+          }
+        }, 0);
+      }
     }
     </script>
 </body>
