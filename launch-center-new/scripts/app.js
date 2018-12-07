@@ -208,7 +208,7 @@ function setupMainView() {
         layout: function(make, view) {
           var preView = view.prev
           make.top.equalTo(preView.top)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -739,7 +739,7 @@ function genCloudView() {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -1441,7 +1441,7 @@ function genSettingView() {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -1617,7 +1617,7 @@ function setupWebView(title, url) {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -1719,7 +1719,7 @@ function setupMyUpView() {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -1938,7 +1938,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -2755,7 +2755,7 @@ function setupReward() {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -3109,7 +3109,7 @@ function setupFeedBack(text) {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(0)
         },
         events: {
@@ -3387,7 +3387,7 @@ function showInfoView(superView, data) {
         layout: function(make, view) {
           var preView = view.prev
           make.top.equalTo(preView.bottom)
-          make.height.equalTo(1 / $device.info.screen.scale)
+          make.height.equalTo(1)
           make.left.right.inset(20)
         },
         events: {
