@@ -86,32 +86,32 @@
 	if (url.indexOf("?") !=-1) {
 		qrurl = qrurl + "&" + url.substring(1);
     }
-    if (is_weixin()) {        
-        if (typeof WeixinJSBridge == "undefined") {            
-            if (document.addEventListener) {                
-                document.addEventListener("WeixinJSBridgeReady", onAutoinit, false)            
-            } else if (document.attachEvent) {                
-                document.attachEvent("WeixinJSBridgeReady", onAutoinit);                
-                document.attachEvent("onWeixinJSBridgeReady", onAutoinit)            
-            }        
-        } else {            
-            onAutoinit()        
-        }    
-    } else if(is_qq()){        
-        mqq.invoke("ui", "openUrl", {            
-            url: qrurl,            
-            target: 2,            
-            style: 0        
-        });    
-    }else {        
+    <!-- if (is_weixin()) {         -->
+        <!-- if (typeof WeixinJSBridge == "undefined") {             -->
+            <!-- if (document.addEventListener) {                 -->
+                <!-- document.addEventListener("WeixinJSBridgeReady", onAutoinit, false)             -->
+            <!-- } else if (document.attachEvent) {                 -->
+                <!-- document.attachEvent("WeixinJSBridgeReady", onAutoinit);                 -->
+                <!-- document.attachEvent("onWeixinJSBridgeReady", onAutoinit)             -->
+            <!-- }         -->
+        <!-- } else {             -->
+            <!-- onAutoinit()         -->
+        <!-- }     -->
+    <!-- } else if(is_qq()){         -->
+        <!-- mqq.invoke("ui", "openUrl", {             -->
+            <!-- url: qrurl,             -->
+            <!-- target: 2,             -->
+            <!-- style: 0         -->
+        <!-- });     -->
+    <!-- }else {         -->
         <!-- if (qrurl != "") {             -->
             <!-- location.href = qrurl         -->
         <!-- } else {             -->
             <!-- window.close()         -->
         <!-- }     -->
-		executeProtocol(qrurl);
-    }
-	
+		
+    <!-- } -->
+	executeProtocol(qrurl);
 	const executeProtocol = function(e) {
       if (e) {
         console.log(e);
