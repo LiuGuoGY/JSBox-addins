@@ -2,7 +2,22 @@ let ui = require('scripts/ui')
 let utils = require('scripts/utils')
 
 function setupTodayView() {
-  if(utils.getCache("backgroundTranparent", true)) {
+  let items = ui.addButtonMore(utils.getCache("localItems", []))
+  let columns = utils.getCache("columns")
+  let itemHeight = 50
+  let wantToClose = false
+  let showView = []
+
+  if(!utils.getCache("staticHeight")) {
+    if(utils.getCache("pullToClose")) {
+      $widget.height = 215
+    } else {
+      $widget.height = 245
+    }
+  }
+  
+
+  if(utils.getCache("backgroundTranparent")) {
     let alpha = 1
     $delay(0.7, function(){
       let timer = $timer.schedule({
@@ -10,7 +25,7 @@ function setupTodayView() {
         handler: function() {
           if(alpha > 0) {
             $ui.vc.runtimeValue().$view().$setBackgroundColor($rgba(255, 255, 255, alpha))
-            alpha -= 0.05
+            alpha -= 0.02
           } else {
             timer.invalidate()
           }
@@ -18,12 +33,8 @@ function setupTodayView() {
       })
     })
   }
-  let items = utils.getCache("localItems", [])
-  let columns = utils.getCache("columns", 4)
-  let itemHeight = (items.length <= columns)?(200):50
-
-  let showView = []
-  if(utils.getCache("pullToClose", true)) {
+  
+  if(utils.getCache("pullToClose")) {
     showView = [{
       type: "matrix",
       props: {
@@ -37,9 +48,8 @@ function setupTodayView() {
         showsVerticalIndicator: false,
       },
       layout: function(make, view) {
-        make.width.equalTo(view.super)
-        make.centerX.equalTo(view.super)
-        make.top.bottom.inset(0)
+        make.center.equalTo(view.super)
+        make.size.equalTo(view.super)
       },
       events: {
         didSelect(sender, indexPath, data) {
@@ -47,17 +57,22 @@ function setupTodayView() {
           utils.myOpenUrl(data.url)
         },
         didScroll: function(sender) {
-          if($("rowsShow").contentOffset.y < -35) {
-            if($("closeView").bgcolor === $color("clear")) {
+          if(sender.contentOffset.y < -30) {
+            if(!wantToClose) {
+              wantToClose = true
               $device.taptic(2)
-              $("closeView").bgcolor = utils.randomValue(utils.colors)
+              let color = utils.randomValue(utils.colors)
+              $("closeView").icon = $icon("225", color, $size(17, 17))
+              $("closeView").titleColor = color
             }
           } else{
-            $("closeView").bgcolor = $color("clear")
+            wantToClose = false
+            $("closeView").icon = $icon("225", $rgba(100, 100, 100, 0.3), $size(17, 17))
+            $("closeView").titleColor = $rgba(100, 100, 100, 0.3)
           }
         },
         didEndDragging: function(sender, decelerate) {
-          if($("closeView").bgcolor !== $color("clear")) {
+          if(wantToClose) {
             $app.close()
           }
         }
@@ -66,20 +81,21 @@ function setupTodayView() {
         type: "button",
         props: {
           id: "closeView",
-          title: "CLOSE",
+          title: " CLOSE",
           bgcolor: $color("clear"),
-          titleColor: $rgba(100, 100, 100, 0.4),
-          font: $font(15),
+          icon: $icon("225", $rgba(100, 100, 100, 0.3), $size(17, 17)),
+          titleColor: $rgba(100, 100, 100, 0.3),
+          font: $font("bold", 15),
           hidden: false,
           radius: 15,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
-          make.top.inset(0).offset(-35)
+          make.top.inset(0).offset(-30)
           make.width.equalTo(80)
           make.height.equalTo(30)
         },
-      }]
+      },]
     }]
   } else {
     showView = [{
@@ -87,9 +103,10 @@ function setupTodayView() {
       props: {
         title: "CLOSE",
         bgcolor: $color("clear"),
-        titleColor: $rgba(100, 100, 100, 0.2),
-        font: $font(15),
+        titleColor: $rgba(100, 100, 100, 0.3),
+        font: $font("bold", 15),
         hidden: false,
+        radius: 15,
       },
       layout: function(make, view) {
         make.centerX.equalTo(view.super)
@@ -99,6 +116,7 @@ function setupTodayView() {
       },
       events: {
         tapped: function(sender) {
+          $device.taptic(2)
           $app.close(0.1)
         }
       }
@@ -110,7 +128,7 @@ function setupTodayView() {
         itemHeight: itemHeight, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         bgcolor: $color("clear"),
-        template: genTemplate(),
+        template: ui.genTemplate(),
         data: items,
         showsVerticalIndicator: false,
       },
@@ -128,7 +146,7 @@ function setupTodayView() {
       },
     }]
   }
-  
+
   $ui.render({
     props: {
       id: "todayView",
@@ -139,10 +157,10 @@ function setupTodayView() {
     views: showView,
   })
 
-  if(utils.getCache("pullToClose", true) == true && !utils.getCache("isPullToCloseToasted", false)) {
+  if(utils.getCache("pullToClose") == true && !utils.getCache("isPullToCloseToasted", false)) {
     $cache.set("isPullToCloseToasted", true);
     $delay(1, function(){
-      ui.showToastView($("todayView"), mColor.blue, "下拉即可关闭 ↓")
+      ui.showToastView($("todayView"), utils.mColor.blue, "下拉即可关闭 ↓")
     })
   }
 }

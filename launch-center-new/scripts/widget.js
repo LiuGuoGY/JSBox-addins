@@ -4,10 +4,9 @@ let utils = require('scripts/utils')
 setupWidgetView()
 
 function setupWidgetView() {
-  let items = utils.getCache("localItems", [])
-  let columns = utils.getCache("columns", 4)
-  let height = 100
-  let itemHeight = (items.length <= columns)?(height):50
+  let items = ui.addButtonMore(utils.getCache("localItems", []))
+  let columns = utils.getCache("columns")
+  let itemHeight = utils.getWidgetHeight() * 5 / 11
   let view = {
     props: {
       title: "Launch Center",
@@ -18,7 +17,7 @@ function setupWidgetView() {
         id: "rowsShow",
         columns: columns, //横行个数
         itemHeight: itemHeight, //图标到字之间得距离
-        spacing: 3, //每个边框与边框之间得距离
+        spacing: utils.getWidgetHeight() * 3 / 110, //每个边框与边框之间得距离
         template: ui.genTemplate(),
         data: items,
       },
