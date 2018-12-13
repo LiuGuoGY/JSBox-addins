@@ -6,11 +6,7 @@ setupWidgetView()
 function setupWidgetView() {
   let items = ui.addButtonMore(utils.getCache("localItems", []))
   let columns = utils.getCache("columns")
-<<<<<<< HEAD
   let itemHeight = utils.getWidgetHeight() * 5 / 11
-=======
-  let itemHeight = 50
->>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
   let view = {
     props: {
       title: "Launch Center",

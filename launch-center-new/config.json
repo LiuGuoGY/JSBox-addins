@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "settings" : {
     "minOSVer" : "10.0.0",
     "minSDKVer" : "1.0.0",
@@ -7,15 +6,6 @@
     "autoKeyboardEnabled" : false,
     "keyboardToolbarEnabled" : false,
     "rotateDisabled" : false
-=======
-  "info": {
-    "name": "Launch Center",
-    "url": "",
-    "version": "1.0",
-    "author": "Linger",
-    "website": "https://www.liuguogy.com",
-    "types": 0
->>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
   },
   "info" : {
     "version" : "1.0",
