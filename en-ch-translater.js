@@ -1,15 +1,15 @@
 /**
- * @Version 4.7
+ * @Version 4.8
  * @author Liu Guo
- * @date 2018.10.11
+ * @date 2018.11.15
  * @brief
- *   1. 多项优化
+ *   1. 去掉了工具栏上的历史查询项
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.7
+let appVersion = 4.8
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/en-ch-translater.js"
 let appId = "PwqyveoNdNCk7FqvwOx9CL0D-gzGzoHsz"
 let appKey = "gRxHqQeeWrM6U1QAPrBi9R3i"
@@ -710,68 +710,7 @@ function setTextInputTool() {
           make.width.equalTo(view.super).multipliedBy(0.6)
           make.top.bottom.inset(0)
         },
-        views: [{
-          type: "matrix",
-          props: {
-            columns: getHistoryLength(2),
-            itemHeight: 40,
-            spacing: 0,
-            alwaysBounceVertical: false,
-            waterfall: true,
-            bgcolor: $color("clear"),
-            template: [{
-              type: "view",
-              props: {
-                bgcolor: $color("white"),
-                smoothRadius: 8,
-              },
-              layout: function(make, view) {
-                make.center.equalTo(view.super)
-                make.top.bottom.inset(5)
-                make.left.right.inset(3)
-              },
-              views: [{
-                type: "image",
-                props: {
-                  id: "icon",
-                  bgcolor: $color("clear"),
-                  smoothRadius: 5,
-                  size: $size(18, 18),
-                },
-                layout: function(make, view) {
-                  make.left.inset(8)
-                  make.centerY.equalTo(view.super)
-                  make.size.equalTo($size(18, 18))
-                }
-              },{
-                type: "label",
-                props: {
-                  id: "title",
-                  textColor: $color("black"),
-                  bgcolor: $color("clear"),
-                  font: $font(12),
-                  // autoFontSize: true,
-                  align: $align.center,
-                },
-                layout: function(make, view) {
-                  make.left.equalTo(view.prev.right).inset(0)
-                  make.centerY.equalTo(view.super)
-                  make.height.equalTo(25)
-                  make.right.inset(5)
-                }
-              },],
-            },],
-            data: genHistoryViewData()
-          },
-          layout: $layout.fill,
-          events: {
-            didSelect(sender, indexPath, data) {
-              $device.taptic(1)
-              inputView.blur()
-              translate(data.title.text)
-            },
-          },
-        },],
+        views: [],
       },{
         type: "canvas",
         layout: function(make, view) {
@@ -1314,6 +1253,25 @@ function setupSetting() {
       props: {
         id: "list",
         template: feedBackTemplate,
+        footer: {
+          type: "view",
+          props:{
+            height: 60,
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "Version " + appVersion.toFixed(1) + " © Linger.",
+              textColor: $color("#BBBBBB"),
+              align: $align.center,
+              font: $font(13)
+            },
+            layout: function(make, view) {
+              make.center.equalTo(view.super)
+              make.height.equalTo(view.super)
+            }
+          },],
+        },
         data: [
           {
             title: "界面",

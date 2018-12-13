@@ -208,7 +208,11 @@ function setupMainView() {
         layout: function(make, view) {
           var preView = view.prev
           make.top.equalTo(preView.top)
+<<<<<<< HEAD
           make.height.equalTo(1 / $device.info.screen.scale)
+=======
+          make.height.equalTo(1)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
           make.left.right.inset(0)
         },
         events: {
@@ -316,6 +320,7 @@ function genRowsView(reorder, columns) {
       spacing: 3, //每个边框与边框之间得距离
       reorder: reorder,
       template: ui.genTemplate(),
+<<<<<<< HEAD
       header: {
         type: "view",
         props:{
@@ -337,6 +342,8 @@ function genRowsView(reorder, columns) {
           }
         }]
       },
+=======
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
       data: utils.getCache("localItems", [])
     },
     layout: $layout.fill,
@@ -383,6 +390,7 @@ function genRowsView(reorder, columns) {
         })
       },
       didScroll: function(sender) {
+<<<<<<< HEAD
         if(sender.contentOffset.y >= 37 && $("localPageHeaderLabel").hidden === true) {
           $("localPageHeaderLabel").hidden = false
         } else if(sender.contentOffset.y < 37 && $("localPageHeaderLabel").hidden === false) {
@@ -393,6 +401,9 @@ function genRowsView(reorder, columns) {
             size = 40
           $("localListHeaderTitle").font = $font("Avenir-Black", size)
         }
+=======
+        
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
       },
     }
   }
@@ -408,6 +419,7 @@ function genLocalView() {
     },
     layout: $layout.fill,
     views: [{
+<<<<<<< HEAD
       type: "view",
       props: {
         hidden: false,
@@ -580,6 +592,156 @@ function genCloudView() {
         props: {
           icon: $icon("023", $rgba(100, 100, 100, 0.4), $size(15, 15)),
           bgcolor: $color("clear"),
+=======
+      type: "button",
+      props: {
+        id: "reorderButton",
+        title: "排序",
+        bgcolor: $color("clear"),
+        titleColor: $color("orange"),
+        info: false,
+      },
+      layout: function(make, view) {
+        make.top.inset(10)
+        make.right.inset(10)
+        make.width.equalTo(50)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          if (sender.info == false) {
+            sender.info = true
+            sender.bgcolor = $color("#C70039")
+            sender.titleColor = $color("white")
+            $("rowsShow").remove()
+            $("rowsShowParent").add(genRowsView(true, utils.getCache("columns")))
+          } else {
+            sender.info = false
+            sender.bgcolor = $color("clear")
+            sender.titleColor = $color("orange")
+            $("rowsShow").remove()
+            $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
+          }
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        id: "deleteLocalButton",
+        title: "删除",
+        bgcolor: $color("clear"),
+        titleColor: $color("#377116"),
+        info: false,
+      },
+      layout: function(make, view) {
+        make.top.inset(10)
+        make.left.inset(10)
+        make.width.equalTo(50)
+        make.height.equalTo(30)
+      },
+      events: {
+        tapped: function(sender) {
+          if (sender.info == undefined || sender.info == false) {
+            sender.info = true
+            sender.bgcolor = $color("#C70039")
+            sender.titleColor = $color("white")
+          } else {
+            sender.info = false
+            sender.bgcolor = $color("clear")
+            sender.titleColor = $color("#377116")
+          }
+        },
+        longPressed: function(sender) {
+          $device.taptic(2)
+          $ui.alert({
+            title: "确定清空？",
+            message: "清空操作无法撤销",
+            actions: [
+              {
+                title: "OK",
+                handler: function() {
+                  $device.taptic(2)
+                  $delay(0.15, function(){
+                    $device.taptic(2)
+                  })
+                  $cache.set("localItems", [])
+                  $("rowsShow").data = []
+                }
+              },
+              {
+                title: "Cancel",
+                handler: function() {
+          
+                }
+              }
+            ]
+          })
+        }
+      }
+    },{
+      type: "view",
+      props: {
+        id: "rowsShowParent",
+      },
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.top.equalTo($("deleteLocalButton").bottom).inset(10)
+        make.bottom.inset(0)
+        make.centerX.equalTo(view.super)
+      },
+      views: [genRowsView(false, utils.getCache("columns"))]
+    },]
+  }
+  return view
+}
+
+
+
+function genCloudView() {
+  let needRelayout = true
+  let prevPosition = 0
+  const searchBar = {
+    type: "view",
+    layout: $layout.fill,
+    views: [{
+      type: "button",
+      props: {
+        id: "cancel_button",
+        title: "取消",
+        font: $font(17),
+        titleColor: $color(mColor.blue),
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.right.inset(0).offset(55)
+        make.size.equalTo($size(55, 35))
+      },
+      events: {
+        tapped: function(sender) {
+          let input = $("search_input")
+          input.blur()
+        }
+      }
+    },
+    {
+      type: "view",
+      props: {
+        bgcolor: $rgba(100, 100, 100, 0.1),
+        radius: 10,
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.left.inset(0)
+        make.right.equalTo(view.prev.left)
+        make.height.equalTo(35)
+      },
+      views: [{
+        type: "image",
+        props: {
+          icon: $icon("023", $rgba(100, 100, 100, 0.4), $size(15, 15)),
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.centerY.equalTo(view.super)
@@ -596,6 +758,531 @@ function genCloudView() {
         },
         layout: function(make, view) {
           make.centerY.equalTo(view.super)
+          make.right.inset(0)
+          make.height.equalTo(view.super)
+          make.left.equalTo(view.prev.right).inset(0)
+          make.width.equalTo(view.frame.width - 22)
+        },
+        events: {
+          didBeginEditing: function(sender, view) {
+            $("searchBarParent").remakeLayout(function(make) {
+              make.left.inset(20)
+              make.height.equalTo($("headerView").height)
+              make.centerY.equalTo($("headerView").centerY)
+              make.right.inset(20)
+            })
+            $ui.animate({
+              duration: 0.2,
+              animation: function() {
+                $("searchBarParent").relayout()
+              },
+              completion: function() {
+                $("cancel_button").updateLayout(function(make) {
+                  make.right.inset(0).offset(0)
+                })
+                $ui.animate({
+                  duration: 0.4,
+                  damping: 0.8,
+                  animation: function() {
+                    $("cancel_button").relayout()
+                  }
+                })
+              }
+            })
+          },
+          didEndEditing: function(sender) {
+            if($("cancel_button") != undefined) {
+              $("cancel_button").updateLayout(function(make) {
+                make.right.inset(0).offset(55)
+              })
+              $ui.animate({
+                duration: 0.2,
+                animation: function() {
+                  $("cancel_button").relayout()
+                },
+                completion: function() {
+                  $("searchBarParent").remakeLayout(function(make) {
+                    make.left.inset(20)
+                    make.height.equalTo($("headerView").height)
+                    make.centerY.equalTo($("headerView").centerY)
+                    make.right.equalTo($("uploadButton").left).inset(10)
+                  })
+                  $ui.animate({
+                    duration: 0.2,
+                    animation: function() {
+                      $("searchBarParent").relayout()
+                    },
+                    completion: function() {
+                      $("search_input").userInteractionEnabled = false
+                    }
+                  })
+                }
+              })
+              
+            }
+          },
+          changed: function(sender) {
+            if(sender.text.length > 0) {
+              $("search_hint").hidden = true
+            } else {
+              $("search_hint").hidden = false
+              searchItems(sender.text)
+            }
+          },
+          returned: function(sender) {
+            sender.blur()
+            searchItems(sender.text)
+          },
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "search_hint",
+            text: "Launcher",
+            align: $align.center,
+            textColor: $rgba(100, 100, 100, 0.4),
+            hidden: false,
+          },
+          layout: function(make, view) {
+            make.left.inset(8)
+            make.centerY.equalTo(view.super)
+          }
+        }]
+      },]
+    }]
+  }
+
+  let view = {
+    type: "view",
+    props: {
+      id: "cloudView",
+      hidden: true,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      props: {
+        id: "headerView",
+        clipsToBounds: true,
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.left.right.inset(0)
+        make.top.inset(0)
+        make.height.equalTo(65)
+      },
+      views: [{
+        type: "button",
+        props: {
+          id: "myUploadButton",
+          bgcolor: $color("clear"),
+          titleColor: $color("#F39C12"),
+          icon: $icon("109", $color("#F39C12"), $size(20, 20)),
+          font: $font(17),
+        },
+        layout: function(make, view) {
+          make.right.inset(20)
+          make.height.equalTo(view.super)
+          make.top.inset(0)
+          make.width.equalTo(40)
+        },
+        views: [{
+          type: "image",
+          props: {
+            src: "assets/vip.png",
+            bgcolor: $color("clear"),
+            hidden: (utils.getCache("myItems", []).length > 15)?false:true,
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super).offset(8)
+            make.centerY.equalTo(view.super).offset(6)
+            make.size.equalTo($size(12, 12))
+          },
+        }],
+        events: {
+          tapped: function(sender) {
+            setupMyUpView()
+          }
+        }
+      },{
+        type: "button",
+        props: {
+          id: "uploadButton",
+          font: $font(17),
+          bgcolor: $color("clear"),
+          titleColor: $color("#15BCF5"),
+          icon: $icon("166", $color("#15BCF5"), $size(20, 20)),
+        },
+        layout: function(make, view) {
+          make.right.equalTo(view.prev.left)
+          make.height.equalTo(view.super)
+          make.top.inset(0)
+          make.width.equalTo(40)
+        },
+        events: {
+          tapped: function(sender) {
+            setupUploadView("upload")
+          }
+        }
+      },
+      {
+        type: "view",
+        props: {
+          id: "searchBarParent",
+          clipsToBounds: true,
+          userInteractionEnabled: true,
+          bgcolor: $color("white"),
+        },
+        layout: function(make, view) {
+          make.left.inset(20)
+          make.height.equalTo(view.super)
+          make.centerY.equalTo(view.super)
+          make.right.equalTo(view.prev.left).inset(10)
+        },
+        views: [searchBar],
+        events: {
+          tapped: function(sender) {
+            $("search_input").userInteractionEnabled = true
+            $("search_input").focus()
+            if($("rowsCloudShow").contentOffset.y > 0) {
+              $("rowsCloudShow").scrollToOffset($point(0,0))
+            }
+          }
+        }
+      },
+      {
+        type: "canvas",
+        layout: function(make, view) {
+          make.bottom.inset(0)
+          make.height.equalTo(1)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("#c0c0c0")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },]
+    },
+    {
+      type: "view",
+      props: {
+        id: "rowsCloudShowParent",
+      },
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.top.equalTo(view.prev.bottom)
+        make.bottom.inset(0)
+        make.centerX.equalTo(view.super)
+      },
+      views: [{
+        type: "matrix",
+        props: {
+          id: "rowsCloudShow",
+          columns: ($device.info.screen.width < 400)?4:6, //横行个数
+          itemHeight: 50, //图标到字之间得距离
+          spacing: 3, //每个边框与边框之间得距离
+          template: [{
+              type: "blur",
+              props: {
+                radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
+                style: 1 // 0 ~ 5 调整背景的颜色程度
+              },
+              layout: $layout.fill
+            },
+            {
+              type: "label",
+              props: {
+                id: "title",
+                textColor: $color("black"),
+                bgcolor: $color("clear"),
+                font: $font(13),
+                align: $align.center,
+              },
+              layout(make, view) {
+                make.bottom.inset(0)
+                make.centerX.equalTo(view.super)
+                make.height.equalTo(25)
+                make.width.equalTo(view.super)
+              }
+            },
+            {
+              type: "image",
+              props: {
+                id: "icon",
+                bgcolor: $color("clear"),
+                smoothRadius: 5,
+                size: $size(20, 20)
+              },
+              layout(make, view) {
+                make.top.inset(9)
+                make.centerX.equalTo(view.super)
+                make.size.equalTo($size(20,20))
+              }
+            }
+          ],
+          data: utils.getCache("cloudItems", []),
+        },
+        layout: $layout.fill,
+        events: {
+          didSelect(sender, indexPath, data) {
+            $("search_input").blur()
+            showInfoView($("mainView"), data, indexPath)
+          },
+          pulled: function(sender) {
+            if($("search_input").text.length > 0) {
+              $("search_input").text = ""
+              $("search_hint").hidden = false
+            }
+            requireItems()
+          },
+          didLongPress: function(sender, indexPath, data) {
+            $device.taptic(2)
+            $ui.menu({
+              items: ["收藏到本地"],
+              handler: function(title, idx) {
+                if(idx == 0) {
+                  addToLocal(data, true)
+                }
+              }
+            })
+          },
+          didScroll: function(sender) {
+            if(sender.contentOffset.y - prevPosition > 0 && sender.contentOffset.y >= 0 && needRelayout == true && sender.contentSize.height > sender.frame.height) {
+              let pos = sender.contentOffset.y
+              if(pos > 65) {
+                pos = 65
+                needRelayout = false
+              }
+              $("search_input").blur()
+              $("headerView").updateLayout(function(make) {
+                make.top.inset(0).offset(-pos)
+              })
+              $ui.animate({
+                duration: 0.1,
+                animation: function() {
+                  $("headerView").relayout()
+                },
+              })
+            } else if(sender.contentOffset.y - prevPosition < 0 && sender.contentOffset.y <= 65 && sender.contentSize.height > sender.frame.height) {
+              needRelayout = true
+              let pos = (sender.contentOffset.y < 0)?0:sender.contentOffset.y
+              $("headerView").updateLayout(function(make) {
+                make.top.inset(0).offset(-pos)
+              })
+              $ui.animate({
+                duration: 0.1,
+                animation: function() {
+                  $("headerView").relayout()
+                },
+              })
+            }
+            prevPosition = sender.contentOffset.y
+          },
+          willBeginDragging: function(sender) {
+
+          },
+          didEndDragging: function(sender, decelerate) {
+            
+          },
+        }
+      }]
+    },],
+  }
+  
+  requireItems()
+  return view
+}
+
+function searchItems(text) {
+  let view = $("rowsCloudShow")
+  if(text === "" || text.length <= 0) {
+    view.data = utils.getCache("cloudItems", [])
+  } else {
+    $text.tokenize({
+      text: text,
+      handler: function(results) {
+        let resultItems = []
+        let cloudItems = utils.getCache("cloudItems", [])
+        for(let i = 0; i < cloudItems.length; i++) {
+          for(let j = 0; j < results.length; j++) {
+            let descript = (cloudItems[i].descript)?(cloudItems[i].descript):"";
+            if(cloudItems[i].title.text.toLowerCase().indexOf(results[j].toLowerCase()) >= 0 || cloudItems[i].url.toLowerCase().indexOf(results[j].toLowerCase()) >= 0 || descript.toLowerCase().indexOf(results[j].toLowerCase()) >= 0) {
+              resultItems.push(cloudItems[i])
+              break
+            }
+          }
+        }
+        view.data = resultItems
+        if(resultItems.length == 0) {
+          ui.showToastView($("mainView"), mColor.blue, "无搜索结果，试试其他词吧")
+        }
+      }
+    })
+  }
+}
+
+function addToLocal(data, showToast) {
+  let array = utils.getCache("localItems", [])
+  let isExist = false
+  for(let i = 0; i < array.length; i++) {
+    if(data.url === array[i].url) {
+      isExist = true
+    }
+  }
+  if(isExist === false) {
+    array.push({
+      title: {
+        text: data.title.text
+      },
+      icon: {
+        src: data.icon.src
+      },
+      url: data.url,
+      descript: data.descript,
+    })
+    $cache.set("localItems", array)
+    if(showToast) {
+      ui.showToastView($("mainView"), mColor.green, "添加成功")
+    }
+    $("rowsShow").data = utils.getCache("localItems", [])
+  } else {
+    if(showToast) {
+      ui.showToastView($("mainView"), mColor.red, "本地已存在")
+    }
+  }
+}
+
+function deleteLocalItem(data) {
+  let array = utils.getCache("localItems", [])
+  for(let i = 0; i < array.length; i++) {
+    if(data.url === array[i].url) {
+      array.splice(i, 1)
+      $cache.set("localItems", array)
+    }
+  }
+  if($("rowsShow") != undefined) {
+    $("rowsShow").remove()
+    $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns")))
+  }
+}
+
+function isExist(data) {
+  let array = utils.getCache("localItems", [])
+  let isExist = false
+  for(let i = 0; i < array.length; i++) {
+    if(data.url === array[i].url) {
+      isExist = true
+    }
+  }
+  return isExist
+}
+
+function updateToLocal(sender, indexPath, title, icon, url, descript) {
+  let array = utils.getCache("localItems", [])
+  array[indexPath.row].title.text = title
+  array[indexPath.row].icon.src = icon
+  array[indexPath.row].url = url
+  array[indexPath.row].descript = descript
+  $cache.set("localItems", array)
+  $("rowsShow").data = utils.getCache("localItems", [])
+}
+
+function genSettingView() {
+  const feedBackTemplate = [{
+    type: "label",
+    props: {
+      id: "templateTitle",
+    },
+    layout: function(make, view) {
+      make.left.inset(15);
+      make.centerY.equalTo(view.super);
+    }
+  },
+  {
+    type: "image",
+    props: {
+      src: "assets/enter.png",
+      bgcolor: $color("clear"),
+    },
+    layout: function(make, view) {
+      make.right.inset(15)
+      make.centerY.equalTo(view.super)
+      make.size.equalTo($size(8, 18))
+    },
+  }]
+
+  const tabShowInstalls = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          id: "tabShowInstalls",
+          text: "安装量统计",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "label",
+        props: {
+          id: "tabShowInstallsDetail",
+          text: utils.getCache("installNumbers", 0).toString(),
+          textColor: $color("#AAAAAA"),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
+  const tabAutoSync = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          text: "iCloud 自动同步",
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+<<<<<<< HEAD
+          make.left.inset(7)
+          make.size.equalTo($size(15, 15))
+        },
+      },{
+        type: "input",
+        props: {
+          id: "search_input",
+          returnKeyType: 6,
+          userInteractionEnabled: false,
+          tintColor: $color(mColor.blue),
+=======
+        }
+      },
+      {
+        type: "label",
+        props: {
+          text: "已启用",
+          textColor: $color("#AAAAAA"),
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+<<<<<<< HEAD
           make.right.inset(0)
           make.height.equalTo(view.super)
           make.left.equalTo(view.prev.right).inset(0)
@@ -1059,37 +1746,7 @@ function genSettingView() {
           id: "tabShowInstallsDetail",
           text: utils.getCache("installNumbers", 0).toString(),
           textColor: $color("#AAAAAA"),
-        },
-        layout: function(make, view) {
-          make.right.inset(15)
-          make.centerY.equalTo(view.super)
-        }
-      }
-    ],
-    layout: $layout.fill
-  }
-
-  const tabAutoSync = {
-    type: "view",
-    views: [{
-        type: "label",
-        props: {
-          text: "iCloud 自动同步",
-        },
-        layout: function(make, view) {
-          make.left.inset(15)
-          make.centerY.equalTo(view.super)
-        }
-      },
-      {
-        type: "label",
-        props: {
-          text: "已启用",
-          textColor: $color("#AAAAAA"),
-        },
-        layout: function(make, view) {
-          make.right.inset(15)
-          make.centerY.equalTo(view.super)
+=======
         }
       }
     ],
@@ -1108,6 +1765,92 @@ function genSettingView() {
           make.left.inset(15)
           make.centerY.equalTo(view.super)
         }
+      },
+      {
+        type: "stepper",
+        props: {
+          max: 10,
+          min: 2,
+          tintColor: $color("black"),
+          value: utils.getCache("columns"),
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+<<<<<<< HEAD
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
+  const tabAutoSync = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          text: "iCloud 自动同步",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+=======
+        },
+        events: {
+          changed: function(sender) {
+            $("tabSetColumnsDetail").text = sender.value
+            $cache.set("columns", sender.value)
+            refreshLocalView()
+          }
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        }
+      },
+      {
+        type: "label",
+        props: {
+<<<<<<< HEAD
+          text: "已启用",
+          textColor: $color("#AAAAAA"),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+=======
+          id: "tabSetColumnsDetail",
+          text: "" + utils.getCache("columns"),
+        },
+        layout: function(make, view) {
+          make.right.equalTo(view.prev.left).inset(5)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+          make.centerY.equalTo(view.super)
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
+<<<<<<< HEAD
+  const tabSetColumns = {
+=======
+  const tabShowMode = {
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+<<<<<<< HEAD
+          id: "tabSetColumns",
+          text: "显示列数",
+=======
+          id: "tabShowMode",
+          text: "显示样式",
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+<<<<<<< HEAD
       },
       {
         type: "stepper",
@@ -1158,6 +1901,10 @@ function genSettingView() {
         }
       },
       {
+=======
+      },
+      {
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
         type: "view",
         layout: function(make, view) {
           make.right.inset(15)
@@ -1198,6 +1945,11 @@ function genSettingView() {
           },
           layout: function(make, view) {
             make.right.equalTo(view.prev.left).inset(5)
+<<<<<<< HEAD
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+=======
             make.centerY.equalTo(view.super)
             make.height.equalTo(view.super)
           },
@@ -1263,6 +2015,7 @@ function genSettingView() {
             make.centerY.equalTo(view.super)
             make.height.equalTo(view.super)
           },
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
         },]
       },
       
@@ -1270,6 +2023,15 @@ function genSettingView() {
     layout: $layout.fill
   }
 
+<<<<<<< HEAD
+  const tabOpenBroswer = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          id: "tabOpenBroswer",
+          text: "启动浏览器",
+=======
   const tabBackgroundTranparent = {
     type: "view",
     props: {
@@ -1280,6 +2042,7 @@ function genSettingView() {
         props: {
           id: "tabBackgroundTranparent",
           text: "透明背景",
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
         },
         layout: function(make, view) {
           make.left.inset(15)
@@ -1287,6 +2050,52 @@ function genSettingView() {
         }
       },
       {
+<<<<<<< HEAD
+        type: "view",
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+          make.height.equalTo(view.super)
+          make.width.equalTo(view.super).multipliedBy(0.5)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.menu({
+              items: broswers,
+              handler: function(title, idx) {
+                $cache.set("openBroswer", idx)
+                $("tabOpenBroswerDetail").text = getOpenBroswer()
+              }
+            })
+          }
+        },
+        views: [{
+          type: "image",
+          props: {
+            src: "assets/enter.png",
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.right.inset(0)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(8, 18))
+          },
+        },{
+          type: "label",
+          props: {
+            id: "tabOpenBroswerDetail",
+            text: getOpenBroswer(),
+            align: $align.right,
+          },
+          layout: function(make, view) {
+            make.right.equalTo(view.prev.left).inset(5)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        },]
+      },
+      
+=======
         type: "switch",
         props: {
           id: "tabBackgroundTranparentSwitch",
@@ -1307,6 +2116,138 @@ function genSettingView() {
     layout: $layout.fill
   }
 
+  const tabPullToClose = {
+    type: "view",
+    props: {
+
+    },
+    views: [{
+        type: "label",
+        props: {
+          id: "tabPullToClose",
+          text: "下拉关闭",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "switch",
+        props: {
+          id: "tabPullToCloseSwitch",
+          onColor: $color(mColor.iosGreen),
+          on: utils.getCache("pullToClose"),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+            $cache.set("pullToClose", sender.on)
+          }
+        }
+      }
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+    ],
+    layout: $layout.fill
+  }
+
+<<<<<<< HEAD
+  const tabBackgroundTranparent = {
+=======
+  const tabStaticHeight = {
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+    type: "view",
+    props: {
+
+    },
+    views: [{
+        type: "label",
+        props: {
+<<<<<<< HEAD
+          id: "tabBackgroundTranparent",
+          text: "透明背景",
+=======
+          id: "tabStaticHeight",
+          text: "高度跟随",
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+<<<<<<< HEAD
+=======
+        }
+      },{
+        type: "button",
+        props: {
+          icon: $icon("008", $color("white"), $size(14, 14)),
+          bgcolor: $color("lightGray"),
+          borderWidth: 1,
+          borderColor: $color("lightGray"),
+          circular: true,
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right).inset(10)
+          make.centerY.equalTo(view.super)
+          make.size.equalTo($size(14,14))
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.alert({
+              title: "高度跟随",
+              message: "即通知中心打开不改变原来的高度",
+            });
+          }
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        }
+      },
+      {
+        type: "switch",
+        props: {
+<<<<<<< HEAD
+          id: "tabBackgroundTranparentSwitch",
+          onColor: $color(mColor.iosGreen),
+          on: utils.getCache("backgroundTranparent"),
+=======
+          id: "tabStaticHeightSwitch",
+          onColor: $color(mColor.iosGreen),
+          on: utils.getCache("staticHeight"),
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+<<<<<<< HEAD
+              $cache.set("backgroundTranparent", sender.on)
+=======
+            $cache.set("staticHeight", sender.on)
+            let file = $file.read("config.json")
+            if(file) {
+              let json = JSON.parse(file.string)
+              json.widget.staticSize = sender.on
+              $file.write({
+                data: $data({string: JSON.stringify(json, null, 2)}),
+                path: "config.json"
+              });
+            }
+            if($app.info.build < 339 && sender.on == true) {
+              ui.showToastView($("mainView"), mColor.blue, "当前JSBox版本低，当前设置不会生效")
+            }
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+          }
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
+<<<<<<< HEAD
   const tabPullToClose = {
     type: "view",
     props: {
@@ -1462,6 +2403,54 @@ function genSettingView() {
       },
       layout: function(make, view) {
         make.left.top.right.inset(0)
+=======
+  let array = [{
+    templateTitle: {
+      text : "更新日志",
+    },
+    url: "https://www.liuguogy.com/archives/launch-center.html",
+  },
+  {
+    templateTitle: {
+      text : "GitHub",
+    },
+    url: "https://github.com/LiuGuoGY/JSBox-addins/tree/master/launch-center-new",
+  },
+  {
+    templateTitle: {
+      text : "检查更新",
+    },
+  },
+  {
+    templateTitle: {
+      text : "反馈建议",
+    },
+  },
+  {
+    templateTitle: {
+      text : "支持与赞赏",
+    },
+  },
+  {
+    templateTitle: {
+      text : "分享 Launch Center",
+    },
+  },]
+
+  let view = {
+    type: "view",
+    props: {
+      id: "settingView",
+      hidden: true,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      props: {
+        hidden: true,
+      },
+      layout: function(make, view) {
+        make.left.top.right.inset(0)
         make.height.equalTo(45)
       },
       views:[{
@@ -1478,6 +2467,188 @@ function genSettingView() {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
+          make.height.equalTo(1)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("darkGray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },],
+    },{
+      type: "list",
+      props: {
+        id: "list",
+        bgcolor: $color("clear"),
+        template: feedBackTemplate,
+        header: {
+          type: "view",
+          props:{
+            height: 45,
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "设置",
+              font: $font("Avenir-Black", 35),
+              textColor: $color("black"),
+              align: $align.center,
+            },
+            layout: function(make, view) {
+              make.left.inset(15)
+              make.bottom.inset(0)
+              make.height.equalTo(45)
+            }
+          }]
+        },
+        footer: {
+          type: "view",
+          props:{
+            height: 60,
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
+              textColor: $color("#BBBBBB"),
+              align: $align.center,
+              font: $font(13)
+            },
+            layout: function(make, view) {
+              make.center.equalTo(view.super)
+              make.height.equalTo(view.super)
+            }
+          },],
+        },
+        data: [{
+          title: "功能",
+          rows: [tabSetColumns, tabShowMode, tabOpenBroswer],
+        },
+        {
+          title: "JSBox 启动器",
+          rows: [tabBackgroundTranparent, tabPullToClose, tabStaticHeight],
+        },
+        {
+          title: "关于",
+          rows: array,
+        },
+        {
+          title: "同步",
+          rows: [tabAutoSync],
+        },
+        {
+          title: "其他",
+          rows: [tabShowInstalls],
+        }],
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.bottom.inset(0)
+        make.left.right.inset(0)
+      },
+      events: {
+        didSelect: function(sender, indexPath, title) {
+          if(title.templateTitle == undefined) {
+            return 0
+          }
+          let titleText = title.templateTitle.text
+          if(title.url) {
+            setupWebView(titleText, title.url)
+          } else {
+            switch(indexPath.row) {
+              case 2: update.checkUpdate(true)
+                break
+              case 3: setupFeedBack()
+                break
+              case 4: setupReward()
+                break
+              case 5: share("http://t.cn/E7kdTkv")
+                break
+              default:
+            }
+          }
+        },
+        didScroll: function(sender) {
+          if(sender.contentOffset.y >= 37 && sender.prev.hidden === true) {
+            sender.prev.hidden = false
+          } else if(sender.contentOffset.y < 37 && sender.prev.hidden === false) {
+            sender.prev.hidden = true
+          }
+        },
+      }
+    },],
+  }
+  requireInstallNumbers()
+  return view
+}
+
+function getShowModeText() {
+  let mode = utils.getCache("showMode")
+  return showMode[mode]
+}
+
+function getOpenBroswer() {
+  let mode = utils.getCache("openBroswer")
+  return broswers[mode]
+}
+
+function share(link) {
+  $share.sheet({
+    items: [link], // 也支持 item
+    handler: function(success) {
+      if(success) {
+        ui.showToastView($("mainView"), mColor.blue, "感谢您的分享")
+      }
+    }
+  })
+}
+
+function setupWebView(title, url) {
+  $ui.push({
+    props: {
+      id: "myWebView",
+      title: title,
+      navBarHidden: true,
+      statusBarStyle: 0,
+    },
+    views: [{
+      type: "view",
+      layout: function(make, view) {
+        if($device.info.version >= "11"){
+          make.top.equalTo(view.super.safeAreaTop)
+        } else {
+          make.top.inset(20)
+        }
+        make.left.right.inset(0)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+        make.height.equalTo(45)
+      },
+      views:[{
+        type: "label",
+        props: {
+<<<<<<< HEAD
+          text: "设置",
+=======
+          text: title,
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+          font: $font("bold", 17),
+          align: $align.center,
+          bgcolor: $color("white"),
+          textColor: $color("black"),
+        },
+        layout: $layout.fill,
+      },{
+        type: "canvas",
+        layout: function(make, view) {
+          make.bottom.inset(0)
+<<<<<<< HEAD
           make.height.equalTo(1 / $device.info.screen.scale)
           make.left.right.inset(0)
         },
@@ -1689,6 +2860,37 @@ function setupWebView(title, url) {
             $ui.pop()
           },
         },
+=======
+          make.height.equalTo(1)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("darkGray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },{
+        type: "button",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.left.inset(0)
+          make.width.equalTo(60)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.pop()
+          },
+        },
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
         views:[{
           type: "image",
           props: {
@@ -1762,7 +2964,11 @@ function setupMyUpView() {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
+<<<<<<< HEAD
           make.height.equalTo(1 / $device.info.screen.scale)
+=======
+          make.height.equalTo(1)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
           make.left.right.inset(0)
         },
         events: {
@@ -1900,8 +3106,11 @@ function setupMyUpView() {
                         deleteCloudItem(data.info.objectId)
                         $("rowsMyShow").delete(indexPath)
                         $cache.set("myItems", $("rowsMyShow").data)
+<<<<<<< HEAD
                         requireItems()
                         $("rowsCloudShow").scrollToOffset($point(0, 0))
+=======
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
                       }
                     },
                     {
@@ -1983,7 +3192,11 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
+<<<<<<< HEAD
           make.height.equalTo(1 / $device.info.screen.scale)
+=======
+          make.height.equalTo(1)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
           make.left.right.inset(0)
         },
         events: {
@@ -2549,6 +3762,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
   })
   if(icon != undefined) {
     $("icon").src = icon
+<<<<<<< HEAD
   }
   if(action != "upload") {
     verifyStateSet(true)
@@ -2941,11 +4155,427 @@ function setupReward() {
         },
         layout: function(make, view) {
           make.left.inset(40)
+=======
+  }
+  if(action != "upload") {
+    verifyStateSet(true)
+  }
+  $("uploadScroll").resize()
+  $("uploadScroll").contentSize = $size(0, 750)
+}
+
+function setUrlInputTool() {
+  let inputView = $("schemeInput")
+  var toolView = $ui.create({
+    type: "view",
+    props: {
+      frame: $rect(0, 0, 0, 40),
+      bgcolor: $color("clear"),
+      borderWidth: 0.5,
+      borderColor: $color("#cccccc")
+    },
+    views: [{
+      type: "blur",
+      props: {
+        style: 5,
+      },
+      layout: $layout.fill
+    },{
+      type: "button",
+      props: {
+        title: "完成",
+        font: $font(16.5),
+        titleColor: $color("#222222"),
+        radius: 0,
+        bgcolor: $color("clear")
+      },
+      layout: function(make, view) {
+        make.top.bottom.inset(0);
+        make.right.inset(15)
+      },
+      events: {
+        tapped: function(sender) {
+          inputView.blur();
+        }
+      }
+    },{
+      type: "view",
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.height.equalTo(view.super)
+        make.left.inset(5)
+        make.right.equalTo(view.prev.left).inset(15)
+      },
+      views: [{
+        type: "button",
+        props: {
+          bgcolor: $color("white"),
+          smoothRadius: 8,
+        },
+        layout: function(make, view) {
+          make.centerY.equalTo(view.super)
+          make.top.bottom.inset(5)
+          make.left.inset(3)
+          make.width.equalTo(110)
+        },
+        views: [{
+          type: "image",
+          props: {
+            icon: $icon("104", $color("#bbbbbb"), $size(18, 18)),
+            bgcolor: $color("clear"),
+            smoothRadius: 5,
+            size: $size(18, 18),
+          },
+          layout: function(make, view) {
+            make.left.inset(8)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(18, 18))
+          }
+        },{
+          type: "label",
+          props: {
+            text: "剪切板参数",
+            textColor: $color("black"),
+            bgcolor: $color("clear"),
+            font: $font(13),
+            align: $align.center,
+          },
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.right).inset(0)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(25)
+            make.right.inset(5)
+          }
+        },],
+        events: {
+          tapped: function(sender) {
+            inputView.text = inputView.text + "[clipboard]"
+          }
+        },
+      },],
+    },]
+  });
+  inputView.runtimeValue().$setInputAccessoryView(toolView);
+  inputView.runtimeValue().$reloadInputViews();
+}
+
+function genProgress(baseView) {
+  if($("progress") != undefined) {
+    $("progress").super.remove()
+  }
+  let progress = {
+    type: "gradient",
+    props: {
+      colors: colors,
+      locations: [0, 0.15, 0.3, 0.45, 0.6, 0.75, 1],
+      startPoint: $point(0, 0.5),
+      endPoint: $point(1, 0.5),
+    },
+    layout: function(make, view) {
+      make.height.equalTo(2)
+      make.left.right.inset(20)
+      make.bottom.equalTo(baseView.top).inset(8)
+      make.centerX.equalTo(view.super)
+    },
+    views: [{
+      type: "progress",
+      props: {
+        id: "progress",
+        value: 0,
+        progressColor: $color("darkGray"),
+        trackColor: $color("clear"),
+      },
+      layout: $layout.fill,
+    }]
+  }
+  let progressTimer = $timer.schedule({
+    interval: 0.04,
+    handler: function() {
+      let view = $("progress")
+      if(view != undefined) {
+        if(view.value < 0.8 && $("cloudButton").info.isfinish == false) {
+          view.value += 0.001
+        } else {
+          progressTimer.invalidate()
+        }
+      }
+    }
+  })
+  return progress
+}
+
+function haveExisted(url) {
+  let cloudItems = utils.getCache("cloudItems", [])
+  let result = false
+  for(let i = 0; i < cloudItems.length; i++) {
+    if(cloudItems[i].url.toLowerCase() === url.toLowerCase()) {
+      result = true
+    }
+  }
+  return result
+}
+
+function verifyStateSet(isSuccess) {
+  let button = $("verifyButton")
+  if(isSuccess == undefined) {
+    button.bgcolor = $color("#D8D8D8")
+    button.info = false
+  } else if (isSuccess == false) {
+    button.bgcolor = $color("red")
+    button.info = false
+  } else if (isSuccess == true) {
+    button.bgcolor = $color("#2ECC71")
+    button.info = true
+  }
+}
+
+//赞赏页面
+function setupReward() {
+  const rewardTemplate = [{
+    type: "label",
+    props: {
+      id: "templateTitle",
+      textColor: $color("#333333"),
+      font: $font("TrebuchetMS-Italic",17)
+    },
+    layout: function(make, view) {
+      make.left.inset(40);
+      make.centerY.equalTo(view.super);
+    }
+  },
+  {
+    type: "image",
+    props: {
+      id: "templateImage",
+      icon: $icon("061", $color("#FF823E"), $size(15, 15)),
+      bgcolor: $color("clear"),
+      hidden: false,
+    },
+    layout: function(make, view) {
+      make.right.inset(40);
+      make.centerY.equalTo(view.super);
+    }
+  }]
+  let array = $cache.get("rewardList")
+  if(array == undefined) {
+    array = []
+  }
+  $ui.push({
+    props: {
+      id: "rewardMainView",
+      title: "支持与赞赏",
+      navBarHidden: true,
+      statusBarStyle: 0,
+    },
+    layout: $layout.fill,
+    events: {
+      appeared: function(sender) {
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      didAppear: function(sender) {
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      disappeared: function() {
+        $app.autoKeyboardEnabled = false
+        $app.keyboardToolbarEnabled = false
+      }
+    },
+    views: [{
+      type: "view",
+      layout: function(make, view) {
+        if($device.info.version >= "11"){
+          make.top.equalTo(view.super.safeAreaTop)
+        } else {
+          make.top.inset(20)
+        }
+        make.left.right.inset(0)
+        make.height.equalTo(45)
+      },
+      views:[{
+        type: "label",
+        props: {
+          text: "支持与赞赏",
+          font: $font("bold", 17),
+          align: $align.center,
+          bgcolor: $color("white"),
+          textColor: $color("black"),
+        },
+        layout: $layout.fill,
+      },{
+        type: "canvas",
+        layout: function(make, view) {
+          make.bottom.inset(0)
+          make.height.equalTo(1)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("darkGray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },{
+        type: "button",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.left.inset(0)
+          make.width.equalTo(60)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.pop()
+          },
+        },
+        views:[{
+          type: "image",
+          props: {
+            src: "assets/back.png",
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.left.inset(10)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(12, 23))
+          },
+        },{
+          type: "label",
+          props: {
+            text: "设置",
+            align: $align.center,
+            textColor: $color(mColor.blue),
+            font: $font(17)
+          },
+          layout: function(make, view) {
+            make.height.equalTo(view.super)
+            make.left.equalTo(view.prev.right).inset(3)
+          }
+        }],
+      },],
+    },{
+      type: "view",
+      props: {
+        id: "reward",
+      },
+      layout: function(make, view) {
+        make.left.right.inset(10)
+        make.top.equalTo(view.prev.bottom).inset(30)
+        if($device.info.version >= "11"){
+          make.bottom.equalTo(view.super.safeAreaBottom).inset(30)
+        } else {
+          make.bottom.inset(30)
+        }
+        make.centerX.equalTo(view.super)
+      },
+      views:[{
+        type: "label",
+        props: {
+          id: "rewardTextTitle",
+          text: "赞赏名单(按时间排序)：",
+          textColor: $color("#333333"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.top.inset(10)
+          make.left.inset(20)
+        }
+      },
+      {
+        type: "tab",
+        props: {
+          id: "selection",
+          items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
+          tintColor: $color("#333333"),
+          index: 0,
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.width.equalTo(200)
+          make.bottom.inset(60)
+          make.height.equalTo(25)
+        },
+        events: {
+          changed: function(sender) {
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "aliRewardButton",
+          title: " 支付宝 ",
+          icon: $icon("074", $color("#108EE9"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#108EE9"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
           make.height.equalTo(40)
           make.bottom.inset(10)
         },
         events: {
           tapped: function(sender) {
+            switch($("selection").index) {
+              case 0: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX02994GPGIJ8ACYWFQD8")
+                break
+              case 1: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX075764EQ49XNSVFA0BC")
+                break
+              case 2: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX07563B7TFDJBIRDFX45")
+                break
+            }
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "wxRewardButton",
+          title: " 微信 ",
+          icon: $icon("189", $color("#1AAD19"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#1AAD19"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.left.inset(40)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            begainReward(sender.title)
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "aliRedPackButton",
+          title: " 红包 ",
+          icon: $icon("204", $color("#E81F1F"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#E81F1F"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.right.inset(40)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+<<<<<<< HEAD
             begainReward(sender.title)
           }
         }
@@ -2988,6 +4618,9 @@ function setupReward() {
                 }
               ]
             })
+=======
+            $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
           }
         }
       },
@@ -3034,7 +4667,11 @@ function setupReward() {
             rows: array,
           },
         ],
+<<<<<<< HEAD
         footer: {
+=======
+        header: {
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
           type: "label",
           props: {
             height: 20,
@@ -3059,6 +4696,12 @@ function setupReward() {
     },]
   })
   requireReward()
+<<<<<<< HEAD
+=======
+  $delay(1, function(){
+    $("rewardList").scrollToOffset($point(0, 20))
+  })
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
 }
 
 function begainReward(way) {
@@ -3171,7 +4814,11 @@ function setupFeedBack(text) {
         type: "canvas",
         layout: function(make, view) {
           make.bottom.inset(0)
+<<<<<<< HEAD
           make.height.equalTo(1 / $device.info.screen.scale)
+=======
+          make.height.equalTo(1)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
           make.left.right.inset(0)
         },
         events: {
@@ -3449,7 +5096,11 @@ function showInfoView(superView, data) {
         layout: function(make, view) {
           var preView = view.prev
           make.top.equalTo(preView.bottom)
+<<<<<<< HEAD
           make.height.equalTo(1 / $device.info.screen.scale)
+=======
+          make.height.equalTo(1)
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
           make.left.right.inset(20)
         },
         events: {
@@ -3880,8 +5531,11 @@ function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
       $("cloudButton").info = {isfinish: true}
       let view = $("progress")
       ui.showToastView($("uploadItemView"), mColor.green, "上传成功")
+<<<<<<< HEAD
       requireItems()
       $("rowsCloudShow").scrollToOffset($point(0, 0))
+=======
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
       if(view != undefined) {
         let finishTimer = $timer.schedule({
           interval: 0.001,

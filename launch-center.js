@@ -1,15 +1,18 @@
 /**
- * @version 4.9
+ * @version 4.91
  * @author Liu Guo
  * @date 2018.9.30
  * @brief
- *   1. 修复收藏动画加载过慢的问题
+ *   注意!注意!注意!
+ *   本版本为过渡版本，接下来你将会更新两次以过渡到最新版本！
+ *   新版本修复了通知中心闪烁的问题，还有全新UI ！
+ *   请注意：本次更新会清除本插件的所有设置，请谅解！
  * @/brief
  */
 
 "use strict"
 
-let appVersion = 4.9
+let appVersion = 4.91
 let addinURL = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center.js"
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -68,9 +71,10 @@ if ($app.env == $env.today) {
 
 function main() {
   setupMainView()
-  if (needCheckup()) {
-    checkupVersion()
-  }
+  // if (needCheckup()) {
+  //   checkupVersion()
+  // }
+  checkBox()
   checkStarJson()
   $delay(0, function(){
     let view = $("gradientParent")
@@ -87,6 +91,74 @@ function main() {
         view.relayout(); 
       }
     })
+  })
+}
+
+function checkBox() {
+  $http.download({
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/updateDetail.md",
+    showsProgress: false,
+    timeout: 5,
+    handler: function(resp) {
+      if(resp.data) {
+        $ui.alert({
+          title: "发现新版本 V5.0.0",
+          message: resp.data.string + "\n是否更新？",
+          actions: [{
+              title: "否",
+              handler: function() {
+      
+              }
+            },
+            {
+              title: "是",
+              handler: function() {
+                updateScript()
+              }
+            },
+          ]
+        })
+      }
+    }
+  })
+  
+}
+
+function updateScript() {
+  let url =
+    "https://github.com/LiuGuoGY/JSBox-addins/blob/master/launch-center-new/.output/Launch%20Center%20New.box?raw=true";
+  const scriptName = $addin.current.name;
+  $http.download({
+    url: url,
+    showsProgress: false,
+    timeout: 5,
+    handler: function(resp) {
+      let box = resp.data
+      $addin.save({
+        name: scriptName,
+        data: box,
+        handler: success => {
+          if (success) {
+            $cache.remove("lastCT")
+            $device.taptic(2)
+            $delay(0.2, function() {
+              $device.taptic(2)
+            })
+            $ui.alert({
+              title: "安装完成",
+              actions: [{
+                title: "OK",
+                handler: function() {
+                  $cache.clear()
+                  $app.openExtension($addin.current.name)
+          
+                }
+              }]
+            })
+          }
+        }
+      });
+    }
   })
 }
 
@@ -1703,7 +1775,7 @@ function genSettingView() {
             setupWebView(titleText, title.url)
           } else {
             switch(indexPath.row) {
-              case 2: checkupVersion()
+              case 2: checkBox()
                 break
               case 3: setupFeedBack()
                 break

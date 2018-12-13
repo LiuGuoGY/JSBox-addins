@@ -1,0 +1,134 @@
+<html lang="zh-cmn-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge, chrome=1">
+    <title>正在打开Launch Center...</title>
+</head>
+<body>
+	<p>正在拉起 JSBox...</p>
+    <script>    
+    var qrurl = "jsbox://run?name=Launch%20Center";    
+    function is_weixin() {        
+        if (/MicroMessenger/i.test(navigator.userAgent)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function is_qq() {        
+        var ua = navigator.userAgent.toLowerCase();        
+        if (ua.match(/(QQ)/i)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function is_android() {        
+        var ua = navigator.userAgent.toLowerCase();        
+        if (ua.match(/(Android|SymbianOS)/i)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function is_ios() {        
+        var ua = navigator.userAgent.toLowerCase();        
+        if (/iphone|ipad|ipod/.test(ua)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function android_auto_jump() {        
+        WeixinJSBridge.invoke("jumpToInstallUrl", {}, function (e) {        
+        });        
+        window.close();        
+        WeixinJSBridge.call("closeWindow")    
+    }    
+    function ios_auto_jump() {        
+        if (qrurl != "") {            
+            location.href = qrurl        
+        } else {            
+            window.close();            
+            WeixinJSBridge.call("closeWindow")        
+        }    
+    }    
+    function onAutoinit() {        
+        if (is_android()) {            
+            android_auto_jump();            
+            return false        
+        }        
+        if (is_ios()) {            
+            ios_auto_jump();            
+            return false        
+        }    
+    }
+	function getRequest() {
+		var url = location.search; //获取url中"?"符后的字串
+		var theRequest = new Object();
+		if (url.indexOf("?") != -1) {
+			var str = url.substr(1);
+			strs = str.split("&");
+			for(var i = 0; i < strs.length; i ++) {
+				theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+			}
+		}
+		return theRequest;
+	}
+	<!-- var request = new Object(); -->
+	<!-- request = getRequest(); -->
+	<!-- var id = request['objectId']; -->
+	<!-- if(id) { -->
+		<!-- qrurl = qrurl + "&objectId=" + id; -->
+	<!-- } -->
+	var url = location.search;
+	if (url.indexOf("?") !=-1) {
+		qrurl = qrurl + "&" + url.substring(1);
+    }
+    if (is_weixin()) {        
+        if (typeof WeixinJSBridge == "undefined") {            
+            if (document.addEventListener) {                
+                document.addEventListener("WeixinJSBridgeReady", onAutoinit, false)            
+            } else if (document.attachEvent) {                
+                document.attachEvent("WeixinJSBridgeReady", onAutoinit);                
+                document.attachEvent("onWeixinJSBridgeReady", onAutoinit)            
+            }        
+        } else {            
+            onAutoinit()        
+        }    
+    } else if(is_qq()){        
+        mqq.invoke("ui", "openUrl", {            
+            url: qrurl,            
+            target: 2,            
+            style: 0        
+        });    
+    }else {        
+        if (qrurl != "") {            
+            location.href = qrurl        
+        } else {            
+            window.close()        
+        }    
+		
+    }
+	<!-- executeProtocol(qrurl); -->
+	<!-- function executeProtocol(e) { -->
+	   <!-- if (e) { -->
+		 <!-- console.log(e); -->
+		 <!-- /** @type {!Element} */ -->
+		 <!-- var iframe = document.createElement("iframe"); -->
+		 <!-- /** @type {string} */ -->
+		 <!-- iframe.style.cssText = "display:none;width:0px;height:0px;"; -->
+		 <!-- /** @type {string} */ -->
+		 <!-- iframe.src = e; -->
+		 <!-- (document.body || document.documentElement).appendChild(iframe); -->
+		 <!-- setTimeout(function() { -->
+		   <!-- if (iframe && iframe.parentNode) { -->
+			 <!-- iframe.parentNode.removeChild(iframe); -->
+		   <!-- } -->
+		 <!-- }, 0); -->
+	   <!-- } -->
+	 <!-- } -->
+    </script>
+</body>
+</html>

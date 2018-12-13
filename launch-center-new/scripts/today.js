@@ -8,6 +8,17 @@ function setupTodayView() {
   let wantToClose = false
   let showView = []
 
+<<<<<<< HEAD
+=======
+  // if(!utils.getCache("staticHeight")) {
+  //   let totalHeight = Math.ceil(items.length / columns) * itemHeight + 15
+  //   if(!utils.getCache("pullToClose")) {
+  //     totalHeight += 30
+  //   }
+  //   $widget.height = totalHeight
+  // }
+
+>>>>>>> 7fd478c82b8a499d4abf7ac9683d238cc48f4e4d
   if(!utils.getCache("staticHeight")) {
     if(utils.getCache("pullToClose")) {
       $widget.height = 215
