@@ -445,18 +445,40 @@ function genLocalView() {
         },
         events: {
           tapped: function(sender) {
-            if (sender.info == false) {
+            if (sender.info == false && $("deleteLocalButton").info == false) {
               sender.info = true
-              sender.bgcolor = $color("#C70039")
-              sender.titleColor = $color("white")
+              sender.title = "完成"
               $("rowsShow").remove()
               $("rowsShowParent").add(genRowsView(true, utils.getCache("columns")))
-            } else {
+            } else if(sender.info && $("deleteLocalButton").info == false) {
               sender.info = false
-              sender.bgcolor = $color("clear")
-              sender.titleColor = $color(mColor.blue)
+              sender.title = "排序"
               $("rowsShow").remove()
               $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
+            } else {
+              $ui.alert({
+                title: "确定清空？",
+                message: "清空操作无法撤销",
+                actions: [
+                  {
+                    title: "OK",
+                    handler: function() {
+                      $device.taptic(2)
+                      $delay(0.15, function(){
+                        $device.taptic(2)
+                      })
+                      $cache.set("localItems", [])
+                      $("rowsShow").data = []
+                    }
+                  },
+                  {
+                    title: "Cancel",
+                    handler: function() {
+              
+                    }
+                  }
+                ]
+              })
             }
           }
         }
@@ -479,40 +501,18 @@ function genLocalView() {
           tapped: function(sender) {
             if (sender.info == undefined || sender.info == false) {
               sender.info = true
-              sender.bgcolor = $color("#C70039")
-              sender.titleColor = $color("white")
+              sender.title = "完成"
+              $("reorderButton").title = "清空"
+              $("reorderButton").info = false
+              $("rowsShow").remove()
+              $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
             } else {
               sender.info = false
-              sender.bgcolor = $color("clear")
-              sender.titleColor = $color(mColor.blue)
+              sender.title = "删除"
+              $("reorderButton").title = "排序"
+              $("reorderButton").info = false
             }
           },
-          longPressed: function(sender) {
-            $device.taptic(2)
-            $ui.alert({
-              title: "确定清空？",
-              message: "清空操作无法撤销",
-              actions: [
-                {
-                  title: "OK",
-                  handler: function() {
-                    $device.taptic(2)
-                    $delay(0.15, function(){
-                      $device.taptic(2)
-                    })
-                    $cache.set("localItems", [])
-                    $("rowsShow").data = []
-                  }
-                },
-                {
-                  title: "Cancel",
-                  handler: function() {
-            
-                  }
-                }
-              ]
-            })
-          }
         }
       },],
     },
@@ -779,14 +779,6 @@ function genCloudView() {
           itemHeight: 50, //图标到字之间得距离
           spacing: 3, //每个边框与边框之间得距离
           template: [{
-              type: "blur",
-              props: {
-                radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-                style: 1 // 0 ~ 5 调整背景的颜色程度
-              },
-              layout: $layout.fill
-            },
-            {
               type: "label",
               props: {
                 id: "title",
@@ -1544,7 +1536,7 @@ function genSettingView() {
           rows: [tabSetColumns, tabShowMode, tabOpenBroswer],
         },
         {
-          title: "JSBox 启动器",
+          title: "效果",
           rows: [tabBackgroundTranparent, tabPullToClose, tabStaticHeight],
         },
         {
@@ -1900,8 +1892,6 @@ function setupMyUpView() {
                         deleteCloudItem(data.info.objectId)
                         $("rowsMyShow").delete(indexPath)
                         $cache.set("myItems", $("rowsMyShow").data)
-                        requireItems()
-                        $("rowsCloudShow").scrollToOffset($point(0, 0))
                       }
                     },
                     {
@@ -1972,7 +1962,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       views:[{
         type: "label",
         props: {
-          text: "上传修改",
+          text: (action === "upload")?"上传":"编辑",
           font: $font("bold", 17),
           align: $align.center,
           bgcolor: $color("white"),
@@ -3385,6 +3375,9 @@ function showInfoView(superView, data) {
         views: [{
           type: "button",
           props: {
+            title: "⋯",
+            font: $font("bold", 24),
+            titleColor: $color("#bbbbbb"),
             bgcolor: $color("clear"),
           },
           layout: function(make, view) {
@@ -3413,18 +3406,6 @@ function showInfoView(superView, data) {
               })
             }
           },
-          views: [{
-            type: "image",
-            props: {
-              src: "assets/more.png",
-              bgcolor: $color("clear"),
-              alpha: 0.7,
-            },
-            layout: function(make, view) {
-              make.center.equalTo(view.super)
-              make.size.equalTo($size(17, 17))
-            },
-          }]
         },{
           type: "button",
           props: {
@@ -3835,6 +3816,8 @@ function deleteCloudItem(objectId) {
       "X-LC-Key": appKey,
     },
     handler: function(resp) {
+      requireItems()
+      $("rowsCloudShow").scrollToOffset($point(0, 0))
     }
   })
 }
@@ -4066,6 +4049,10 @@ function uploadTinyPng(action, pic, objectId, indexPath, fileName) {
     body: pic,
     handler: function (resp) {
       let response = resp.response;
+      if(!response) {
+        ui.showToastView($("uploadItemView"), mColor.red, "网络异常，请重试")
+        return 0;
+      }
       if (response.statusCode === 201 || response.statusCode === 200) {
         let compressedImageUrl = response.headers["Location"]
         $http.download({
