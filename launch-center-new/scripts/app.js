@@ -44,6 +44,7 @@ function show() {
 }
 
 function main() {
+  $app.rotateDisabled = true
   sync.download()
   setupMainView()
   solveQuery()
@@ -100,7 +101,7 @@ $app.listen({
 })
 
 let contentViews = ["localView", "cloudView", "settingView"]
-  
+let topOffset = -20
 function setupMainView() {
   $app.autoKeyboardEnabled = false
   $app.keyboardToolbarEnabled = false
@@ -112,98 +113,119 @@ function setupMainView() {
       statusBarStyle: 0,
     },
     views: [{
-        type: "blur",
+        type: "view",
         props: {
-          style: 5 // 0 ~ 5 调整背景的颜色程度
+          id: "content",
+          bgcolor: $color("clear"),
+          clipsToBounds: true,
         },
         layout: function(make, view) {
-          make.left.bottom.right.inset(0)
+          make.width.equalTo(view.super)
+          make.left.right.inset(0)
+          make.bottom.inset(0)
+          make.top.inset(0)
+        },
+        events: {
+          ready(sender) {
+            $delay(0.1, ()=>{
+              topOffset = $("rowsShow").contentOffset.y
+            })
+          },
+        },
+        views: [genLocalView()],
+      },
+      {
+        type: "view",
+        layout: function(make, view) {
           if($device.info.version >= "11"){
             make.top.equalTo(view.super.safeAreaBottom).offset(-50)
           } else {
             make.height.equalTo(50)
           }
+          make.left.right.inset(0)
+          make.bottom.inset(0)
         },
-      },
-      {
-        type: "matrix",
-        props: {
-          id: "tab",
-          columns: 3,
-          itemHeight: 50,
-          spacing: 0,
-          scrollEnabled: false,
-          bgcolor: $color("clear"),
-          template: [{
-              type: "image",
-              props: {
-                id: "menu_image",
-                bgcolor: $color("clear")
+        views: [{
+          type: "blur",
+          props: {
+            style: 1,
+          },
+          layout: $layout.fill,
+        },{
+          type: "matrix",
+          props: {
+            id: "tab",
+            columns: 3,
+            itemHeight: 50,
+            spacing: 0,
+            scrollEnabled: false,
+            bgcolor: $color("clear"),
+            template: [{
+                type: "image",
+                props: {
+                  id: "menu_image",
+                  bgcolor: $color("clear")
+                },
+                layout: function(make, view) {
+                  make.centerX.equalTo(view.super)
+                  make.width.height.equalTo(25)
+                  make.top.inset(7)
+                },
               },
-              layout: function(make, view) {
-                make.centerX.equalTo(view.super)
-                make.width.height.equalTo(25)
-                make.top.inset(7)
+              {
+                type: "label",
+                props: {
+                  id: "menu_label",
+                  font: $font(10),
+                },
+                layout: function(make, view) {
+                  var preView = view.prev
+                  make.centerX.equalTo(preView)
+                  make.bottom.inset(5)
+                }
+              }
+            ],
+            data: [{
+              menu_image: {
+                icon: mIcon[0].blue,
               },
+              menu_label: {
+                text: "本地",
+                textColor: $color(mColor.blue)
+              }
             },
             {
-              type: "label",
-              props: {
-                id: "menu_label",
-                font: $font(10),
+              menu_image: {
+                icon: mIcon[1].gray,
               },
-              layout: function(make, view) {
-                var preView = view.prev
-                make.centerX.equalTo(preView)
-                make.bottom.inset(5)
+              menu_label: {
+                text: "云库",
+                textColor: $color(mColor.gray)
+              }
+            },
+            {
+              menu_image: {
+                icon: mIcon[2].gray,
+              },
+              menu_label: {
+                text: "设置",
+                textColor: $color(mColor.gray),
               }
             }
           ],
-          data: [{
-            menu_image: {
-              icon: mIcon[0].blue,
-            },
-            menu_label: {
-              text: "本地",
-              textColor: $color(mColor.blue)
-            }
           },
-          {
-            menu_image: {
-              icon: mIcon[1].gray,
-            },
-            menu_label: {
-              text: "云库",
-              textColor: $color(mColor.gray)
-            }
+          layout: function(make, view) {
+            make.top.inset(0)
+            make.left.right.inset(0)
+            make.height.equalTo(50)
           },
-          {
-            menu_image: {
-              icon: mIcon[2].gray,
+          events: {
+            didSelect(sender, indexPath, data) {
+              handleSelect(sender, indexPath.row)
             },
-            menu_label: {
-              text: "设置",
-              textColor: $color(mColor.gray),
-            }
           }
-        ],
-        },
-        layout: function(make, view) {
-          make.height.equalTo(50)
-          make.left.right.inset(0)
-          if($device.info.version >= "11"){
-            make.bottom.equalTo(view.super.safeAreaBottom)
-          } else {
-            make.bottom.inset(0)
-          }
-        },
-        events: {
-          didSelect(sender, indexPath, data) {
-            handleSelect(sender, indexPath.row)
-          },
-        }
-      },
-      {
+        },],
+      },{
         type: "canvas",
         layout: function(make, view) {
           var preView = view.prev
@@ -222,36 +244,6 @@ function setupMainView() {
             ctx.strokePath()
           }
         }
-      },
-      {
-        type: "view",
-        props: {
-          bgcolor: $color("white"),
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.left.right.top.inset(0)
-          make.height.equalTo(20)
-        },
-      },
-      {
-        type: "view",
-        props: {
-          id: "content",
-          bgcolor: $color("clear"),
-          clipsToBounds: true,
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.left.right.inset(0)
-          make.bottom.equalTo($("tab").top)
-          if($device.info.version >= "11"){
-            make.top.equalTo(view.super.safeAreaTop)
-          } else {
-            make.top.inset(20)
-          }
-        },
-        views: [genLocalView()],
       },
     ]
   })
@@ -316,10 +308,11 @@ function genRowsView(reorder, columns) {
       spacing: 3, //每个边框与边框之间得距离
       reorder: reorder,
       template: ui.genTemplate(),
+      indicatorInsets: $insets(45, 0, 50, 0),
       header: {
         type: "view",
         props:{
-          height: 45,
+          height: 95,
         },
         views: [{
           type: "label",
@@ -336,6 +329,13 @@ function genRowsView(reorder, columns) {
             make.height.equalTo(45)
           }
         }]
+      },
+      footer: {
+        type: "view",
+        props: {
+          height: 50,
+          bgcolor: $color("clear"),
+        }
       },
       data: utils.getCache("localItems", [])
     },
@@ -383,11 +383,15 @@ function genRowsView(reorder, columns) {
         })
       },
       didScroll: function(sender) {
-        if(sender.contentOffset.y >= 37 && $("localPageHeaderLabel").hidden === true) {
+        if(sender.contentOffset.y >= 40 + topOffset && $("localPageHeaderLabel").hidden === true) {
           $("localPageHeaderLabel").hidden = false
-        } else if(sender.contentOffset.y < 37 && $("localPageHeaderLabel").hidden === false) {
+          $("localPageHeaderBlur").bgcolor = $color("clear")
+          $("localListHeaderTitle").hidden = true
+        } else if(sender.contentOffset.y < 40 + topOffset && $("localPageHeaderLabel").hidden === false) {
           $("localPageHeaderLabel").hidden = true
-        }else if(sender.contentOffset.y < 0) {
+          $("localPageHeaderBlur").bgcolor = $color("white")
+          $("localListHeaderTitle").hidden = false
+        }else if(sender.contentOffset.y < topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
           if(size > 40)
             size = 40
@@ -410,124 +414,142 @@ function genLocalView() {
     views: [{
       type: "view",
       props: {
-        hidden: false,
-      },
-      layout: function(make, view) {
-        make.left.top.right.inset(0)
-        make.height.equalTo(45)
-      },
-      views:[{
-        type: "label",
-        props: {
-          id: "localPageHeaderLabel",
-          text: "本地",
-          font: $font("bold", 17),
-          align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
-          hidden: true,
-        },
-        layout: $layout.fill,
-      },{
-        type: "button",
-        props: {
-          id: "reorderButton",
-          title: "排序",
-          bgcolor: $color("clear"),
-          titleColor: $color(mColor.blue),
-          info: false,
-        },
-        layout: function(make, view) {
-          make.right.inset(10)
-          make.width.equalTo(50)
-          make.centerY.equalTo(view.super)
-          make.height.equalTo(35)
-        },
-        events: {
-          tapped: function(sender) {
-            if (sender.info == false && $("deleteLocalButton").info == false) {
-              sender.info = true
-              sender.title = "完成"
-              $("rowsShow").remove()
-              $("rowsShowParent").add(genRowsView(true, utils.getCache("columns")))
-            } else if(sender.info && $("deleteLocalButton").info == false) {
-              sender.info = false
-              sender.title = "排序"
-              $("rowsShow").remove()
-              $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
-            } else {
-              $ui.alert({
-                title: "确定清空？",
-                message: "清空操作无法撤销",
-                actions: [
-                  {
-                    title: "OK",
-                    handler: function() {
-                      $device.taptic(2)
-                      $delay(0.15, function(){
-                        $device.taptic(2)
-                      })
-                      $cache.set("localItems", [])
-                      $("rowsShow").data = []
-                    }
-                  },
-                  {
-                    title: "Cancel",
-                    handler: function() {
-              
-                    }
-                  }
-                ]
-              })
-            }
-          }
-        }
-      },{
-        type: "button",
-        props: {
-          id: "deleteLocalButton",
-          title: "删除",
-          bgcolor: $color("clear"),
-          titleColor: $color(mColor.blue),
-          info: false,
-        },
-        layout: function(make, view) {
-          make.left.inset(10)
-          make.width.equalTo(50)
-          make.centerY.equalTo(view.super)
-          make.height.equalTo(35)
-        },
-        events: {
-          tapped: function(sender) {
-            if (sender.info == undefined || sender.info == false) {
-              sender.info = true
-              sender.title = "完成"
-              $("reorderButton").title = "清空"
-              $("reorderButton").info = false
-              $("rowsShow").remove()
-              $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
-            } else {
-              sender.info = false
-              sender.title = "删除"
-              $("reorderButton").title = "排序"
-              $("reorderButton").info = false
-            }
-          },
-        }
-      },],
-    },
-    {
-      type: "view",
-      props: {
         id: "rowsShowParent",
       },
       layout: function(make, view) {
         make.width.equalTo(view.super)
-        make.top.equalTo($("deleteLocalButton").bottom).inset(7)
+        make.top.inset(0)
         make.bottom.inset(0)
         make.centerX.equalTo(view.super)
       },
       views: [genRowsView(false, utils.getCache("columns"))]
+    },{
+      type: "view",
+      props: {
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.left.top.right.inset(0)
+        if($device.info.version >= "11"){
+          make.bottom.equalTo(view.super.topMargin).offset(40)
+        } else {
+          make.height.equalTo(65)
+        }
+      },
+      views:[{
+        type: "blur",
+        props: {
+          id: "localPageHeaderBlur",
+          style: 1, // 0 ~ 5
+          bgcolor: $color("white"),
+        },
+        layout: $layout.fill,
+      },{
+        type: "view",
+        layout: function(make, view) {
+          make.left.bottom.right.inset(0)
+          make.height.equalTo(45)
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "localPageHeaderLabel",
+            text: "本地",
+            font: $font("bold", 17),
+            align: $align.center,
+            bgcolor: $color("clear"),
+            textColor: $color("black"),
+            hidden: true,
+          },
+          layout: $layout.fill,
+        },{
+          type: "button",
+          props: {
+            id: "reorderButton",
+            title: "排序",
+            bgcolor: $color("clear"),
+            titleColor: $color(mColor.blue),
+            info: false,
+          },
+          layout: function(make, view) {
+            make.right.inset(10)
+            make.width.equalTo(50)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(35)
+          },
+          events: {
+            tapped: function(sender) {
+              if (sender.info == false && $("deleteLocalButton").info == false) {
+                sender.info = true
+                sender.title = "完成"
+                $("rowsShow").remove()
+                $("rowsShowParent").add(genRowsView(true, utils.getCache("columns")))
+              } else if(sender.info && $("deleteLocalButton").info == false) {
+                sender.info = false
+                sender.title = "排序"
+                $("rowsShow").remove()
+                $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
+              } else {
+                $ui.alert({
+                  title: "确定清空？",
+                  message: "清空操作无法撤销",
+                  actions: [
+                    {
+                      title: "OK",
+                      handler: function() {
+                        $device.taptic(2)
+                        $delay(0.15, function(){
+                          $device.taptic(2)
+                        })
+                        $cache.set("localItems", [])
+                        $("rowsShow").data = []
+                      }
+                    },
+                    {
+                      title: "Cancel",
+                      handler: function() {
+                
+                      }
+                    }
+                  ]
+                })
+              }
+            }
+          }
+        },{
+          type: "button",
+          props: {
+            id: "deleteLocalButton",
+            title: "删除",
+            bgcolor: $color("clear"),
+            titleColor: $color(mColor.blue),
+            info: false,
+          },
+          layout: function(make, view) {
+            make.left.inset(10)
+            make.width.equalTo(50)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(35)
+          },
+          events: {
+            tapped: function(sender) {
+              if (sender.info == undefined || sender.info == false) {
+                sender.info = true
+                sender.title = "完成"
+                $("reorderButton").title = "清空"
+                $("reorderButton").info = false
+                $("rowsShow").remove()
+                $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
+              } else {
+                sender.info = false
+                sender.title = "删除"
+                $("reorderButton").title = "排序"
+                $("reorderButton").info = false
+              }
+            },
+          }
+        },],
+      },],
     },]
   }
   return view
@@ -536,6 +558,7 @@ function genLocalView() {
 
 
 function genCloudView() {
+  let searchText = ""
   const searchBar = {
     type: "view",
     layout: $layout.fill,
@@ -558,7 +581,13 @@ function genCloudView() {
           let input = $("search_input")
           input.text = ""
           $("search_hint").hidden = false
-          searchItems("")
+          if(searchText !== "") {
+            searchItems("")
+          }
+          if($("noSearchItemView")) {
+            $("noSearchItemView").remove()
+          }
+          searchText = ""
           input.blur()
         }
       }
@@ -664,12 +693,12 @@ function genCloudView() {
               $("search_hint").hidden = true
             } else {
               $("search_hint").hidden = false
-              // searchItems(sender.text)
             }
           },
           returned: function(sender) {
             sender.blur()
             searchItems(sender.text)
+            searchText = sender.text
           },
         },
         views: [{
@@ -709,75 +738,13 @@ function genCloudView() {
         make.centerX.equalTo(view.super)
       },
       views: [{
-        type: "view",
-        props: {
-          hidden: false,
-        },
-        layout: function(make, view) {
-          make.left.top.right.inset(0)
-          make.height.equalTo(45)
-        },
-        views:[{
-          type: "label",
-          props: {
-            id: "cloudPageHeaderLabel",
-            text: "云库",
-            font: $font("bold", 17),
-            align: $align.center,
-            bgcolor: $color("white"),
-            textColor: $color("black"),
-            hidden: true,
-          },
-          layout: $layout.fill,
-        },{
-          type: "button",
-          props: {
-            id: "uploadButton",
-            title: "＋",
-            bgcolor: $color("clear"),
-            font: $font(27),
-            titleColor: $color(mColor.blue),
-            info: false,
-          },
-          layout: function(make, view) {
-            make.right.inset(10)
-            make.width.equalTo(50)
-            make.centerY.equalTo(view.super)
-            make.height.equalTo(35)
-          },
-          events: {
-            tapped: function(sender) {
-              setupUploadView("upload")
-            }
-          }
-        },{
-          type: "button",
-          props: {
-            id: "myUploadButton",
-            title: "我的",
-            bgcolor: $color("clear"),
-            titleColor: $color(mColor.blue),
-            info: false,
-          },
-          layout: function(make, view) {
-            make.left.inset(10)
-            make.width.equalTo(50)
-            make.centerY.equalTo(view.super)
-            make.height.equalTo(35)
-          },
-          events: {
-            tapped: function(sender) {
-              setupMyUpView()
-            },
-          }
-        },],
-      },{
         type: "matrix",
         props: {
           id: "rowsCloudShow",
           columns: ($device.info.screen.width < 400)?4:6, //横行个数
           itemHeight: 50, //图标到字之间得距离
           spacing: 3, //每个边框与边框之间得距离
+          indicatorInsets: $insets(45, 0, 50, 0),
           template: [{
               type: "label",
               props: {
@@ -812,7 +779,7 @@ function genCloudView() {
           header: {
             type: "view",
             props:{
-              height: 100,
+              height: 150,
             },
             views: [{
               type: "label",
@@ -825,7 +792,7 @@ function genCloudView() {
               },
               layout: function(make, view) {
                 make.left.inset(15)
-                make.top.inset(0)
+                make.top.inset(50)
                 make.height.equalTo(45)
               }
             },{
@@ -864,11 +831,18 @@ function genCloudView() {
               },]
             },]
           },
+          footer: {
+            type: "view",
+            props: {
+              height: 50,
+              bgcolor: $color("clear"),
+            }
+          },
           data: utils.getCache("cloudItems", []),
         },
         layout: function(make, view) {
           make.left.right.bottom.inset(0)
-          make.top.equalTo(view.prev.bottom)
+          make.top.inset(0)
           make.centerX.equalTo(view.super)
         },
         events: {
@@ -888,11 +862,15 @@ function genCloudView() {
             })
           },
           didScroll: function(sender) {
-            if(sender.contentOffset.y >= 37 && $("cloudPageHeaderLabel").hidden === true) {
+            if(sender.contentOffset.y >= 40 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
               $("cloudPageHeaderLabel").hidden = false
-            } else if(sender.contentOffset.y < 37 && $("cloudPageHeaderLabel").hidden === false) {
+              $("cloudPageHeaderBlur").bgcolor = $color("clear")
+              $("cloudListHeaderTitle").hidden = true
+            } else if(sender.contentOffset.y < 40 + topOffset && $("cloudPageHeaderLabel").hidden === false) {
               $("cloudPageHeaderLabel").hidden = true
-            }else if(sender.contentOffset.y < 0) {
+              $("cloudPageHeaderBlur").bgcolor = $color("white")
+              $("cloudListHeaderTitle").hidden = false
+            }else if(sender.contentOffset.y < topOffset) {
               let size = 35 - sender.contentOffset.y * 0.04
               if(size > 40)
                 size = 40
@@ -906,7 +884,89 @@ function genCloudView() {
             
           },
         }
-      }]
+      },{
+        type: "view",
+        props: {
+          hidden: false,
+        },
+        layout: function(make, view) {
+          make.left.top.right.inset(0)
+          if($device.info.version >= "11"){
+            make.bottom.equalTo(view.super.topMargin).offset(40)
+          } else {
+            make.height.equalTo(65)
+          }
+        },
+        views:[{
+          type: "blur",
+          props: {
+            id: "cloudPageHeaderBlur",
+            style: 1, // 0 ~ 5
+            bgcolor: $color("white"),
+          },
+          layout: $layout.fill,
+        },{
+          type: "view",
+          layout: function(make, view) {
+            make.left.bottom.right.inset(0)
+            make.height.equalTo(45)
+          },
+          views: [{
+            type: "label",
+            props: {
+              id: "cloudPageHeaderLabel",
+              text: "云库",
+              font: $font("bold", 17),
+              align: $align.center,
+              bgcolor: $color("clear"),
+              textColor: $color("black"),
+              hidden: true,
+            },
+            layout: $layout.fill,
+          },{
+            type: "button",
+            props: {
+              id: "uploadButton",
+              title: "＋",
+              bgcolor: $color("clear"),
+              font: $font(27),
+              titleColor: $color(mColor.blue),
+              info: false,
+            },
+            layout: function(make, view) {
+              make.right.inset(10)
+              make.width.equalTo(50)
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(35)
+            },
+            events: {
+              tapped: function(sender) {
+                setupUploadView("upload")
+              }
+            }
+          },{
+            type: "button",
+            props: {
+              id: "myUploadButton",
+              title: "我的",
+              bgcolor: $color("clear"),
+              titleColor: $color(mColor.blue),
+              info: false,
+            },
+            layout: function(make, view) {
+              make.left.inset(10)
+              make.width.equalTo(50)
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(35)
+            },
+            events: {
+              tapped: function(sender) {
+                setupMyUpView()
+              },
+            }
+          },],
+        },],
+      },]
     },],
   }
   
@@ -935,7 +995,55 @@ function searchItems(text) {
         }
         view.data = resultItems
         if(resultItems.length == 0) {
-          ui.showToastView($("mainView"), mColor.blue, "无搜索结果，试试其他词吧")
+          $("rowsCloudShow").add({
+            type: "view",
+            props: {
+              id: "noSearchItemView",
+            },
+            layout: function(make, view) {
+              make.width.equalTo(view.super)
+              make.height.equalTo(70)
+              make.center.equalTo(view.super)
+            },
+            views: [{
+              type: "label",
+              props: {
+                text: "无搜索结果",
+                font: $font(17),
+                align: $align.center,
+                bgcolor: $color("clear"),
+                textColor: $color("black"),
+              },
+              layout: function(make, view) {
+                make.width.equalTo(view.super)
+                make.top.inset(0)
+                make.centerX.equalTo(view.super)
+              },
+            },{
+              type: "button",
+              props: {
+                title: "我要上传",
+                font: $font(15),
+                titleColor: $color("white"),
+                bgcolor: $color(mColor.blue),
+                radius: 3,
+              },
+              layout: function(make, view) {
+                make.width.equalTo(80)
+                make.bottom.inset(0)
+                make.centerX.equalTo(view.super)
+              },
+              events: {
+                tapped: function(sender) {
+                  setupUploadView("upload")
+                },
+              }
+            }]
+          })
+        } else {
+          if($("noSearchItemView")) {
+            $("noSearchItemView").remove()
+          }
         }
       }
     })
@@ -1448,53 +1556,16 @@ function genSettingView() {
     },
     layout: $layout.fill,
     views: [{
-      type: "view",
-      props: {
-        hidden: true,
-      },
-      layout: function(make, view) {
-        make.left.top.right.inset(0)
-        make.height.equalTo(45)
-      },
-      views:[{
-        type: "label",
-        props: {
-          text: "设置",
-          font: $font("bold", 17),
-          align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
-        },
-        layout: $layout.fill,
-      },{
-        type: "canvas",
-        layout: function(make, view) {
-          make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
-          make.left.right.inset(0)
-        },
-        events: {
-          draw: function(view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("darkGray")
-            ctx.setLineWidth(1 / scale)
-            ctx.moveToPoint(0, 0)
-            ctx.addLineToPoint(width, 0)
-            ctx.strokePath()
-          }
-        }
-      },],
-    },{
       type: "list",
       props: {
         id: "list",
         bgcolor: $color("clear"),
         template: feedBackTemplate,
+        indicatorInsets: $insets(45, 0, 50, 0),
         header: {
           type: "view",
           props:{
-            height: 45,
+            height: 95,
           },
           views: [{
             type: "label",
@@ -1515,7 +1586,7 @@ function genSettingView() {
         footer: {
           type: "view",
           props:{
-            height: 60,
+            height: 110,
           },
           views: [{
             type: "label",
@@ -1526,8 +1597,8 @@ function genSettingView() {
               font: $font(13)
             },
             layout: function(make, view) {
-              make.center.equalTo(view.super)
-              make.height.equalTo(view.super)
+              make.centerX.equalTo(view.super)
+              make.top.inset(23)
             }
           },],
         },
@@ -1553,7 +1624,7 @@ function genSettingView() {
         }],
       },
       layout: function(make, view) {
-        make.top.equalTo(view.prev.bottom)
+        make.top.inset(0)
         make.bottom.inset(0)
         make.left.right.inset(0)
       },
@@ -1580,11 +1651,15 @@ function genSettingView() {
           }
         },
         didScroll: function(sender) {
-          if(sender.contentOffset.y >= 37 && sender.prev.hidden === true) {
-            sender.prev.hidden = false
-          } else if(sender.contentOffset.y < 37 && sender.prev.hidden === false) {
-            sender.prev.hidden = true
-          }else if(sender.contentOffset.y < 0) {
+          if(sender.contentOffset.y >= 40 + topOffset && $("settingPageHeaderLabel").hidden === true) {
+            $("settingPageHeaderLabel").hidden = false
+            $("settingPageHeaderBlur").bgcolor = $color("clear")
+            $("settingListHeaderTitle").hidden = true
+          } else if(sender.contentOffset.y < 40 + topOffset && $("settingPageHeaderLabel").hidden === false) {
+            $("settingPageHeaderLabel").hidden = true
+            $("settingPageHeaderBlur").bgcolor = $color("white")
+            $("settingListHeaderTitle").hidden = false
+          }else if(sender.contentOffset.y < topOffset) {
             let size = 35 - sender.contentOffset.y * 0.04
             if(size > 40)
               size = 40
@@ -1592,6 +1667,46 @@ function genSettingView() {
           }
         },
       }
+    },{
+      type: "view",
+      props: {
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.left.top.right.inset(0)
+        if($device.info.version >= "11"){
+          make.bottom.equalTo(view.super.topMargin).offset(40)
+        } else {
+          make.height.equalTo(65)
+        }
+      },
+      views:[{
+        type: "blur",
+        props: {
+          id: "settingPageHeaderBlur",
+          style: 1, // 0 ~ 5
+          bgcolor: $color("white"),
+        },
+        layout: $layout.fill,
+      },{
+        type: "view",
+        layout: function(make, view) {
+          make.left.bottom.right.inset(0)
+          make.height.equalTo(45)
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "settingPageHeaderLabel",
+            text: "设置",
+            font: $font("bold", 17),
+            align: $align.center,
+            bgcolor: $color("clear"),
+            textColor: $color("black"),
+          },
+          layout: $layout.fill,
+        },],
+      },],
     },],
   }
   requireInstallNumbers()
@@ -1817,14 +1932,6 @@ function setupMyUpView() {
         itemHeight: 50, //图标到字之间得距离
         spacing: 3, //每个边框与边框之间得距离
         template: [{
-            type: "blur",
-            props: {
-              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-              style: 1 // 0 ~ 5 调整背景的颜色程度
-            },
-            layout: $layout.fill,
-          },
-          {
             type: "label",
             props: {
               id: "title",
@@ -1883,7 +1990,7 @@ function setupMyUpView() {
                 setupUploadView("renew", data.title.text, data.icon.src, data.url, data.descript, data.info.objectId)
               } else if(idx == 1) {
                 $ui.alert({
-                  title: "确定删除？",
+                  title: "确定要删除 " + data.title.text + " ？",
                   message: "删除操作不可撤销，请谨慎操作",
                   actions: [
                     {
@@ -2509,7 +2616,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                 if(haveExisted($("schemeInput").text)) {
                   $ui.alert({
                     title: "提示",
-                    message: "云库中已存在，请勿重复上传，如有其他情况请反馈",
+                    message: "云库中已存在，请勿重复上传，如有特殊情况请反馈",
                   })
                 } else {
                   $("uploadItemView").add(genProgress(sender))
@@ -3360,7 +3467,11 @@ function showInfoView(superView, data) {
       },
       layout: function(make, view) {
         make.height.equalTo(260)
-        make.width.equalTo(view.super)
+        if(superView.frame.width > 600) {
+          make.width.equalTo(600)
+        } else {
+          make.width.equalTo(view.super)
+        }
         make.centerX.equalTo(view.super)
         make.top.equalTo(view.super.bottom)
         shadow(view)
@@ -3626,7 +3737,11 @@ function showInfoView(superView, data) {
   $("windowView").relayout()
   $("windowView").remakeLayout(function(make) {
     make.height.equalTo(260)
-    make.width.equalTo(superView)
+    if(superView.frame.width > 600) {
+      make.width.equalTo(600)
+    } else {
+      make.width.equalTo(superView)
+    }
     make.centerX.equalTo(superView)
     make.bottom.inset(0)
   })
@@ -3642,7 +3757,11 @@ function showInfoView(superView, data) {
   function hideView() {
     $("windowView").remakeLayout(function(make) {
       make.height.equalTo(260)
-      make.width.equalTo($("infoView"))
+      if(superView.frame.width > 600) {
+        make.width.equalTo(600)
+      } else {
+        make.width.equalTo($("infoView"))
+      }
       make.centerX.equalTo($("infoView"))
       make.top.equalTo($("infoView").bottom)
     })
@@ -3755,6 +3874,11 @@ function requireItems() {
           ui.showToastView($("mainView"), mColor.blue, "发现 " + (array.length - cloudItems.length) + " 个新启动器")
         }
         $cache.set("cloudItems", array)
+        if($("noSearchItemView")) {
+          $("noSearchItemView").remove()
+        }
+        $("search_input").text = ""
+        $("search_hint").hidden = false
       } else {
         view.endRefreshing()
       }
@@ -3792,11 +3916,15 @@ function requireMyItems() {
             }
           })
         }
-        $("rowsMyShow").data = array
-        $("rowsMyShow").endRefreshing()
+        if($("rowsMyShow")) {
+          $("rowsMyShow").data = array
+          $("rowsMyShow").endRefreshing()
+        }
         $cache.set("myItems", array)
       } else {
-        $("rowsMyShow").endRefreshing()
+        if($("rowsMyShow")) {
+          $("rowsMyShow").endRefreshing()
+        }
       }
     }
   })
@@ -3865,6 +3993,7 @@ function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
       ui.showToastView($("uploadItemView"), mColor.green, "上传成功")
       requireItems()
       $("rowsCloudShow").scrollToOffset($point(0, 0))
+      requireMyItems()
       if(view != undefined) {
         let finishTimer = $timer.schedule({
           interval: 0.001,
