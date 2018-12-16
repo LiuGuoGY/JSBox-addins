@@ -65,6 +65,8 @@ function getLatestBuild() {
               }
             }
           })
+        } else {
+          $cache.set("needToUpdate", false)
         }
       }
     }

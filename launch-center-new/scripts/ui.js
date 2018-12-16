@@ -296,7 +296,7 @@ function genTemplate() {
 }
 
 function addButtonMore(items) {
-  if(utils.getCache("needToUpdate", true)) {
+  if(utils.getCache("needToUpdate", false)) {
     items.push({
       title: {
         text: "版本更新"
