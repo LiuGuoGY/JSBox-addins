@@ -1,7 +1,6 @@
 let ui = require('scripts/ui')
 let utils = require('scripts/utils')
-
-setupWidgetView()
+let update = require('scripts/update')
 
 function setupWidgetView() {
   let items = ui.addButtonMore(utils.getCache("localItems", []))
@@ -31,6 +30,7 @@ function setupWidgetView() {
     }]
   }
   $ui.render(view)
+  update.easyCheckUpdate()
 }
 
 module.exports = {

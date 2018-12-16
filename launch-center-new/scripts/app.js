@@ -33,6 +33,7 @@ const mIcon = [
     gray: $icon("002", $color(mColor.gray), $size(25, 25)),
   },
 ]
+
 function show() {
   uploadInstall()
   checkBlackList()
@@ -255,6 +256,12 @@ function solveQuery() {
     switch(query.q) {
       case "show":
       showOneItem(query.objectId);break;
+      default:break;
+    }
+    switch(query.action) {
+      case "update": {
+        update.checkUpdate(true);
+      };break;
       default:break;
     }
   }

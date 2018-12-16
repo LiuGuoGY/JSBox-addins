@@ -108,6 +108,7 @@ function updateScript() {
         handler: success => {
           if (success) {
             $cache.remove("lastCT")
+            $cache.set("needToUpdate", false)
             $device.taptic(2)
             $delay(0.2, function() {
               $device.taptic(2)
@@ -117,7 +118,7 @@ function updateScript() {
               actions: [{
                 title: "OK",
                 handler: function() {
-                  $app.openExtension($addin.current.name)
+                  $addin.restart()
                 }
               }]
             })
@@ -153,7 +154,7 @@ function needCheckup() {
     return true
   } else {
     let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000)
-    let interval = 1440
+    let interval = 720
     if ($app.env == $env.app) {
       interval = 30
     }
@@ -167,9 +168,31 @@ function needCheckup() {
   }
 }
 
+function easyCheckUpdate() {
+  if(needCheckup()) {
+    $http.download({
+      url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/app.json",
+      showsProgress: false,
+      timeout: 5,
+      handler: function(resp) {
+        if(resp.data) {
+          let appJson = JSON.parse(resp.data.string)
+          let updateBuild = appJson.build
+          if(parseInt(updateBuild) > parseInt(getCurBuild())) {
+            $cache.set("needToUpdate", true)
+          } else {
+            $cache.set("needToUpdate", false)
+          }
+        }
+      }
+    })
+  }
+}
+
 module.exports = {
   checkUpdate: checkUpdate,
   getCurVersion: getCurVersion,
   getCurBuild: getCurBuild,
   getCurDate: getCurDate,
+  easyCheckUpdate: easyCheckUpdate,
 }

@@ -296,15 +296,28 @@ function genTemplate() {
 }
 
 function addButtonMore(items) {
-  items.push({
-    title: {
-      text: "更多"
-    },
-    icon: {
-      src: "assets/more.png"
-    },
-    url: "jsbox://run?name=" + encodeURI($addin.current.name + "&action=more"),
-  })
+  if(utils.getCache("needToUpdate", true)) {
+    items.push({
+      title: {
+        text: "版本更新"
+      },
+      icon: {
+        src: "assets/update.png"
+      },
+      url: "jsbox://run?name=" + encodeURI($addin.current.name + "&action=update"),
+    })
+  } else {
+    items.push({
+      title: {
+        text: "更多"
+      },
+      icon: {
+        src: "assets/more.png"
+      },
+      url: "jsbox://run?name=" + encodeURI($addin.current.name + "&action=more"),
+    })
+  }
+  
   return items
 }
 

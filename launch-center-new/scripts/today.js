@@ -15,8 +15,6 @@ function setupTodayView() {
       $widget.height = 245
     }
   }
-  
-
   if(utils.getCache("backgroundTranparent")) {
     let alpha = 1
     $delay(0.7, function(){
@@ -156,6 +154,7 @@ function setupTodayView() {
     layout: $layout.fill,
     views: showView,
   })
+  update.easyCheckUpdate()
 
   if(utils.getCache("pullToClose") == true && !utils.getCache("isPullToCloseToasted", false)) {
     $cache.set("isPullToCloseToasted", true);
