@@ -741,7 +741,7 @@ function genCloudView() {
         type: "matrix",
         props: {
           id: "rowsCloudShow",
-          columns: ($device.info.screen.width < 400)?4:6, //横行个数
+          columns: ($("mainView").frame.width < 600)?4:6, //横行个数
           itemHeight: 50, //图标到字之间得距离
           spacing: 3, //每个边框与边框之间得距离
           indicatorInsets: $insets(45, 0, 50, 0),
