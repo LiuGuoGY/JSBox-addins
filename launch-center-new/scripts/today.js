@@ -9,13 +9,6 @@ function setupTodayView() {
   let wantToClose = false
   let showView = []
 
-  if(!utils.getCache("staticHeight")) {
-    if(utils.getCache("pullToClose")) {
-      $widget.height = 215
-    } else {
-      $widget.height = 245
-    }
-  }
   if(utils.getCache("backgroundTranparent")) {
     let alpha = 1
     $delay(0.7, function(){
@@ -157,6 +150,13 @@ function setupTodayView() {
   })
   update.easyCheckUpdate()
 
+  if(!utils.getCache("staticHeight")) {
+    if(utils.getCache("pullToClose")) {
+      $widget.height = 215
+    } else {
+      $widget.height = 245
+    }
+  }
   if(utils.getCache("pullToClose") == true && !utils.getCache("isPullToCloseToasted", false)) {
     $cache.set("isPullToCloseToasted", true);
     $delay(1, function(){

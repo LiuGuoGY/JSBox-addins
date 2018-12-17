@@ -3929,6 +3929,50 @@ function requireMyItems() {
         if($("rowsMyShow")) {
           $("rowsMyShow").data = array
           $("rowsMyShow").endRefreshing()
+          if(array.length <= 0) {
+            $("rowsMyShow").add({
+              type: "view",
+              layout: function(make, view) {
+                make.width.equalTo(view.super)
+                make.height.equalTo(70)
+                make.center.equalTo(view.super)
+              },
+              views: [{
+                type: "label",
+                props: {
+                  text: "暂无上传",
+                  font: $font(17),
+                  align: $align.center,
+                  bgcolor: $color("clear"),
+                  textColor: $color("black"),
+                },
+                layout: function(make, view) {
+                  make.width.equalTo(view.super)
+                  make.top.inset(0)
+                  make.centerX.equalTo(view.super)
+                },
+              },{
+                type: "button",
+                props: {
+                  title: "我要上传",
+                  font: $font(15),
+                  titleColor: $color("white"),
+                  bgcolor: $color(mColor.blue),
+                  radius: 3,
+                },
+                layout: function(make, view) {
+                  make.width.equalTo(80)
+                  make.bottom.inset(0)
+                  make.centerX.equalTo(view.super)
+                },
+                events: {
+                  tapped: function(sender) {
+                    setupUploadView("upload")
+                  },
+                }
+              }]
+            })
+          }
         }
         $cache.set("myItems", array)
       } else {
