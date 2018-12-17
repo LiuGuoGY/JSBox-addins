@@ -985,6 +985,9 @@ function searchItems(text) {
   let view = $("rowsCloudShow")
   if(text === "" || text.length <= 0) {
     view.data = utils.getCache("cloudItems", [])
+    if($("noSearchItemView")) {
+      $("noSearchItemView").remove()
+    }
   } else {
     $text.tokenize({
       text: text,
@@ -3509,10 +3512,10 @@ function showInfoView(superView, data) {
                 items: ["分享", "失效反馈"],
                 handler: function(title, idx) {
                   switch (idx) {
-                    case 0:
+                    case 0: {
                       let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
                       share(shareLink)
-                      break;
+                    };break;
                     case 1:
                       setupFeedBack("应用失效(objectId)：\n\t" + data.objectId + "\n描述(原因或现象)：\n\t")
                       break;

@@ -1,5 +1,6 @@
 let ui = require('scripts/ui')
 let utils = require('scripts/utils')
+let update = require('scripts/update')
 
 function setupTodayView() {
   let items = ui.addButtonMore(utils.getCache("localItems", []))
@@ -139,7 +140,7 @@ function setupTodayView() {
       events: {
         didSelect(sender, indexPath, data) {
           $device.taptic(1)
-          myOpenUrl(data.url)
+          utils.myOpenUrl(data.url)
         },
       },
     }]
