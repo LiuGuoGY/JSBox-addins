@@ -1005,51 +1005,53 @@ function searchItems(text) {
         }
         view.data = resultItems
         if(resultItems.length == 0) {
-          $("rowsCloudShow").add({
-            type: "view",
-            props: {
-              id: "noSearchItemView",
-            },
-            layout: function(make, view) {
-              make.width.equalTo(view.super)
-              make.height.equalTo(70)
-              make.center.equalTo(view.super)
-            },
-            views: [{
-              type: "label",
+          if(!$("noSearchItemView")) {
+            $("rowsCloudShow").add({
+              type: "view",
               props: {
-                text: "无搜索结果",
-                font: $font(17),
-                align: $align.center,
-                bgcolor: $color("clear"),
-                textColor: $color("black"),
+                id: "noSearchItemView",
               },
               layout: function(make, view) {
                 make.width.equalTo(view.super)
-                make.top.inset(0)
-                make.centerX.equalTo(view.super)
+                make.height.equalTo(70)
+                make.center.equalTo(view.super)
               },
-            },{
-              type: "button",
-              props: {
-                title: "我要上传",
-                font: $font(15),
-                titleColor: $color("white"),
-                bgcolor: $color(mColor.blue),
-                radius: 3,
-              },
-              layout: function(make, view) {
-                make.width.equalTo(80)
-                make.bottom.inset(0)
-                make.centerX.equalTo(view.super)
-              },
-              events: {
-                tapped: function(sender) {
-                  setupUploadView("upload")
+              views: [{
+                type: "label",
+                props: {
+                  text: "无搜索结果",
+                  font: $font(17),
+                  align: $align.center,
+                  bgcolor: $color("clear"),
+                  textColor: $color("black"),
                 },
-              }
-            }]
-          })
+                layout: function(make, view) {
+                  make.width.equalTo(view.super)
+                  make.top.inset(0)
+                  make.centerX.equalTo(view.super)
+                },
+              },{
+                type: "button",
+                props: {
+                  title: "我要上传",
+                  font: $font(15),
+                  titleColor: $color("white"),
+                  bgcolor: $color(mColor.blue),
+                  radius: 3,
+                },
+                layout: function(make, view) {
+                  make.width.equalTo(80)
+                  make.bottom.inset(0)
+                  make.centerX.equalTo(view.super)
+                },
+                events: {
+                  tapped: function(sender) {
+                    setupUploadView("upload")
+                  },
+                }
+              }]
+            })
+          }
         } else {
           if($("noSearchItemView")) {
             $("noSearchItemView").remove()
@@ -1535,7 +1537,7 @@ function genSettingView() {
     templateTitle: {
       text : "GitHub",
     },
-    url: "https://github.com/LiuGuoGY/JSBox-addins/tree/master/launch-center-new",
+    // url: "https://github.com/LiuGuoGY/JSBox-addins/tree/master/launch-center-new",
   },
   {
     templateTitle: {
@@ -1648,6 +1650,22 @@ function genSettingView() {
             setupWebView(titleText, title.url)
           } else {
             switch(indexPath.row) {
+              case 1: setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins/tree/master/launch-center-new", function() {
+                $ui.menu({
+                  items: ["用 Grape 打开", "用 PPHub 打开", "用其他应用打开"],
+                  handler: function(title, idx) {
+                    switch(idx) {
+                      case 0: $app.openURL("grape://repo?reponame=LiuGuoGY/JSBox-addins");break;
+                      case 1: $app.openURL("pphub://repo?owner=LiuGuoGY&repo=JSBox-addins");break;
+                      case 2: $share.sheet({
+                        items: ["https://github.com/LiuGuoGY/JSBox-addins"],
+                        handler: function(success) {
+                        }
+                      });break;
+                    }
+                  }
+                });
+              });break;
               case 2: update.checkUpdate(true)
                 break
               case 3: setupFeedBack()
@@ -1744,7 +1762,28 @@ function share(link) {
   })
 }
 
-function setupWebView(title, url) {
+function setupWebView(title, url, moreHandler) {
+  let moreView = {}
+  if(moreHandler) {
+    moreView = {
+      type: "button",
+      props: {
+        title: "⋯",
+        font: $font("bold", 24),
+        titleColor: $color(mColor.blue),
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.size.equalTo(view.super)
+      },
+      events: {
+        tapped: function(sender) {
+          moreHandler()
+        }
+      }
+    }
+  }
   $ui.push({
     props: {
       id: "myWebView",
@@ -1830,7 +1869,18 @@ function setupWebView(title, url) {
             make.left.equalTo(view.prev.right).inset(3)
           }
         }],
-      },],
+      },{
+        type: "view",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.right.inset(0)
+          make.width.equalTo(50)
+          make.height.equalTo(view.super)
+        },
+        views: [moreView],
+      }],
     },{
       type: "web",
       props: {
@@ -2023,9 +2073,6 @@ function setupMyUpView() {
             }
           })
         },
-        pulled: function(sender) {
-          requireMyItems()
-        }
       }
     },]
   })
@@ -2494,8 +2541,11 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           },
           events: {
             tapped: function(sender) {
-              utils.myOpenUrl($("schemeInput").text)
               let nDate = new Date()
+              if($("schemeInput").text.endsWith(":") && $("schemeInput").text.indexOf("//") < 0) {
+                $("schemeInput").text = $("schemeInput").text + "//"
+              }
+              utils.myOpenUrl($("schemeInput").text)
               $cache.set("begainTime", nDate.getTime())
               resumeAction = 1
               $thread.background({
@@ -3145,7 +3195,7 @@ function setupReward() {
           type: "label",
           props: {
             height: 20,
-            text: "Thank you all.",
+            text: "感谢以上小伙伴的支持",
             textColor: $rgba(90, 90, 90, 0.6),
             align: $align.center,
             font: $font(12)
