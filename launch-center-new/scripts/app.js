@@ -2,6 +2,7 @@ let ui = require('scripts/ui')
 let utils = require('scripts/utils')
 let update = require('scripts/update')
 let sync = require('scripts/sync')
+let welcome = require('scripts/welcome')
 
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -50,6 +51,7 @@ function main() {
   setupMainView()
   solveQuery()
   update.checkUpdate()
+  welcome.show($("mainView"))
 }
 
 $app.listen({
