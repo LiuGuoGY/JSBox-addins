@@ -40,7 +40,7 @@
 
 #### 预览
 
-![预览图](https://i.loli.net/2018/10/29/5bd6ccec9c38e.png)
+![预览图](https://i.loli.net/2018/12/16/5c163c2f52844.jpg)
 
 #### 安装与更新
 
