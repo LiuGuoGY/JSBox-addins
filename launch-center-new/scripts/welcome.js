@@ -1,54 +1,47 @@
+let utils = require('scripts/utils')
+
 function show(view) {
   playMusic(view)
 }
 
-async function emojiText() {
-  let url = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/emoji.txt"
-  let resp = await $http.download({
-    url: url,
-    showsProgress: false,
-  })
-  return (resp.data.string)
+function emojiText() {
+  return utils.getCache("welcomeEmoji", "")
 }
 
 function playMusic(view) {
-  let url = "https://github.com/LiuGuoGY/JSBox-addins/raw/master/launch-center/music.mp3"
-  $http.get({
-    url: url,
-    handler: function(resp) {
-      if(resp.response.statusCode !== 404) {
-        $audio.play({
-          url: url,
-          events: {
-            newAccessLogEntry: function() {
-              if($audio.status != 0) {
-                playEmoji(view, $audio.duration)
-              }
-            },
+  let url = utils.getCache("welcomeMusic", "")
+  if(url.length > 0) {
+    $audio.play({
+      url: url,
+      events: {
+        newAccessLogEntry: function() {
+          if($audio.status != 0) {
+            playEmoji(view, $audio.duration)
           }
-        });
-      } else {
-        playEmoji(view)
+        },
       }
-    }
-  })
+    });
+  } else {
+    playEmoji(view)
+  }
 }
 
-async function playEmoji(view, duration) {
-  let text = await emojiText()
+function playEmoji(view, duration) {
+  let text = emojiText()
   let number = 0, x = 0;
   if(text.length > 0) {
     let timer = $timer.schedule({
       interval: 0.2,
       handler: function() {
-        x = Math.random() * (view.frame.width - 20) + 10
+        x = Math.random() * (view.frame.width - 40) + 20
         let id = "welcome_" + number
+        let index = Math.floor(Math.random()*(text.length / 2))
         view.add({
           type: "label",
           props: {
             id: id,
-            text: text,
-            font: $font(17),
+            text: text.substr(index * 2, 2),
+            font: $font(19),
             align: $align.center,
           },
           layout: function(make, view) {
@@ -61,7 +54,7 @@ async function playEmoji(view, duration) {
           make.top.inset(0).offset(view.frame.height + 40)
         })
         $ui.animate({
-          duration: 2,
+          duration: Math.random() * 0.5 + 2.5,
           velocity: 2,
           animation: function() {
             $(id).relayout()
@@ -76,7 +69,7 @@ async function playEmoji(view, duration) {
         })
         number ++;
         if(duration == undefined) {
-          duration = 2
+          duration = 3
         }
         if(0.2 * number >= duration) {
           timer.invalidate()

@@ -12,28 +12,18 @@ let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
 let showMode = ["图文模式", "小图标", "仅文字", "横向图文", "大图标"]
 let broswers = ["Safari", "Chrome", "UC", "Firefox", "QQ", "Opera", "Quark", "iCab", "Maxthon", "Dolphin", "2345", "Alook"]
 
-const mColor = {
+let mColor = {
   gray: "#a2a2a2",
   blue: "#3478f7",
+  theme: "#3478f7",
   black: "#303032",
   green: "#27AE60",
   red: "#E74C3C",
   iosGreen: "#4CD964",
 }
-const mIcon = [
-  {
-    blue: $icon("102", $color(mColor.blue), $size(25, 25)),
-    gray: $icon("102", $color(mColor.gray), $size(25, 25)),
-  },
-  {
-    blue: $icon("091", $color(mColor.blue), $size(25, 25)),
-    gray: $icon("091", $color(mColor.gray), $size(25, 25)),
-  },
-  {
-    blue: $icon("002", $color(mColor.blue), $size(25, 25)),
-    gray: $icon("002", $color(mColor.gray), $size(25, 25)),
-  },
-]
+let mIcon;
+let welcomeEmoji;
+let welcomeMusic;
 
 function show() {
   uploadInstall()
@@ -46,8 +36,10 @@ function show() {
 }
 
 function main() {
+  setConfig()
   $app.rotateDisabled = true
   sync.download()
+  requireCloudConfig()
   setupMainView()
   solveQuery()
   update.checkUpdate()
@@ -194,7 +186,7 @@ function setupMainView() {
               },
               menu_label: {
                 text: "本地",
-                textColor: $color(mColor.blue)
+                textColor: $color(mColor.theme)
               }
             },
             {
@@ -273,7 +265,7 @@ function handleSelect(view, row) {
   let newData = view.data
   for(let i = 0; i < newData.length; i++) {
     if (i == row) {
-      newData[i].menu_label.textColor = $color(mColor.blue)
+      newData[i].menu_label.textColor = $color(mColor.theme)
       newData[i].menu_image.icon = mIcon[i].blue
       if($(contentViews[i]) == undefined) {
         $("content").add(getContentView(i)) 
@@ -477,7 +469,8 @@ function genLocalView() {
             id: "reorderButton",
             title: "排序",
             bgcolor: $color("clear"),
-            titleColor: $color(mColor.blue),
+            font: $font(17),
+            titleColor: $color(mColor.theme),
             info: false,
           },
           layout: function(make, view) {
@@ -491,11 +484,13 @@ function genLocalView() {
               if (sender.info == false && $("deleteLocalButton").info == false) {
                 sender.info = true
                 sender.title = "完成"
+                sender.font = $font("bold", 17)
                 $("rowsShow").remove()
                 $("rowsShowParent").add(genRowsView(true, utils.getCache("columns")))
               } else if(sender.info && $("deleteLocalButton").info == false) {
                 sender.info = false
                 sender.title = "排序"
+                sender.font = $font(17)
                 $("rowsShow").remove()
                 $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
               } else {
@@ -530,8 +525,9 @@ function genLocalView() {
           props: {
             id: "deleteLocalButton",
             title: "删除",
+            font: $font(17),
             bgcolor: $color("clear"),
-            titleColor: $color(mColor.blue),
+            titleColor: $color(mColor.theme),
             info: false,
           },
           layout: function(make, view) {
@@ -545,15 +541,19 @@ function genLocalView() {
               if (sender.info == undefined || sender.info == false) {
                 sender.info = true
                 sender.title = "完成"
+                sender.font = $font("bold", 17)
                 $("reorderButton").title = "清空"
+                $("reorderButton").font = $font(17)
                 $("reorderButton").info = false
                 $("rowsShow").remove()
                 $("rowsShowParent").add(genRowsView(false, utils.getCache("columns")))
               } else {
                 sender.info = false
                 sender.title = "删除"
+                sender.font = $font(17)
                 $("reorderButton").title = "排序"
                 $("reorderButton").info = false
+                $("reorderButton").font = $font(17)
               }
             },
           }
@@ -577,7 +577,7 @@ function genCloudView() {
         id: "cancel_button",
         title: "取消",
         font: $font(17),
-        titleColor: $color(mColor.blue),
+        titleColor: $color(mColor.theme),
         bgcolor: $color("clear"),
       },
       layout: function(make, view) {
@@ -630,7 +630,7 @@ function genCloudView() {
           id: "search_input",
           returnKeyType: 6,
           userInteractionEnabled: false,
-          tintColor: $color(mColor.blue),
+          tintColor: $color(mColor.theme),
         },
         layout: function(make, view) {
           make.centerY.equalTo(view.super)
@@ -939,7 +939,7 @@ function genCloudView() {
               title: "＋",
               bgcolor: $color("clear"),
               font: $font(27),
-              titleColor: $color(mColor.blue),
+              titleColor: $color(mColor.theme),
               info: false,
             },
             layout: function(make, view) {
@@ -959,7 +959,7 @@ function genCloudView() {
               id: "myUploadButton",
               title: "我的",
               bgcolor: $color("clear"),
-              titleColor: $color(mColor.blue),
+              titleColor: $color(mColor.theme),
               info: false,
             },
             layout: function(make, view) {
@@ -1038,7 +1038,7 @@ function searchItems(text) {
                   title: "我要上传",
                   font: $font(15),
                   titleColor: $color("white"),
-                  bgcolor: $color(mColor.blue),
+                  bgcolor: $color(mColor.theme),
                   radius: 3,
                 },
                 layout: function(make, view) {
@@ -1198,7 +1198,8 @@ function genSettingView() {
       {
         type: "label",
         props: {
-          text: "已启用",
+          text: "✓",
+          font: $font("bold", 20),
           textColor: $color("#AAAAAA"),
         },
         layout: function(make, view) {
@@ -1558,7 +1559,7 @@ function genSettingView() {
   },
   {
     templateTitle: {
-      text : "分享 Launch Center",
+      text : "分享︎︎给朋友",
     },
   },]
 
@@ -1772,7 +1773,7 @@ function setupWebView(title, url, moreHandler) {
       props: {
         title: "⋯",
         font: $font("bold", 24),
-        titleColor: $color(mColor.blue),
+        titleColor: $color(mColor.theme),
         bgcolor: $color("clear"),
       },
       layout: function(make, view) {
@@ -1848,26 +1849,27 @@ function setupWebView(title, url, moreHandler) {
           },
         },
         views:[{
-          type: "image",
+          type: "view",
           props: {
-            src: "assets/back.png",
             bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.left.inset(10)
             make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
+            make.size.equalTo($size(12.5, 21))
           },
+          views: [createBack($color(mColor.theme))]
         },{
           type: "label",
           props: {
             text: "设置",
             align: $align.center,
-            textColor: $color(mColor.blue),
+            textColor: $color(mColor.theme),
             font: $font(17)
           },
           layout: function(make, view) {
             make.height.equalTo(view.super)
+            make.centerY.equalTo(view.super)
             make.left.equalTo(view.prev.right).inset(3)
           }
         }],
@@ -1961,22 +1963,22 @@ function setupMyUpView() {
           },
         },
         views:[{
-          type: "image",
+          type: "view",
           props: {
-            src: "assets/back.png",
             bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.left.inset(10)
             make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
+            make.size.equalTo($size(12.5, 21))
           },
+          views: [createBack($color(mColor.theme))]
         },{
           type: "label",
           props: {
             text: "云库",
             align: $align.center,
-            textColor: $color(mColor.blue),
+            textColor: $color(mColor.theme),
             font: $font(17)
           },
           layout: function(make, view) {
@@ -2169,22 +2171,22 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           },
         },
         views:[{
-          type: "image",
+          type: "view",
           props: {
-            src: "assets/back.png",
             bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.left.inset(10)
             make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
+            make.size.equalTo($size(12.5, 21))
           },
+          views: [createBack($color(mColor.theme))]
         },{
           type: "label",
           props: {
             text: "云库",
             align: $align.center,
-            textColor: $color(mColor.blue),
+            textColor: $color(mColor.theme),
             font: $font(17)
           },
           layout: function(make, view) {
@@ -2650,9 +2652,10 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         props: {
           id: "cloudButton",
           title: actionText,
-          bgcolor: $color("#62BEF2"),
-          titleColor: $color("white"),
-          circular: true,
+          bgcolor: $color("#F0F0F6"),
+          titleColor: $color(mColor.theme),
+          font: $font("bold", 16),
+          radius: 12,
           info: {isfinish: false}
         },
         layout: function(make, view) {
@@ -2816,29 +2819,20 @@ function genProgress(baseView) {
     $("progress").super.remove()
   }
   let progress = {
-    type: "gradient",
+    type: "progress",
     props: {
-      colors: colors,
-      locations: [0, 0.15, 0.3, 0.45, 0.6, 0.75, 1],
-      startPoint: $point(0, 0.5),
-      endPoint: $point(1, 0.5),
+      id: "progress",
+      value: 0,
+      progressColor: $color(mColor.theme),
+      trackColor: $color("clear"),
     },
     layout: function(make, view) {
-      make.height.equalTo(2)
-      make.left.right.inset(20)
-      make.bottom.equalTo(baseView.top).inset(8)
+      make.height.equalTo(1)
+      make.left.equalTo(baseView.left).inset(10)
+      make.right.equalTo(baseView.right).inset(10)
+      make.bottom.equalTo(baseView.bottom)
       make.centerX.equalTo(view.super)
     },
-    views: [{
-      type: "progress",
-      props: {
-        id: "progress",
-        value: 0,
-        progressColor: $color("darkGray"),
-        trackColor: $color("clear"),
-      },
-      layout: $layout.fill,
-    }]
   }
   let progressTimer = $timer.schedule({
     interval: 0.04,
@@ -2989,22 +2983,22 @@ function setupReward() {
           },
         },
         views:[{
-          type: "image",
+          type: "view",
           props: {
-            src: "assets/back.png",
             bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.left.inset(10)
             make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
+            make.size.equalTo($size(12.5, 21))
           },
+          views: [createBack($color(mColor.theme))]
         },{
           type: "label",
           props: {
             text: "设置",
             align: $align.center,
-            textColor: $color(mColor.blue),
+            textColor: $color(mColor.theme),
             font: $font(17)
           },
           layout: function(make, view) {
@@ -3160,18 +3154,6 @@ function setupReward() {
         },
         layout: function(make, view) {
           make.centerX.equalTo($("aliRewardButton"))
-          make.bottom.inset(8)
-        }
-      },{
-        type: "label",
-        props: {
-          id: "recommandText",
-          text: "— 零成本支持 —",
-          textColor: $rgba(100, 100, 100, 0.5),
-          font: $font(10),
-        },
-        layout: function(make, view) {
-          make.centerX.equalTo($("aliRedPackButton"))
           make.bottom.inset(8)
         }
       },]
@@ -3360,22 +3342,22 @@ function setupFeedBack(text) {
           },
         },
         views:[{
-          type: "image",
+          type: "view",
           props: {
-            src: "assets/back.png",
             bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.left.inset(10)
             make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
+            make.size.equalTo($size(12.5, 21))
           },
+          views: [createBack($color(mColor.theme))]
         },{
           type: "label",
           props: {
             text: "设置",
             align: $align.center,
-            textColor: $color(mColor.blue),
+            textColor: $color(mColor.theme),
             font: $font(17)
           },
           layout: function(make, view) {
@@ -3472,9 +3454,9 @@ function setupFeedBack(text) {
             props: {
               id: "sendFeedback",
               title: "发送",
-              bgcolor: $color("#62BEF2"),
-              titleColor: $color("white"),
-              font: $font(15),
+              bgcolor: $color("#F0F0F6"),
+              titleColor: $color(mColor.theme),
+              font: $font("bold", 16),
               titleEdgeInsets: $insets(2, 5, 2, 5)
             },
             layout: function(make, view) {
@@ -3495,6 +3477,13 @@ function setupFeedBack(text) {
       },
     ]
   })
+  if(text) {
+    $delay(0.5, ()=>{
+      if($("feedbackText")) {
+        $("feedbackText").focus()
+      }
+    })
+  }
 }
 
 function showInfoView(superView, data) {
@@ -3569,7 +3558,7 @@ function showInfoView(superView, data) {
                       share(shareLink)
                     };break;
                     case 1:
-                      setupFeedBack("应用失效(objectId)：\n\t" + data.objectId + "\n描述(原因或现象)：\n\t")
+                      setupFeedBack("失效应用：\n\t" + data.title.text + " (" + data.objectId + ")\n描述(原因或现象)：\n\t")
                       break;
                     default:
                       break;
@@ -4009,7 +3998,7 @@ function requireMyItems() {
                   title: "我要上传",
                   font: $font(15),
                   titleColor: $color("white"),
-                  bgcolor: $color(mColor.blue),
+                  bgcolor: $color(mColor.theme),
                   radius: 3,
                 },
                 layout: function(make, view) {
@@ -4378,11 +4367,78 @@ function checkBlackList() {
   }
 }
 
+function createBack(color) {
+  let view = {
+    type: "canvas",
+    layout: $layout.fill,
+    events: {
+      draw: function(view, ctx) {
+        ctx.fillColor = color
+        ctx.strokeColor = color
+        ctx.allowsAntialiasing = true
+        ctx.setLineCap(1)
+        ctx.setLineWidth(3)
+        ctx.moveToPoint(view.frame.width - 2, 2)
+        ctx.addLineToPoint(2, view.frame.height / 2)
+        ctx.addLineToPoint(view.frame.width - 2, view.frame.height - 2)
+        ctx.strokePath()
+      }
+    }
+  }
+  return view
+}
+
 function refreshLocalView() {
   if($("rowsShow") != undefined) {
     $("rowsShow").remove()
     $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns")))
   }
+}
+
+async function requireCloudConfig() {
+  let url = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/config.json"
+  let resp = await $http.get({
+    url: url,
+  })
+  let data = resp.data
+  if(data.themeColor && data.themeColor.length !== 0 ) {
+    $cache.set("themeColor", data.themeColor)
+  } else {
+    $cache.set("themeColor", mColor.blue)
+  }
+  if(data.welcomeEmoji && data.welcomeEmoji.length !== 0 ) {
+    $cache.set("welcomeEmoji", data.welcomeEmoji)
+  } else {
+    $cache.set("welcomeEmoji", "")
+  }
+  if(data.welcomeMusic && data.welcomeMusic.length !== 0 ) {
+    $cache.set("welcomeMusic", data.welcomeMusic)
+  } else {
+    $cache.set("welcomeMusic", "")
+  }
+  if((mColor.theme !== utils.getCache("themeColor", mColor.blue)) || (welcomeEmoji !== utils.getCache("welcomeEmoji", "")) || (welcomeMusic !== utils.getCache("welcomeMusic", ""))) {
+    $addin.restart()
+  }
+}
+
+function setConfig() {
+  mColor.theme = utils.getCache("themeColor", mColor.blue)
+  mIcon = [
+    {
+      blue: $icon("102", $color(mColor.theme), $size(25, 25)),
+      gray: $icon("102", $color(mColor.gray), $size(25, 25)),
+    },
+    {
+      blue: $icon("091", $color(mColor.theme), $size(25, 25)),
+      gray: $icon("091", $color(mColor.gray), $size(25, 25)),
+    },
+    {
+      blue: $icon("002", $color(mColor.theme), $size(25, 25)),
+      gray: $icon("002", $color(mColor.gray), $size(25, 25)),
+    },
+  ]
+  welcomeEmoji = utils.getCache("welcomeEmoji", "")
+  welcomeMusic = utils.getCache("welcomeMusic", "")
 }
 
 module.exports = {

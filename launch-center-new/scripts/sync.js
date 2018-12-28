@@ -28,6 +28,15 @@ function upload() {
       data: $data({string: Encrypt.encrypt(getAllDataString())}),
       path: dataDir
     })
+    let contents = $file.list("drive://launch-center/")
+    if(contents.length > 1) {
+      for(let i = 0; i < contents.length; i++) {
+        let have = contents[i].match(/data [0-9]*/)
+        if(have != null) {
+          $file.delete("drive://launch-center/" + contents[i]);
+        }
+      }
+    }
   }
 }
 
