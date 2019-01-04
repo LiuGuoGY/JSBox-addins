@@ -2086,6 +2086,7 @@ function setupMyUpView() {
 function setupUploadView(action, title, icon, url, descript, objectId, indexPath) {
   let fileName = ""
   let isIconRevised = false
+  let showOptional = false
   let actionText = "  开始上传  "
   switch(action) {
     case "upload": actionText = "  开始上传  "
@@ -2391,25 +2392,73 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           },
           events: {
             tapped: function(sender) {
-              $photo.pick({
-                format: "data",
-                handler: function(resp) {
-                  if(resp.data != undefined) {
-                    let mimeType = resp.data.info.mimeType
-                    let cutedIcon = cutIcon(resp.data.image)
-                    if (mimeType.indexOf("png") >= 0) {
-                      fileName = "1.png"
-                      sender.info = cutedIcon.png
-                      $("icon").data = cutedIcon.png
+              $ui.menu({
+                items: ["照片图库", "App 图标"],
+                handler: function(title, idx) {
+                  if(idx == 0) {
+                    $photo.pick({
+                      format: "data",
+                      handler: function(resp) {
+                        useImage(resp.data)
+                      }
+                    })
+                  } else if(idx == 1){
+                    if($clipboard.text.indexOf("://itunes.apple.com/") >= 0 || ($clipboard.items[1] && $clipboard.items[1]["public.url"].string.indexOf("://itunes.apple.com/") >= 0)) {
+                      let appUrl = ($clipboard.text.indexOf("://itunes.apple.com/") >= 0)?$clipboard.link:$clipboard.items[1]["public.url"].string;
+                      let appIdNumber = appUrl.match(/id(\S*)\?/)[1]
+                      $http.get({
+                        url: "https://itunes.apple.com/lookup?id=" + appIdNumber,
+                        handler: function(resp) {
+                          var imageUrl = resp.data.results[0].artworkUrl100
+                          $http.download({
+                            url: imageUrl,
+                            showsProgress: false,
+                            handler: function(resp) {
+                              useImage(resp.data)
+                            }
+                          })
+                        }
+                      })
                     } else {
-                      fileName = "1.jpg"
-                      sender.info = cutedIcon.jpg(1.0)
-                      $("icon").data = cutedIcon.jpg(1.0)
+                      $ui.alert({
+                        title: "提示",
+                        message: "剪切板中未检测到 APP 链接，即将跳转到 App Store ，复制对应 APP 的链接，回来重新添加即可",
+                        actions: [
+                          {
+                            title: "好的",
+                            handler: function() {
+                              $app.openURL("itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/search");
+                            }
+                          },
+                          {
+                            title: "取消",
+                            handler: function() {
+                      
+                            }
+                          }
+                        ]
+                      })
                     }
-                    isIconRevised = true
+                  }
+                  function useImage(data) {
+                    if(data != undefined) {
+                      let mimeType = data.info.mimeType
+                      let cutedIcon = cutIcon(data.image)
+                      if (mimeType.indexOf("png") >= 0) {
+                        fileName = "1.png"
+                        sender.info = cutedIcon.png
+                        $("icon").data = cutedIcon.png
+                      } else {
+                        fileName = "1.jpg"
+                        sender.info = cutedIcon.jpg(1.0)
+                        $("icon").data = cutedIcon.jpg(1.0)
+                      }
+                      isIconRevised = true
+                      ui.showToastView($("uploadItemView"), mColor.green, "图标更改成功")
+                    }
                   }
                 }
-              })
+              });
             }
           },
           views: [{
@@ -2490,13 +2539,13 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
               if(sender.text.indexOf("jsbox://run") >= 0) {
                 $ui.alert({
                   title: "提示",
-                  message: "请勿上传JSBox内脚本的链接，因为JSBox自带启动器，且其他人难以获取",
+                  message: "请勿上传JSBox内脚本的链接，因为JSBox自带启动器，且其他人无从获取",
                 })
                 sender.text = ""
-              } else if(sender.text.indexOf("workflow://x-callback-url/run-workflow") >= 0) {
+              } else if(sender.text.indexOf("workflow://run-workflow?name=") >= 0) {
                 $ui.alert({
                   title: "提示",
-                  message: "请勿上传Workflow内规则的链接，因为Workflow自带启动器，且其他人难以获取",
+                  message: "请勿上传捷径内规则的链接，因为捷径自带启动器，且其他人无从获取",
                 })
                 sender.text = ""
               }
@@ -2582,69 +2631,136 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         }
       },
       {
-        type: "label",
+        type: "button",
         props: {
-          id: "descriptLabel",
-          text: "启动器说明(可选)",
-          align: $align.left,
-          font: $font(16),
+          title: "显示可选参数",
+          font: $font("bold", 14),
+          titleColor: $color(mColor.gray),
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
           make.height.equalTo(20)
           make.left.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            if(!showOptional) {
+              sender.title = "隐藏可选参数"
+              showOptional = true
+              $("optionalView").hidden = false
+              $("optionalView").updateLayout(function(make) {
+                make.height.equalTo(180)
+              })
+              $ui.animate({
+                duration: 0.4,
+                damping: 0.8,
+                animation: function() {
+                  $("optionalView").relayout()
+                },
+                completion: function() {
+                  resize()
+                }
+              })
+            } else {
+              sender.title = "显示可选参数"
+              showOptional = false
+              $("uploadScroll").scrollToOffset($point(0, 0))
+              $("optionalView").hidden = true
+              $("optionalView").updateLayout(function(make) {
+                make.height.equalTo(0)
+              })
+              $ui.animate({
+                duration: 0.35,
+                animation: function() {
+                  $("optionalView").relayout()
+                },
+                completion: function() {
+                  resize()
+                }
+              })
+            }
+          }
         }
       },
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          id: "optionalView",
+          bgcolor: $color("clear"),
+          clipsToBounds: true,
+          hidden: true,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
-          make.top.equalTo(view.prev.bottom).inset(10)
-          make.height.equalTo(140)
+          make.top.equalTo(view.prev.bottom).inset(20)
+          make.height.equalTo(0)
           make.left.right.inset(0)
         },
         views: [{
-          type: "text",
-          props: {
-            id: "descriptInput",
-            text: (descript)?descript:"",
-            bgcolor: $color("white"),
-            radius: 0,
-            font: $font(15),
-          },
-          layout: function(make, view) {
-            make.center.equalTo(view.super)
-            make.height.equalTo(110)
-            make.left.right.inset(15)
-          },
-          events: {
-            didChange: function(sender) {
-              let length = sender.text.length
-              $("descriptNumberHint").text = length + "/80"
-              if(length > 80) {
-                $("descriptNumberHint").textColor = $color("red")
-              } else {
-                $("descriptNumberHint").textColor = $color("darkGray")
-              }
-            }
-          }
-        },{
           type: "label",
           props: {
-            id: "descriptNumberHint",
-            text: ((descript)?descript.length:0).toString() + "/80",
-            align: $align.center,
-            font: $font(12),
-            textColor: $color("darkGray"),
+            id: "descriptLabel",
+            text: "启动器说明",
+            align: $align.left,
+            font: $font(16),
           },
           layout: function(make, view) {
-            make.right.equalTo(view.prev).inset(3)
-            make.bottom.equalTo(view.prev)
+            make.top.inset(0)
             make.height.equalTo(20)
+            make.left.inset(10)
           }
+        },{
+          type: "view",
+          props: {
+            bgcolor: $color("white"),
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            make.top.equalTo(view.prev.bottom).inset(10)
+            make.height.equalTo(140)
+            make.left.right.inset(0)
+          },
+          views: [{
+            type: "text",
+            props: {
+              id: "descriptInput",
+              text: (descript)?descript:"",
+              bgcolor: $color("white"),
+              radius: 0,
+              font: $font(15),
+            },
+            layout: function(make, view) {
+              make.center.equalTo(view.super)
+              make.height.equalTo(110)
+              make.left.right.inset(15)
+            },
+            events: {
+              didChange: function(sender) {
+                let length = sender.text.length
+                $("descriptNumberHint").text = length + "/80"
+                if(length > 80) {
+                  $("descriptNumberHint").textColor = $color("red")
+                } else {
+                  $("descriptNumberHint").textColor = $color("darkGray")
+                }
+              }
+            }
+          },{
+            type: "label",
+            props: {
+              id: "descriptNumberHint",
+              text: ((descript)?descript.length:0).toString() + "/80",
+              align: $align.center,
+              font: $font(12),
+              textColor: $color("darkGray"),
+            },
+            layout: function(make, view) {
+              make.right.equalTo(view.prev).inset(3)
+              make.bottom.equalTo(view.prev)
+              make.height.equalTo(20)
+            }
+          },],
         },],
       },
       {
@@ -2715,8 +2831,12 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
   if(action != "upload") {
     verifyStateSet(true)
   }
-  $("uploadScroll").resize()
-  $("uploadScroll").contentSize = $size(0, 750)
+  resize()
+
+  function resize() {
+    $("uploadScroll").resize()
+    $("uploadScroll").contentSize = $size(0, $("uploadScroll").contentSize.height + 80)
+  }
 }
 
 function setUrlInputTool() {
@@ -4395,30 +4515,32 @@ function refreshLocalView() {
   }
 }
 
-async function requireCloudConfig() {
+function requireCloudConfig() {
   let url = "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/config.json"
-  let resp = await $http.get({
+  $http.get({
     url: url,
+    handler: function(resp) {
+      let data = resp.data
+      if(data.themeColor && data.themeColor.length !== 0 ) {
+        $cache.set("themeColor", data.themeColor)
+      } else {
+        $cache.set("themeColor", mColor.blue)
+      }
+      if(data.welcomeEmoji && data.welcomeEmoji.length !== 0 ) {
+        $cache.set("welcomeEmoji", data.welcomeEmoji)
+      } else {
+        $cache.set("welcomeEmoji", "")
+      }
+      if(data.welcomeMusic && data.welcomeMusic.length !== 0 ) {
+        $cache.set("welcomeMusic", data.welcomeMusic)
+      } else {
+        $cache.set("welcomeMusic", "")
+      }
+      if((mColor.theme !== utils.getCache("themeColor", mColor.blue)) || (welcomeEmoji !== utils.getCache("welcomeEmoji", "")) || (welcomeMusic !== utils.getCache("welcomeMusic", ""))) {
+        $addin.restart()
+      }
+    }
   })
-  let data = resp.data
-  if(data.themeColor && data.themeColor.length !== 0 ) {
-    $cache.set("themeColor", data.themeColor)
-  } else {
-    $cache.set("themeColor", mColor.blue)
-  }
-  if(data.welcomeEmoji && data.welcomeEmoji.length !== 0 ) {
-    $cache.set("welcomeEmoji", data.welcomeEmoji)
-  } else {
-    $cache.set("welcomeEmoji", "")
-  }
-  if(data.welcomeMusic && data.welcomeMusic.length !== 0 ) {
-    $cache.set("welcomeMusic", data.welcomeMusic)
-  } else {
-    $cache.set("welcomeMusic", "")
-  }
-  if((mColor.theme !== utils.getCache("themeColor", mColor.blue)) || (welcomeEmoji !== utils.getCache("welcomeEmoji", "")) || (welcomeMusic !== utils.getCache("welcomeMusic", ""))) {
-    $addin.restart()
-  }
 }
 
 function setConfig() {
