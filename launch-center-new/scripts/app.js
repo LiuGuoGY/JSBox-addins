@@ -1900,6 +1900,115 @@ function setupWebView(title, url, moreHandler) {
   })
 }
 
+function setupUploadHelpView() {
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: 0,
+    },
+    views: [{
+      type: "view",
+      layout: function(make, view) {
+        if($device.info.version >= "11"){
+          make.top.equalTo(view.super.safeAreaTop)
+        } else {
+          make.top.inset(20)
+        }
+        make.left.right.inset(0)
+        make.height.equalTo(45)
+      },
+      views:[{
+        type: "label",
+        props: {
+          text: "帮助",
+          font: $font("bold", 17),
+          align: $align.center,
+          bgcolor: $color("white"),
+          textColor: $color("black"),
+        },
+        layout: $layout.fill,
+      },{
+        type: "canvas",
+        layout: function(make, view) {
+          make.bottom.inset(0)
+          make.height.equalTo(1 / $device.info.screen.scale)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("darkGray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },{
+        type: "button",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.left.inset(0)
+          make.width.equalTo(60)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.pop()
+          },
+        },
+        views:[{
+          type: "view",
+          props: {
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.left.inset(10)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(12.5, 21))
+          },
+          views: [createBack($color(mColor.theme))]
+        },{
+          type: "label",
+          props: {
+            text: "上传",
+            align: $align.center,
+            textColor: $color(mColor.theme),
+            font: $font(17)
+          },
+          layout: function(make, view) {
+            make.height.equalTo(view.super)
+            make.centerY.equalTo(view.super)
+            make.left.equalTo(view.prev.right).inset(3)
+          }
+        }],
+      }],
+    },{
+      type: "markdown",
+      props: {
+        id: "uploadHelpMarkdownView",
+        content: utils.getCache("uploadHelpMarkdown", ""),
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.left.right.bottom.inset(0)
+        make.top.equalTo(view.prev.bottom)
+      },
+    }]
+  })
+  $http.get({
+    url: 'https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/uploadHelp.md',
+    handler: function(resp) {
+      var data = resp.data
+      $cache.set("uploadHelpMarkdown", data);
+      $("uploadHelpMarkdownView").content = data
+    }
+  })
+}
+
 function setupMyUpView() {
   $ui.push({
     props: {
@@ -2195,7 +2304,27 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
             make.left.equalTo(view.prev.right).inset(3)
           }
         }],
-      },],
+      },{
+        type: "button",
+        props: {
+          title: "帮助",
+          align: $align.center,
+          bgcolor: $color("clear"),
+          titleColor: $color(mColor.theme),
+          font: $font(17)
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.width.equalTo(40)
+          make.centerY.equalTo(view.super)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: function(sender) {
+            setupUploadHelpView()
+          }
+        }
+      }],
     },
     {
       type: "scroll",
@@ -2542,7 +2671,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                   message: "请勿上传JSBox内脚本的链接，因为JSBox自带启动器，且其他人无从获取",
                 })
                 sender.text = ""
-              } else if(sender.text.indexOf("workflow://run-workflow?name=") >= 0) {
+              } else if(sender.text.indexOf("workflow://run-workflow?name=") >= 0 || sender.text.indexOf("shortcuts://run-shortcut?name=") >= 0) {
                 $ui.alert({
                   title: "提示",
                   message: "请勿上传捷径内规则的链接，因为捷径自带启动器，且其他人无从获取",
@@ -2602,7 +2731,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
               $cache.set("begainTime", nDate.getTime())
               resumeAction = 1
               $thread.background({
-                delay: 0.1,
+                delay: 0.2,
                 handler: function() {
                   if (resumeAction == 1) {
                     resumeAction = 0
