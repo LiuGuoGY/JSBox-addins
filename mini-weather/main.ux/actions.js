@@ -16,3 +16,4 @@ let cacheWeatherType = utils.getCache("todayType", "晴")
 weatherType.text = cacheWeatherType
 card.src = utils.getCardSrc(cacheWeatherType)
 quality.text = "空气质量：" + utils.getCache("nowQlty", "优")
+card.height = utils.getWidgetHeight() - 20

@@ -1,4 +1,5 @@
 let utils = require("scripts/utils")
+let update = require("scripts/update")
 
 $ui.render("main");
 
@@ -34,6 +35,10 @@ $location.fetch({
     })
   }
 })
+
+if ($app.env == $env.app) {
+  update.checkUpdate()
+}
 
 async function getWannianli(city) {
   let resp = await $http.get({
@@ -73,7 +78,6 @@ async function getHeFeng(city) {
     $cache.set("nowTemp", data.HeWeather6[0].now.tmp);
     $cache.set("todayType", data.HeWeather6[0].now.cond_txt);
     $("image[0]").src = utils.getCardSrc(data.HeWeather6[0].now.cond_txt)
-    $console.info(data.HeWeather6[0].now.cond_txt);
   }
   $console.info(data);
 }

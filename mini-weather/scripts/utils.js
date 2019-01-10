@@ -18,7 +18,17 @@ function getCardSrc(weatherType) {
   }
 }
 
+function getWidgetHeight() {
+  let standardHeight = ($device.isIpadPro ? 130.0 : 110.0);
+  let bodyFontSize = $objc("UIFont").$preferredFontForTextStyle("UICTFontTextStyleBody").$pointSize();
+  let standardFontSize = 17.0;
+  let fontSizeDiff = (bodyFontSize - standardFontSize);
+  let compactModeHeight = standardHeight + fontSizeDiff;
+  return compactModeHeight
+}
+
 module.exports = {
   getCache: getCache,
   getCardSrc: getCardSrc,
+  getWidgetHeight: getWidgetHeight,
 };

@@ -19,34 +19,9 @@ function getCurDate() {
   return date;
 }
 
-function getLatestVersion() {
-  $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/app.json",
-    showsProgress: false,
-    timeout: 5,
-    handler: function(resp) {
-      if(resp.data) {
-        let updateVersion = JSON.parse(resp.data.string).version
-        if(needUpdate(updateVersion, getCurVersion())) {
-          $http.download({
-            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/updateDetail.md",
-            showsProgress: false,
-            timeout: 5,
-            handler: function(resp) {
-              if(resp.data) {
-                sureToUpdate(updateVersion, resp.data.string)
-              }
-            }
-          })
-        }
-      }
-    }
-  })
-}
-
 function getLatestBuild() {
   $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/app.json",
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/mini-weather/app.json",
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
@@ -56,7 +31,7 @@ function getLatestBuild() {
         let updateVersion = appJson.version
         if(parseInt(updateBuild) > parseInt(getCurBuild())) {
           $http.download({
-            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/updateDetail.md",
+            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/mini-weather/updateDetail.md",
             showsProgress: false,
             timeout: 5,
             handler: function(resp) {
@@ -96,7 +71,7 @@ function sureToUpdate(version, des) {
 
 function updateScript() {
   let url =
-    "https://github.com/LiuGuoGY/JSBox-addins/blob/master/launch-center-new/.output/Launch%20Center%20New.box?raw=true";
+    "https://github.com/LiuGuoGY/JSBox-addins/blob/master/mini-weather/.output/MiniWeather.box?raw=true";
   const scriptName = $addin.current.name;
   $http.download({
     url: url,
@@ -129,16 +104,6 @@ function updateScript() {
       });
     }
   })
-}
-
-function needUpdate(nv, ov) {
-  let getVersionWeight = i => {
-    return i
-      .split(".")
-      .map(i => i * 1)
-      .reduce((s, i) => s * 100 + i);
-  };
-  return getVersionWeight(nv) > getVersionWeight(ov);
 }
 
 function checkUpdate(now) {
