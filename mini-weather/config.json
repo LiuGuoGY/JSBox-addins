@@ -10,10 +10,10 @@
   "info": {
     "version": "1.0.0",
     "author": "",
-    "types": 15,
     "website": "",
     "name": "",
-    "url": ""
+    "url": "",
+    "types": 15
   },
   "widget": {
     "staticSize": false,

@@ -21,31 +21,33 @@ function getCurDate() {
 
 function getLatestBuild() {
   $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/mini-weather/app.json",
+    url:
+      "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/mini-weather/app.json",
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
-      if(resp.data) {
-        let appJson = JSON.parse(resp.data.string)
-        let updateBuild = appJson.build
-        let updateVersion = appJson.version
-        if(parseInt(updateBuild) > parseInt(getCurBuild())) {
+      if (resp.data) {
+        let appJson = JSON.parse(resp.data.string);
+        let updateBuild = appJson.build;
+        let updateVersion = appJson.version;
+        if (parseInt(updateBuild) > parseInt(getCurBuild())) {
           $http.download({
-            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/mini-weather/updateDetail.md",
+            url:
+              "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/mini-weather/updateDetail.md",
             showsProgress: false,
             timeout: 5,
             handler: function(resp) {
-              if(resp.data) {
-                sureToUpdate(updateVersion, resp.data.string)
+              if (resp.data) {
+                sureToUpdate(updateVersion, resp.data.string);
               }
             }
-          })
+          });
         } else {
-          $cache.set("needToUpdate", false)
+          $cache.set("needToUpdate", false);
         }
       }
     }
-  })
+  });
 }
 
 //确定升级？
@@ -53,20 +55,19 @@ function sureToUpdate(version, des) {
   $ui.alert({
     title: "发现新版本 V" + version,
     message: "\n" + des + "\n\n是否更新？",
-    actions: [{
+    actions: [
+      {
         title: "否",
-        handler: function() {
-          
-        }
+        handler: function() {}
       },
       {
         title: "是",
         handler: function() {
-          updateScript()
+          updateScript();
         }
-      },
+      }
     ]
-  })
+  });
 }
 
 function updateScript() {
@@ -78,59 +79,61 @@ function updateScript() {
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
-      let box = resp.data
+      let box = resp.data;
       $addin.save({
         name: scriptName,
         data: box,
         handler: success => {
           if (success) {
-            $cache.remove("lastCT")
-            $cache.set("needToUpdate", false)
-            $device.taptic(2)
+            $cache.remove("lastCT");
+            $cache.set("needToUpdate", false);
+            $device.taptic(2);
             $delay(0.2, function() {
-              $device.taptic(2)
-            })
+              $device.taptic(2);
+            });
             $ui.alert({
               title: "安装完成",
-              actions: [{
-                title: "OK",
-                handler: function() {
-                  $addin.restart()
+              actions: [
+                {
+                  title: "OK",
+                  handler: function() {
+                    $addin.restart();
+                  }
                 }
-              }]
-            })
+              ]
+            });
           }
         }
       });
     }
-  })
+  });
 }
 
 function checkUpdate(now) {
-  if(needCheckup() || now) {
-    getLatestBuild()
+  if (needCheckup() || now) {
+    getLatestBuild();
   }
 }
 
 //需要检查更新？
 function needCheckup() {
-  let nDate = new Date()
-  let lastCT = $cache.get("lastCT")
+  let nDate = new Date();
+  let lastCT = $cache.get("lastCT");
   if (lastCT == undefined) {
-    $cache.set("lastCT", nDate)
-    return true
+    $cache.set("lastCT", nDate);
+    return true;
   } else {
-    let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000)
-    let interval = 720
+    let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000);
+    let interval = 720;
     if ($app.env == $env.app) {
-      interval = 30
+      interval = 30;
     }
-    $console.info("离下次检测更新: " + (interval - tdoa) + "  分钟")
+    $console.info("离下次检测更新: " + (interval - tdoa) + "  分钟");
     if (tdoa > interval) {
-      $cache.set("lastCT", nDate)
-      return true
+      $cache.set("lastCT", nDate);
+      return true;
     } else {
-      return false
+      return false;
     }
   }
 }
@@ -138,5 +141,5 @@ module.exports = {
   checkUpdate: checkUpdate,
   getCurVersion: getCurVersion,
   getCurBuild: getCurBuild,
-  getCurDate: getCurDate,
-}
+  getCurDate: getCurDate
+};
