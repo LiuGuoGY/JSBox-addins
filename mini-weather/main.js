@@ -30,8 +30,9 @@ $location.fetch({
         $console.info(data);
         if (data.status == "1") {
           // getWannianli(data.regeocode.addressComponent.district)
-          getAirQuality(data.regeocode.addressComponent.city);
-          getHeFeng(data.regeocode.addressComponent.district);
+          getAirQuality(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city);
+          getHeFeng(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city, data.regeocode.addressComponent.district);
+          // getCaiYun(lng, lat);
           locTimer.invalidate();
           $("image[1]").hidden = true;
         }
@@ -44,6 +45,7 @@ if ($app.env == $env.app) {
   update.checkUpdate();
   uploadInstall()
 }
+
 
 async function getWannianli(city) {
   let resp = await $http.get({
@@ -60,37 +62,114 @@ async function getWannianli(city) {
   $console.info(data);
 }
 
-async function getAirQuality(city) {
-  let resp = await $http.get({
-    url:
-      "https://free-api.heweather.net/s6/air/now?location=" +
-      $text.URLEncode(city) +
-      "&key=63d9ae66c2844258895e1432ac452ef4"
-  });
-  let data = resp.data;
-  if (data.HeWeather6[0].status == "ok") {
-    $("label[2]").text = "空气质量：" + data.HeWeather6[0].air_now_city.qlty;
-    $cache.set("nowQlty", data.HeWeather6[0].air_now_city.qlty);
+async function getAirQuality(province, city) {
+  let array = [city, province]
+  get(array)
+  async function get(array, index) {
+    if(!index) {
+      index = 0;
+    }
+    if(index > array.length - 1) {
+      return false;
+    }
+    if(!utils.isString(array[index]) || array[index].length <= 0) {
+      get(array, index + 1);
+      return false;
+    }
+    let resp = await $http.get({
+      url:
+        "https://free-api.heweather.net/s6/air/now?location="  +
+        $text.URLEncode(array[index]) +
+        "&key=63d9ae66c2844258895e1432ac452ef4"
+    });
+    let data = resp.data;
+    $console.info(data);
+    if (data.HeWeather6[0].status == "ok") {
+      $("label[2]").text = "空气质量：" + data.HeWeather6[0].air_now_city.qlty;
+      $cache.set("nowQlty", data.HeWeather6[0].air_now_city.qlty);
+      return true
+    } else {
+      get(array, index + 1);
+      return false
+    }
   }
-  $console.info(data);
 }
 
-async function getHeFeng(city) {
+async function getHeFeng(province, city, district) {
+  let array = [district, city, province]
+  get(array)
+  async function get(array, index) {
+    if(!index) {
+      index = 0;
+    }
+    if(index > array.length - 1) {
+      return undefined;
+    }
+    if(!utils.isString(array[index]) || array[index].length <= 0) {
+      get(array, index + 1);
+      return undefined;
+    }
+    let resp = await $http.get({
+      url:
+        "https://free-api.heweather.net/s6/weather/now?location=" +
+        $text.URLEncode(array[index]) +
+        "&key=63d9ae66c2844258895e1432ac452ef4"
+    });
+    let data = resp.data;
+    $console.info(data);
+    if (data.HeWeather6[0].status == "ok") {
+      $("label[0]").text = data.HeWeather6[0].now.tmp + "°";
+      $("label[1]").text = data.HeWeather6[0].now.cond_txt;
+      $cache.set("nowTemp", data.HeWeather6[0].now.tmp);
+      $cache.set("todayType", data.HeWeather6[0].now.cond_txt);
+      $("image[2]").src = utils.getCardSrc(data.HeWeather6[0].now.cond_txt);
+      return true
+    } else {
+      get(array, index + 1);
+      return false
+    }
+  }
+}
+
+async function getCaiYun(lng, lat) {
   let resp = await $http.get({
-    url:
-      "https://free-api.heweather.net/s6/weather/now?location=" +
-      $text.URLEncode(city) +
-      "&key=63d9ae66c2844258895e1432ac452ef4"
+    url: "https://api.caiyunapp.com/v2/Y2FpeXVuX25vdGlmeQ==/" + lng + "," + lat + "/realtime"
   });
   let data = resp.data;
-  if (data.HeWeather6[0].status == "ok") {
-    $("label[0]").text = data.HeWeather6[0].now.tmp + "°";
-    $("label[1]").text = data.HeWeather6[0].now.cond_txt;
-    $cache.set("nowTemp", data.HeWeather6[0].now.tmp);
-    $cache.set("todayType", data.HeWeather6[0].now.cond_txt);
-    $("image[2]").src = utils.getCardSrc(data.HeWeather6[0].now.cond_txt);
-  }
   $console.info(data);
+  if (data.status == "ok") {
+  //   $("label[0]").text = data.HeWeather6[0].now.tmp + "°";
+  //   $("label[1]").text = data.HeWeather6[0].now.cond_txt;
+  //   $cache.set("nowTemp", data.HeWeather6[0].now.tmp);
+  //   $cache.set("todayType", data.HeWeather6[0].now.cond_txt);
+  //   $("image[2]").src = utils.getCardSrc(data.HeWeather6[0].now.cond_txt);
+  //   return true
+  // } else {
+  //   get(array, index + 1);
+  //   return false
+  }
+}
+
+function setTempView(targetTemp) {
+  targetTemp = parseInt(targetTemp)
+  let startTemp = parseInt($("label[0]").text.substring(0, $("label[0]").text.length - 1))
+  let nowTemp = startTemp
+  let tempTimer = $timer.schedule({
+    interval: Math.abs(startTemp - targetTemp) * 0.0145,
+    handler: function() {
+      if($("label[0]")) {
+        if(nowTemp < targetTemp) {
+          $("label[0]").text = ++nowTemp + "°";
+        } else if(nowTemp > targetTemp) {
+          $("label[0]").text = --nowTemp + "°";
+        } else {
+          tempTimer.invalidate();
+        }
+      } else {
+        tempTimer.invalidate();
+      }
+    }
+  });
 }
 
 function uploadInstall() {
