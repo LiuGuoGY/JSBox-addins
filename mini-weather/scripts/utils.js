@@ -1,3 +1,10 @@
+const bgcolors = {
+  purple: "#A192D1",
+  orange: "#F8A042",
+  green: "#9BEE52",
+  blue: "#496CC5",
+}
+
 function getCache(key, def) {
   let temp = $cache.get(key);
   if (temp == undefined) {
@@ -17,6 +24,18 @@ function getCardSrc(weatherType, airQuality) {
     return "assets/green.PNG";
   } else {
     return "assets/blue.PNG";
+  }
+}
+
+function getBgColor(src) {
+  if (src.indexOf("purple") >= 0) {
+    return bgcolors.purple;
+  } else if (src.indexOf("orange") >= 0) {
+    return bgcolors.orange;
+  } else if (src.indexOf("green") >= 0){
+    return bgcolors.green;
+  } else {
+    return bgcolors.blue;
   }
 }
 
@@ -40,4 +59,6 @@ module.exports = {
   getCardSrc: getCardSrc,
   getWidgetHeight: getWidgetHeight,
   isString: isString,
+  bgcolors: bgcolors,
+  getBgColor: getBgColor,
 };
