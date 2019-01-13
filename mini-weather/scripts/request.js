@@ -31,8 +31,8 @@ function request() {
             // getWannianli(data.regeocode.addressComponent.district)
             getAirQuality(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city);
             getHeFeng(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city, data.regeocode.addressComponent.district);
-            getCaiYun(lng, lat);
-            getWeatherWarning(lng, lat);
+            // getCaiYun(lng, lat);
+            getCaiYunForecast(lng, lat);
             locTimer.invalidate();
             $("locationIcon").hidden = true;
           }
@@ -49,12 +49,9 @@ async function getWannianli(city) {
   });
   let data = resp.data;
   if (data.status == 1000) {
-    $("temp").text = data.data.wendu + "°";
-    $("weatherType").text = data.data.forecast[0].type;
-    $cache.set("nowTemp", data.data.wendu);
-    $cache.set("todayType", data.data.forecast[0].type);
-    $("cardBgImage").src = utils.getCardSrc(data.data.forecast[0].type);
-    view.shadow($("card"), utils.getBgColor($("cardBgImage").src))
+    setTemp(data.data.wendu);
+    setWeatherType(data.data.forecast[0].type);
+    setBgImage(data.data.forecast[0].type)
   }
   $console.info(data);
 }
@@ -115,13 +112,9 @@ async function getHeFeng(province, city, district) {
     let data = resp.data;
     $console.info(data);
     if (data.HeWeather6[0].status == "ok") {
-      $("temp").text = data.HeWeather6[0].now.tmp + "°";
-      $("weatherType").text = data.HeWeather6[0].now.cond_txt;
-      $cache.set("nowTemp", data.HeWeather6[0].now.tmp);
-      $cache.set("todayType", data.HeWeather6[0].now.cond_txt);
-      $("cardBgImage").src = utils.getCardSrc(data.HeWeather6[0].now.cond_txt);
-      view.shadow($("card"), utils.getBgColor($("cardBgImage").src))
-      $cache.set("bgcolor", utils.getBgColor($("cardBgImage").src));
+      setTemp(data.HeWeather6[0].now.tmp);
+      setWeatherType(data.HeWeather6[0].now.cond_txt);
+      setBgImage(data.HeWeather6[0].now.cond_txt)
       return true
     } else {
       get(array, index + 1);
@@ -137,9 +130,10 @@ async function getCaiYun(lng, lat) {
   let data = resp.data;
   $console.info(data);
   if (data.status == "ok") {
-    $("temp").text = Math.floor(Math.parseFloat(data.result.temperature)) + "°";
+    setTemp(Math.floor(Math.parseFloat(data.result.temperature)));
+    // $("temp").text = Math.floor(Math.parseFloat(data.result.temperature)) + "°";
     // $("weatherType").text = data.result.skycon;
-    $cache.set("nowTemp", Math.floor(Math.parseFloat(data.result.temperature)));
+    // $cache.set("nowTemp", Math.floor(Math.parseFloat(data.result.temperature)));
   //   $cache.set("todayType", data.HeWeather6[0].now.cond_txt);
   //   $("cardBgImage").src = utils.getCardSrc(data.HeWeather6[0].now.cond_txt);
   //   view.shadow($("card"), utils.getBgColor($("cardBgImage").src))
@@ -150,7 +144,7 @@ async function getCaiYun(lng, lat) {
   }
 }
 
-async function getWeatherWarning(lng, lat) {
+async function getCaiYunForecast(lng, lat) {
   let resp = await $http.get({
     url: "https://api.caiyunapp.com/v2/Y2FpeXVuX25vdGlmeQ==/" + lng + "," + lat + "/forecast"
   });
@@ -178,7 +172,72 @@ async function getWeatherWarning(lng, lat) {
         })
       });
     }
+    
+    let listData = [];
+    listData.push({
+      list_mark: {
+        hidden: false,
+      },
+      list_date: {
+        text: getDateString(0),
+      },
+      list_temp: {
+        text: Math.floor(data.result.daily.temperature[0].min) + " ~ " + Math.floor(data.result.daily.temperature[0].max) + "℃",
+      },
+      list_weather: {
+        text: "——",
+      }
+    });
+    listData.push({
+      list_mark: {
+        hidden: true,
+      },
+      list_date: {
+        text: getDateString(1),
+      },
+      list_temp: {
+        text: Math.floor(data.result.daily.temperature[1].min) + " ~ " + Math.floor(data.result.daily.temperature[1].max) + "℃",
+      },
+      list_weather: {
+        text: "——",
+      }
+    })
+    $("forecastList").data = listData;
+    $cache.set("forecastData", listData);
   }
+}
+
+function getDateString(offset) {
+  let date = new Date();
+  date.setDate(date.getDate() + offset);
+  let nowMonth = date.getMonth() + 1;
+  var nowDay = date.getDate();
+  if (nowMonth >= 1 && nowMonth <= 9) {
+    nowMonth = "0" + nowMonth;
+ }
+ if (nowDay >= 0 && nowDay <= 9) {
+    nowDay = "0" + nowDay;
+ }
+ return nowMonth + " / " + nowDay;
+}
+
+function setTemp(text) {
+  $("temp").text = text + "°";
+  $cache.set("nowTemp", text);
+}
+
+function setBgImage(text) {
+  let src = utils.getCardSrc(text);
+  if(src !== $("cardBgImage").src) {
+    $("cardBgImage").src = src;
+  }
+  view.shadow($("card"), utils.getBgColor(src))
+  $cache.set("bgcolor", utils.getBgColor(src));
+}
+
+function setWeatherType(text) {
+  $("weatherType").text = text;
+  $cache.set("todayType", text);
 }
 
 function setTempView(targetTemp) {

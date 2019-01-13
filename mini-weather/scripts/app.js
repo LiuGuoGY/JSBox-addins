@@ -8,7 +8,7 @@ function setupView() {
         make.width.equalTo(view.super)
         make.centerX.equalTo(view.super)
         make.top.inset(0)
-        make.height.equalTo(200)
+        make.height.equalTo(220)
       },
       views: [view.setupCardView()]
     }]

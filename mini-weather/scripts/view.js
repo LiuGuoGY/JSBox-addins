@@ -1,6 +1,8 @@
 let utils = require("scripts/utils");
 
 function setupCardView(mode) {
+  let widgetHeight = utils.getWidgetHeight();
+  let listTextColor = "#171717";
   let view = {
     type: "view",
     layout: function(make, view) {
@@ -16,17 +18,17 @@ function setupCardView(mode) {
       },
       layout: function(make, view) {
         make.centerX.equalTo(view.super)
-        make.top.inset(10)
+        make.top.inset(widgetHeight / 11)
         make.left.right.inset(10)
         // make.height.equalTo(utils.getWidgetHeight() - 20) //utils.getWidgetHeight() - 20
-        make.bottom.inset(10)
+        make.bottom.inset(widgetHeight / 11)
         shadow(view, utils.getCache("bgcolor", utils.bgcolors.orange))
       },
       views: [{
         type: "blur",
         props: {
           smoothRadius: 13.5,
-          style: 1,
+          style: 5,
         },
         layout: $layout.fill,
         views: [{
@@ -38,7 +40,7 @@ function setupCardView(mode) {
             make.centerX.equalTo(view.super)
             make.top.inset(0)
             make.width.equalTo(view.super)
-            make.height.equalTo(utils.getWidgetHeight() - 20)
+            make.height.equalTo(utils.getWidgetHeight() - widgetHeight / 11 * 2)
           },
           views: [{
             type: "image",
@@ -52,7 +54,7 @@ function setupCardView(mode) {
               make.centerX.equalTo(view.super)
               make.centerY.equalTo(view.super).offset(-8)
               make.width.equalTo(view.super)
-              make.height.equalTo(300)
+              make.height.equalTo(500)
             }
           },{
             type: "label",
@@ -105,14 +107,109 @@ function setupCardView(mode) {
               icon: $icon("007", $color("white"), $size(14, 14)),
               alpha: 0.5,
               bgcolor: $color("clear"),
-              circular: true,
             },
             layout: function(make, view) {
               make.top.right.inset(8)
               make.size.equalTo($size(15, 15))
             },
           }]
-        },]
+        },{
+          type: "view",
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            make.top.equalTo(view.prev.bottom)
+            make.bottom.inset(0)
+            make.width.equalTo(view.super)
+          },
+          views: [{
+            type: "list",
+            props: {
+              id: "forecastList",
+              rowHeight: 45,
+              separatorHidden: true,
+              showsVerticalIndicator: false,
+              scrollEnabled: false,
+              bgcolor: $color("clear"),
+              template: {
+                props: {
+                  bgcolor: $color("clear")
+                },
+                views: [{
+                  type: "label",
+                  props: {
+                    id: "list_mark",
+                    text: "  ·",
+                    bgcolor: $color("clear"),
+                    textColor: $color(listTextColor),
+                    align: $align.center,
+                    font: $font("Avenir-Black", 20),
+                  },
+                  layout: function(make, view) {
+                    make.centerY.equalTo(view.super)
+                    make.left.inset(0)
+                    make.top.bottom.inset(0)
+                    make.width.equalTo(view.super).multipliedBy(0.1)
+                  },
+                },{
+                  type: "label",
+                  props: {
+                    id: "list_date",
+                    bgcolor: $color("clear"),
+                    textColor: $color(listTextColor),
+                    align: $align.left,
+                    font: $font("Avenir-Black", 15),
+                  },
+                  layout: function(make, view) {
+                    make.centerY.equalTo(view.super)
+                    make.left.equalTo(view.prev.right)
+                    make.top.bottom.inset(0)
+                    make.width.equalTo(view.super).multipliedBy(0.4)
+                  },
+                },{
+                  type: "label",
+                  props: {
+                    id: "list_temp",
+                    bgcolor: $color("clear"),
+                    textColor: $color(listTextColor),
+                    align: $align.left,
+                    font: $font("Avenir-Black", 15),
+                  },
+                  layout: function(make, view) {
+                    make.centerY.equalTo(view.super)
+                    make.left.equalTo(view.prev.right)
+                    make.top.bottom.inset(0)
+                    make.width.equalTo(view.super).multipliedBy(0.3)
+                  },
+                },{
+                  type: "label",
+                  props: {
+                    id: "list_weather",
+                    bgcolor: $color("clear"),
+                    textColor: $color(listTextColor),
+                    align: $align.left,
+                    font: $font("Avenir-Black", 15),
+                  },
+                  layout: function(make, view) {
+                    make.centerY.equalTo(view.super)
+                    make.left.equalTo(view.prev.right)
+                    make.top.bottom.inset(0)
+                    make.width.equalTo(view.super).multipliedBy(0.2)
+                  },
+                }]
+              },
+              data: utils.getCache("forecastData", []),
+            },
+            layout: function(make, view) {
+              make.center.equalTo(view.super)
+              make.width.equalTo(view.super)
+              if(view.super.frame.height > 90 && view.super.frame.height < 135) {
+                make.height.equalTo(90)
+              } else {
+                make.height.equalTo(view.super).multipliedBy(0.8)
+              }
+            },
+          }],
+        }]
       }]
     },]
   }
