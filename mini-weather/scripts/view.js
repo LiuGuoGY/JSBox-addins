@@ -18,10 +18,10 @@ function setupCardView(mode) {
       },
       layout: function(make, view) {
         make.centerX.equalTo(view.super)
-        make.top.inset(widgetHeight / 11)
-        make.left.right.inset(10)
+        make.top.inset(widgetHeight / 13)
+        make.left.right.inset(widgetHeight / 13)
         // make.height.equalTo(utils.getWidgetHeight() - 20) //utils.getWidgetHeight() - 20
-        make.bottom.inset(widgetHeight / 11)
+        make.bottom.inset(widgetHeight / 13)
         shadow(view, utils.getCache("bgcolor", utils.bgcolors.orange))
       },
       views: [{
@@ -40,7 +40,7 @@ function setupCardView(mode) {
             make.centerX.equalTo(view.super)
             make.top.inset(0)
             make.width.equalTo(view.super)
-            make.height.equalTo(utils.getWidgetHeight() - widgetHeight / 11 * 2)
+            make.height.equalTo(utils.getWidgetHeight() - widgetHeight / 13 * 2)
           },
           views: [{
             type: "image",
@@ -53,7 +53,7 @@ function setupCardView(mode) {
             layout: function(make, view) {
               make.centerX.equalTo(view.super)
               make.centerY.equalTo(view.super).offset(-8)
-              make.width.equalTo(view.super)
+              make.width.equalTo(view.super).multipliedBy(1.05)
               make.height.equalTo(500)
             }
           },{
@@ -95,7 +95,7 @@ function setupCardView(mode) {
               align: $align.right,
             },
             layout: function(make, view) {
-              make.width.equalTo(view.super).multipliedBy(0.8)
+              make.width.equalTo(view.super).multipliedBy(0.7)
               make.right.inset(15)
               make.bottom.inset(8)
               make.height.equalTo(20)
@@ -163,7 +163,7 @@ function setupCardView(mode) {
                     make.centerY.equalTo(view.super)
                     make.left.equalTo(view.prev.right)
                     make.top.bottom.inset(0)
-                    make.width.equalTo(view.super).multipliedBy(0.4)
+                    make.width.equalTo(view.super).multipliedBy(0.35)
                   },
                 },{
                   type: "label",
@@ -178,7 +178,7 @@ function setupCardView(mode) {
                     make.centerY.equalTo(view.super)
                     make.left.equalTo(view.prev.right)
                     make.top.bottom.inset(0)
-                    make.width.equalTo(view.super).multipliedBy(0.3)
+                    make.width.equalTo(view.super).multipliedBy(0.25)
                   },
                 },{
                   type: "label",
@@ -186,14 +186,14 @@ function setupCardView(mode) {
                     id: "list_weather",
                     bgcolor: $color("clear"),
                     textColor: $color(listTextColor),
-                    align: $align.left,
+                    align: $align.center,
                     font: $font("Avenir-Black", 15),
                   },
                   layout: function(make, view) {
                     make.centerY.equalTo(view.super)
                     make.left.equalTo(view.prev.right)
                     make.top.bottom.inset(0)
-                    make.width.equalTo(view.super).multipliedBy(0.2)
+                    make.width.equalTo(view.super).multipliedBy(0.3)
                   },
                 }]
               },
@@ -219,7 +219,7 @@ function setupCardView(mode) {
 function shadow(view, color) {
   var layer = view.runtimeValue().invoke("layer")
   layer.invoke("setCornerRadius", 10)
-  layer.invoke("setShadowOffset", $size(0, 7))
+  layer.invoke("setShadowOffset", $size(2, 7))
   layer.invoke("setShadowColor", $color(color).runtimeValue().invoke("CGColor"))
   layer.invoke("setShadowOpacity", 0.8)
   layer.invoke("setShadowRadius", 5)

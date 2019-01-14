@@ -29,10 +29,12 @@ function request() {
           $console.info(data);
           if (data.status == "1") {
             // getWannianli(data.regeocode.addressComponent.district)
-            getAirQuality(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city);
-            getHeFeng(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city, data.regeocode.addressComponent.district);
+            getHeFengAirQuality(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city);
+            getHeFengLive(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city, data.regeocode.addressComponent.district);
+            getHeFengForecast(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city, data.regeocode.addressComponent.district);
             // getCaiYun(lng, lat);
-            getCaiYunForecast(lng, lat);
+            // getCaiYunForecast(lng, lat);
+            getMojiWeatherWarning(lng, lat);
             locTimer.invalidate();
             $("locationIcon").hidden = true;
           }
@@ -56,7 +58,7 @@ async function getWannianli(city) {
   $console.info(data);
 }
 
-async function getAirQuality(province, city) {
+async function getHeFengAirQuality(province, city) {
   let array = [city, province]
   get(array)
   async function get(array, index) {
@@ -89,7 +91,7 @@ async function getAirQuality(province, city) {
   }
 }
 
-async function getHeFeng(province, city, district) {
+async function getHeFengLive(province, city, district) {
   let array = [district, city, province]
   get(array)
   async function get(array, index) {
@@ -115,6 +117,71 @@ async function getHeFeng(province, city, district) {
       setTemp(data.HeWeather6[0].now.tmp);
       setWeatherType(data.HeWeather6[0].now.cond_txt);
       setBgImage(data.HeWeather6[0].now.cond_txt)
+      return true
+    } else {
+      get(array, index + 1);
+      return false
+    }
+  }
+}
+
+async function getHeFengForecast(province, city, district) {
+  let array = [district, city, province]
+  get(array)
+  async function get(array, index) {
+    if(!index) {
+      index = 0;
+    }
+    if(index > array.length - 1) {
+      return undefined;
+    }
+    if(!utils.isString(array[index]) || array[index].length <= 0) {
+      get(array, index + 1);
+      return undefined;
+    }
+    let resp = await $http.get({
+      url:
+        "https://free-api.heweather.net/s6/weather/forecast?location=" +
+        $text.URLEncode(array[index]) +
+        "&key=63d9ae66c2844258895e1432ac452ef4"
+    });
+    let data = resp.data;
+    $console.info(data);
+    if (data.HeWeather6[0].status == "ok") {
+      // setTemp(data.HeWeather6[0].now.tmp);
+      // setWeatherType(data.HeWeather6[0].now.cond_txt);
+      // setBgImage(data.HeWeather6[0].now.cond_txt)
+      let listData = [];
+      listData.push({
+        list_mark: {
+          hidden: false,
+        },
+        list_date: {
+          text: getDateString(0),
+        },
+        list_temp: {
+          text: data.HeWeather6[0].daily_forecast[0].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[0].tmp_max + "℃",
+        },
+        list_weather: {
+          text: data.HeWeather6[0].daily_forecast[0].cond_txt_d,
+        }
+      });
+      listData.push({
+        list_mark: {
+          hidden: true,
+        },
+        list_date: {
+          text: getDateString(1),
+        },
+        list_temp: {
+          text: data.HeWeather6[0].daily_forecast[1].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[1].tmp_max + "℃",
+        },
+        list_weather: {
+          text: data.HeWeather6[0].daily_forecast[1].cond_txt_d,
+        }
+      })
+      $("forecastList").data = listData;
+      $cache.set("forecastData", listData);
       return true
     } else {
       get(array, index + 1);
@@ -173,37 +240,86 @@ async function getCaiYunForecast(lng, lat) {
       });
     }
     
-    let listData = [];
-    listData.push({
-      list_mark: {
-        hidden: false,
+    // let listData = [];
+    // listData.push({
+    //   list_mark: {
+    //     hidden: false,
+    //   },
+    //   list_date: {
+    //     text: getDateString(0),
+    //   },
+    //   list_temp: {
+    //     text: Math.floor(data.result.daily.temperature[0].min) + " ~ " + Math.floor(data.result.daily.temperature[0].max) + "℃",
+    //   },
+    //   list_weather: {
+    //     text: "——",
+    //   }
+    // });
+    // listData.push({
+    //   list_mark: {
+    //     hidden: true,
+    //   },
+    //   list_date: {
+    //     text: getDateString(1),
+    //   },
+    //   list_temp: {
+    //     text: Math.floor(data.result.daily.temperature[1].min) + " ~ " + Math.floor(data.result.daily.temperature[1].max) + "℃",
+    //   },
+    //   list_weather: {
+    //     text: "——",
+    //   }
+    // })
+    // $("forecastList").data = listData;
+    // $cache.set("forecastData", listData);
+  }
+}
+
+async function getMojiWeatherWarning(lng, lat) {
+  let resp = await $http.post({
+    url: "https://mprg.moji.com/data/short/get",
+    header: {
+      "Content-Type": "application/json",
+      "X-Access-Token": "f06bc72f3e7df2ea95c2cb43508d41f60056d860",
+    },
+    body: {
+      "common": {
+      "platform": "ios_wechat",
+      "uid": 1457521
       },
-      list_date: {
-        text: getDateString(0),
+      "params": {
+      "lat": lat,
+      "lon": lng,
       },
-      list_temp: {
-        text: Math.floor(data.result.daily.temperature[0].min) + " ~ " + Math.floor(data.result.daily.temperature[0].max) + "℃",
-      },
-      list_weather: {
-        text: "——",
+      "constant": {
+      "versionCode": 33020701,
+      "channelCode": 8100
       }
-    });
-    listData.push({
-      list_mark: {
-        hidden: true,
-      },
-      list_date: {
-        text: getDateString(1),
-      },
-      list_temp: {
-        text: Math.floor(data.result.daily.temperature[1].min) + " ~ " + Math.floor(data.result.daily.temperature[1].max) + "℃",
-      },
-      list_weather: {
-        text: "——",
-      }
-    })
-    $("forecastList").data = listData;
-    $cache.set("forecastData", listData);
+    },
+  });
+  let data = resp.data;
+  $console.info(data)
+  if(data.rc.p == "success") {
+    if(data.radarData.banner.indexOf("不会") < 0) {
+      $delay(0.5, function() {
+        $ui.animate({
+          duration: 0.4,
+          damping: 0.8,
+          animation: function() {
+            $("airQuality").alpha = 0
+          },
+          completion: function() {
+            $("airQuality").text = data.radarData.banner;
+            $ui.animate({
+              duration: 0.4,
+              damping: 0.8,
+              animation: function() {
+                $("airQuality").alpha = 1
+              },
+            })
+          },
+        })
+      });
+    }
   }
 }
 
