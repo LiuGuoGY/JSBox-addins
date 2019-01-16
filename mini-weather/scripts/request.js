@@ -2,6 +2,68 @@ let utils = require("scripts/utils");
 let view = require("scripts/view");
 
 function request() {
+  if($objc("CLLocationManager").invoke("authorizationStatus") == 2) {
+    if(utils.getCache("location")) {
+      requestWeather(utils.getCache("location"))
+    } else {
+      fetchIPAddress()
+    }
+  } else {
+    $location.fetch({
+      handler: function(resp) {
+        var lat = resp.lat;
+        var lng = resp.lng;
+        $http.get({
+          url:
+            "https://restapi.amap.com/v3/geocode/regeo?output=json&location=" +
+            lng +
+            "," +
+            lat +
+            "&key=cddd95953d25ad9d34d63b1823a21dcd",
+          handler: function(resp) {
+            var data = resp.data;
+            $console.info(data);
+            if (data.status == "1") {
+              let location = {
+                lat: lat,
+                lng: lng,
+                province: data.regeocode.addressComponent.province,
+                city: data.regeocode.addressComponent.city,
+                district: data.regeocode.addressComponent.district,
+              }
+              $cache.set("location", location);
+              requestWeather(location)
+            }
+          }
+        });
+      }
+    });
+  }
+}
+
+async function fetchIPAddress() {
+  let resp = await $http.get({
+    url: "http://www.taobao.com/help/getip.php"
+  });
+  let ip = resp.data.match(/\"(\S*)\"/)[1]
+  let resp2 = await $http.get({
+    url: "http://ip-api.com/json/" + ip + "?lang=zh-CN",
+  });
+  let data = resp2.data;
+  $console.info(data);
+  if(data.status == "success") {
+    let location = {
+      lat: data.lat,
+      lng: data.lon,
+      province: data.regionName,
+      city: data.city,
+      district: "",
+    }
+    requestWeather(location)
+  }
+}
+
+function requestWeather(location) {
   let locTimer = $timer.schedule({
     interval: 0.2,
     handler: function() {
@@ -12,38 +74,16 @@ function request() {
       }
     }
   });
-  
-  $location.fetch({
-    handler: function(resp) {
-      var lat = resp.lat;
-      var lng = resp.lng;
-      $http.get({
-        url:
-          "https://restapi.amap.com/v3/geocode/regeo?output=json&location=" +
-          lng +
-          "," +
-          lat +
-          "&key=cddd95953d25ad9d34d63b1823a21dcd",
-        handler: function(resp) {
-          var data = resp.data;
-          $console.info(data);
-          if (data.status == "1") {
-            // getWannianli(data.regeocode.addressComponent.district)
-            getHeFengAirQuality(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city);
-            getHeFengLive(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city, data.regeocode.addressComponent.district);
-            getHeFengForecast(data.regeocode.addressComponent.province, data.regeocode.addressComponent.city, data.regeocode.addressComponent.district);
-            // getCaiYun(lng, lat);
-            // getCaiYunForecast(lng, lat);
-            getMojiWeatherWarning(lng, lat);
-            locTimer.invalidate();
-            $("locationIcon").hidden = true;
-          }
-        }
-      });
-    }
-  });
+  // getWannianli(location.district)
+  getHeFengAirQuality(location.province, location.city);
+  getHeFengLive(location.province, location.city, location.district);
+  getHeFengForecast(location.province, location.city, location.district);
+  // getCaiYun(location.lng, location.lat);
+  // getCaiYunForecast(location.lng, location.lat);
+  getMojiWeatherWarning(location.lng, location.lat);
+  locTimer.invalidate();
+  $("locationIcon").hidden = true;
 }
-
 
 async function getWannianli(city) {
   let resp = await $http.get({

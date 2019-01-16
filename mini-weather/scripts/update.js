@@ -126,7 +126,7 @@ function needCheckup() {
     let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000);
     let interval = 720;
     if ($app.env == $env.app) {
-      interval = 30;
+      interval = 1;
     }
     $console.info("离下次检测更新: " + (interval - tdoa) + "  分钟");
     if (tdoa > interval) {
