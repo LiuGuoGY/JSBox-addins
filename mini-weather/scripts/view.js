@@ -22,7 +22,7 @@ function setupCardView(mode) {
         make.left.right.inset(widgetHeight / 13)
         // make.height.equalTo(utils.getWidgetHeight() - 20) //utils.getWidgetHeight() - 20
         make.bottom.inset(widgetHeight / 13)
-        shadow(view, utils.getCache("bgcolor", utils.bgcolors.orange))
+        shadow(view, utils.getCache("bgcolor", utils.bgcolors.blue))
       },
       views: [{
         type: "blur",
@@ -219,9 +219,9 @@ function setupCardView(mode) {
 function shadow(view, color) {
   var layer = view.runtimeValue().invoke("layer")
   layer.invoke("setCornerRadius", 10)
-  layer.invoke("setShadowOffset", $size(2, 7))
+  layer.invoke("setShadowOffset", $size(0, 3))
   layer.invoke("setShadowColor", $color(color).runtimeValue().invoke("CGColor"))
-  layer.invoke("setShadowOpacity", 0.8)
+  layer.invoke("setShadowOpacity", 1)
   layer.invoke("setShadowRadius", 5)
 }
 

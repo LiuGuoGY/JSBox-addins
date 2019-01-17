@@ -1,7 +1,18 @@
 let utils = require("scripts/utils");
 let view = require("scripts/view");
+let locTimer;
 
 function request() {
+  locTimer = $timer.schedule({
+    interval: 0.2,
+    handler: function() {
+      if ($("locationIcon").hidden == false) {
+        $("locationIcon").hidden = true;
+      } else {
+        $("locationIcon").hidden = false;
+      }
+    }
+  });
   if($objc("CLLocationManager").invoke("authorizationStatus") == 2) {
     if(utils.getCache("location")) {
       requestWeather(utils.getCache("location"))
@@ -41,6 +52,24 @@ function request() {
   }
 }
 
+// async function parseXML(city) {
+//   let xml = $file.read("assets/city.xml").string;
+//   let doc = $xml.parse({
+//     string: xml, // Or data: data
+//     mode: "xml", // Or "html", default to xml
+//   });
+//   let rootElement = doc.rootElement;
+//   $console.info(rootElement.children({
+//     "tag": "name",
+//   }));//rootElement.children()[0].children()[1].string
+//   let length = rootElement.children().length;
+//   // for(let i = 0; i < length; i++) {
+//   //   if(city == rootElement.children()[i].children()[1].string) {
+//   //     return rootElement.children()[i].children()[0].string
+//   //   }
+//   // }
+// }
+
 async function fetchIPAddress() {
   let resp = await $http.get({
     url: "http://www.taobao.com/help/getip.php"
@@ -64,16 +93,6 @@ async function fetchIPAddress() {
 }
 
 function requestWeather(location) {
-  let locTimer = $timer.schedule({
-    interval: 0.2,
-    handler: function() {
-      if ($("locationIcon").hidden == false) {
-        $("locationIcon").hidden = true;
-      } else {
-        $("locationIcon").hidden = false;
-      }
-    }
-  });
   // getWannianli(location.district)
   getHeFengAirQuality(location.province, location.city);
   getHeFengLive(location.province, location.city, location.district);
@@ -81,6 +100,8 @@ function requestWeather(location) {
   // getCaiYun(location.lng, location.lat);
   // getCaiYunForecast(location.lng, location.lat);
   getMojiWeatherWarning(location.lng, location.lat);
+  // getMojiWeatherAlert(location.lng, location.lat);
+  getChinaWeather(location.lng, location.lat);
   locTimer.invalidate();
   $("locationIcon").hidden = true;
 }
@@ -109,8 +130,7 @@ async function getHeFengAirQuality(province, city) {
       return false;
     }
     if(!utils.isString(array[index]) || array[index].length <= 0) {
-      get(array, index + 1);
-      return false;
+      return await get(array, index + 1);
     }
     let resp = await $http.get({
       url:
@@ -125,8 +145,7 @@ async function getHeFengAirQuality(province, city) {
       $cache.set("nowQlty", data.HeWeather6[0].air_now_city.qlty);
       return true
     } else {
-      get(array, index + 1);
-      return false
+      return await get(array, index + 1);
     }
   }
 }
@@ -142,8 +161,7 @@ async function getHeFengLive(province, city, district) {
       return undefined;
     }
     if(!utils.isString(array[index]) || array[index].length <= 0) {
-      get(array, index + 1);
-      return undefined;
+      return await get(array, index + 1);
     }
     let resp = await $http.get({
       url:
@@ -159,8 +177,7 @@ async function getHeFengLive(province, city, district) {
       setBgImage(data.HeWeather6[0].now.cond_txt)
       return true
     } else {
-      get(array, index + 1);
-      return false
+      return await get(array, index + 1);
     }
   }
 }
@@ -176,8 +193,7 @@ async function getHeFengForecast(province, city, district) {
       return undefined;
     }
     if(!utils.isString(array[index]) || array[index].length <= 0) {
-      get(array, index + 1);
-      return undefined;
+      return await get(array, index + 1);
     }
     let resp = await $http.get({
       url:
@@ -224,8 +240,7 @@ async function getHeFengForecast(province, city, district) {
       $cache.set("forecastData", listData);
       return true
     } else {
-      get(array, index + 1);
-      return false
+      return await get(array, index + 1);
     }
   }
 }
@@ -359,6 +374,45 @@ async function getMojiWeatherWarning(lng, lat) {
           },
         })
       });
+    }
+  }
+}
+
+async function getChinaWeather(lng, lat) {
+  let resp = await $http.get({
+    url: "https://mpv2.weather.com.cn/?lat=" + lat + "&lng=" + lng,
+    header: {
+      "Content-Type": "application/json",
+    },
+  });
+  let data = resp.data;
+  $console.info(data)
+  let nowDay = new Date().getDate();
+  if(utils.getCache("pushDay") != nowDay) { // 气象灾害
+    let body = undefined;
+    if(data.station != "") {
+      let alarm = data.alarm[data.station]["1001003"]
+      if(alarm != null) {
+        for(let i = 0; i < alarm.length; i++) {
+          if(!body) {
+            body = alarm[i]["009"];
+          } else {
+            body = body + "\n" + alarm[i]["009"];
+          }
+        }
+      }
+    }
+    if(body) {
+      $push.schedule({
+        id: "alarm",
+        title: "气象灾害预警",
+        body: body,
+        delay: 1,
+        query: data.alarm[data.station]["1001003"],
+        handler: function(result) {
+          $cache.set("pushDay", nowDay);
+        }
+      })
     }
   }
 }
