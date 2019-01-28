@@ -72,7 +72,7 @@ function spliceUrlPara(url) {
 }
 
 function checkUrlScheme(url) {
-  let array = ["itunes.apple.com"]
+  let array = ["itunes.apple.com", ".mobileconfig"]
   for(let i = 0; i < array.length; i++) {
     if(url.indexOf(array[i]) >= 0) {
       return true

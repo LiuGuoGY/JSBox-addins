@@ -53,7 +53,7 @@ $app.listen({
         let nDate = new Date()
         let sTime = utils.getCache("begainTime", nDate.getTime())
         let duration = (nDate.getTime() - sTime)
-        if (duration < 100) {
+        if (duration < 500) {
           verifyStateSet(true)
         } else {
           verifyStateSet(false)
@@ -1196,16 +1196,13 @@ function genSettingView() {
         }
       },
       {
-        type: "label",
-        props: {
-          text: "✓",
-          font: $font("bold", 20),
-          textColor: $color("#AAAAAA"),
-        },
+        type: "view",
         layout: function(make, view) {
           make.right.inset(15)
           make.centerY.equalTo(view.super)
-        }
+          make.size.equalTo($size(16, 13))
+        },
+        views: [createRight($color("#AAAAAA"))]
       }
     ],
     layout: $layout.fill
@@ -2195,7 +2192,7 @@ function setupMyUpView() {
 function setupUploadView(action, title, icon, url, descript, objectId, indexPath) {
   let fileName = ""
   let isIconRevised = false
-  let showOptional = false
+  let showOptional = descript?true:false
   let actionText = "  开始上传  "
   switch(action) {
     case "upload": actionText = "  开始上传  "
@@ -2622,6 +2619,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         type: "view",
         props: {
           bgcolor: $color("white"),
+          clipsToBounds: true,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -2630,56 +2628,67 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           make.left.right.inset(0)
         },
         views: [{
-          type: "label",
-          props: {
-            id: "schemeLabel",
-            text: "Url Scheme",
-            align: $align.left,
-            font: $font(16),
-          },
+          type: "view",
           layout: function(make, view) {
-            make.centerY.equalTo(view.super)
-            make.height.equalTo(20)
-            make.left.inset(15)
-            make.width.equalTo(90)
-          }
-        },{
-          type: "input",
-          props: {
-            id: "schemeInput",
-            text: (url == undefined)?"":url,
-            bgcolor: $color("white"),
-            radius: 0,
-            type: $kbType.url,
+            make.top.inset(0)
+            make.height.equalTo(50)
+            make.left.right.inset(0)
           },
-          layout: function(make, view) {
-            make.centerY.equalTo(view.super)
-            make.height.equalTo(32)
-            make.left.equalTo(view.prev.right)
-            make.right.inset(15)
-            setUrlInputTool()
-          },
-          events: {
-            returned: function(sender) {
-              sender.blur()
+          views: [{
+            type: "label",
+            props: {
+              id: "schemeLabel",
+              text: "Url Scheme",
+              align: $align.left,
+              font: $font(16),
             },
-            changed: function(sender) {
-              verifyStateSet()
-              if(sender.text.indexOf("jsbox://run") >= 0) {
-                $ui.alert({
-                  title: "提示",
-                  message: "请勿上传JSBox内脚本的链接，因为JSBox自带启动器，且其他人无从获取",
-                })
-                sender.text = ""
-              } else if(sender.text.indexOf("workflow://run-workflow?name=") >= 0 || sender.text.indexOf("shortcuts://run-shortcut?name=") >= 0) {
-                $ui.alert({
-                  title: "提示",
-                  message: "请勿上传捷径内规则的链接，因为捷径自带启动器，且其他人无从获取",
-                })
-                sender.text = ""
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(20)
+              make.left.inset(15)
+              make.width.equalTo(90)
+            }
+          },{
+            type: "input",
+            props: {
+              id: "schemeInput",
+              text: (url == undefined)?"":url,
+              bgcolor: $color("white"),
+              radius: 0,
+              type: $kbType.url,
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(32)
+              make.left.equalTo(view.prev.right)
+              make.right.inset(15)
+              setUrlInputTool()
+            },
+            events: {
+              returned: function(sender) {
+                sender.blur()
+              },
+              didEndEditing: function(sender) {
+                
+              },
+              changed: function(sender) {
+                verifyStateSet()
+                if(sender.text.indexOf("jsbox://run") >= 0) {
+                  $ui.alert({
+                    title: "提示",
+                    message: "请勿上传JSBox内脚本的链接，因为JSBox自带启动器，且其他人无从获取",
+                  })
+                  sender.text = ""
+                } else if(sender.text.indexOf("workflow://run-workflow?name=") >= 0 || sender.text.indexOf("shortcuts://run-shortcut?name=") >= 0) {
+                  $ui.alert({
+                    title: "提示",
+                    message: "请勿上传捷径内规则的链接，因为捷径自带启动器，且其他人无从获取",
+                  })
+                  sender.text = ""
+                }
               }
             }
-          }
+          },]
         },],
       },
       {
@@ -2731,7 +2740,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
               $cache.set("begainTime", nDate.getTime())
               resumeAction = 1
               $thread.background({
-                delay: 0.2,
+                delay: 0.5,
                 handler: function() {
                   if (resumeAction == 1) {
                     resumeAction = 0
@@ -2762,7 +2771,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       {
         type: "button",
         props: {
-          title: "显示可选参数",
+          title: descript?"隐藏可选参数":"显示可选参数",
           font: $font("bold", 14),
           titleColor: $color(mColor.gray),
           bgcolor: $color("clear"),
@@ -2818,12 +2827,12 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           id: "optionalView",
           bgcolor: $color("clear"),
           clipsToBounds: true,
-          hidden: true,
+          hidden: descript?false:true,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo(view.prev.bottom).inset(20)
-          make.height.equalTo(0)
+          make.height.equalTo(descript?180:0)
           make.left.right.inset(0)
         },
         views: [{
@@ -2963,8 +2972,10 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
   resize()
 
   function resize() {
-    $("uploadScroll").resize()
-    $("uploadScroll").contentSize = $size(0, $("uploadScroll").contentSize.height + 80)
+    if($("uploadScroll")) {
+      $("uploadScroll").resize()
+      $("uploadScroll").contentSize = $size(0, $("uploadScroll").contentSize.height + 80)
+    }
   }
 }
 
@@ -3799,14 +3810,14 @@ function showInfoView(superView, data) {
           events: {
             tapped: function(sender) {
               $ui.menu({
-                items: ["分享", "失效反馈"],
+                items: ["失效反馈"],
                 handler: function(title, idx) {
                   switch (idx) {
-                    case 0: {
-                      let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
-                      share(shareLink)
-                    };break;
-                    case 1:
+                    // case 0: {
+                    //   let shareLink = "https://liuguogy.github.io/JSBox-addins?q=show&objectId=" + data.objectId
+                    //   share(shareLink)
+                    // };break;
+                    case 0:
                       setupFeedBack("失效应用：\n\t" + data.title.text + " (" + data.objectId + ")\n描述(原因或现象)：\n\t")
                       break;
                     default:
@@ -4630,6 +4641,30 @@ function createBack(color) {
         ctx.moveToPoint(view.frame.width - 2, 2)
         ctx.addLineToPoint(2, view.frame.height / 2)
         ctx.addLineToPoint(view.frame.width - 2, view.frame.height - 2)
+        ctx.strokePath()
+      }
+    }
+  }
+  return view
+}
+
+function createRight(color) {
+  let view = {
+    type: "canvas",
+    props: {
+      clipsToBounds: false,
+    },
+    layout: $layout.fill,
+    events: {
+      draw: function(view, ctx) {
+        ctx.fillColor = color
+        ctx.strokeColor = color
+        ctx.allowsAntialiasing = true
+        ctx.setLineCap(1)
+        ctx.setLineWidth(2)
+        ctx.moveToPoint(2, view.frame.height / 2)
+        ctx.addLineToPoint(view.frame.width / 2.5, view.frame.height - 2)
+        ctx.addLineToPoint(view.frame.width - 2, 2)
         ctx.strokePath()
       }
     }
