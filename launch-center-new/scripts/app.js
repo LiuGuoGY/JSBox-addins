@@ -3137,35 +3137,42 @@ function verifyStateSet(isSuccess) {
 
 //赞赏页面
 function setupReward() {
-  const rewardTemplate = [{
-    type: "label",
-    props: {
-      id: "templateTitle",
-      textColor: $color("#333333"),
-      font: $font("TrebuchetMS-Italic",17)
-    },
-    layout: function(make, view) {
-      make.left.inset(40);
-      make.centerY.equalTo(view.super);
-    }
-  },
-  {
-    type: "image",
-    props: {
-      id: "templateImage",
-      icon: $icon("061", $color("#FF823E"), $size(15, 15)),
-      bgcolor: $color("clear"),
-      hidden: false,
-    },
-    layout: function(make, view) {
-      make.right.inset(40);
-      make.centerY.equalTo(view.super);
-    }
-  }]
+  let rewardTimer = undefined
   let array = $cache.get("rewardList")
   if(array == undefined) {
     array = []
   }
+  let selectionData = [{
+    selection_border: {
+      hidden: true,
+    },
+    selection_image: {
+      src: "assets/latiao.png"
+    },
+    selection_text: {
+      text: "￥2"
+    }
+  },{
+    selection_border: {
+      hidden: false,
+    },
+    selection_image: {
+      src: "assets/yinliao.png"
+    },
+    selection_text: {
+      text: "￥5"
+    }
+  },{
+    selection_border: {
+      hidden: true,
+    },
+    selection_image: {
+      src: "assets/kafei.png"
+    },
+    selection_text: {
+      text: "￥10"
+    }
+  }]
   $ui.push({
     props: {
       id: "rewardMainView",
@@ -3273,8 +3280,8 @@ function setupReward() {
         id: "reward",
       },
       layout: function(make, view) {
-        make.left.right.inset(10)
-        make.top.equalTo(view.prev.bottom).inset(30)
+        make.left.right.inset(0)
+        make.top.equalTo(view.prev.bottom).inset(0)
         if($device.info.version >= "11"){
           make.bottom.equalTo(view.super.safeAreaBottom).inset(30)
         } else {
@@ -3283,183 +3290,292 @@ function setupReward() {
         make.centerX.equalTo(view.super)
       },
       views:[{
-        type: "label",
-        props: {
-          id: "rewardTextTitle",
-          text: "赞赏名单(按时间排序)：",
-          textColor: $color("#333333"),
-          font: $font(15),
-        },
-        layout: function(make, view) {
-          make.top.inset(10)
-          make.left.inset(20)
-        }
-      },
-      {
-        type: "tab",
-        props: {
-          id: "selection",
-          items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
-          tintColor: $color("#333333"),
-          index: 0,
-        },
+        type: "view",
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
-          make.width.equalTo(200)
-          make.bottom.inset(60)
-          make.height.equalTo(25)
+          make.width.equalTo(view.super)
+          make.bottom.inset(0)
+          make.height.equalTo(130)
         },
-        events: {
-          changed: function(sender) {
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "aliRewardButton",
-          title: " 支付宝 ",
-          icon: $icon("074", $color("#108EE9"), $size(20, 20)),
-          bgcolor: $color("clear"),
-          titleColor: $color("#108EE9"),
-          font: $font(15),
+        views: [{
+          type: "matrix",
+          props: {
+            id: "selection",
+            columns: 3,
+            itemHeight: 55,
+            spacing: 0,
+            showsVerticalIndicator: false,
+            showsHorizontalIndicator: false,
+            scrollEnabled: false,
+            info: 1,
+            template: [{
+              type: "view",
+              props: {
+                id: "selection_border",
+                bgcolor: $color("clear"),
+                borderWidth: 1.5,
+                borderColor: $color("#FDA447"),
+              },
+              layout: function(make, view) {
+                make.top.bottom.inset(0)
+                make.left.right.inset(8)
+              },
+            },{
+              type: "image",
+              props: {
+                id: "selection_image",
+                bgcolor: $color("clear"),
+              },
+              layout: function(make, view) {
+                make.centerX.equalTo(view.super)
+                make.top.inset(8)
+                make.size.equalTo($size(23, 23))
+              },
+            },{
+              type: "label",
+              props: {
+                id: "selection_text",
+                bgcolor: $color("clear"),
+                textColor: $rgba(100, 100, 100, 0.4),
+                font: $font("Lato-Bold", 13),
+              },
+              layout: function(make, view) {
+                make.centerX.equalTo(view.super)
+                make.bottom.inset(5)
+              }
+            }],
+            data: selectionData,
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            make.width.equalTo(250)
+            make.top.inset(10)
+            make.height.equalTo(60)
+          },
+          events: {
+            didSelect: function(sender, indexPath, data) {
+              for(let i = 0; i < selectionData.length; i++) {
+                if(i == indexPath.row) {
+                  selectionData[i].selection_border.hidden = false
+                } else {
+                  selectionData[i].selection_border.hidden = true
+                }
+              }
+              sender.data = selectionData
+              sender.info = indexPath.row
+            }
+          },
+        },{
+          type: "button",
+          props: {
+            id: "aliRewardButton",
+            title: " 支付宝 ",
+            icon: $icon("074", $color("#108EE9"), $size(20, 20)),
+            bgcolor: $color("clear"),
+            titleColor: $color("#108EE9"),
+            font: $font(15),
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            make.height.equalTo(45)
+            make.top.equalTo(view.prev.bottom).inset(10)
+          },
+          events: {
+            tapped: function(sender) {
+              switch($("selection").info) {
+                case 0: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX02994GPGIJ8ACYWFQD8")
+                  break
+                case 1: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX075764EQ49XNSVFA0BC")
+                  break
+                case 2: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX07563B7TFDJBIRDFX45")
+                  break
+              }
+            }
+          },
+          views: [{
+            type: "label",
+            props: {
+              id: "recommandText",
+              text: "— 推荐方式 —",
+              textColor: $rgba(100, 100, 100, 0.5),
+              font: $font(10),
+            },
+            layout: function(make, view) {
+              make.centerX.equalTo(view.super)
+              make.bottom.inset(0)
+            }
+          },]
         },
-        layout: function(make, view) {
-          make.centerX.equalTo(view.super)
-          make.height.equalTo(40)
-          make.bottom.inset(10)
-        },
-        events: {
-          tapped: function(sender) {
-            switch($("selection").index) {
-              case 0: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX02994GPGIJ8ACYWFQD8")
-                break
-              case 1: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX075764EQ49XNSVFA0BC")
-                break
-              case 2: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX07563B7TFDJBIRDFX45")
-                break
+        {
+          type: "button",
+          props: {
+            id: "wxRewardButton",
+            title: " 微信 ",
+            icon: $icon("189", $color("#1AAD19"), $size(20, 20)),
+            bgcolor: $color("clear"),
+            titleColor: $color("#1AAD19"),
+            font: $font(15),
+          },
+          layout: function(make, view) {
+            make.left.inset(40)
+            make.height.equalTo(45)
+            make.top.equalTo(view.prev.top)
+          },
+          events: {
+            tapped: function(sender) {
+              begainReward(sender.title)
             }
           }
-        }
-      },
-      {
-        type: "button",
+        },
+        {
+          type: "button",
+          props: {
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.right.inset(35)
+            make.height.equalTo(45)
+            make.width.equalTo(70)
+            make.top.equalTo(view.prev.top)
+          },
+          events: {
+            tapped: function(sender) {
+              $clipboard.text = "#吱口令#长按复制此消息，快来支付宝赐我敬业福，一起集五福迎新春vG威易逸衡衡儒蜾楦扰特取"
+              $app.openURL("alipay://");
+            }
+          },
+          views: [{
+            type: "image",
+            props: {
+              bgcolor: $color("clear"),
+              src: "assets/fu.png"
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.left.inset(0)
+              make.size.equalTo($size(20, 20))
+            },
+          },{
+            type: "label",
+            props: {
+              text: "敬业福",
+              bgcolor: $color("clear"),
+              textColor: $color("#E81F1F"),
+              font: $font(15),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.right.inset(0)
+            }
+          }]
+        }],
+      },{
+        type: "image",
         props: {
-          id: "wxRewardButton",
-          title: " 微信 ",
-          icon: $icon("189", $color("#1AAD19"), $size(20, 20)),
+          id: "reward_bgImage",
           bgcolor: $color("clear"),
-          titleColor: $color("#1AAD19"),
-          font: $font(15),
+          contentMode: $contentMode.scaleAspectFit,
+          src: "assets/border.png",
         },
         layout: function(make, view) {
-          make.left.inset(40)
-          make.height.equalTo(40)
-          make.bottom.inset(10)
+          make.top.inset(0)
+          make.bottom.equalTo(view.prev.top).inset(0)
+          make.centerX.equalTo(view.center)
+          make.left.right.inset(0)
         },
-        events: {
-          tapped: function(sender) {
-            begainReward(sender.title)
+        views: [{
+          type: "label",
+          props: {
+            id: "rewardTextTitle",
+            text: "赞赏名单",
+            textColor: $color("#333333"),
+            font: $font(16),
+          },
+          layout: function(make, view) {
+            make.top.inset(70)
+            make.centerX.equalTo(view.super)
           }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "aliRedPackButton",
-          title: " 红包 ",
-          icon: $icon("204", $color("#E81F1F"), $size(20, 20)),
-          bgcolor: $color("clear"),
-          titleColor: $color("#E81F1F"),
-          font: $font(15),
-        },
-        layout: function(make, view) {
-          make.right.inset(40)
-          make.height.equalTo(40)
-          make.bottom.inset(10)
-        },
-        events: {
-          tapped: function(sender) {
-            // $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
-            $clipboard.text = "623098624"
-            $ui.alert({
-              title: "提示",
-              message: "感谢你的支持！\n红包码 623098624 已复制到剪切板，到支付宝首页粘贴红包码即可领取",
-              actions: [
-                {
-                  title: "确定",
-                  disabled: false, // Optional
-                  handler: function() {
-                    $app.openURL("alipays://")
-                  }
-                },
-                {
-                  title: "取消",
-                  handler: function() {
-            
-                  }
-                }
-              ]
-            })
-          }
-        }
-      },
-      {
-        type: "label",
-        props: {
-          id: "recommandText",
-          text: "— 推荐方式 —",
-          textColor: $rgba(100, 100, 100, 0.5),
-          font: $font(10),
-        },
-        layout: function(make, view) {
-          make.centerX.equalTo($("aliRewardButton"))
-          make.bottom.inset(8)
-        }
+        },]
       },]
     },
     {
       type: "list",
       props: {
         id: "rewardList",
-        template: rewardTemplate,
-        radius: 5,
-        borderColor: $rgba(90, 90, 90, 0.4),
-        borderWidth: 1,
-        insets: $insets(5,5,5,5),
-        rowHeight: 35,
-        bgcolor: $color("clear"),
-        selectable: false,
-        data: [
-          {
-            rows: array,
+        template: {
+          props: {
+            bgcolor: $color("clear")
           },
-        ],
+          views: [{
+            type: "label",
+            props: {
+              id: "templateTitle",
+              textColor: $color("#333333"),
+              font: $font("TrebuchetMS-Italic", 15),
+              bgcolor: $color("clear"),
+            },
+            layout: function(make, view) {
+              make.center.equalTo(view.super);
+            }
+          }],
+        },
         footer: {
           type: "label",
           props: {
             height: 20,
-            text: "感谢以上小伙伴的支持",
-            textColor: $rgba(90, 90, 90, 0.6),
+            text: "--END--",
+            textColor: $color("#333333"),
             align: $align.center,
-            font: $font(12)
-          }
-        }
+            font: $font("TrebuchetMS-Italic", 15),
+            bgcolor: $color("clear"),
+          },
+        },
+        insets: $insets(5,5,5,5),
+        rowHeight: 35,
+        bgcolor: $color("clear"),
+        selectable: false,
+        separatorHidden: true,
+        userInteractionEnabled: true,
+        showsVerticalIndicator: false,
+        data: [{
+          rows: array,
+        }],
       },
       layout: function(make, view) {
-        make.top.equalTo($("rewardTextTitle").bottom).inset(5)
-        make.bottom.equalTo($("selection").top).inset(20)
-        make.centerX.equalTo(view.center)
+        make.top.equalTo($("rewardTextTitle").bottom).inset(15)
+        make.bottom.equalTo($("reward_bgImage").bottom).inset(70)
+        make.centerX.equalTo($("reward_bgImage"))
         make.left.right.inset(20)
       },
       events: {
         didSelect: function(sender, indexPath, data) {
 
-        }
+        },
+        willBeginDragging: function(sender) {
+          if(rewardTimer) {
+            rewardTimer.invalidate()
+          }
+        },
       }
-    },]
+    },
+  ]
   })
   requireReward()
+  $delay(1, ()=>{
+    let times = 0;
+    rewardTimer = $timer.schedule({
+      interval: 0.1,
+      handler: function() {
+        if($("rewardList") && times <= $("rewardList").contentSize.height - $("rewardList").frame.height) {
+          $("rewardList").scrollToOffset($point(0, times))
+          times++;
+        } else {
+          rewardTimer.invalidate()
+        }
+      }
+    });
+  })
+  
 }
 
 function begainReward(way) {
@@ -3483,7 +3599,7 @@ function downloadRewardPic(way) {
   let PicWay = ""
   let PicMoney = ""
   let url = ""
-  switch ($("selection").index) {
+  switch ($("selection").info) {
     case 0:
       PicMoney = "02"
       break
