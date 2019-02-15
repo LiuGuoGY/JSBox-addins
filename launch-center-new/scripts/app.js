@@ -1650,7 +1650,7 @@ function genSettingView() {
             setupWebView(titleText, title.url)
           } else {
             switch(indexPath.row) {
-              case 1: setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins/tree/master/launch-center-new", function() {
+              case 1: setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins", function() {
                 $ui.menu({
                   items: ["用 Grape 打开", "用 PPHub 打开", "用其他应用打开"],
                   handler: function(title, idx) {
@@ -2532,8 +2532,9 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                     if($clipboard.text.indexOf("://itunes.apple.com/") >= 0 || ($clipboard.items[1] && $clipboard.items[1]["public.url"].string.indexOf("://itunes.apple.com/") >= 0)) {
                       let appUrl = ($clipboard.text.indexOf("://itunes.apple.com/") >= 0)?$clipboard.link:$clipboard.items[1]["public.url"].string;
                       let appIdNumber = appUrl.match(/id(\S*)\?/)[1]
+                      let country = appUrl.match(/com\/(\S*)\/app/)[1]
                       $http.get({
-                        url: "https://itunes.apple.com/lookup?id=" + appIdNumber,
+                        url: "https://itunes.apple.com/lookup?id=" + appIdNumber + "&country=" + country,
                         handler: function(resp) {
                           var imageUrl = resp.data.results[0].artworkUrl100
                           $http.download({
@@ -3076,7 +3077,7 @@ function setUrlInputTool() {
 
 function genProgress(baseView) {
   if($("progress") != undefined) {
-    $("progress").super.remove()
+    $("progress").remove()
   }
   let progress = {
     type: "progress",
@@ -3426,49 +3427,47 @@ function setupReward() {
               begainReward(sender.title)
             }
           }
-        },
-        {
+        },{
           type: "button",
           props: {
+            id: "aliRedPackButton",
+            title: " 红包 ",
+            icon: $icon("204", $color("#E81F1F"), $size(20, 20)),
             bgcolor: $color("clear"),
+            titleColor: $color("#E81F1F"),
+            font: $font(15),
           },
           layout: function(make, view) {
-            make.right.inset(35)
+            make.right.inset(40)
             make.height.equalTo(45)
-            make.width.equalTo(70)
             make.top.equalTo(view.prev.top)
           },
           events: {
             tapped: function(sender) {
-              $clipboard.text = "#吱口令#长按复制此消息，快来支付宝赐我敬业福，一起集五福迎新春vG威易逸衡衡儒蜾楦扰特取"
-              $app.openURL("alipay://");
+              // $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
+              $clipboard.text = "623098624"
+              $ui.alert({
+                title: "提示",
+                message: "感谢你的支持！\n红包码 623098624 即将复制到剪切板，到支付宝首页粘贴红包码即可领取",
+                actions: [
+                  {
+                    title: "确定",
+                    disabled: false, // Optional
+                    handler: function() {
+                      $app.openURL("alipays://")
+                    }
+                  },
+                  {
+                    title: "取消",
+                    handler: function() {
+              
+                    }
+                  }
+                ]
+              })
             }
-          },
-          views: [{
-            type: "image",
-            props: {
-              bgcolor: $color("clear"),
-              src: "assets/fu.png"
-            },
-            layout: function(make, view) {
-              make.centerY.equalTo(view.super)
-              make.left.inset(0)
-              make.size.equalTo($size(20, 20))
-            },
-          },{
-            type: "label",
-            props: {
-              text: "敬业福",
-              bgcolor: $color("clear"),
-              textColor: $color("#E81F1F"),
-              font: $font(15),
-            },
-            layout: function(make, view) {
-              make.centerY.equalTo(view.super)
-              make.right.inset(0)
-            }
-          }]
-        }],
+          }
+        },],
       },{
         type: "image",
         props: {
@@ -3893,7 +3892,7 @@ function showInfoView(superView, data) {
         bgcolor: $color("#f6f6f6"),
       },
       layout: function(make, view) {
-        make.height.equalTo(260)
+        make.height.equalTo(270)
         if(superView.frame.width > 600) {
           make.width.equalTo(600)
         } else {
@@ -3901,7 +3900,6 @@ function showInfoView(superView, data) {
         }
         make.centerX.equalTo(view.super)
         make.top.equalTo(view.super.bottom)
-        shadow(view)
       },
       views: [{
         type: "view",  //top view
@@ -4115,7 +4113,7 @@ function showInfoView(superView, data) {
         layout: function(make, view) {
           make.left.right.inset(25)
           make.height.equalTo(40)
-          make.bottom.inset(20)
+          make.bottom.inset(30)
         },
         views: [{
           type: "button",
@@ -4163,7 +4161,7 @@ function showInfoView(superView, data) {
   })
   $("windowView").relayout()
   $("windowView").remakeLayout(function(make) {
-    make.height.equalTo(260)
+    make.height.equalTo(270)
     if(superView.frame.width > 600) {
       make.width.equalTo(600)
     } else {
@@ -4183,7 +4181,7 @@ function showInfoView(superView, data) {
   })
   function hideView() {
     $("windowView").remakeLayout(function(make) {
-      make.height.equalTo(260)
+      make.height.equalTo(270)
       if(superView.frame.width > 600) {
         make.width.equalTo(600)
       } else {
@@ -4777,7 +4775,7 @@ function createRight(color) {
         ctx.strokeColor = color
         ctx.allowsAntialiasing = true
         ctx.setLineCap(1)
-        ctx.setLineWidth(2)
+        ctx.setLineWidth(1.8)
         ctx.moveToPoint(2, view.frame.height / 2)
         ctx.addLineToPoint(view.frame.width / 2.5, view.frame.height - 2)
         ctx.addLineToPoint(view.frame.width - 2, 2)
