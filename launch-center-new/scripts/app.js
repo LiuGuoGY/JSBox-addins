@@ -2529,9 +2529,9 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                       }
                     })
                   } else if(idx == 1){
-                    if($clipboard.text.indexOf("://itunes.apple.com/") >= 0 || ($clipboard.items[1] && $clipboard.items[1]["public.url"].string.indexOf("://itunes.apple.com/") >= 0)) {
+                    if($clipboard.text && ($clipboard.text.indexOf("://itunes.apple.com/") >= 0 || ($clipboard.items[1] && $clipboard.items[1]["public.url"].string.indexOf("://itunes.apple.com/") >= 0))) {
                       let appUrl = ($clipboard.text.indexOf("://itunes.apple.com/") >= 0)?$clipboard.link:$clipboard.items[1]["public.url"].string;
-                      let appIdNumber = appUrl.match(/id(\S*)\?/)[1]
+                      let appIdNumber = appUrl.match(/\/id(\S*)\?/)[1]
                       let country = appUrl.match(/com\/(\S*)\/app/)[1]
                       $http.get({
                         url: "https://itunes.apple.com/lookup?id=" + appIdNumber + "&country=" + country,
@@ -4119,11 +4119,10 @@ function showInfoView(superView, data) {
           type: "button",
           props: {
             title: "打 开",
-            bgcolor: $color("#3897E6"),
+            bgcolor: (data.url !== "jsbox://")?$color("#3897E6"):$color("#909497"),
             borderColor: $color("clear"),
             borderWidth: 0,
             titleColor: $color("white"),
-            // circular: true,
           },
           layout: function(make, view) {
             make.top.bottom.inset(0)
@@ -4133,26 +4132,28 @@ function showInfoView(superView, data) {
           },
           events: {
             tapped: function(sender) {
-              $device.taptic(0)
-              utils.myOpenUrl(data.url)
-              resumeAction = 3
-              $thread.background({
-                delay: 0.1,
-                handler: function() {
-                  if(resumeAction == 3) {
-                    resumeAction = 0
-                    sender.title = "未安装对应APP"
-                    sender.bgcolor = $color(mColor.red)
-                    $device.taptic(2)
-                    $delay(0.6, function(){
-                      if(sender != undefined) {
-                        sender.bgcolor = $color("#3897E6")
-                        sender.title = "打 开"
-                      }
-                    })
+              if(data.url !== "jsbox://") {
+                $device.taptic(0)
+                utils.myOpenUrl(data.url)
+                resumeAction = 3
+                $thread.background({
+                  delay: 0.1,
+                  handler: function() {
+                    if(resumeAction == 3) {
+                      resumeAction = 0
+                      sender.title = "未安装对应APP"
+                      sender.bgcolor = $color(mColor.red)
+                      $device.taptic(2)
+                      $delay(0.6, function(){
+                        if(sender != undefined) {
+                          sender.bgcolor = $color("#3897E6")
+                          sender.title = "打 开"
+                        }
+                      })
+                    }
                   }
-                }
-              })
+                })
+              }
             }
           }
         },]
