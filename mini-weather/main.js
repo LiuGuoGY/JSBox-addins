@@ -11,19 +11,6 @@ if ($app.env != $env.app) {
 }
 request.request()
 
-// $widget.modeChanged = function(mode) {
-//   let view = $("card")
-//   view.updateLayout(function(make) {
-//     if(mode == 0) {
-//       make.height.equalTo(utils.getWidgetHeight() - 20)
-//     } else {
-//       make.height.equalTo(200)
-//     }
-//   })
-// }
-
-// $ui.render("main");
-
 if ($app.env == $env.app) {
   update.checkUpdate();
   uploadInstall()

@@ -2,6 +2,7 @@ let utils = require("scripts/utils");
 let view = require("scripts/view");
 let locTimer;
 
+$cache.set("weatherRequestLog", "");
 function request() {
   locTimer = $timer.schedule({
     interval: 0.2,
@@ -34,6 +35,7 @@ function request() {
           handler: function(resp) {
             var data = resp.data;
             $console.info(data);
+            addLog(data)
             if (data.status == "1") {
               let location = {
                 lat: lat,
@@ -80,6 +82,7 @@ async function fetchIPAddress() {
   });
   let data = resp2.data;
   $console.info(data);
+  addLog(data)
   if(data.status == "success") {
     let location = {
       lat: data.lat,
@@ -98,8 +101,8 @@ function requestWeather(location) {
   getHeFengLive(location.province, location.city, location.district);
   getHeFengForecast(location.province, location.city, location.district);
   // getCaiYun(location.lng, location.lat);
-  // getCaiYunForecast(location.lng, location.lat);
-  getMojiWeatherWarning(location.lng, location.lat);
+  getCaiYunForecast(location.lng, location.lat);
+  // getMojiWeatherWarning(location.lng, location.lat);
   // getMojiWeatherAlert(location.lng, location.lat);
   getChinaWeather(location.lng, location.lat);
   locTimer.invalidate();
@@ -140,6 +143,7 @@ async function getHeFengAirQuality(province, city) {
     });
     let data = resp.data;
     $console.info(data);
+    addLog(data)
     if (data.HeWeather6[0].status == "ok") {
       $("airQuality").text = "空气质量：" + data.HeWeather6[0].air_now_city.qlty;
       $cache.set("nowQlty", data.HeWeather6[0].air_now_city.qlty);
@@ -171,6 +175,7 @@ async function getHeFengLive(province, city, district) {
     });
     let data = resp.data;
     $console.info(data);
+    addLog(data)
     if (data.HeWeather6[0].status == "ok") {
       setTemp(data.HeWeather6[0].now.tmp);
       setWeatherType(data.HeWeather6[0].now.cond_txt);
@@ -203,6 +208,7 @@ async function getHeFengForecast(province, city, district) {
     });
     let data = resp.data;
     $console.info(data);
+    addLog(data)
     if (data.HeWeather6[0].status == "ok") {
       // setTemp(data.HeWeather6[0].now.tmp);
       // setWeatherType(data.HeWeather6[0].now.cond_txt);
@@ -251,6 +257,7 @@ async function getCaiYun(lng, lat) {
   });
   let data = resp.data;
   $console.info(data);
+  addLog(data)
   if (data.status == "ok") {
     setTemp(Math.floor(Math.parseFloat(data.result.temperature)));
     // $("temp").text = Math.floor(Math.parseFloat(data.result.temperature)) + "°";
@@ -272,6 +279,7 @@ async function getCaiYunForecast(lng, lat) {
   });
   let data = resp.data;
   $console.info(data)
+  addLog(data)
   if (data.status == "ok") {
     if(data.result.forecast_keypoint.indexOf("不会") < 0) {
       $delay(0.5, function() {
@@ -387,6 +395,7 @@ async function getChinaWeather(lng, lat) {
   });
   let data = resp.data;
   $console.info(data)
+  addLog(data)
   let nowDay = new Date().getDate();
   if(utils.getCache("pushDay") != nowDay) { // 气象灾害
     let body = undefined;
@@ -417,6 +426,10 @@ async function getChinaWeather(lng, lat) {
   }
 }
 
+function addLog(json) {
+  $cache.set("weatherRequestLog", utils.getCache("weatherRequestLog", "") + "\n-----------------------------\n" + JSON.stringify(json, null, 2));
+}
+
 function getDateString(offset) {
   let date = new Date();
   date.setDate(date.getDate() + offset);
@@ -437,7 +450,7 @@ function setTemp(text) {
 }
 
 function setBgImage(text) {
-  let src = utils.getCardSrc(text);
+  let src = utils.getCardSrc(text, utils.getCache("nowQlty", "无"));
   if(src !== $("cardBgImage").src) {
     $("cardBgImage").src = src;
   }
