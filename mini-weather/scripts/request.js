@@ -23,8 +23,8 @@ function request() {
   } else {
     $location.fetch({
       handler: function(resp) {
-        var lat = resp.lat;
-        var lng = resp.lng;
+        var lat = resp.lat;//纬度
+        var lng = resp.lng;//经度
         $http.get({
           url:
             "https://restapi.amap.com/v3/geocode/regeo?output=json&location=" +
@@ -98,10 +98,10 @@ async function fetchIPAddress() {
 function requestWeather(location) {
   // getWannianli(location.district)
   getHeFengAirQuality(location.province, location.city);
-  getHeFengLive(location.province, location.city, location.district);
-  getHeFengForecast(location.province, location.city, location.district);
+  getHeFengLive(location.lng, location.lat);
+  getHeFengForecast(location.lng, location.lat);
   // getCaiYun(location.lng, location.lat);
-  getCaiYunForecast(location.lng, location.lat);
+  getCaiYun2HoursForecast(location.lng, location.lat);
   // getMojiWeatherWarning(location.lng, location.lat);
   // getMojiWeatherAlert(location.lng, location.lat);
   getChinaWeather(location.lng, location.lat);
@@ -109,18 +109,18 @@ function requestWeather(location) {
   $("locationIcon").hidden = true;
 }
 
-async function getWannianli(city) {
-  let resp = await $http.get({
-    url: "http://wthrcdn.etouch.cn/weather_mini?city=" + $text.URLEncode(city)
-  });
-  let data = resp.data;
-  if (data.status == 1000) {
-    setTemp(data.data.wendu);
-    setWeatherType(data.data.forecast[0].type);
-    setBgImage(data.data.forecast[0].type)
-  }
-  $console.info(data);
-}
+// async function getWannianli(city) {
+//   let resp = await $http.get({
+//     url: "http://wthrcdn.etouch.cn/weather_mini?city=" + $text.URLEncode(city)
+//   });
+//   let data = resp.data;
+//   if (data.status == 1000) {
+//     setTemp(data.data.wendu);
+//     setWeatherType(data.data.forecast[0].type);
+//     setBgImage(data.data.forecast[0].type)
+//   }
+//   $console.info(data);
+// }
 
 async function getHeFengAirQuality(province, city) {
   let array = [city, province]
@@ -154,100 +154,71 @@ async function getHeFengAirQuality(province, city) {
   }
 }
 
-async function getHeFengLive(province, city, district) {
-  let array = [district, city, province]
-  get(array)
-  async function get(array, index) {
-    if(!index) {
-      index = 0;
-    }
-    if(index > array.length - 1) {
-      return undefined;
-    }
-    if(!utils.isString(array[index]) || array[index].length <= 0) {
-      return await get(array, index + 1);
-    }
-    let resp = await $http.get({
-      url:
-        "https://free-api.heweather.net/s6/weather/now?location=" +
-        $text.URLEncode(array[index]) +
-        "&key=63d9ae66c2844258895e1432ac452ef4"
-    });
-    let data = resp.data;
-    $console.info(data);
-    addLog(data)
-    if (data.HeWeather6[0].status == "ok") {
-      setTemp(data.HeWeather6[0].now.tmp);
-      setWeatherType(data.HeWeather6[0].now.cond_txt);
-      setBgImage(data.HeWeather6[0].now.cond_txt)
-      return true
-    } else {
-      return await get(array, index + 1);
-    }
+async function getHeFengLive(lng, lat) {
+  let resp = await $http.get({
+    url:
+      "https://free-api.heweather.net/s6/weather/now?location=" +
+      lng + "," + lat +
+      "&key=63d9ae66c2844258895e1432ac452ef4"
+  });
+  let data = resp.data;
+  $console.info(data);
+  addLog(data)
+  if (data.HeWeather6[0].status == "ok") {
+    setTemp(data.HeWeather6[0].now.tmp);
+    setWeatherType(data.HeWeather6[0].now.cond_txt);
+    setBgImage(data.HeWeather6[0].now.cond_txt)
+    return true
+  } else {
+    return await get(array, index + 1);
   }
 }
 
-async function getHeFengForecast(province, city, district) {
-  let array = [district, city, province]
-  get(array)
-  async function get(array, index) {
-    if(!index) {
-      index = 0;
-    }
-    if(index > array.length - 1) {
-      return undefined;
-    }
-    if(!utils.isString(array[index]) || array[index].length <= 0) {
-      return await get(array, index + 1);
-    }
-    let resp = await $http.get({
-      url:
-        "https://free-api.heweather.net/s6/weather/forecast?location=" +
-        $text.URLEncode(array[index]) +
-        "&key=63d9ae66c2844258895e1432ac452ef4"
+async function getHeFengForecast(lng, lat) {
+  let resp = await $http.get({
+    url:
+      "https://free-api.heweather.net/s6/weather/forecast?location=" +
+      lng + "," + lat +
+      "&key=63d9ae66c2844258895e1432ac452ef4"
+  });
+  let data = resp.data;
+  $console.info(data);
+  addLog(data)
+  if (data.HeWeather6[0].status == "ok") {
+    // setTemp(data.HeWeather6[0].now.tmp);
+    // setWeatherType(data.HeWeather6[0].now.cond_txt);
+    // setBgImage(data.HeWeather6[0].now.cond_txt)
+    let listData = [];
+    listData.push({
+      list_mark: {
+        hidden: false,
+      },
+      list_date: {
+        text: getDateString(0),
+      },
+      list_temp: {
+        text: data.HeWeather6[0].daily_forecast[0].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[0].tmp_max + "℃",
+      },
+      list_weather: {
+        text: data.HeWeather6[0].daily_forecast[0].cond_txt_d,
+      }
     });
-    let data = resp.data;
-    $console.info(data);
-    addLog(data)
-    if (data.HeWeather6[0].status == "ok") {
-      // setTemp(data.HeWeather6[0].now.tmp);
-      // setWeatherType(data.HeWeather6[0].now.cond_txt);
-      // setBgImage(data.HeWeather6[0].now.cond_txt)
-      let listData = [];
-      listData.push({
-        list_mark: {
-          hidden: false,
-        },
-        list_date: {
-          text: getDateString(0),
-        },
-        list_temp: {
-          text: data.HeWeather6[0].daily_forecast[0].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[0].tmp_max + "℃",
-        },
-        list_weather: {
-          text: data.HeWeather6[0].daily_forecast[0].cond_txt_d,
-        }
-      });
-      listData.push({
-        list_mark: {
-          hidden: true,
-        },
-        list_date: {
-          text: getDateString(1),
-        },
-        list_temp: {
-          text: data.HeWeather6[0].daily_forecast[1].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[1].tmp_max + "℃",
-        },
-        list_weather: {
-          text: data.HeWeather6[0].daily_forecast[1].cond_txt_d,
-        }
-      })
-      $("forecastList").data = listData;
-      $cache.set("forecastData", listData);
-      return true
-    } else {
-      return await get(array, index + 1);
-    }
+    listData.push({
+      list_mark: {
+        hidden: true,
+      },
+      list_date: {
+        text: getDateString(1),
+      },
+      list_temp: {
+        text: data.HeWeather6[0].daily_forecast[1].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[1].tmp_max + "℃",
+      },
+      list_weather: {
+        text: data.HeWeather6[0].daily_forecast[1].cond_txt_d,
+      }
+    })
+    $("forecastList").data = listData;
+    $cache.set("forecastData", listData);
   }
 }
 
@@ -273,7 +244,7 @@ async function getCaiYun(lng, lat) {
   }
 }
 
-async function getCaiYunForecast(lng, lat) {
+async function getCaiYun2HoursForecast(lng, lat) {
   let resp = await $http.get({
     url: "https://api.caiyunapp.com/v2/Y2FpeXVuX25vdGlmeQ==/" + lng + "," + lat + "/forecast"
   });
@@ -282,7 +253,7 @@ async function getCaiYunForecast(lng, lat) {
   addLog(data)
   if (data.status == "ok") {
     if(data.result.forecast_keypoint.indexOf("不会") < 0) {
-      $delay(0.5, function() {
+      $delay(1, function() {
         $ui.animate({
           duration: 0.4,
           damping: 0.8,
@@ -453,9 +424,10 @@ function setBgImage(text) {
   let src = utils.getCardSrc(text, utils.getCache("nowQlty", "无"));
   if(src !== $("cardBgImage").src) {
     $("cardBgImage").src = src;
+    $console.info($("cardBgImage").src + "-->" + src);
+    view.shadow($("card"), utils.getBgColor(src))
+    $cache.set("bgcolor", utils.getBgColor(src));
   }
-  view.shadow($("card"), utils.getBgColor(src))
-  $cache.set("bgcolor", utils.getBgColor(src));
 }
 
 function setWeatherType(text) {

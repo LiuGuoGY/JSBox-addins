@@ -203,35 +203,41 @@ function setupSetting() {
 }
 
 function reportWeatherError() {
-  $ui.alert({
-    title: "提示",
-    message: "点击确定按钮会提交所有的请求数据以供开发者进行适配，如介意请取消",
-    actions: [
-      {
-        title: "确定",
-        handler: function() {
-          $console.info(utils.getCache("weatherRequestLog", ""));
-          sendFeedBack("天气报错--->" + utils.getCache("weatherRequestLog", ""), "", ()=>{
-            $ui.alert({
-              title: "发送成功",
-              message: "感谢您的反馈！",
-              actions: [{
-                title: "OK",
-                handler: function() {
-                }
-              }]
-            })
-          })
-        }
-      },
-      {
-        title: "取消",
-        handler: function() {
-  
-        }
-      }
-    ]
+  $ui.menu({
+    items: ["空气质量","实时天气","天气预报"],
+    handler: function(title, idx) {
+      $ui.alert({
+        title: "提示",
+        message: "点击确定按钮会提交所有的请求数据以供开发者进行适配，如介意请取消",
+        actions: [
+          {
+            title: "确定",
+            handler: function() {
+              $console.info(utils.getCache("weatherRequestLog", ""));
+              sendFeedBack(title + "报错--->" + utils.getCache("weatherRequestLog", ""), "", ()=>{
+                $ui.alert({
+                  title: "发送成功",
+                  message: "感谢您的反馈！",
+                  actions: [{
+                    title: "OK",
+                    handler: function() {
+                    }
+                  }]
+                })
+              })
+            }
+          },
+          {
+            title: "取消",
+            handler: function() {
+      
+            }
+          }
+        ]
+      });
+    }
   });
+  
 }
 
 //反馈页面
