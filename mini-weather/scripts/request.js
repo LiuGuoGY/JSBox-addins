@@ -189,34 +189,22 @@ async function getHeFengForecast(lng, lat) {
     // setWeatherType(data.HeWeather6[0].now.cond_txt);
     // setBgImage(data.HeWeather6[0].now.cond_txt)
     let listData = [];
-    listData.push({
-      list_mark: {
-        hidden: false,
-      },
-      list_date: {
-        text: getDateString(0),
-      },
-      list_temp: {
-        text: data.HeWeather6[0].daily_forecast[0].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[0].tmp_max + "℃",
-      },
-      list_weather: {
-        text: data.HeWeather6[0].daily_forecast[0].cond_txt_d,
-      }
-    });
-    listData.push({
-      list_mark: {
-        hidden: true,
-      },
-      list_date: {
-        text: getDateString(1),
-      },
-      list_temp: {
-        text: data.HeWeather6[0].daily_forecast[1].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[1].tmp_max + "℃",
-      },
-      list_weather: {
-        text: data.HeWeather6[0].daily_forecast[1].cond_txt_d,
-      }
-    })
+    for(let i = 0; i < data.HeWeather6[0].daily_forecast.length; i++) {
+      listData.push({
+        list_mark: {
+          hidden: i != 0,
+        },
+        list_date: {
+          text: getDateString(i),
+        },
+        list_temp: {
+          text: data.HeWeather6[0].daily_forecast[i].tmp_min + " ~ " + data.HeWeather6[0].daily_forecast[i].tmp_max + "℃",
+        },
+        list_weather: {
+          text: data.HeWeather6[0].daily_forecast[i].cond_txt_d,
+        }
+      })
+    }
     $("forecastList").data = listData;
     $cache.set("forecastData", listData);
   }

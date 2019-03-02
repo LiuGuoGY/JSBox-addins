@@ -23,8 +23,8 @@ function setupView() {
       layout: function(make, view) {
         make.width.equalTo(view.super)
         make.centerX.equalTo(view.super)
-        make.top.inset(0)
-        make.height.equalTo(220)
+        make.top.inset(20)
+        make.height.equalTo(315)
       },
       views: [view.setupCardView()]
     }]
@@ -117,6 +117,14 @@ function setupSetting() {
   },
   {
     templateTitle: {
+      text : "支持与赞赏",
+    },
+    templateDetails: {
+      text : "",
+    },
+  },
+  {
+    templateTitle: {
       text : "反馈建议",
     },
     templateDetails: {
@@ -152,24 +160,12 @@ function setupSetting() {
           },],
         },
         data: [{
-          title: "功能",
-          rows: [{
-            templateTitle: {
-              text : "报告天气错误",
-              textColor: $color("#14BCF7"),
-            },
-            templateDetails: {
-              text : "",
-            },
-          },]
-        },{
           title: "关于",
           rows: array,
         },{
           title: "统计",
           rows: [tabShowInstalls]
-        }
-        ],
+        }],
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
@@ -183,14 +179,29 @@ function setupSetting() {
           }
           let titleText = title.templateTitle.text
           if(title.url) {
-            setupWebView(titleText, title.url)
+            setupWebView(titleText, title.url, ()=>{
+              $ui.menu({
+                items: ["用 Grape 打开", "用 PPHub 打开", "用其他应用打开"],
+                handler: function(title, idx) {
+                  switch(idx) {
+                    case 0: $app.openURL("grape://repo?reponame=LiuGuoGY/JSBox-addins");break;
+                    case 1: $app.openURL("pphub://repo?owner=LiuGuoGY&repo=JSBox-addins");break;
+                    case 2: $share.sheet({
+                      items: ["https://github.com/LiuGuoGY/JSBox-addins"],
+                      handler: function(success) {
+                      }
+                    });break;
+                  }
+                }
+              });
+            })
           } else {
             switch(title.templateTitle.text) {
               case "反馈建议": setupFeedBack()
                 break
               case "检查更新": update.checkUpdate(true);
                 break
-              case "报告天气错误": reportWeatherError();
+              case "支持与赞赏": setupReward()
                 break
               default:
             }
@@ -202,43 +213,339 @@ function setupSetting() {
   requireInstallNumbers()
 }
 
-function reportWeatherError() {
-  $ui.menu({
-    items: ["空气质量","实时天气","天气预报"],
-    handler: function(title, idx) {
-      $ui.alert({
-        title: "提示",
-        message: "点击确定按钮会提交所有的请求数据以供开发者进行适配，如介意请取消",
-        actions: [
-          {
-            title: "确定",
-            handler: function() {
-              $console.info(utils.getCache("weatherRequestLog", ""));
-              sendFeedBack(title + "报错--->" + utils.getCache("weatherRequestLog", ""), "", ()=>{
-                $ui.alert({
-                  title: "发送成功",
-                  message: "感谢您的反馈！",
-                  actions: [{
-                    title: "OK",
-                    handler: function() {
-                    }
-                  }]
-                })
-              })
-            }
-          },
-          {
-            title: "取消",
-            handler: function() {
-      
+//赞赏页面
+function setupReward() {
+  const rewardTemplate = [{
+    type: "label",
+    props: {
+      id: "templateTitle",
+      textColor: $color("#333333"),
+      font: $font("TrebuchetMS-Italic",17)
+    },
+    layout: function(make, view) {
+      make.left.inset(40);
+      make.centerY.equalTo(view.super);
+    }
+  },
+  {
+    type: "image",
+    props: {
+      id: "templateImage",
+      icon: $icon("061", $color("#FF823E"), $size(15, 15)),
+      bgcolor: $color("clear"),
+      hidden: false,
+    },
+    layout: function(make, view) {
+      make.right.inset(40);
+      make.centerY.equalTo(view.super);
+    }
+  }]
+  let array = $cache.get("rewardList")
+  if(array == undefined) {
+    array = []
+  }
+  $ui.push({
+    props: {
+      title: "支持与赞赏",
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      props: {
+        id: "reward",
+      },
+      layout: function(make, view) {
+        make.left.right.inset(10)
+        if($app.env == $env.today) {
+          make.height.equalTo(cardHeight)
+        } else {
+          make.top.inset(50)
+          if($device.info.version >= "11"){
+            make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
+          } else {
+            make.bottom.inset(50)
+          }
+        }
+        make.center.equalTo(view.super)
+      },
+      events: {
+        
+      },
+      views:[{
+        type: "label",
+        props: {
+          id: "rewardTextTitle",
+          text: "赞赏名单(按时间排序)：",
+          textColor: $color("#333333"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.top.inset(10)
+          make.left.inset(20)
+        }
+      },
+      {
+        type: "tab",
+        props: {
+          id: "selection",
+          items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
+          tintColor: $color("#333333"),
+          index: 1,
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.width.equalTo(200)
+          make.bottom.inset(60)
+          make.height.equalTo(25)
+        },
+        events: {
+          changed: function(sender) {
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "aliRewardButton",
+          title: " 支付宝 ",
+          icon: $icon("074", $color("#108EE9"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#108EE9"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            switch($("selection").index) {
+              case 0: $app.openURL("https://qr.alipay.com/fkx07711hceuis4snmk1xaf")
+                break
+              case 1: $app.openURL("https://qr.alipay.com/fkx06135o73av80uxsek380")
+                break
+              case 2: $app.openURL("https://qr.alipay.com/fkx077471oi7olpmrxe4obe")
+                break
             }
           }
-        ]
-      });
-    }
-  });
-  
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "wxRewardButton",
+          title: " 微信 ",
+          icon: $icon("189", $color("#1AAD19"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#1AAD19"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.left.inset(40)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            begainReward(sender.title)
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "qqRewardButton",
+          title: " 红包 ",
+          icon: $icon("204", $color("#E81F1F"), $size(20, 20)),
+          bgcolor: $color("clear"),
+          titleColor: $color("#E81F1F"),
+          font: $font(15),
+        },
+        layout: function(make, view) {
+          make.right.inset(40)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+        },
+        events: {
+          tapped: function(sender) {
+            $clipboard.text = "623098624"
+              $ui.alert({
+                title: "提示",
+                message: "感谢你的支持！\n红包码 623098624 即将复制到剪切板，到支付宝首页粘贴红包码即可领取",
+                actions: [
+                  {
+                    title: "确定",
+                    disabled: false, // Optional
+                    handler: function() {
+                      $app.openURL("alipays://")
+                    }
+                  },
+                  {
+                    title: "取消",
+                    handler: function() {
+              
+                    }
+                  }
+                ]
+              })
+          }
+        }
+      },
+      {
+        type: "label",
+        props: {
+          id: "recommandText",
+          text: "— 推荐方式 —",
+          textColor: $rgba(100, 100, 100, 0.5),
+          font: $font(10),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo($("aliRewardButton"))
+          make.bottom.inset(8)
+        }
+      },]
+    },
+    {
+      type: "list",
+      props: {
+        id: "rewardList",
+        template: rewardTemplate,
+        radius: 5,
+        borderColor: $rgba(90, 90, 90, 0.4),
+        borderWidth: 1,
+        insets: $insets(5,5,5,5),
+        rowHeight: 35,
+        bgcolor: $color("clear"),
+        selectable: false,
+        data: [
+          {
+            rows: array,
+          },
+        ],
+        header: {
+          type: "label",
+          props: {
+            height: 20,
+            text: "Thank you all.",
+            textColor: $rgba(90, 90, 90, 0.6),
+            align: $align.center,
+            font: $font(12)
+          }
+        }
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("rewardTextTitle").bottom).inset(5)
+        make.bottom.equalTo($("selection").top).inset(20)
+        make.centerX.equalTo(view.center)
+        make.left.right.inset(20)
+      },
+      events: {
+        didSelect: function(sender, indexPath, data) {
+
+        }
+      }
+    }]
+  })
+  requireReward()
+  $delay(1, function(){
+    $("rewardList").scrollToOffset($point(0, 20))
+  })
 }
+
+function begainReward(way) {
+  $ui.alert({
+    title: "确定赞赏？",
+    message: "点击确定后，将会下载付款码到手机相册，并会跳转到" + way + "扫一扫\n你只需要选择相册里的付款码即可赞赏\n----------\n赞赏完成后别忘记回来，插件会自动删除付款码图片",
+    actions: [{
+        title: "确定",
+        handler: function() {
+          downloadRewardPic(way)
+        }
+      },
+      {
+        title: "取消",
+      }
+    ]
+  })
+}
+
+function downloadRewardPic(way) {
+  let PicWay = ""
+  let PicMoney = ""
+  let url = ""
+  switch ($("selection").index) {
+    case 0:
+      PicMoney = "02"
+      break
+    case 1:
+      PicMoney = "05"
+      break
+    case 2:
+      PicMoney = "10"
+      break
+  }
+  switch (way) {
+    case " 微信 ":
+      PicWay = "wx"
+      url = "weixin://scanqrcode"
+      break
+    case " QQ ":
+      PicWay = "qq"
+      url = "mqqapi://qrcode/scan_qrcode?version=1&src_type=app"
+      break
+  }
+  $http.download({
+    url: "https://github.com/LiuGuoGY/JSBox-addins/raw/master/mini-weather-res/" + PicWay + "_reward_" + PicMoney + ".JPG",
+    handler: function(resp) {
+      $console.info(resp.data);
+      $photo.save({
+        data: resp.data,
+        handler: function(success) {
+          if (success) {
+            let nDate = new Date()
+            $cache.set("stopTime", nDate.getTime())
+            resumeAction = 2
+            $app.openURL(url)
+          }
+        }
+      })
+    }
+  })
+}
+
+
+function requireReward() {
+  $http.request({
+    method: "GET",
+    url: "https://pwqyveon.api.lncld.net/1.1/classes/Reward",
+    timeout: 5,
+    header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": appId,
+        "X-LC-Key": appKey,
+    },
+    handler: function(resp) {
+      let data = resp.data.results
+      let array = []
+      if(data != undefined) {
+        for(let i = 0; i < data.length; i++) {
+          array.unshift({
+            templateTitle: {
+              text : data[i].name,
+            },
+            templateImage: {
+              hidden: false,
+            }
+          })
+        }
+        $("rewardList").data = array
+        $cache.set("rewardList", array)
+      }
+    }
+  })
+}
+
 
 //反馈页面
 function setupFeedBack(text) {
@@ -418,10 +725,20 @@ function sendFeedBack(text, contact, handler) {
   })
 }
 
-function setupWebView(title, url) {
+function setupWebView(title, url, moreHandler) {
   $ui.push({
     props: {
       title: title,
+      navButtons: [
+        {
+          icon: "022",
+          handler: function() {
+            if(moreHandler) {
+              moreHandler()
+            }
+          }
+        }
+      ]
     },
     views: [{
       type: "web",
@@ -456,6 +773,32 @@ function requireInstallNumbers(){
     }
   })
 }
+
+$app.listen({
+  resume: function() {
+    switch(resumeAction) {
+      case 2: {
+        let nDate = new Date()
+        let sTime = utils.getCache("stopTime", nDate.getTime())
+        let tdoa = (nDate.getTime() - sTime) / 1000
+        $console.info(tdoa)
+        if (tdoa > 5) {
+          $photo.delete({
+            count: 1,
+            format: "data",
+            handler: function(success) {
+              $ui.alert({
+                title: "温馨提示",
+                message: "如果赞赏成功\n待开发者审核之后\n会将你的昵称放入赞赏名单里\n-----------\n如有匿名或其他要求请反馈给开发者",
+              })
+            }
+          })
+        }
+        resumeAction = 0
+      };break;
+    }
+  },
+})
 
 module.exports = {
   setupView: setupView,
