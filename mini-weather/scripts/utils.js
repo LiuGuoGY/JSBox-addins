@@ -17,13 +17,13 @@ function getCache(key, def) {
 
 function getCardSrc(weatherType, airQuality) {
   if (weatherType.indexOf("多云") >= 0) {
-    return "assets/purple.PNG";
+    return "assets/purple.png";
   } else if (weatherType.indexOf("晴") >= 0) {
-    return "assets/orange.PNG";
+    return "assets/orange.png";
   } else if (weatherType.indexOf("小雨") >= 0 && airQuality.indexOf("优") >= 0){
-    return "assets/green.PNG";
+    return "assets/green.png";
   } else {
-    return "assets/blue.PNG";
+    return "assets/blue.png";
   }
 }
 
