@@ -60,7 +60,7 @@ function setupCardView(mode) {
               },
               layout: function(make, view) {
                 make.centerX.equalTo(view.super)
-                make.centerY.equalTo(view.super).offset(15)
+                make.centerY.equalTo(view.super).offset(15 / 110 * widgetHeight)
                 make.width.equalTo(view.super).multipliedBy(1)
                 make.height.equalTo(500)
               }
@@ -75,7 +75,7 @@ function setupCardView(mode) {
               },
               layout: function(make, view) {
                 make.width.equalTo(view.super).multipliedBy(0.4)
-                make.left.bottom.inset(15)
+                make.left.bottom.inset(15 / 110 * widgetHeight)
                 make.height.equalTo(35)
               }
             },{
@@ -105,7 +105,7 @@ function setupCardView(mode) {
               layout: function(make, view) {
                 make.width.equalTo(view.super).multipliedBy(0.7)
                 make.right.inset(15)
-                make.bottom.inset(8)
+                make.bottom.inset(8 / 110 * widgetHeight)
                 make.height.equalTo(20)
               }
             },{
@@ -117,7 +117,7 @@ function setupCardView(mode) {
                 bgcolor: $color("clear"),
               },
               layout: function(make, view) {
-                make.top.right.inset(8)
+                make.top.right.inset(8 / 110 * widgetHeight)
                 make.size.equalTo($size(15, 15))
               },
             },],
@@ -225,6 +225,70 @@ function setupCardView(mode) {
   return view
 }
 
+function addProgressView(superView) {
+  superView.add({
+    type: "blur",
+    props: {
+      id: "myProgressParent",
+      style: 1,
+      alpha: 0,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      props: {
+        bgcolor: $color("clear"),
+        clipsToBounds: 0
+      },
+      layout: function (make, view) {
+        make.centerX.equalTo(view.super)
+        make.centerY.equalTo(view.super).offset(-20)
+        make.size.equalTo($size(300, 15))
+        progress_shadow(view)
+      },
+      views: [{
+        type: "gradient",
+        props: {
+          id: "myProgress",
+          circular: 1,
+          colors: [$color("#d4fc79"), $color("#96e6a1"), $color("white")],
+          locations: [0.0, 0.0, 0.0],
+          startPoint: $point(0, 1),
+          endPoint: $point(1, 1)
+        },
+        layout: $layout.fill
+      }]
+    },{
+      type: "label",
+      props: {
+        id: "myProgressText",
+        text: "更新中...",
+        font: $font("bold", 15),
+        align: $align.center
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.centerY.equalTo(view.super).offset(20)
+      }
+    }],
+  })
+  $ui.animate({
+    duration: 0.5,
+    animation: () => {
+      $("myProgressParent").alpha = 1;
+    },
+  });
+
+  function progress_shadow(view) {
+    var layer = view.runtimeValue().invoke("layer")
+    layer.invoke("setCornerRadius", 5)
+    layer.invoke("setShadowOffset", $size(0, 0))
+    layer.invoke("setShadowColor", $color("#96e6a1").runtimeValue().invoke("CGColor"))
+    layer.invoke("setShadowOpacity", 0.8)
+    layer.invoke("setShadowRadius", 5)
+  }
+}
+
 function shadow(view, color) {
   var layer = view.runtimeValue().invoke("layer")
   layer.invoke("setCornerRadius", 10)
@@ -234,7 +298,24 @@ function shadow(view, color) {
   layer.invoke("setShadowRadius", 5)
 }
 
+function showBannedAlert() {
+  $ui.alert({
+    title: "Warning",
+    message: "You have been banned!",
+    actions: [
+      {
+        title: "OK",
+        handler: function() {
+          $app.close()
+        }
+      },
+    ]
+  })
+}
+
 module.exports = {
   setupCardView: setupCardView,
+  addProgressView: addProgressView,
   shadow: shadow,
+  showBannedAlert: showBannedAlert,
 };

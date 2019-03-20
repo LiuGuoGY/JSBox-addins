@@ -63,6 +63,7 @@ function sureToUpdate(version, des) {
       {
         title: "是",
         handler: function() {
+          $ui.popToRoot();
           updateScript();
         }
       }
@@ -74,39 +75,38 @@ function updateScript() {
   let url =
     "https://github.com/LiuGuoGY/JSBox-addins/blob/master/mini-weather/.output/MiniWeather.box?raw=true";
   const scriptName = $addin.current.name;
+  let ui = require('scripts/view')
+  ui.addProgressView($("mainView"))
   $http.download({
     url: url,
     showsProgress: false,
     timeout: 5,
+    progress: function(bytesWritten, totalBytes) {
+      var percentage = bytesWritten * 1.0 / totalBytes
+      $("myProgress").locations = [0.0, percentage, percentage]
+    },
     handler: function(resp) {
-      let box = resp.data;
+      let box = resp.data
       $addin.save({
         name: scriptName,
         data: box,
         handler: success => {
           if (success) {
-            $cache.remove("lastCT");
-            $cache.set("needToUpdate", false);
-            $device.taptic(2);
+            $cache.remove("lastCT")
+            $cache.set("needToUpdate", false)
+            $device.taptic(2)
             $delay(0.2, function() {
-              $device.taptic(2);
-            });
-            $ui.alert({
-              title: "安装完成",
-              actions: [
-                {
-                  title: "OK",
-                  handler: function() {
-                    $addin.restart();
-                  }
-                }
-              ]
-            });
+              $device.taptic(2)
+            })
+            $("myProgressText").text = "更新完成"
+            $delay(1, ()=>{
+              $addin.restart()
+            })
           }
         }
       });
     }
-  });
+  })
 }
 
 function checkUpdate(now) {

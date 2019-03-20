@@ -6,6 +6,17 @@ let utils = require("scripts/utils");
 let appId = "KnKfUcSG1QcFIBPgM7D10thc-gzGzoHsz"
 let appKey = "HqShYPrqogdvMOrBC6fIPqVa"
 
+let resumeAction = 0;
+
+function show() {
+  checkBlackList()
+  if(!utils.getCache("haveBanned", false)) {
+    setupView()
+  } else {
+    view.showBannedAlert()
+  }
+}
+
 function setupView() {
   $ui.render({
     props: {
@@ -20,13 +31,20 @@ function setupView() {
     },
     views: [{
       type: "view",
-      layout: function(make, view) {
-        make.width.equalTo(view.super)
-        make.centerX.equalTo(view.super)
-        make.top.inset(20)
-        make.height.equalTo(315)
+      props: {
+        id: "mainView",
       },
-      views: [view.setupCardView()]
+      layout: $layout.fill,
+      views: [{
+        type: "view",
+        layout: function(make, view) {
+          make.width.equalTo(view.super)
+          make.centerX.equalTo(view.super)
+          make.top.inset(20)
+          make.height.equalTo(315)
+        },
+        views: [view.setupCardView()]
+      }]
     }]
   });
 }
@@ -148,7 +166,7 @@ function setupSetting() {
           views: [{
             type: "label",
             props: {
-              text: "Version " + update.getCurVersion() + " Beta (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
+              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
               textColor: $color("#BBBBBB"),
               align: $align.center,
               font: $font(13)
@@ -800,6 +818,42 @@ $app.listen({
   },
 })
 
+function checkBlackList() {
+  let nowTime = new Date().getTime()
+  let lastCheckTime = utils.getCache("lastCheckBlackTime")
+  let needCheckBlackList = true
+  if(lastCheckTime !== undefined && utils.getCache("haveBanned") !== undefined) {
+    if((nowTime - lastCheckTime) / (60 * 1000) < 60) {
+      needCheckBlackList = false
+    }
+  }
+  if(needCheckBlackList) {
+    $cache.remove("haveBanned")
+    $cache.set("lastCheckBlackTime", nowTime)
+    let url = "https://wcphv9sr.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+    $http.request({
+      method: "GET",
+      url: encodeURI(url),
+      timeout: 5,
+      header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
+        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+      },
+      handler: function(resp) {
+        let data = resp.data.results
+        if(data.length > 0) {
+          $cache.set("haveBanned", true)
+          view.showBannedAlert()
+        } else {
+          $cache.set("haveBanned", false)
+        }
+      }
+    })
+  }
+}
+
 module.exports = {
   setupView: setupView,
+  show: show,
 };

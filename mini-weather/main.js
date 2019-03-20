@@ -3,13 +3,20 @@ let update = require("scripts/update");
 let widget = require("scripts/widget");
 let app = require("scripts/app");
 let request = require("scripts/request");
+let view = require("scripts/view");
+
 
 if ($app.env != $env.app) {
-  widget.setupView()
+  if(utils.getCache("haveBanned") === true) {
+    view.showBannedAlert()
+  } else {
+    widget.setupView()
+  }
 } else {
-  app.setupView()
+  app.show()
 }
 request.request()
+
 
 if ($app.env == $env.app) {
   update.checkUpdate();
@@ -59,3 +66,4 @@ function uploadInstall() {
     })
   }
 }
+
