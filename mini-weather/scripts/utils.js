@@ -5,6 +5,16 @@ const bgcolors = {
   blue: "#496CC5",
 }
 
+const mColor = {
+  gray: "#a2a2a2",
+  blue: "#3478f7",
+  theme: "#3478f7",
+  black: "#303032",
+  green: "#27AE60",
+  red: "#E74C3C",
+  iosGreen: "#4CD964",
+}
+
 function getCache(key, def) {
   let temp = $cache.get(key)
   if (temp == undefined) {
@@ -66,4 +76,5 @@ module.exports = {
   isString: isString,
   bgcolors: bgcolors,
   getBgColor: getBgColor,
+  mColor: mColor,
 };

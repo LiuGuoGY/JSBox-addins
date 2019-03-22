@@ -210,8 +210,11 @@ async function getHeFengForecast(lng, lat) {
     if(utils.getCache("forcastRemind")) {
       for(let i = 1; i < listData.length; i++) {
         if(listData[i].list_weather.text.indexOf("雨") >= 0 || listData[i].list_weather.text.indexOf("雪") >= 0) {
-          if(utils.getCache("pushId")) {
-            $push.cancel({id: utils.getCache("pushId")})
+          let ids = utils.getCache("pushId")
+          if(ids) {
+            for(let i = 0; i < ids.length; i ++) {
+              $push.cancel({id: ids[i]})
+            }
           }
           let desDate = new Date()
           let nowDate = new Date()
@@ -221,21 +224,23 @@ async function getHeFengForecast(lng, lat) {
               body: "明天天气可能是" + listData[i].list_weather.text + "，请注意防范！点击查看详情",
               delay: 1,
               handler: function(result) {
-                let id = result.id
-                $cache.set("pushId", id);
               }
             })
           } else {
             desDate.setDate(nowDate.getDate() + i - 1)
             desDate.setHours(20)
             desDate.setMinutes(0)
+            desDate.setSeconds(0)
+            desDate.setMilliseconds(0)
             $push.schedule({
               title: "贴心提示",
               body: "明天天气可能是" + listData[i].list_weather.text + "，请注意防范！点击查看详情",
               date: desDate,
               handler: function(result) {
                 let id = result.id
-                $cache.set("pushId", id);
+                let ids = utils.getCache("pushId", [])
+                ids.push(id)
+                $cache.set("pushId", ids);
               }
             })
           }

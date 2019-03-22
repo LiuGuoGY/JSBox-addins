@@ -107,6 +107,14 @@ function setupSetting() {
         events: {
           changed: function(sender) {
             $cache.set("forcastRemind", sender.on)
+            if(!sender.on) {
+              let ids = utils.getCache("pushId")
+              if(ids) {
+                for(let i = 0; i < ids.length; i ++) {
+                  $push.cancel({id: ids[i]})
+                }
+              }
+            }
           }
         }
       }
@@ -187,6 +195,7 @@ function setupSetting() {
   },]
   $ui.push({
     props: {
+      id: "settingView",
       title: "设置",
     },
     views: [{
