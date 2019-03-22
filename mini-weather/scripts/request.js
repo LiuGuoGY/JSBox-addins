@@ -76,7 +76,7 @@ async function fetchIPAddress() {
   let resp = await $http.get({
     url: "http://www.taobao.com/help/getip.php"
   });
-  let ip = resp.data.match(/\"(\S*)\"/)[1]
+  let ip = resp.data.match(/"(\S*)"/)[1]
   let resp2 = await $http.get({
     url: "http://ip-api.com/json/" + ip + "?lang=zh-CN",
   });
@@ -170,7 +170,7 @@ async function getHeFengLive(lng, lat) {
     setBgImage(data.HeWeather6[0].now.cond_txt)
     return true
   } else {
-    return await get(array, index + 1);
+    return false;
   }
 }
 
@@ -207,6 +207,41 @@ async function getHeFengForecast(lng, lat) {
     }
     $("forecastList").data = listData;
     $cache.set("forecastData", listData);
+    if(utils.getCache("forcastRemind")) {
+      for(let i = 1; i < listData.length; i++) {
+        if(listData[i].list_weather.text.indexOf("雨") >= 0 || listData[i].list_weather.text.indexOf("雪") >= 0) {
+          if(utils.getCache("pushId")) {
+            $push.cancel({id: utils.getCache("pushId")})
+          }
+          let desDate = new Date()
+          let nowDate = new Date()
+          if(nowDate.getHours > 20 && i == 1) {
+            $push.schedule({
+              title: "贴心提示",
+              body: "明天天气可能是" + listData[i].list_weather.text + "，请注意防范！点击查看详情",
+              delay: 1,
+              handler: function(result) {
+                let id = result.id
+                $cache.set("pushId", id);
+              }
+            })
+          } else {
+            desDate.setDate(nowDate.getDate() + i - 1)
+            desDate.setHours(20)
+            desDate.setMinutes(0)
+            $push.schedule({
+              title: "贴心提示",
+              body: "明天天气可能是" + listData[i].list_weather.text + "，请注意防范！点击查看详情",
+              date: desDate,
+              handler: function(result) {
+                let id = result.id
+                $cache.set("pushId", id);
+              }
+            })
+          }
+        }
+      }
+    }
   }
 }
 
@@ -240,7 +275,7 @@ async function getCaiYun2HoursForecast(lng, lat) {
   $console.info(data)
   addLog(data)
   if (data.status == "ok") {
-    if(data.result.forecast_keypoint.indexOf("不会") < 0) {
+    if(data.result.forecast_keypoint.indexOf("不会") < 0 && data.result.forecast_keypoint.indexOf("最近的") < 0) {
       $delay(1, function() {
         $ui.animate({
           duration: 0.4,

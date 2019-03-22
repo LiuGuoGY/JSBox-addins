@@ -6,12 +6,17 @@ const bgcolors = {
 }
 
 function getCache(key, def) {
-  let temp = $cache.get(key);
+  let temp = $cache.get(key)
   if (temp == undefined) {
-    $cache.set(key, def);
-    return def;
+    if(def == undefined){
+      switch(key) { 
+        case "forcastRemind": def = false; break;
+      }
+    }
+    $cache.set(key, def)
+    return def
   } else {
-    return temp;
+    return temp
   }
 }
 

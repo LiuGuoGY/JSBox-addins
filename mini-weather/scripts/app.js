@@ -78,6 +78,42 @@ function setupSetting() {
     }
   }]
 
+  const tabForcastRemindItem = {
+    type: "view",
+    props: {
+
+    },
+    views: [{
+        type: "label",
+        props: {
+          id: "tabForcastRemindLabel",
+          text: "异常天气推送 (Beta)",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "switch",
+        props: {
+          id: "tabForcastRemindSwitch",
+          on: utils.getCache("forcastRemind"),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+            $cache.set("forcastRemind", sender.on)
+          }
+        }
+      }
+    ],
+    layout: $layout.fill
+  }
+
   const tabShowInstalls = {
     type: "view",
     views: [{
@@ -178,6 +214,9 @@ function setupSetting() {
           },],
         },
         data: [{
+          title: "功能",
+          rows: [tabForcastRemindItem]
+        },{
           title: "关于",
           rows: array,
         },{
@@ -274,15 +313,11 @@ function setupReward() {
       },
       layout: function(make, view) {
         make.left.right.inset(10)
-        if($app.env == $env.today) {
-          make.height.equalTo(cardHeight)
+        make.top.inset(50)
+        if($device.info.version >= "11"){
+          make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
         } else {
-          make.top.inset(50)
-          if($device.info.version >= "11"){
-            make.bottom.equalTo(view.super.safeAreaBottom).inset(50)
-          } else {
-            make.bottom.inset(50)
-          }
+          make.bottom.inset(50)
         }
         make.center.equalTo(view.super)
       },
