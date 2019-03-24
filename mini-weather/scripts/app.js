@@ -93,6 +93,28 @@ function setupSetting() {
           make.left.inset(15)
           make.centerY.equalTo(view.super)
         }
+      },{
+        type: "button",
+        props: {
+          icon: $icon("008", $color("white"), $size(14, 14)),
+          bgcolor: $color("lightGray"),
+          borderWidth: 1,
+          borderColor: $color("lightGray"),
+          circular: true,
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right).inset(10)
+          make.centerY.equalTo(view.super)
+          make.size.equalTo($size(14,14))
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.alert({
+              title: "异常天气推送",
+              message: "开启此功能将会在特殊天气的前一天晚上8点推送提醒通知",
+            });
+          }
+        }
       },
       {
         type: "switch",
