@@ -62,20 +62,16 @@ function setupSetting() {
     }
   },
   {
-    type: "label",
+    type: "image",
     props: {
-      id: "templateDetails",
-      textColor: $color("#AAAAAA")
+      src: "assets/enter.png",
+      bgcolor: $color("clear"),
     },
     layout: function(make, view) {
-      make.right.inset(15);
-      make.centerY.equalTo(view.super);
+      make.right.inset(15)
+      make.centerY.equalTo(view.super)
+      make.size.equalTo($size(8, 18))
     },
-    events: {
-      tapped: function(sender, indexPath, item) {
-  
-      }
-    }
   }]
 
   const tabForcastRemindItem = {
@@ -177,17 +173,11 @@ function setupSetting() {
     templateTitle: {
       text : "更新日志",
     },
-    templateDetails: {
-      text : "",
-    },
     url: "https://www.liuguogy.com/archives/mini-weather.html",
   },
   {
     templateTitle: {
       text : "GitHub",
-    },
-    templateDetails: {
-      text : "",
     },
     url: "https://github.com/LiuGuoGY/JSBox-addins",
   },
@@ -195,24 +185,19 @@ function setupSetting() {
     templateTitle: {
       text : "检查更新",
     },
-    templateDetails: {
-      text : "",
-    },
   },
   {
     templateTitle: {
       text : "支持与赞赏",
-    },
-    templateDetails: {
-      text : "",
     },
   },
   {
     templateTitle: {
       text : "反馈建议",
     },
-    templateDetails: {
-      text : "",
+  },{
+    templateTitle: {
+      text : "分享给朋友",
     },
   },]
   $ui.push({
@@ -289,7 +274,9 @@ function setupSetting() {
                 break
               case "检查更新": update.checkUpdate(true);
                 break
-              case "支持与赞赏": setupReward()
+              case "支持与赞赏": setupReward();
+                break
+              case "分享给朋友": setupShareView()
                 break
               default:
             }
@@ -299,6 +286,176 @@ function setupSetting() {
     }]
   })
   requireInstallNumbers()
+}
+
+function setupShareView() {
+  $ui.push({
+    props: {
+      title: "分享"
+    },
+    views: [{
+      type: "scroll",
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.size.equalTo(view.super)
+      },
+      views: [{
+        type: "view",
+        props: {
+          id: "cardShareView"
+        },
+        layout: function(make, view) {
+          make.top.equalTo(20)
+          make.width.equalTo(view.super)
+          make.height.equalTo(utils.getWidgetHeight())
+        },
+        views: [view.setupCardView()]
+      },{
+        type: "button",
+        props: {
+          title: "",
+          radius: 0,
+          bgcolor: $color("white"),
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(10)
+          make.width.equalTo(view.super)
+          make.height.equalTo(40)
+        },
+        events: {
+          tapped: function(sender) {
+            $share.universal($("cardShareView").snapshot)
+          }
+        },
+        views: [{
+          type: "canvas",
+          layout: function(make, view) {
+            make.top.inset(0)
+            make.height.equalTo(1 / $device.info.screen.scale)
+            make.left.right.inset(0)
+          },
+          events: {
+            draw: function(view, ctx) {
+              var width = view.frame.width
+              var scale = $device.info.screen.scale
+              ctx.strokeColor = $color("lightGray")
+              ctx.setLineWidth(1 / scale)
+              ctx.moveToPoint(0, 0)
+              ctx.addLineToPoint(width, 0)
+              ctx.strokePath()
+            }
+          }
+        },{
+          type: "canvas",
+          layout: function(make, view) {
+            make.bottom.inset(0)
+            make.height.equalTo(1 / $device.info.screen.scale)
+            make.left.right.inset(0)
+          },
+          events: {
+            draw: function(view, ctx) {
+              var width = view.frame.width
+              var scale = $device.info.screen.scale
+              ctx.strokeColor = $color("lightGray")
+              ctx.setLineWidth(1 / scale)
+              ctx.moveToPoint(0, 0)
+              ctx.addLineToPoint(width, 0)
+              ctx.strokePath()
+            }
+          }
+        },{
+          type: "label",
+          props: {
+            text: "分享",
+            align: $align.center,
+            font: $font(17),
+            textColor: $color("#3478f7"),
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.left.inset(20)
+          }
+        }]
+      },{
+        type: "view",
+        props: {
+          id: "cardShare2View"
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(20)
+          make.width.equalTo(view.super)
+          make.height.equalTo(220)
+        },
+        views: [view.setupCardView()]
+      },{
+        type: "button",
+        props: {
+          title: "",
+          radius: 0,
+          bgcolor: $color("white"),
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(10)
+          make.width.equalTo(view.super)
+          make.height.equalTo(40)
+        },
+        events: {
+          tapped: function(sender) {
+            $share.universal($("cardShare2View").snapshot)
+          }
+        },
+        views: [{
+          type: "canvas",
+          layout: function(make, view) {
+            make.top.inset(0)
+            make.height.equalTo(1 / $device.info.screen.scale)
+            make.left.right.inset(0)
+          },
+          events: {
+            draw: function(view, ctx) {
+              var width = view.frame.width
+              var scale = $device.info.screen.scale
+              ctx.strokeColor = $color("lightGray")
+              ctx.setLineWidth(1 / scale)
+              ctx.moveToPoint(0, 0)
+              ctx.addLineToPoint(width, 0)
+              ctx.strokePath()
+            }
+          }
+        },{
+          type: "canvas",
+          layout: function(make, view) {
+            make.bottom.inset(0)
+            make.height.equalTo(1 / $device.info.screen.scale)
+            make.left.right.inset(0)
+          },
+          events: {
+            draw: function(view, ctx) {
+              var width = view.frame.width
+              var scale = $device.info.screen.scale
+              ctx.strokeColor = $color("lightGray")
+              ctx.setLineWidth(1 / scale)
+              ctx.moveToPoint(0, 0)
+              ctx.addLineToPoint(width, 0)
+              ctx.strokePath()
+            }
+          }
+        },{
+          type: "label",
+          props: {
+            text: "分享",
+            align: $align.center,
+            font: $font(17),
+            textColor: $color("#3478f7"),
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.left.inset(20)
+          }
+        }]
+      },]
+    },]
+  });
 }
 
 //赞赏页面
@@ -533,7 +690,9 @@ function setupReward() {
   })
   requireReward()
   $delay(1, function(){
-    $("rewardList").scrollToOffset($point(0, 20))
+    if($("rewardList")) {
+      $("rewardList").scrollToOffset($point(0, 20))
+    }
   })
 }
 

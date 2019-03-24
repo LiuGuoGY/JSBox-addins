@@ -4,6 +4,7 @@ let locTimer;
 
 $cache.set("weatherRequestLog", "");
 function request() {
+  $("locationIcon").hidden = false;
   locTimer = $timer.schedule({
     interval: 0.2,
     handler: function() {

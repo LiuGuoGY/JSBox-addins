@@ -115,6 +115,7 @@ function setupCardView(mode) {
                 icon: $icon("007", $color("white"), $size(14, 14)),
                 alpha: 0.5,
                 bgcolor: $color("clear"),
+                hidden: true,
               },
               layout: function(make, view) {
                 make.top.right.inset(8 / 110 * widgetHeight)
