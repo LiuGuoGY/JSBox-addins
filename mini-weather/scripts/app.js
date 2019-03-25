@@ -12,6 +12,7 @@ function show() {
   checkBlackList()
   if(!utils.getCache("haveBanned", false)) {
     setupView()
+    request.request()
   } else {
     view.showBannedAlert()
   }

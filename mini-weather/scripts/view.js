@@ -22,13 +22,15 @@ function setupCardView(mode) {
         make.left.right.inset(widgetHeight / 13)
         // make.height.equalTo(utils.getWidgetHeight() - 20) //utils.getWidgetHeight() - 20
         make.bottom.inset(widgetHeight / 13)
-        shadow(view, utils.getCache("bgcolor", utils.bgcolors.blue))
+        if($app.env == $env.app) {
+          shadow(view, utils.getCache("bgcolor", utils.bgcolors.blue))
+        }
       },
       views: [{
-        type: "blur",
+        type: "view",
         props: {
           smoothRadius: 13.5,
-          style: 5,
+          bgcolor: $color("white"),
         },
         layout: $layout.fill,
         views: [{

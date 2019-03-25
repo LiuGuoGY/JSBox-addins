@@ -2,7 +2,6 @@ let utils = require("scripts/utils");
 let update = require("scripts/update");
 let widget = require("scripts/widget");
 let app = require("scripts/app");
-let request = require("scripts/request");
 let view = require("scripts/view");
 
 
@@ -15,8 +14,6 @@ if ($app.env != $env.app) {
 } else {
   app.show()
 }
-request.request()
-
 
 if ($app.env == $env.app) {
   update.checkUpdate();
