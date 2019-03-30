@@ -87,7 +87,8 @@ function sureToUpdate(version, des) {
       {
         title: "是",
         handler: function() {
-          updateScript()
+          $ui.popToRoot();
+          updateScript();
         }
       },
     ]
@@ -98,10 +99,16 @@ function updateScript() {
   let url =
     "https://github.com/LiuGuoGY/JSBox-addins/blob/master/launch-center-new/.output/Launch%20Center%20New.box?raw=true";
   const scriptName = $addin.current.name;
+  let ui = require('scripts/ui')
+  ui.addProgressView($("mainView"))
   $http.download({
     url: url,
     showsProgress: false,
     timeout: 5,
+    progress: function(bytesWritten, totalBytes) {
+      var percentage = bytesWritten * 1.0 / totalBytes
+      $("myProgress").locations = [0.0, percentage, percentage]
+    },
     handler: function(resp) {
       let box = resp.data
       $addin.save({
@@ -115,14 +122,9 @@ function updateScript() {
             $delay(0.2, function() {
               $device.taptic(2)
             })
-            $ui.alert({
-              title: "安装完成",
-              actions: [{
-                title: "OK",
-                handler: function() {
-                  $addin.restart()
-                }
-              }]
+            $("myProgressText").text = "更新完成"
+            $delay(1, ()=>{
+              $addin.restart()
             })
           }
         }

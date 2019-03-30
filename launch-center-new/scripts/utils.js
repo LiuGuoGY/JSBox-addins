@@ -29,12 +29,18 @@ function getCache(key, def) {
 }
 
 function getWidgetHeight() {
-  let standardHeight = ($device.isIpadPro ? 130.0 : 110.0);
-  let bodyFontSize = $objc("UIFont").$preferredFontForTextStyle("UICTFontTextStyleBody").$pointSize();
-  let standardFontSize = 17.0;
-  let fontSizeDiff = (bodyFontSize - standardFontSize);
-  let compactModeHeight = standardHeight + fontSizeDiff;
-  return compactModeHeight
+  if(getCache("widgetHeight") && $app.env != $env.app) {
+    return getCache("widgetHeight")
+  } else {
+    let standardHeight = $device.isIpadPro ? 130.0 : 110.0;
+    let bodyFontSize = $objc("UIFont")
+      .$preferredFontForTextStyle("UICTFontTextStyleBody")
+      .$pointSize();
+    let standardFontSize = 17.0;
+    let fontSizeDiff = bodyFontSize - standardFontSize;
+    let compactModeHeight = standardHeight + fontSizeDiff;
+    return compactModeHeight;
+  }
 }
 
 function myOpenUrl(url) {

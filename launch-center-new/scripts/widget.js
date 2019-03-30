@@ -8,6 +8,7 @@ function setupWidgetView() {
   let itemHeight = utils.getWidgetHeight() * 5 / 11
   let view = {
     props: {
+      id: "widget",
       title: "Launch Center",
     },
     views: [{
@@ -31,6 +32,16 @@ function setupWidgetView() {
   }
   $ui.render(view)
   update.easyCheckUpdate()
+
+  if(!utils.getCache("widgetHeight")) {
+    $delay(0.2, function() {
+      if($widget.mode == 0) {
+        if(utils.getCache("widgetHeight") != $("widget").frame.height) {
+          $cache.set("widgetHeight", $("widget").frame.height);
+        }
+      }
+    });
+  }
 }
 
 module.exports = {

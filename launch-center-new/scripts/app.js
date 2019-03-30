@@ -354,7 +354,11 @@ function genRowsView(reorder, columns) {
               handler: function() {
                 if(resumeAction == 3) {
                   resumeAction = 0
-                  ui.showToastView($("mainView"), mColor.red, "未安装对应APP")
+                  if(data.url != "jsbox://") {
+                    ui.showToastView($("mainView"), mColor.red, "未安装对应APP")
+                  } else {
+                    ui.showToastView($("mainView"), mColor.blue, "当前已经在 JSBox 中")
+                  }
                 }
               }
             })
@@ -4305,6 +4309,9 @@ function requireItems() {
         }
         $("search_input").text = ""
         $("search_hint").hidden = false
+      } else if(data.length == 0){
+        view.endRefreshing()
+        ui.showToastView($("mainView"), mColor.red, "服务器开小差了，请稍后重试")
       } else {
         view.endRefreshing()
       }

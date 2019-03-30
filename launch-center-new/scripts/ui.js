@@ -336,9 +336,74 @@ function showBannedAlert() {
   })
 }
 
+function addProgressView(superView) {
+  superView.add({
+    type: "blur",
+    props: {
+      id: "myProgressParent",
+      style: 1,
+      alpha: 0,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      props: {
+        bgcolor: $color("clear"),
+        clipsToBounds: 0
+      },
+      layout: function (make, view) {
+        make.centerX.equalTo(view.super)
+        make.centerY.equalTo(view.super).offset(-20)
+        make.size.equalTo($size(300, 15))
+        shadow(view)
+      },
+      views: [{
+        type: "gradient",
+        props: {
+          id: "myProgress",
+          circular: 1,
+          colors: [$color("#d4fc79"), $color("#96e6a1"), $color("white")],
+          locations: [0.0, 0.0, 0.0],
+          startPoint: $point(0, 1),
+          endPoint: $point(1, 1)
+        },
+        layout: $layout.fill
+      }]
+    },{
+      type: "label",
+      props: {
+        id: "myProgressText",
+        text: "更新中...",
+        font: $font("bold", 15),
+        align: $align.center
+      },
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        make.centerY.equalTo(view.super).offset(20)
+      }
+    }],
+  })
+  $ui.animate({
+    duration: 0.5,
+    animation: () => {
+      $("myProgressParent").alpha = 1;
+    },
+  });
+}
+
+function shadow(view) {
+  var layer = view.runtimeValue().invoke("layer")
+  layer.invoke("setCornerRadius", 5)
+  layer.invoke("setShadowOffset", $size(0, 0))
+  layer.invoke("setShadowColor", $color("#96e6a1").runtimeValue().invoke("CGColor"))
+  layer.invoke("setShadowOpacity", 0.8)
+  layer.invoke("setShadowRadius", 5)
+}
+
 module.exports = {
   showToastView: showToastView,
   genTemplate: genTemplate,
   showBannedAlert: showBannedAlert,
   addButtonMore: addButtonMore,
+  addProgressView: addProgressView,
 }

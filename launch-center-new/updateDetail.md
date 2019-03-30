@@ -1,1 +1,2 @@
-1. 修复已知问题
+1. Bug fixes and performance improvements.
+2. In the future, the update frequency will be greatly reduced.
