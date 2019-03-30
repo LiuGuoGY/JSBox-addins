@@ -1,20 +1,8 @@
 let utils = require("scripts/utils");
 let view = require("scripts/view");
-let locTimer;
 
-$cache.set("weatherRequestLog", "");
 function request() {
   $("locationIcon").hidden = false;
-  locTimer = $timer.schedule({
-    interval: 0.2,
-    handler: function() {
-      if ($("locationIcon").hidden == false) {
-        $("locationIcon").hidden = true;
-      } else {
-        $("locationIcon").hidden = false;
-      }
-    }
-  });
   if($objc("CLLocationManager").invoke("authorizationStatus") == 2) {
     if(utils.getCache("location")) {
       requestWeather(utils.getCache("location"))
@@ -36,7 +24,6 @@ function request() {
           handler: function(resp) {
             var data = resp.data;
             $console.info(data);
-            addLog(data)
             if (data.status == "1") {
               let location = {
                 lat: lat,
@@ -55,24 +42,6 @@ function request() {
   }
 }
 
-// async function parseXML(city) {
-//   let xml = $file.read("assets/city.xml").string;
-//   let doc = $xml.parse({
-//     string: xml, // Or data: data
-//     mode: "xml", // Or "html", default to xml
-//   });
-//   let rootElement = doc.rootElement;
-//   $console.info(rootElement.children({
-//     "tag": "name",
-//   }));//rootElement.children()[0].children()[1].string
-//   let length = rootElement.children().length;
-//   // for(let i = 0; i < length; i++) {
-//   //   if(city == rootElement.children()[i].children()[1].string) {
-//   //     return rootElement.children()[i].children()[0].string
-//   //   }
-//   // }
-// }
-
 async function fetchIPAddress() {
   let resp = await $http.get({
     url: "http://www.taobao.com/help/getip.php"
@@ -83,7 +52,6 @@ async function fetchIPAddress() {
   });
   let data = resp2.data;
   $console.info(data);
-  addLog(data)
   if(data.status == "success") {
     let location = {
       lat: data.lat,
@@ -106,7 +74,7 @@ function requestWeather(location) {
   // getMojiWeatherWarning(location.lng, location.lat);
   // getMojiWeatherAlert(location.lng, location.lat);
   getChinaWeather(location.lng, location.lat);
-  locTimer.invalidate();
+  // locTimer.invalidate();
   $("locationIcon").hidden = true;
 }
 
@@ -144,7 +112,6 @@ async function getHeFengAirQuality(province, city) {
     });
     let data = resp.data;
     $console.info(data);
-    addLog(data)
     if (data.HeWeather6[0].status == "ok") {
       $("airQuality").text = "空气质量：" + data.HeWeather6[0].air_now_city.qlty;
       $cache.set("nowQlty", data.HeWeather6[0].air_now_city.qlty);
@@ -164,7 +131,6 @@ async function getHeFengLive(lng, lat) {
   });
   let data = resp.data;
   $console.info(data);
-  addLog(data)
   if (data.HeWeather6[0].status == "ok") {
     setTemp(data.HeWeather6[0].now.tmp);
     setWeatherType(data.HeWeather6[0].now.cond_txt);
@@ -184,7 +150,6 @@ async function getHeFengForecast(lng, lat) {
   });
   let data = resp.data;
   $console.info(data);
-  addLog(data)
   if (data.HeWeather6[0].status == "ok") {
     // setTemp(data.HeWeather6[0].now.tmp);
     // setWeatherType(data.HeWeather6[0].now.cond_txt);
@@ -262,7 +227,6 @@ async function getCaiYun(lng, lat) {
   });
   let data = resp.data;
   $console.info(data);
-  addLog(data)
   if (data.status == "ok") {
     setTemp(Math.floor(Math.parseFloat(data.result.temperature)));
     // $("temp").text = Math.floor(Math.parseFloat(data.result.temperature)) + "°";
@@ -284,7 +248,6 @@ async function getCaiYun2HoursForecast(lng, lat) {
   });
   let data = resp.data;
   $console.info(data)
-  addLog(data)
   if (data.status == "ok") {
     if(data.result.forecast_keypoint.indexOf("不会") < 0 && data.result.forecast_keypoint.indexOf("最近的") < 0) {
       $delay(1, function() {
@@ -400,7 +363,6 @@ async function getChinaWeather(lng, lat) {
   });
   let data = resp.data;
   $console.info(data)
-  addLog(data)
   let nowDay = new Date().getDate();
   if(utils.getCache("pushDay") != nowDay) { // 气象灾害
     let body = undefined;
@@ -431,10 +393,6 @@ async function getChinaWeather(lng, lat) {
   }
 }
 
-function addLog(json) {
-  $cache.set("weatherRequestLog", utils.getCache("weatherRequestLog", "") + "\n-----------------------------\n" + JSON.stringify(json, null, 2));
-}
-
 function getDateString(offset) {
   let date = new Date();
   date.setDate(date.getDate() + offset);
@@ -459,7 +417,9 @@ function setBgImage(text) {
   if(src !== $("cardBgImage").src) {
     $("cardBgImage").src = src;
     $console.info($("cardBgImage").src + "-->" + src);
-    view.shadow($("card"), utils.getBgColor(src))
+    if($app.env == $env.app) {
+      view.shadow($("card"), utils.getBgColor(src))
+    }
     $cache.set("bgcolor", utils.getBgColor(src));
   }
 }

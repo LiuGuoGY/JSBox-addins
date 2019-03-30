@@ -1,2 +1,2 @@
-1. 为了在小组件中更稳定的运行，去掉了小组件的阴影和模糊效果；
-2. 使用了更好的方法适配了所有机型的小组件。
+1. Bug fixes and performance improvements.
+2. For the future, the update frequency will be greatly reduced.

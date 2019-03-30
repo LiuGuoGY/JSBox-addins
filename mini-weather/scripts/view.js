@@ -77,7 +77,8 @@ function setupCardView(mode) {
               },
               layout: function(make, view) {
                 make.width.equalTo(view.super).multipliedBy(0.4)
-                make.left.bottom.inset(15 / 110 * widgetHeight)
+                make.left.inset(15 / 110 * widgetHeight)
+                make.bottom.inset(17 / 110 * widgetHeight)
                 make.height.equalTo(35)
               }
             },{

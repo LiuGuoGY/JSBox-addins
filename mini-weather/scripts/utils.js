@@ -55,7 +55,7 @@ function getBgColor(src) {
 }
 
 function getWidgetHeight() {
-  if(getCache("widgetHeight")) {
+  if(getCache("widgetHeight") && $app.env != $env.app) {
     return getCache("widgetHeight")
   } else {
     let standardHeight = $device.isIpadPro ? 130.0 : 110.0;

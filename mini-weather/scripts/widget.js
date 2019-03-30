@@ -14,13 +14,15 @@ function setupView() {
     }]
   });
   request.request()
-  $delay(0.2, function() {
-    if($widget.mode == 0) {
-      if(utils.getCache("widgetHeight") != $("widget").frame.height) {
-        $cache.set("widgetHeight", $("widget").frame.height);
+  if(!utils.getCache("widgetHeight")) {
+    $delay(0.2, function() {
+      if($widget.mode == 0) {
+        if(utils.getCache("widgetHeight") != $("widget").frame.height) {
+          $cache.set("widgetHeight", $("widget").frame.height);
+        }
       }
-    }
-  });
+    });
+  }
 }
 
 module.exports = {
