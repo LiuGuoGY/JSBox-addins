@@ -20,7 +20,7 @@
 
 #### 安装与更新
 
-[Mini Weather](https://xteko.com/redir?name=Mini%20Weather&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fblob%2Fmaster%2Fmini-weather%2F.output%2FMiniWeather.box)
+[Mini Weather.box](https://xteko.com/redir?name=Mini%20Weather&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fblob%2Fmaster%2Fmini-weather%2F.output%2FMiniWeather.box)
 
 #### 鸣谢
 
