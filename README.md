@@ -2,6 +2,35 @@
 
 更多介绍请移步：[**Linger 博客**](https://www.liuguogy.com)
 
+### mini-weather - 天气小插件 Mini Weather
+
+#### 功能
+
+- 无需打开定位也可使用
+- 实时天气显示
+- 实时空气质量
+- 两天天气预报
+- 自然灾害预警
+- 两小时特殊天气预报
+- 异常天气预报推送
+
+#### 预览
+
+![折叠图](https://i.loli.net/2019/04/04/5ca5b108cbb05.jpg)
+
+![展开图](https://i.loli.net/2019/04/04/5ca5b108d25b1.jpg)
+
+#### 安装与更新
+
+[Mini Weather](https://xteko.com/redir?name=Mini%20Weather&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fblob%2Fmaster%2Fmini-weather%2F.output%2FMiniWeather.box)
+
+#### 鸣谢
+
+| 卡片背景图设计 | 美术工程师 |
+| :------ | :------ |
+| @HYZ | @倒计时 |
+
+
 ### en-ch-translater.js - 中英互译
 
 #### 特性
