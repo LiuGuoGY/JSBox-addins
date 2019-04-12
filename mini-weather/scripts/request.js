@@ -417,11 +417,11 @@ function setBgImage(text) {
   if(src !== $("cardBgImage").src) {
     $("cardBgImage").src = src;
     $console.info($("cardBgImage").src + "-->" + src);
-    if($app.env == $env.app) {
-      view.shadow($("card"), utils.getBgColor(src))
-    }
-    $cache.set("bgcolor", utils.getBgColor(src));
   }
+  if($app.env == $env.app) {
+    view.shadow($("card"), utils.getBgColor(src))
+  }
+  $cache.set("bgcolor", utils.getBgColor(src));
 }
 
 function setWeatherType(text) {

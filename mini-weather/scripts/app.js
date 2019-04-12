@@ -37,15 +37,19 @@ function setupView() {
       },
       layout: $layout.fill,
       views: [{
-        type: "view",
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.centerX.equalTo(view.super)
-          make.top.inset(20)
-          make.height.equalTo(315)
-        },
-        views: [view.setupCardView()]
-      }]
+        type: "scroll",
+        layout: $layout.fill,
+        views: [{
+          type: "view",
+          layout: function(make, view) {
+            make.width.equalTo(view.super)
+            make.centerX.equalTo(view.super)
+            make.top.inset(20)
+            make.height.equalTo(315)
+          },
+          views: [view.setupCardView()]
+        }]
+      },]
     }]
   });
 }
@@ -74,72 +78,6 @@ function setupSetting() {
       make.size.equalTo($size(8, 18))
     },
   }]
-
-  const tabForcastRemindItem = {
-    type: "view",
-    props: {
-
-    },
-    views: [{
-        type: "label",
-        props: {
-          id: "tabForcastRemindLabel",
-          text: "异常天气推送 (Beta)",
-        },
-        layout: function(make, view) {
-          make.left.inset(15)
-          make.centerY.equalTo(view.super)
-        }
-      },{
-        type: "button",
-        props: {
-          icon: $icon("008", $color("white"), $size(14, 14)),
-          bgcolor: $color("lightGray"),
-          borderWidth: 1,
-          borderColor: $color("lightGray"),
-          circular: true,
-        },
-        layout: function(make, view) {
-          make.left.equalTo(view.prev.right).inset(10)
-          make.centerY.equalTo(view.super)
-          make.size.equalTo($size(14,14))
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.alert({
-              title: "异常天气推送",
-              message: "开启此功能将会在特殊天气的前一天晚上8点推送提醒通知",
-            });
-          }
-        }
-      },
-      {
-        type: "switch",
-        props: {
-          id: "tabForcastRemindSwitch",
-          on: utils.getCache("forcastRemind"),
-        },
-        layout: function(make, view) {
-          make.right.inset(15)
-          make.centerY.equalTo(view.super)
-        },
-        events: {
-          changed: function(sender) {
-            $cache.set("forcastRemind", sender.on)
-            if(!sender.on) {
-              let ids = utils.getCache("pushId")
-              if(ids) {
-                for(let i = 0; i < ids.length; i ++) {
-                  $push.cancel({id: ids[i]})
-                }
-              }
-            }
-          }
-        }
-      }
-    ],
-    layout: $layout.fill
-  }
 
   const tabShowInstalls = {
     type: "view",
@@ -170,7 +108,13 @@ function setupSetting() {
     layout: $layout.fill
   }
 
-  let array = [{
+  let array1 = [{
+    templateTitle: {
+      text : "推送通知",
+    },
+  }]
+
+  let array2 = [{
     templateTitle: {
       text : "更新日志",
     },
@@ -232,10 +176,10 @@ function setupSetting() {
         },
         data: [{
           title: "功能",
-          rows: [tabForcastRemindItem]
+          rows: array1,
         },{
           title: "关于",
-          rows: array,
+          rows: array2,
         },{
           title: "统计",
           rows: [tabShowInstalls]
@@ -252,34 +196,35 @@ function setupSetting() {
             return 0
           }
           let titleText = title.templateTitle.text
-          if(title.url) {
-            setupWebView(titleText, title.url, ()=>{
-              $ui.menu({
-                items: ["用 Grape 打开", "用 PPHub 打开", "用其他应用打开"],
-                handler: function(title, idx) {
-                  switch(idx) {
-                    case 0: $app.openURL("grape://repo?reponame=LiuGuoGY/JSBox-addins");break;
-                    case 1: $app.openURL("pphub://repo?owner=LiuGuoGY&repo=JSBox-addins");break;
-                    case 2: $share.sheet({
-                      items: ["https://github.com/LiuGuoGY/JSBox-addins"],
-                      handler: function(success) {
-                      }
-                    });break;
+          if(indexPath.section == 0) {
+            switch(indexPath.row) {
+              case 0: setupForcastRemindView();break;
+              default: break;
+            }
+          } else if(indexPath.section == 1) {
+            switch(indexPath.row) {
+              case 0: setupWebView(titleText, title.url);break;
+              case 1: setupWebView(titleText, title.url, function() {
+                $ui.menu({
+                  items: ["用 Grape 打开", "用 PPHub 打开", "用其他应用打开"],
+                  handler: function(title, idx) {
+                    switch(idx) {
+                      case 0: $app.openURL("grape://repo?reponame=LiuGuoGY/JSBox-addins");break;
+                      case 1: $app.openURL("pphub://repo?owner=LiuGuoGY&repo=JSBox-addins");break;
+                      case 2: $share.sheet({
+                        items: ["https://github.com/LiuGuoGY/JSBox-addins"],
+                        handler: function(success) {
+                        }
+                      });break;
+                    }
                   }
-                }
-              });
-            })
-          } else {
-            switch(title.templateTitle.text) {
-              case "反馈建议": setupFeedBack()
-                break
-              case "检查更新": update.checkUpdate(true);
-                break
-              case "支持与赞赏": setupReward();
-                break
-              case "分享给朋友": setupShareView()
-                break
-              default:
+                });
+              });break;
+              case 2: update.checkUpdate(true);break;
+              case 3: setupReward();break;
+              case 4: setupFeedBack();break;
+              case 5: setupShareView();break;
+              default: break;
             }
           }
         }
@@ -287,6 +232,94 @@ function setupSetting() {
     }]
   })
   requireInstallNumbers()
+}
+
+function setupForcastRemindView() {
+  $ui.push({
+    props: {
+      title: "推送通知",
+    },
+    views: [{
+      type: "list",
+      props: {
+        header: {
+          type: "view",
+          props: {
+            height: 40,
+          }
+        },
+        footer: {
+          type: "view",
+          props: {
+            height: 20,
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "开启此功能将会在特殊天气的前一天晚上8点推送提醒通知。",
+              textColor: $color("#AAAAAA"),
+              align: $align.left,
+              font: $font(12)
+            },
+            layout: function(make, view) {
+              make.left.right.inset(15)
+              make.top.bottom.inset(0)
+            },
+          },],
+        },
+        data: [{},{
+          type: "view",
+          views: [{
+              type: "label",
+              props: {
+                id: "tabForcastRemindLabel",
+                text: "异常天气推送",
+              },
+              layout: function(make, view) {
+                make.left.inset(15)
+                make.centerY.equalTo(view.super)
+              }
+            },
+            {
+              type: "switch",
+              props: {
+                id: "tabForcastRemindSwitch",
+                on: utils.getCache("forcastRemind"),
+              },
+              layout: function(make, view) {
+                make.right.inset(15)
+                make.centerY.equalTo(view.super)
+              },
+              events: {
+                changed: function(sender) {
+                  $cache.set("forcastRemind", sender.on)
+                  if(!sender.on) {
+                    let ids = utils.getCache("pushId")
+                    if(ids) {
+                      for(let i = 0; i < ids.length; i ++) {
+                        $push.cancel({id: ids[i]})
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          layout: $layout.fill
+        },{}]
+      },
+      layout: $layout.fill,
+      events: {
+        rowHeight: function(sender, indexPath) {
+          if (indexPath.row == 1) {
+            return 45
+          } else {
+            return 5
+          }
+        }
+      }
+    }]
+  });
 }
 
 function setupShareView() {
@@ -970,19 +1003,20 @@ function sendFeedBack(text, contact, handler) {
 }
 
 function setupWebView(title, url, moreHandler) {
+  let navButtons = (moreHandler)?[
+    {
+      icon: "022",
+      handler: function() {
+        if(moreHandler) {
+          moreHandler()
+        }
+      }
+    }
+  ]:[];
   $ui.push({
     props: {
       title: title,
-      navButtons: [
-        {
-          icon: "022",
-          handler: function() {
-            if(moreHandler) {
-              moreHandler()
-            }
-          }
-        }
-      ]
+      navButtons: navButtons,
     },
     views: [{
       type: "web",

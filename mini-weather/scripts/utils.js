@@ -20,7 +20,7 @@ function getCache(key, def) {
   if (temp == undefined) {
     if(def == undefined){
       switch(key) { 
-        case "forcastRemind": def = false; break;
+        case "forcastRemind": def = true; break;
       }
     }
     $cache.set(key, def)
