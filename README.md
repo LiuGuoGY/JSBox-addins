@@ -16,9 +16,7 @@
 
 #### 预览
 
-![折叠图](https://i.loli.net/2019/04/04/5ca5b108cbb05.jpg)
-
-![展开图](https://i.loli.net/2019/04/04/5ca5b108d25b1.jpg)
+![预览图](https://i.loli.net/2019/04/12/5cb04f7a509a5.jpg)
 
 #### 安装与更新
 
