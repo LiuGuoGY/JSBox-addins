@@ -1,5 +1,7 @@
 # JSBox 总览
 
+![GitHub](https://img.shields.io/github/license/liuguogy/JSBox-addins.svg)
+
 更多介绍请移步：[**Linger 博客**](https://www.liuguogy.com)
 
 ### mini-weather - 天气小插件 Mini Weather
