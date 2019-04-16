@@ -1,6 +1,7 @@
 # JSBox 总览
 
-![GitHub](https://img.shields.io/github/license/liuguogy/JSBox-addins.svg)
+![GitHub](https://img.shields.io/github/license/liuguogy/JSBox-addins.svg) 
+![GitHub file size in bytes](https://img.shields.io/github/size/LiuGuoGY/JSBox-addins/mini-weather/.output/MiniWeather.box.svg?label=Mini%20Weather)
 
 更多介绍请移步：[**Linger 博客**](https://www.liuguogy.com)
 
