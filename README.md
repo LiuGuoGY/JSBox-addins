@@ -3,8 +3,6 @@
 ![GitHub](https://img.shields.io/github/license/liuguogy/JSBox-addins.svg) 
 ![GitHub file size in bytes](https://img.shields.io/github/size/LiuGuoGY/JSBox-addins/mini-weather/.output/MiniWeather.box.svg?label=Mini%20Weather)
 ![GitHub file size in bytes](https://img.shields.io/github/size/LiuGuoGY/JSBox-addins/en-ch-translater.js.svg?label=%E4%B8%AD%E8%8B%B1%E4%BA%92%E8%AF%91)
-![GitHub file size in bytes](https://img.shields.io/github/size/LiuGuoGY/JSBox-addins/launch-center-new/.output/Launch%20Center%20New.box.svg?label=Launch%20Center)
-![Website](https://img.shields.io/website/https/www.liuguogy.com/favicon.ico.svg?down_color=lightgrey&down_message=offline&label=Linger%27s%20Blog&up_color=orange&up_message=online)
 
 更多介绍请移步：[**Linger 博客**](https://www.liuguogy.com)
 
