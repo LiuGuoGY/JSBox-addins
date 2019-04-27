@@ -64,7 +64,7 @@ function setupCardView(mode) {
                 make.centerX.equalTo(view.super)
                 make.centerY.equalTo(view.super).offset(15 / 110 * widgetHeight)
                 make.width.equalTo(view.super).multipliedBy(1)
-                make.height.equalTo(500)
+                make.height.equalTo(1000)
               }
             },{
               type: "label",

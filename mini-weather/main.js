@@ -4,7 +4,6 @@ let widget = require("scripts/widget");
 let app = require("scripts/app");
 let view = require("scripts/view");
 
-
 if ($app.env != $env.app) {
   if(utils.getCache("haveBanned") === true) {
     view.showBannedAlert()

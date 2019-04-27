@@ -66,7 +66,7 @@ async function fetchIPAddress() {
 
 function requestWeather(location) {
   // getWannianli(location.district)
-  getHeFengAirQuality(location.province, location.city);
+  getHeFengAirQuality();
   getHeFengLive(location.lng, location.lat);
   getHeFengForecast(location.lng, location.lat);
   // getCaiYun(location.lng, location.lat);
@@ -75,7 +75,9 @@ function requestWeather(location) {
   // getMojiWeatherAlert(location.lng, location.lat);
   getChinaWeather(location.lng, location.lat);
   // locTimer.invalidate();
-  $("locationIcon").hidden = true;
+  if($("locationIcon")) {
+    $("locationIcon").hidden = true;
+  }
 }
 
 // async function getWannianli(city) {
@@ -91,34 +93,18 @@ function requestWeather(location) {
 //   $console.info(data);
 // }
 
-async function getHeFengAirQuality(province, city) {
-  let array = [city, province]
-  get(array)
-  async function get(array, index) {
-    if(!index) {
-      index = 0;
-    }
-    if(index > array.length - 1) {
-      return false;
-    }
-    if(!utils.isString(array[index]) || array[index].length <= 0) {
-      return await get(array, index + 1);
-    }
-    let resp = await $http.get({
-      url:
-        "https://free-api.heweather.net/s6/air/now?location="  +
-        $text.URLEncode(array[index]) +
-        "&key=63d9ae66c2844258895e1432ac452ef4"
-    });
-    let data = resp.data;
-    $console.info(data);
-    if (data.HeWeather6[0].status == "ok") {
-      $("airQuality").text = "空气质量：" + data.HeWeather6[0].air_now_city.qlty;
-      $cache.set("nowQlty", data.HeWeather6[0].air_now_city.qlty);
-      return true
-    } else {
-      return await get(array, index + 1);
-    }
+async function getHeFengAirQuality() {
+  let resp = await $http.get({
+    url:
+      "https://free-api.heweather.net/s6/air/now?location=auto_ip" + 
+      "&key=63d9ae66c2844258895e1432ac452ef4"
+  });
+  let data = resp.data;
+  $console.info(data);
+  if (data.HeWeather6[0].status == "ok") {
+    $("airQuality").text = "空气质量：" + data.HeWeather6[0].air_now_city.qlty;
+    $cache.set("nowQlty", data.HeWeather6[0].air_now_city.qlty);
+    return true
   }
 }
 
@@ -135,6 +121,8 @@ async function getHeFengLive(lng, lat) {
     setTemp(data.HeWeather6[0].now.tmp);
     setWeatherType(data.HeWeather6[0].now.cond_txt);
     setBgImage(data.HeWeather6[0].now.cond_txt)
+    // $cache.set("nowWind", data.HeWeather6[0].now.wind_sc);
+    // $("airQuality").text = "空气质量：" + utils.getCache("nowQlty", "无") + "  |  风力：" + data.HeWeather6[0].now.wind_sc + "级";
     return true
   } else {
     return false;
@@ -168,20 +156,26 @@ async function getHeFengForecast(lng, lat) {
         },
         list_weather: {
           text: data.HeWeather6[0].daily_forecast[i].cond_txt_d,
-        }
+        },
+        temp_average: (parseInt(data.HeWeather6[0].daily_forecast[i].tmp_max) + parseInt(data.HeWeather6[0].daily_forecast[i].tmp_min)) / 2
       })
     }
     $("forecastList").data = listData;
     $cache.set("forecastData", listData);
-    if(utils.getCache("forcastRemind")) {
-      let ids = utils.getCache("pushId")
-      if(ids) {
-        for(let i = 0; i < ids.length; i ++) {
-          $push.cancel({id: ids[i]})
-        }
+    let ids = utils.getCache("pushId")
+    if(ids) {
+      for(let i = 0; i < ids.length; i ++) {
+        $push.cancel({id: ids[i]})
       }
+    }
+    if(utils.getCache("forcastRemind") || utils.getCache("tempRemind")) {
       for(let i = 1; i < listData.length; i++) {
-        if(listData[i].list_weather.text.indexOf("雨") >= 0 || listData[i].list_weather.text.indexOf("雪") >= 0) {
+        let isWeatherAbnormal = listData[i].list_weather.text.indexOf("雨") >= 0 || listData[i].list_weather.text.indexOf("雪") >= 0
+        let temp_error = listData[i].temp_average - listData[i-1].temp_average
+        let isTempAbnormal = temp_error >= 5 || temp_error <= -5
+        if(isWeatherAbnormal || isTempAbnormal) {
+          let updownString = (temp_error > 0)?"升高":"降低"
+          let remindString = ((isWeatherAbnormal)?("天气可能是" + listData[i].list_weather.text + "，"):"") + ((isTempAbnormal)?("温度可能会" + updownString + " " + Math.abs(temp_error) + " °，"):"")
           let desDate = new Date()
           let nowDate = new Date()
           if(nowDate.getHours() >= 20 && i == 1) {
@@ -190,8 +184,9 @@ async function getHeFengForecast(lng, lat) {
             if(!prevScheduleTime || (prevScheduleTime && nowDate.getTime() - prevScheduleTime.getTime() >= 720 * 60000)) {
               $push.schedule({
                 title: "Mini Weather 提示",
-                body: "明天天气可能是" + listData[i].list_weather.text + "，请注意防范！点击查看详情",
+                body: "明天" + remindString + "请注意防范！轻触或重按查看详情",
                 delay: 1,
+                script: $addin.current.name,
                 handler: function(result) {
                   $cache.set("prevScheduleTime", nowDate);
                 }
@@ -205,8 +200,9 @@ async function getHeFengForecast(lng, lat) {
             desDate.setMilliseconds(0)
             $push.schedule({
               title: "Mini Weather 提示",
-              body: "明天天气可能是" + listData[i].list_weather.text + "，请注意防范！点击查看详情",
+              body: "明天" + remindString + "请注意防范！轻触或重按查看详情",
               date: desDate,
+              script: $addin.current.name,
               handler: function(result) {
                 let id = result.id
                 let ids = utils.getCache("pushId", [])
@@ -378,12 +374,13 @@ async function getChinaWeather(lng, lat) {
         }
       }
     }
-    if(body) {
+    if(body && utils.getCache("disasterRemind")) {
       $push.schedule({
         id: "alarm",
         title: "气象灾害预警",
         body: body,
         delay: 1,
+        script: $addin.current.name,
         query: data.alarm[data.station]["1001003"],
         handler: function(result) {
           $cache.set("pushDay", nowDay);

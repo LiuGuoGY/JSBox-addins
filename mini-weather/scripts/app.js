@@ -155,6 +155,7 @@ function setupSetting() {
       props: {
         id: "list",
         template: feedBackTemplate,
+        bgcolor: $color("white"),
         footer: {
           type: "view",
           props:{
@@ -242,6 +243,7 @@ function setupForcastRemindView() {
     views: [{
       type: "list",
       props: {
+        bgcolor: $color("white"),
         header: {
           type: "view",
           props: {
@@ -253,19 +255,6 @@ function setupForcastRemindView() {
           props: {
             height: 20,
           },
-          views: [{
-            type: "label",
-            props: {
-              text: "开启此功能将会在特殊天气的前一天晚上8点推送提醒通知。",
-              textColor: $color("#AAAAAA"),
-              align: $align.left,
-              font: $font(12)
-            },
-            layout: function(make, view) {
-              make.left.right.inset(15)
-              make.top.bottom.inset(0)
-            },
-          },],
         },
         data: [{},{
           type: "view",
@@ -273,7 +262,7 @@ function setupForcastRemindView() {
               type: "label",
               props: {
                 id: "tabForcastRemindLabel",
-                text: "异常天气推送",
+                text: "异常天气提醒",
               },
               layout: function(make, view) {
                 make.left.inset(15)
@@ -293,28 +282,133 @@ function setupForcastRemindView() {
               events: {
                 changed: function(sender) {
                   $cache.set("forcastRemind", sender.on)
-                  if(!sender.on) {
-                    let ids = utils.getCache("pushId")
-                    if(ids) {
-                      for(let i = 0; i < ids.length; i ++) {
-                        $push.cancel({id: ids[i]})
-                      }
-                    }
-                  }
+                  request.request()
                 }
               }
             }
           ],
           layout: $layout.fill
-        },{}]
+        },{
+          type: "view",
+          layout: $layout.fill,
+          views: [{
+            type: "label",
+            props: {
+              text: "开启此功能将会在特殊天气的前一天晚上 8 点推送提醒通知。",
+              textColor: $color("#AAAAAA"),
+              align: $align.left,
+              font: $font(12),
+              lines: 0,
+            },
+            layout: function(make, view) {
+              make.left.right.inset(15)
+              make.top.inset(10)
+            },
+          },],
+        },{
+          type: "view",
+          views: [{
+              type: "label",
+              props: {
+                text: "气温突变预警",
+              },
+              layout: function(make, view) {
+                make.left.inset(15)
+                make.centerY.equalTo(view.super)
+              }
+            },
+            {
+              type: "switch",
+              props: {
+                on: utils.getCache("tempRemind"),
+              },
+              layout: function(make, view) {
+                make.right.inset(15)
+                make.centerY.equalTo(view.super)
+              },
+              events: {
+                changed: function(sender) {
+                  $cache.set("tempRemind", sender.on)
+                  request.request()
+                }
+              }
+            }
+          ],
+          layout: $layout.fill
+        },{
+          type: "view",
+          layout: $layout.fill,
+          views: [{
+            type: "label",
+            props: {
+              text: "开启此功能将会在气温发生大幅变化（超过 5 °）的前一天晚上 8 点推送提醒通知。",
+              textColor: $color("#AAAAAA"),
+              align: $align.left,
+              font: $font(12),
+              lines: 0,
+            },
+            layout: function(make, view) {
+              make.left.right.inset(15)
+              make.top.inset(10)
+            },
+          },],
+        },{
+          type: "view",
+          views: [{
+              type: "label",
+              props: {
+                text: "气象灾害预警",
+              },
+              layout: function(make, view) {
+                make.left.inset(15)
+                make.centerY.equalTo(view.super)
+              }
+            },
+            {
+              type: "switch",
+              props: {
+                on: utils.getCache("disasterRemind"),
+              },
+              layout: function(make, view) {
+                make.right.inset(15)
+                make.centerY.equalTo(view.super)
+              },
+              events: {
+                changed: function(sender) {
+                  $cache.set("disasterRemind", sender.on)
+                }
+              }
+            }
+          ],
+          layout: $layout.fill
+        },{
+          type: "view",
+          layout: $layout.fill,
+          views: [{
+            type: "label",
+            props: {
+              text: "开启此功能将会在每天首次打开时（系统限制）推送气象灾害预警信息。",
+              textColor: $color("#AAAAAA"),
+              align: $align.left,
+              font: $font(12),
+              lines: 0,
+            },
+            layout: function(make, view) {
+              make.left.right.inset(15)
+              make.top.inset(10)
+            },
+          },],
+        },]
       },
       layout: $layout.fill,
       events: {
         rowHeight: function(sender, indexPath) {
-          if (indexPath.row == 1) {
+          if (indexPath.row == 0) {
+            return 5
+          } else if (indexPath.row % 2 == 1) {
             return 45
           } else {
-            return 5
+            return 70
           }
         }
       }
@@ -478,6 +572,72 @@ function setupShareView() {
           type: "label",
           props: {
             text: "分享",
+            align: $align.center,
+            font: $font(17),
+            textColor: $color("#3478f7"),
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.left.inset(20)
+          }
+        }]
+      },{
+        type: "button",
+        props: {
+          title: "",
+          radius: 0,
+          bgcolor: $color("white"),
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(15)
+          make.width.equalTo(view.super)
+          make.height.equalTo(40)
+        },
+        events: {
+          tapped: function(sender) {
+            $share.sheet(["http://t.cn/Eq2M5hm"])
+          }
+        },
+        views: [{
+          type: "canvas",
+          layout: function(make, view) {
+            make.top.inset(0)
+            make.height.equalTo(1 / $device.info.screen.scale)
+            make.left.right.inset(0)
+          },
+          events: {
+            draw: function(view, ctx) {
+              var width = view.frame.width
+              var scale = $device.info.screen.scale
+              ctx.strokeColor = $color("lightGray")
+              ctx.setLineWidth(1 / scale)
+              ctx.moveToPoint(0, 0)
+              ctx.addLineToPoint(width, 0)
+              ctx.strokePath()
+            }
+          }
+        },{
+          type: "canvas",
+          layout: function(make, view) {
+            make.bottom.inset(0)
+            make.height.equalTo(1 / $device.info.screen.scale)
+            make.left.right.inset(0)
+          },
+          events: {
+            draw: function(view, ctx) {
+              var width = view.frame.width
+              var scale = $device.info.screen.scale
+              ctx.strokeColor = $color("lightGray")
+              ctx.setLineWidth(1 / scale)
+              ctx.moveToPoint(0, 0)
+              ctx.addLineToPoint(width, 0)
+              ctx.strokePath()
+            }
+          }
+        },{
+          type: "label",
+          props: {
+            text: "分享安装链接",
             align: $align.center,
             font: $font(17),
             textColor: $color("#3478f7"),
