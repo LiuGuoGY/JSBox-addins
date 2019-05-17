@@ -1,18 +1,8 @@
 let utils = require("scripts/utils");
 let update = require("scripts/update");
-let widget = require("scripts/widget");
-let app = require("scripts/app");
-let view = require("scripts/view");
+let auth = require("scripts/auth");
 
-if ($app.env != $env.app) {
-  if(utils.getCache("haveBanned") === true) {
-    view.showBannedAlert()
-  } else {
-    widget.setupView()
-  }
-} else {
-  app.show()
-}
+auth.start()
 
 if ($app.env == $env.app) {
   update.checkUpdate();
