@@ -254,14 +254,59 @@ async function getCaiYun2HoursForecast(lng, lat) {
             $("airQuality").alpha = 0
           },
           completion: function() {
-            $("airQuality").text = data.result.forecast_keypoint;
+            let blank = "            "
+            let size = $text.sizeThatFits({
+              text: data.result.forecast_keypoint + blank,
+              width: 1000,
+              font: $font("Lato-Medium", 13),
+            })
+            let needScroll = size.width > $("airQuality").frame.width
+            if(needScroll) {
+              $("airQuality").align = $align.left
+              $("airQuality").remakeLayout(function(make) {
+                make.centerY.equalTo(view.super)
+                make.width.equalTo(size.width * 2)
+                make.height.equalTo(20)
+                make.left.inset(0)
+              })
+              $("airQuality").relayout()
+              $("airQuality").text = data.result.forecast_keypoint + blank + data.result.forecast_keypoint + blank;
+            } else {
+              $("airQuality").text = data.result.forecast_keypoint;
+            }
             $ui.animate({
               duration: 0.4,
               damping: 0.8,
               animation: function() {
                 $("airQuality").alpha = 1
               },
+              completion: function() {
+                if(needScroll) {
+                  scrollStart()
+                  function scrollStart() {
+                    $("airQuality").updateLayout(function(make) {
+                      make.left.inset(0).offset(- size.width)
+                    })
+                    $ui.animate({
+                      delay: 1,
+                      options: 3 << 16,
+                      duration: 0.1 * size.width,
+                      animation: function() {
+                        $("airQuality").relayout()
+                      },
+                      completion: function() {
+                        $("airQuality").updateLayout(function(make) {
+                          make.left.inset(0)
+                        })
+                        $("airQuality").relayout()
+                        scrollStart()
+                      }
+                    })
+                  }
+                }
+              }
             })
+            
           },
         })
       });

@@ -1124,6 +1124,20 @@ function setupFeedBack(text) {
               },
             }
           },
+          {
+            type: "label",
+            props: {
+              text: "如果需要发送图片或者视频，请在公众号中进行反馈。",
+              textColor: $color("#AAAAAA"),
+              align: $align.left,
+              font: $font(12),
+              lines: 0,
+            },
+            layout: function(make, view) {
+              make.top.equalTo(view.prev.bottom).inset(20)
+              make.left.inset(20)
+            }
+          }
         ]
       },
     ]

@@ -97,20 +97,32 @@ function setupCardView(mode) {
                 make.height.equalTo(20)
               }
             },{
-              type: "label",
+              type: "view",
               props: {
-                id: "airQuality",
-                text: "空气质量：" + utils.getCache("nowQlty", "无"),
-                font: $font("Lato-Medium", 13),
-                textColor: $color("white"),
-                align: $align.right,
+                clipsToBounds: true,
               },
               layout: function(make, view) {
                 make.width.equalTo(view.super).multipliedBy(0.7)
                 make.right.inset(15)
                 make.bottom.inset(8 / 110 * widgetHeight)
                 make.height.equalTo(20)
-              }
+              },
+              views: [{
+                type: "label",
+                props: {
+                  id: "airQuality",
+                  text: "空气质量：" + utils.getCache("nowQlty", "无"),
+                  font: $font("Lato-Medium", 13),
+                  textColor: $color("white"),
+                  align: $align.right,
+                },
+                layout: function(make, view) {
+                  make.centerY.equalTo(view.super)
+                  make.width.equalTo(view.super)
+                  make.height.equalTo(20)
+                  make.left.inset(0)
+                }
+              },]
             },{
               type: "image",
               props: {
