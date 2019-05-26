@@ -1061,7 +1061,7 @@ function setupUploadView(updateApp) {
         type: "label",
         props: {
           id: "updateDesLabel",
-          text: "新功能（可选）",
+          text: "新功能",
           align: $align.left,
           font: $font(16),
         },
@@ -1122,7 +1122,7 @@ function setupUploadView(updateApp) {
         },
         events: {
           tapped: async function(sender) {
-            if(myApp.appName == "未定义" || myApp.appName == "" || myApp.file == "" || myApp.appCate == "未分类" || myApp.appCate == "" || myApp.appVersion == "" || myApp.instruction == "") {
+            if(myApp.appName == "未定义" || myApp.appName == "" || myApp.file == "" || myApp.appCate == "未分类" || myApp.appCate == "" || myApp.appVersion == "" || myApp.instruction == "" || myApp.versionInst == "") {
               ui.showToastView($("uploadItemView"), utils.mColor.red, "请补全信息");
               return 0;
             }
@@ -1214,6 +1214,8 @@ function setupUploadView(updateApp) {
               delete myApp.createdAt
               delete myApp.updatedAt
               delete myApp.ACL
+              delete myApp.haveInstalled
+              delete myApp.needUpdate
             }
 
             await api.putApp(objectJson.objectId, myApp)
