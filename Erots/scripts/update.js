@@ -46,7 +46,7 @@ function getLatestVersion() {
 
 function getLatestBuild() {
   $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/app.json",
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/app.json",
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
@@ -56,7 +56,7 @@ function getLatestBuild() {
         let updateVersion = appJson.version
         if(parseInt(updateBuild) > parseInt(getCurBuild())) {
           $http.download({
-            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/updateDetail.md",
+            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/updateDetail.md",
             showsProgress: false,
             timeout: 5,
             handler: function(resp) {
@@ -94,7 +94,7 @@ function sureToUpdate(version, des) {
 
 function updateScript() {
   let url =
-    "https://github.com/LiuGuoGY/JSBox-addins/blob/master/launch-center-new/.output/Launch%20Center%20New.box?raw=true";
+    "https://github.com/LiuGuoGY/JSBox-addins/raw/master/Erots/.output/Erots.box?raw=true";
   const scriptName = $addin.current.name;
   $http.download({
     url: url,
