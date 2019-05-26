@@ -622,7 +622,7 @@ function addProgressView(superView) {
       type: "label",
       props: {
         id: "myProgressText",
-        text: "更新中...",
+        text: "开始上传",
         font: $font("bold", 15),
         align: $align.center
       },

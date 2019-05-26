@@ -265,10 +265,12 @@ function setupUploadView(updateApp) {
                     $file.mkdir("assets/temp")
                   }
                   if(title.indexOf(".js") >= 0) {
-                    myApp.appName = title.substr(0, title.length - 3)
-                    myApp.appIcon = setUrlPara(myApp.appIcon, utils.getNum(addins[idx].icon))
+                    if(!updateApp) {
+                      myApp.appName = title.substr(0, title.length - 3)
+                      myApp.appIcon = setUrlPara(myApp.appIcon, utils.getNum(addins[idx].icon))
+                    }
                     $("titleInput").text = myApp.appName
-                    $("chooseFileButtonDetail").text = "已选择 " + myApp.appName
+                    $("chooseFileButtonDetail").text = "已选择 " + title.substr(0, title.length - 3)
                     let path = "assets/temp/" + title
                     if($file.exists(path)) {
                       $file.delete(path)
@@ -280,7 +282,9 @@ function setupUploadView(updateApp) {
                     myApp.file = path
                     refreshPreview()
                   } else {
-                    myApp.appName = title
+                    if(!updateApp) {
+                      myApp.appName = title
+                    }
                     let path = "assets/temp/box"
                     if($file.exists(path)) {
                       $file.delete(path)
@@ -298,9 +302,11 @@ function setupUploadView(updateApp) {
                             data: cutIcon(file.image, true).png,
                             path: iconPath,
                           })
-                          myApp.appIcon = iconPath
+                          if(!updateApp) {
+                            myApp.appIcon = iconPath
+                          }
                           $("titleInput").text = myApp.appName
-                          $("chooseFileButtonDetail").text = "已选择 " + myApp.appName
+                          $("chooseFileButtonDetail").text = "已选择 " + title
                           refreshPreview()
                         }
                       }
@@ -1123,7 +1129,19 @@ function setupUploadView(updateApp) {
         events: {
           tapped: async function(sender) {
             if(myApp.appName == "未定义" || myApp.appName == "" || myApp.file == "" || myApp.appCate == "未分类" || myApp.appCate == "" || myApp.appVersion == "" || myApp.instruction == "" || myApp.versionInst == "") {
-              ui.showToastView($("uploadItemView"), utils.mColor.red, "请补全信息");
+              if(myApp.appName == "未定义" || myApp.appName == "") {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "请填写应用名称");
+              } else if(myApp.file == "") {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "请选择应用文件");
+              } else if(myApp.appCate == "未分类" || myApp.appCate == "") {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "请选择分类");
+              } else if(myApp.appVersion == "") {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "请填写版本号");
+              } else if(myApp.instruction == "") {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "请填写应用介绍");
+              } else if(myApp.versionInst == "") {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "请填写新功能介绍");
+              }
               return 0;
             }
 
@@ -1179,6 +1197,9 @@ function setupUploadView(updateApp) {
             if($("myProgress")) {
               $("myProgress").locations = [0.0, 0.1, 0.1]
             }
+            if($("myProgressText")) {
+              $("myProgressText").text = "上传应用文件..."
+            }
             
             //上传脚本文件
             let file = $file.read(myApp.file);
@@ -1187,6 +1208,9 @@ function setupUploadView(updateApp) {
 
             if($("myProgress")) {
               $("myProgress").locations = [0.0, 0.4, 0.4]
+            }
+            if($("myProgressText")) {
+              $("myProgressText").text = "上传图标中..."
             }
             
             //上传图标
@@ -1202,11 +1226,15 @@ function setupUploadView(updateApp) {
               $("myProgress").locations = [0.0, 0.5, 0.5]
             }
 
+
             //上传预览图片
             if(myApp.previews.length > 0) {
               let arrays = []
               for(let i = 0; i < myApp.previews.length; i++) {
                 if(!myApp.previews[i].startsWith("http")) {
+                  if($("myProgressText")) {
+                    $("myProgressText").text = "上传预览图片...("+ i + "/" + myApp.previews.length + ")"
+                  }
                   if(myApp.previews[i].endsWith("png")) {
                     arrays.push(await api.uploadSM($file.read(myApp.previews[i]).image.png, "1.png"));
                   } else {
