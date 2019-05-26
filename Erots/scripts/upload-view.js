@@ -1127,7 +1127,11 @@ function setupUploadView(updateApp) {
               return 0;
             }
 
-            ui.showToastView($("uploadItemView"), utils.mColor.blue, "开始上传中，请耐心等待...");
+            ui.showToastView($("uploadItemView"), utils.mColor.blue, "开始上传中，请耐心等待，");
+
+            if($("uploadItemView")) {
+              ui.addProgressView($("uploadItemView"))
+            }
 
             let objectJson = (myApp.objectId)?{objectId: myApp.objectId}:await api.uploadApp(myApp);
             $console.info(objectJson);
@@ -1171,11 +1175,19 @@ function setupUploadView(updateApp) {
                 return 0
               }
             }
+
+            if($("myProgress")) {
+              $("myProgress").locations = [0.0, 0.1, 0.1]
+            }
             
             //上传脚本文件
             let file = $file.read(myApp.file);
             let fileUrl = await api.shimo_uploadFile(file);
             myApp.file = fileUrl;
+
+            if($("myProgress")) {
+              $("myProgress").locations = [0.0, 0.4, 0.4]
+            }
             
             //上传图标
             if(!myApp.appIcon.startsWith("erots://") && !myApp.appIcon.startsWith("http")) {
@@ -1184,6 +1196,10 @@ function setupUploadView(updateApp) {
               } else {
                 myApp.appIcon = await api.uploadSM($file.read(myApp.appIcon).image.jpg(1.0), "1.jpg")
               }
+            }
+
+            if($("myProgress")) {
+              $("myProgress").locations = [0.0, 0.5, 0.5]
             }
 
             //上传预览图片
@@ -1203,6 +1219,9 @@ function setupUploadView(updateApp) {
               myApp.previews = arrays;
               $console.info(myApp.previews);
             }
+            if($("myProgress")) {
+              $("myProgress").locations = [0.0, 0.8, 0.8]
+            }
 
             //加入作者信息
             let author = user.getLoginUser()
@@ -1219,7 +1238,14 @@ function setupUploadView(updateApp) {
             }
 
             await api.putApp(objectJson.objectId, myApp)
-            
+
+            if($("myProgress")) {
+              $("myProgress").locations = [0.0, 1, 1]
+            }
+            if($("myProgressText")) {
+              $("myProgressText").text = "发布成功"
+            }
+
             //清空所有缓存
             $cache.remove("unfinishData")
             if($file.exists("assets/temp")) {
