@@ -1289,8 +1289,8 @@ function setupUploadView(updateApp) {
 
             ui.showToastView($("uploadItemView"), utils.mColor.green, "发布成功");
             $app.notify({
-              name: "refresh",
-              object: {}
+              name: "requireCloud",
+              object: {"a": "b"}
             });
             $delay(1, function() {
               $ui.pop();

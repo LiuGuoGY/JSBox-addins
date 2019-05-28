@@ -51,9 +51,12 @@ function main() {
 }
 
 $app.listen({
-  refresh: function(object) {
+  refreshAll: function(object) {
     refreshAllView()
-  }
+  },
+  requireCloud: function(object) {
+    requireApps()
+  },
 });
 
 let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 

@@ -44,7 +44,7 @@ function show(objectId) {
           make.height.equalTo(80)
           make.centerX.equalTo(view.super)
         },
-        views: [ui.genAppShowView(app.appIcon, app.appName, (app.subtitle != "")?app.subtitle:app.appCate, buttonText, function() {
+        views: [ui.genAppShowView(app.appIcon, app.appName, (app.subtitle != "")?app.subtitle:app.appCate, buttonText, function(buttonView) {
           if(!app.needUpdate && app.haveInstalled) {
             $addin.run(app.appName)
           } else {
@@ -67,7 +67,13 @@ function show(objectId) {
                   }
                 }
                 $cache.set("cloudApps", cloudApps);
-                // refreshAllView()
+                $app.notify({
+                  name: "refreshAll",
+                  object: {"a": "b"}
+                });
+                app.needUpdate = false
+                app.haveInstalled = true
+                buttonView.title = "打开"
                 $device.taptic(2);
                 $delay(0.2, ()=>{$device.taptic(2);})
               }

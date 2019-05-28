@@ -36,7 +36,7 @@ function getSearchJson(url){
   let deUrl = decodeURI(url)
   let searchArr = deUrl.substr(deUrl.indexOf("?") + 1).split("&");
   let searchJson = {}
-  for(let i in searchArr){
+  for(let i = 0; i < searchArr.length; i++){
     searchJson[searchArr[i].split("=")[0]] = searchArr[i].split("=")[1]
   }
   return searchJson
@@ -102,7 +102,7 @@ function getInstalledApps() {
   for(let i = 0; i < addins.length; i++) {
     if(addins[i].name.endsWith(".js")) {
       let str = addins[i].data.string
-      if(str.indexOf("/**erots") >= 0) {
+      if(str && str.indexOf("/**erots") >= 0) {
         let id = str.match(/id: (\S*)\n/)[1]
         let build = parseInt(str.match(/build: (\S*)\n/)[1])
         apps.push({
