@@ -389,7 +389,7 @@ function authPass() {
     if(utils.getCache("haveBanned") === true) {
       ui.showBannedAlert()
     } else {
-      widget.setupView()
+      // widget.setupView()
     }
   } else {
     app.show()

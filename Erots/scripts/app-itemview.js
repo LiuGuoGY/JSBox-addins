@@ -6,7 +6,7 @@ function show(objectId) {
   let cloudApps = utils.getCache("cloudApps", [])
   for(let i = 0; i < cloudApps.length; i++) {
     if(cloudApps[i].objectId == objectId) {
-      app = cloudApps[i]
+      app = cloudApps[i];
       break;
     }
   }
@@ -44,7 +44,36 @@ function show(objectId) {
           make.height.equalTo(80)
           make.centerX.equalTo(view.super)
         },
-        views: [ui.genAppShowView(app.appIcon, app.appName, (app.subtitle != "")?app.subtitle:app.appCate, buttonText, ()=>{})]
+        views: [ui.genAppShowView(app.appIcon, app.appName, (app.subtitle != "")?app.subtitle:app.appCate, buttonText, function() {
+          if(!app.needUpdate && app.haveInstalled) {
+            $addin.run(app.appName)
+          } else {
+            $http.download({
+              url: app.file,
+              showsProgress: false,
+              handler: function(resp) {
+                let json = utils.getSearchJson(app.appIcon)
+                let icon_code = (json.code)?json.code:"124";
+                $addin.save({
+                  name: app.appName,
+                  data: resp.data,
+                  icon: "icon_" + icon_code + ".png",
+                });
+                let cloudApps = utils.getCache("cloudApps", [])
+                for(let j = 0; j < cloudApps.length; j++) {
+                  if(cloudApps[j].objectId == app.objectId) {
+                    cloudApps[j].haveInstalled = true
+                    cloudApps[j].needUpdate = false
+                  }
+                }
+                $cache.set("cloudApps", cloudApps);
+                // refreshAllView()
+                $device.taptic(2);
+                $delay(0.2, ()=>{$device.taptic(2);})
+              }
+            })
+          }
+        })]
       },{
         type: "canvas",
         layout: function(make, view) {

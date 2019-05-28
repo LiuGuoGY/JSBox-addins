@@ -3,10 +3,15 @@ let utils = require('scripts/utils')
 async function uploadSM(data, fileName) {
   let resp = await $http.upload({
     url: "https://sm.ms/api/upload",
-    showsProgress: false,
+    timeout: 5,
     files: [{ "data": data, "name": "smfile", "filename": fileName}],
   })
-  return resp.data.data.url
+  $console.info(resp);
+  if(resp.data && resp.data != "") {
+    return resp.data.data.url
+  } else {
+    return undefined
+  }
 }
 
 async function uploadApp(json) {

@@ -50,6 +50,12 @@ function main() {
   // solveQuery()
 }
 
+$app.listen({
+  refresh: function(object) {
+    refreshAllView()
+  }
+});
+
 let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 
   
 function setupMainView() {
@@ -784,9 +790,12 @@ function genAppListView(apps) {
             url: apps[i].file,
             showsProgress: false,
             handler: function(resp) {
+              let json = utils.getSearchJson(apps[i].appIcon)
+              let icon_code = (json.code)?json.code:"124";
               $addin.save({
                 name: apps[i].appName,
-                data: resp.data
+                data: resp.data,
+                icon: "icon_" + icon_code + ".png",
               });
               let cloudApps = utils.getCache("cloudApps", [])
               for(let j = 0; j < cloudApps.length; j++) {
@@ -806,6 +815,17 @@ function genAppListView(apps) {
     })
   }
   return appViewItems
+}
+
+function refreshAllView() {
+  if($("cloudAppsList")) {
+    $("cloudAppsList").remove()
+    $("cloudAppListParent").add(genCloudAppListView())
+  }
+  if($("updateAppsList")) {
+    $("updateAppsList").remove()
+    $("updateAppListParent").add(genUpdateAppListView())
+  }
 }
 
 function genMeView() {
@@ -1879,17 +1899,6 @@ function requireApps() {
       refreshAllView();
     }
   })
-}
-
-function refreshAllView() {
-  if($("cloudAppsList")) {
-    $("cloudAppsList").remove()
-    $("cloudAppListParent").add(genCloudAppListView())
-  }
-  if($("updateAppsList")) {
-    $("updateAppsList").remove()
-    $("updateAppListParent").add(genUpdateAppListView())
-  }
 }
 
 function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {

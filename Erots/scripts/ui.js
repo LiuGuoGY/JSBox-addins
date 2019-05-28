@@ -649,8 +649,6 @@ function addProgressView(superView) {
   }
 }
 
-
-
 module.exports = {
   showToastView: showToastView,
   genTemplate: genTemplate,

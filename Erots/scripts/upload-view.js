@@ -1145,8 +1145,6 @@ function setupUploadView(updateApp) {
               return 0;
             }
 
-            ui.showToastView($("uploadItemView"), utils.mColor.blue, "开始上传中，请耐心等待，");
-
             if($("uploadItemView")) {
               ui.addProgressView($("uploadItemView"))
             }
@@ -1233,12 +1231,21 @@ function setupUploadView(updateApp) {
               for(let i = 0; i < myApp.previews.length; i++) {
                 if(!myApp.previews[i].startsWith("http")) {
                   if($("myProgressText")) {
-                    $("myProgressText").text = "上传预览图片...("+ i + "/" + myApp.previews.length + ")"
+                    let p = i + 1
+                    $("myProgressText").text = "上传预览图片...("+ p + "/" + myApp.previews.length + ")"
                   }
+                  
                   if(myApp.previews[i].endsWith("png")) {
-                    arrays.push(await api.uploadSM($file.read(myApp.previews[i]).image.png, "1.png"));
+                    $console.info($file.read(myApp.previews[i]).image);
+                    let url = await api.uploadSM($file.read(myApp.previews[i]).image.png, "1.png")
+                    if(url) {
+                      arrays.push(url);
+                    }
                   } else {
-                    arrays.push(await api.uploadSM($file.read(myApp.previews[i]).image.jpg(1.0), "1.jpg"));
+                    let url = await api.uploadSM($file.read(myApp.previews[i]).image.jpg(1.0), "1.jpg")
+                    if(url) {
+                      arrays.push(url);
+                    }
                   }
                 } else {
                   arrays.push(myApp.previews[i])
@@ -1281,6 +1288,10 @@ function setupUploadView(updateApp) {
             }
 
             ui.showToastView($("uploadItemView"), utils.mColor.green, "发布成功");
+            $app.notify({
+              name: "refresh",
+              object: {}
+            });
             $delay(1, function() {
               $ui.pop();
             });
