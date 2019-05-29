@@ -12,6 +12,7 @@ let appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
 let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
 let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
+let topOffset = -20
 
 const mColor = {
   gray: "#a2a2a2",
@@ -71,20 +72,45 @@ function setupMainView() {
       statusBarStyle: 0,
     },
     views: [{
-        type: "blur",
-        props: {
-          style: 5 // 0 ~ 5 调整背景的颜色程度
-        },
-        layout: function(make, view) {
-          make.left.bottom.right.inset(0)
-          if($device.info.version >= "11"){
-            make.top.equalTo(view.super.safeAreaBottom).offset(-50)
-          } else {
-            make.height.equalTo(50)
-          }
+      type: "view",
+      props: {
+        id: "content",
+        bgcolor: $color("clear"),
+        clipsToBounds: true,
+      },
+      layout: function(make, view) {
+        make.width.equalTo(view.super)
+        make.left.right.inset(0)
+        make.bottom.inset(0)
+        make.top.inset(0)
+      },
+      events: {
+        ready(sender) {
+          $delay(0.1, ()=>{
+            topOffset = $("cloudAppsList").contentOffset.y
+          })
         },
       },
-      {
+      views: [genCloudView()],
+    },
+    {
+      type: "view",
+      layout: function(make, view) {
+        if($device.info.version >= "11"){
+          make.top.equalTo(view.super.safeAreaBottom).offset(-50)
+        } else {
+          make.height.equalTo(50)
+        }
+        make.left.right.inset(0)
+        make.bottom.inset(0)
+      },
+      views: [{
+        type: "blur",
+        props: {
+          style: 1,
+        },
+        layout: $layout.fill,
+      },{
         type: "matrix",
         props: {
           id: "tab",
@@ -119,101 +145,67 @@ function setupMainView() {
             }
           ],
           data: [
-          {
-            menu_image: {
-              icon: mIcon[0].blue,
+            {
+              menu_image: {
+                icon: mIcon[0].blue,
+              },
+              menu_label: {
+                text: "应用",
+                textColor: $color(mColor.blue)
+              }
             },
-            menu_label: {
-              text: "应用",
-              textColor: $color(mColor.blue)
-            }
-          },
-          {
-            menu_image: {
-              icon: mIcon[1].gray,
+            {
+              menu_image: {
+                icon: mIcon[1].gray,
+              },
+              menu_label: {
+                text: "更新",
+                textColor: $color(mColor.gray)
+              }
             },
-            menu_label: {
-              text: "更新",
-              textColor: $color(mColor.gray)
-            }
-          },
-          {
-            menu_image: {
-              icon: mIcon[2].gray,
+            {
+              menu_image: {
+                icon: mIcon[2].gray,
+              },
+              menu_label: {
+                text: "我的",
+                textColor: $color(mColor.gray)
+              }
             },
-            menu_label: {
-              text: "我的",
-              textColor: $color(mColor.gray)
-            }
-          },
-        ],
+          ],
         },
         layout: function(make, view) {
-          make.height.equalTo(50)
+          make.top.inset(0)
           make.left.right.inset(0)
-          if($device.info.version >= "11"){
-            make.bottom.equalTo(view.super.safeAreaBottom)
-          } else {
-            make.bottom.inset(0)
-          }
+          make.height.equalTo(50)
         },
         events: {
           didSelect(sender, indexPath, data) {
             handleSelect(sender, indexPath.row)
           },
         }
+      },],
+    },{
+      type: "canvas",
+      layout: function(make, view) {
+        var preView = view.prev
+        make.top.equalTo(preView.top)
+        make.height.equalTo(1 / $device.info.screen.scale)
+        make.left.right.inset(0)
       },
-      {
-        type: "canvas",
-        layout: function(make, view) {
-          var preView = view.prev
-          make.top.equalTo(preView.top)
-          make.height.equalTo(1)
-          make.left.right.inset(0)
-        },
-        events: {
-          draw: function(view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("gray")
-            ctx.setLineWidth(1 / scale)
-            ctx.moveToPoint(0, 0)
-            ctx.addLineToPoint(width, 0)
-            ctx.strokePath()
-          }
+      events: {
+        draw: function(view, ctx) {
+          var width = view.frame.width
+          var scale = $device.info.screen.scale
+          ctx.strokeColor = $color("gray")
+          ctx.setLineWidth(1 / scale)
+          ctx.moveToPoint(0, 0)
+          ctx.addLineToPoint(width, 0)
+          ctx.strokePath()
         }
-      },
-      {
-        type: "view",
-        props: {
-          bgcolor: $color("white"),
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.left.right.top.inset(0)
-          make.height.equalTo(20)
-        },
-      },
-      {
-        type: "view",
-        props: {
-          id: "content",
-          bgcolor: $color("clear"),
-          clipsToBounds: true,
-        },
-        layout: function(make, view) {
-          make.width.equalTo(view.super)
-          make.left.right.inset(0)
-          make.bottom.equalTo($("tab").top)
-          if($device.info.version >= "11"){
-            make.top.equalTo(view.super.safeAreaTop)
-          } else {
-            make.top.inset(20)
-          }
-        },
-        views: [genCloudView()],
-      },
-    ]
+      }
+    },
+  ]
   })
 }
 
@@ -579,6 +571,7 @@ function genCloudAppListView() {
       id: "cloudAppsList",
       template: [],
       separatorInset: $insets(0, 85, 0, 15),
+      indicatorInsets: $insets(45, 0, 50, 0),
       header: {
         type: "view",
         props:{
@@ -636,7 +629,7 @@ function genCloudAppListView() {
       footer: {
         type: "view",
         props: {
-          height: 50,
+          height: 70,
           bgcolor: $color("clear"),
         }
       },
@@ -715,6 +708,7 @@ function genUpdateAppListView() {
             font: $font("Avenir-Black", 35),
             textColor: $color("black"),
             align: $align.center,
+            indicatorInsets: $insets(45, 0, 50, 0),
           },
           layout: function(make, view) {
             make.left.inset(15)
@@ -785,10 +779,54 @@ function genAppListView(apps) {
         make.height.equalTo(80)
         make.center.equalTo(view.super)
       },
-      views: [ui.genAppShowView(apps[i].appIcon, apps[i].appName, (apps[i].subtitle != "")?apps[i].subtitle:apps[i].appCate, buttonText, function() {
+      views: [ui.genAppShowView(apps[i].appIcon, apps[i].appName, (apps[i].subtitle != "")?apps[i].subtitle:apps[i].appCate, buttonText, function(buttonView) {
         if(!apps[i].needUpdate && apps[i].haveInstalled) {
           $addin.run(apps[i].appName)
         } else {
+          // buttonView.title = ""
+          // buttonView.updateLayout(function(make, view) {
+          //   make.size.equalTo($size(30, 30))
+          // })
+          // $ui.animate({
+          //   duration: 0.2,
+          //   animation: function() {
+          //     buttonView.relayout()
+          //   },
+          //   completion: function() {
+          //     buttonView.hidden = true
+          //     buttonView.super.add({
+          //       type: "canvas",
+          //       props: {
+          //         id: "canvas"
+          //       },
+          //       layout: (make, view) => {
+          //         make.center.equalTo(view.super)
+          //         make.size.equalTo($size(30, 30))
+          //       },
+          //       events: {
+          //         draw: (view, ctx) => {
+          //           ctx.strokeColor = $color(vcolor)
+          //           ctx.setLineWidth(3)
+          //           ctx.addArc(15, 15, 10, 3.14, 4 * 3.14)
+          //           ctx.strokePath()
+          //         }
+          //       },
+          //       views: [{
+          //         type: "canvas",
+          //         layout: $layout.fill,
+          //         events: {
+          //           draw: (view, ctx) => {
+          //             ctx.fillColor = $color("white")
+          //             ctx.strokeColor = $color(vcolor)
+          //             ctx.addArc(15, 5, 3, 3.14, 4 * 3.14)
+          //             ctx.fillPath()
+          //             ctx.strokePath()
+          //           }
+          //         }
+          //       }]
+          //     },)
+          //   }
+          // })
           $http.download({
             url: apps[i].file,
             showsProgress: false,
@@ -822,12 +860,16 @@ function genAppListView(apps) {
 
 function refreshAllView() {
   if($("cloudAppsList")) {
+    let cloudOffset = $("cloudAppsList").contentOffset.y
     $("cloudAppsList").remove()
     $("cloudAppListParent").add(genCloudAppListView())
+    $("cloudAppsList").contentOffset = $point(0, cloudOffset)
   }
   if($("updateAppsList")) {
+    let updateOffset = $("updateAppsList").contentOffset.y
     $("updateAppsList").remove()
     $("updateAppListParent").add(genUpdateAppListView())
+    $("updateAppsList").contentOffset = $point(0, updateOffset)
   }
 }
 
@@ -932,57 +974,21 @@ function genMeView() {
     },
     layout: $layout.fill,
     views: [{
-      type: "view",
-      props: {
-        hidden: true,
-      },
-      layout: function(make, view) {
-        make.left.top.right.inset(0)
-        make.height.equalTo(45)
-      },
-      views:[{
-        type: "label",
-        props: {
-          text: "我的",
-          font: $font("bold", 17),
-          align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
-        },
-        layout: $layout.fill,
-      },{
-        type: "canvas",
-        layout: function(make, view) {
-          make.bottom.inset(0)
-          make.height.equalTo(1)
-          make.left.right.inset(0)
-        },
-        events: {
-          draw: function(view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("darkGray")
-            ctx.setLineWidth(1 / scale)
-            ctx.moveToPoint(0, 0)
-            ctx.addLineToPoint(width, 0)
-            ctx.strokePath()
-          }
-        }
-      },],
-    },{
       type: "list",
       props: {
         id: "list",
         bgcolor: $color("clear"),
         template: feedBackTemplate,
+        indicatorInsets: $insets(45, 0, 50, 0),
         header: {
           type: "view",
           props:{
-            height: 45,
+            height: 95,
           },
           views: [{
             type: "label",
             props: {
+              id: "meListHeaderTitle",
               text: "我的",
               font: $font("Avenir-Black", 35),
               textColor: $color("black"),
@@ -998,7 +1004,7 @@ function genMeView() {
         footer: {
           type: "view",
           props:{
-            height: 60,
+            height: 110,
           },
           views: [{
             type: "label",
@@ -1009,8 +1015,8 @@ function genMeView() {
               font: $font(13)
             },
             layout: function(make, view) {
-              make.center.equalTo(view.super)
-              make.height.equalTo(view.super)
+              make.centerX.equalTo(view.super)
+              make.top.inset(23)
             }
           },],
         },
@@ -1030,7 +1036,7 @@ function genMeView() {
         }],
       },
       layout: function(make, view) {
-        make.top.equalTo(view.prev.bottom)
+        make.top.inset(0)
         make.bottom.inset(0)
         make.left.right.inset(0)
       },
@@ -1054,14 +1060,64 @@ function genMeView() {
           }
         },
         didScroll: function(sender) {
-          if(sender.contentOffset.y >= 37 && sender.prev.hidden === true) {
-            sender.prev.hidden = false
-          } else if(sender.contentOffset.y < 37 && sender.prev.hidden === false) {
-            sender.prev.hidden = true
+          if(sender.contentOffset.y >= 40 + topOffset && $("mePageHeaderLabel").hidden === true) {
+            $("mePageHeaderLabel").hidden = false
+            $("mePageHeaderBlur").bgcolor = $color("clear")
+            $("meListHeaderTitle").hidden = true
+          } else if(sender.contentOffset.y < 40 + topOffset && $("mePageHeaderLabel").hidden === false) {
+            $("mePageHeaderLabel").hidden = true
+            $("mePageHeaderBlur").bgcolor = $color("white")
+            $("meListHeaderTitle").hidden = false
+          }else if(sender.contentOffset.y < topOffset) {
+            let size = 35 - sender.contentOffset.y * 0.04
+            if(size > 40)
+              size = 40
+            $("meListHeaderTitle").font = $font("Avenir-Black", size)
           }
         },
       }
-    },],
+    },{
+      type: "view",
+      props: {
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.left.top.right.inset(0)
+        if($device.info.version >= "11"){
+          make.bottom.equalTo(view.super.topMargin).offset(40)
+        } else {
+          make.height.equalTo(65)
+        }
+      },
+      views:[{
+        type: "blur",
+        props: {
+          id: "mePageHeaderBlur",
+          style: 1, // 0 ~ 5
+          bgcolor: $color("white"),
+        },
+        layout: $layout.fill,
+      },{
+        type: "view",
+        layout: function(make, view) {
+          make.left.bottom.right.inset(0)
+          make.height.equalTo(45)
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "mePageHeaderLabel",
+            text: "我的",
+            hidden: true,
+            font: $font("bold", 17),
+            align: $align.center,
+            bgcolor: $color("clear"),
+            textColor: $color("black"),
+          },
+          layout: $layout.fill,
+        },],
+      },],
+    }],
   }
   requireInstallNumbers()
   return view
@@ -1092,7 +1148,7 @@ function wantToRealse() {
           let author = user.getLoginUser()
           let myApps = []
           for(let i = 0; i < apps.length; i++) {
-            if(apps[i].authorAccount == author.username) {
+            if(apps[i].authorAccount == author.object || apps[i].authorAccount == author.username) {
               myApps.push(apps[i])
             }
           }
@@ -1166,86 +1222,7 @@ function setupWebView(title, url) {
       navBarHidden: true,
       statusBarStyle: 0,
     },
-    views: [{
-      type: "view",
-      layout: function(make, view) {
-        if($device.info.version >= "11"){
-          make.top.equalTo(view.super.safeAreaTop)
-        } else {
-          make.top.inset(20)
-        }
-        make.left.right.inset(0)
-        make.height.equalTo(45)
-      },
-      views:[{
-        type: "label",
-        props: {
-          text: title,
-          font: $font("bold", 17),
-          align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
-        },
-        layout: $layout.fill,
-      },{
-        type: "canvas",
-        layout: function(make, view) {
-          make.bottom.inset(0)
-          make.height.equalTo(1)
-          make.left.right.inset(0)
-        },
-        events: {
-          draw: function(view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("darkGray")
-            ctx.setLineWidth(1 / scale)
-            ctx.moveToPoint(0, 0)
-            ctx.addLineToPoint(width, 0)
-            ctx.strokePath()
-          }
-        }
-      },{
-        type: "button",
-        props: {
-          bgcolor: $color("clear"),
-        },
-        layout: function(make, view) {
-          make.left.inset(0)
-          make.width.equalTo(60)
-          make.height.equalTo(view.super)
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.pop()
-          },
-        },
-        views:[{
-          type: "image",
-          props: {
-            src: "assets/back.png",
-            bgcolor: $color("clear"),
-          },
-          layout: function(make, view) {
-            make.left.inset(10)
-            make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
-          },
-        },{
-          type: "label",
-          props: {
-            text: "设置",
-            align: $align.center,
-            textColor: $color(mColor.blue),
-            font: $font(17)
-          },
-          layout: function(make, view) {
-            make.height.equalTo(view.super)
-            make.left.equalTo(view.prev.right).inset(3)
-          }
-        }],
-      },],
-    },{
+    views: [ui.genPageHeader("我的", title), {
       type: "web",
       props: {
         id: "webView",

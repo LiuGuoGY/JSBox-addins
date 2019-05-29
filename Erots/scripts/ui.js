@@ -487,27 +487,34 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
       make.height.equalTo(70)
       make.center.equalTo(view.super)
     },
-    views: [iconView,{
-      type: "button",
-      props: {
-        title: buttonText,
-        bgcolor: $rgba(100, 100, 100, 0.1),
-        titleColor: $color(mColor.blue),
-        font: $font("bold", 15),
-        radius: 15,
-        align: $align.center,
-      },
+    views: [iconView, {
+      type: "view",
       layout: function(make, view) {
         make.centerY.equalTo(view.super)
         make.right.inset(0)
         make.size.equalTo($size(75, 30))
       },
-      events: {
-        tapped: function(sender) {
-          buttonFunction(sender)
-        }
-      },
-      views: []
+      views: [{
+        type: "button",
+        props: {
+          title: buttonText,
+          bgcolor: $rgba(100, 100, 100, 0.1),
+          titleColor: $color(mColor.blue),
+          font: $font("bold", 15),
+          radius: 15,
+          align: $align.center,
+        },
+        layout: function(make, view) {
+          make.center.equalTo(view.super)
+          make.size.equalTo($size(75, 30))
+        },
+        events: {
+          tapped: function(sender) {
+            buttonFunction(sender)
+          }
+        },
+        views: []
+      }]
     },{
       type: "label",
       props: {
@@ -539,7 +546,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
   return view
 }
 
-function genAppPreviewPhotosView(photos, longPressedHandler) {
+function genAppPreviewPhotosView(photos, tappedHandler, longPressedHandler) {
   let height = 240
   let photosView = []
   for(let i = 0; i < photos.length; i++) {
@@ -568,9 +575,9 @@ function genAppPreviewPhotosView(photos, longPressedHandler) {
         },
         events: {
           tapped: function(sender) {
-            $quicklook.open({
-              image: sender.image
-            })
+            if(tappedHandler) {
+              tappedHandler(sender)
+            }
           },
           longPressed: function(sender) {
             if(longPressedHandler) {

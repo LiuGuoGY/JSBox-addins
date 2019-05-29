@@ -252,19 +252,10 @@ function setupWelcome() {
                   events: {
                     tapped: function(sender) {
                       if(!authSucces && sender.icon) {
-                        let len = $("nicknameInput").text.match(/[\u4e00-\u9fa50-9a-z]/gi)
-                        if (len == null || (len.constructor==Array && len.length != $("nicknameInput").text.length)) {
-                          $ui.alert({
-                            title: "提示",
-                            message: "待开发者审核，请耐心等待，请在公众号后台发送你的微信昵称以加快审核",
-                          });
-                        } else {
-                          $ui.alert({
-                            title: "提示",
-                            message: "待开发者审核，请耐心等待，如有疑问，请在公众号后台私信开发者",
-                          });
-                          
-                        }
+                        $ui.alert({
+                          title: "提示",
+                          message: "待开发者审核，请在公众号后台发送你的微信昵称以通过审核，请耐心等待",
+                        });
                       }
                     }
                   }

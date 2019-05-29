@@ -230,7 +230,9 @@ function show(objectId) {
             make.center.equalTo(view.super)
             make.size.equalTo(view.super)
           },
-          views: ui.genAppPreviewPhotosView(app.previews, ()=>{}),
+          views: ui.genAppPreviewPhotosView(app.previews, function(sender) {
+            genAppPreviewPhotosScrollView(app.previews)
+          }),
         },]
       },{
         type: "canvas",
@@ -419,6 +421,106 @@ function show(objectId) {
   $("appItemShowScroll").contentSize = $size(0, $("appItemShowScroll").contentSize.height + 50)
   $("appPreviewPhotosScroll").resize()
   $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+}
+
+function genAppPreviewPhotosScrollView(photos) {
+  let moveXOffsetOld,moveXOffsetNew;
+  let items = []
+  for(let i = 0; i < photos.length; i++) {
+    items.push({
+      type: "image",
+      props: {
+        src: photos[i],
+        radius: 5,
+        contentMode: $contentMode.scaleAspectFit,
+        borderWidth: 1 / $device.info.screen.scale,
+        borderColor: $color("#D0D0D0"),
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        if(i == 0) {
+          make.left.inset(25)
+        } else {
+          make.left.equalTo(view.prev.right).inset(13)
+        }
+        make.width.equalTo($device.info.screen.width - 50)
+        make.height.equalTo(view.super).multipliedBy(0.9)
+      },
+    })
+  }
+  items.push({
+    type: "view",
+    layout: function(make, view) {
+      make.centerY.equalTo(view.super)
+      make.left.equalTo(view.prev.right)
+      make.width.equalTo(25)
+      make.height.equalTo(view.super).multipliedBy(0.9)
+    }
+  })
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: 0,
+    },
+    views: [ui.genPageHeader("应用", "预览"), {
+      type: "view",
+      props: {
+        bgcolor: $color("white"),
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom).inset(0)
+        make.left.right.inset(0)
+        make.bottom.inset(0)
+      },
+      views: [{
+        type: "scroll",
+        props: {
+          alwaysBounceHorizontal: true,
+          alwaysBounceVertical: false,
+          userInteractionEnabled: true,
+          showsHorizontalIndicator: false,
+          showsVerticalIndicator: false,
+        },
+        layout: function(make, view) {
+          make.center.equalTo(view.super)
+          make.size.equalTo(view.super)
+        },
+        views: items,
+        events: {
+          willBeginDragging: function(sender) {
+            moveXOffsetOld = sender.contentOffset.x;
+          },
+          willEndDragging: function(sender, decelerate) {
+            moveXOffsetNew = sender.contentOffset.x;
+          },
+          willBeginDecelerating: function(sender) {
+            let offsetChange = moveXOffsetNew - moveXOffsetOld
+            let unit = (sender.contentSize.width - 40) / photos.length
+            let x = Math.round(moveXOffsetOld / unit) * unit
+            if(Math.abs(offsetChange) > 40) {
+              x = (offsetChange > 0)? x + unit : x - unit
+            }
+            if(x < 0 || x > sender.contentSize.width - unit) {
+              x = Math.round(moveXOffsetOld / unit) * unit
+            }
+            sender.scrollToOffset($point(x, 0))
+          },
+          didEndDragging: function(sender, decelerate) {
+            let offsetChange = moveXOffsetNew - moveXOffsetOld
+            let unit = (sender.contentSize.width - 40) / photos.length
+            let x = Math.round(moveXOffsetOld / unit) * unit
+            if(Math.abs(offsetChange) > 40) {
+              x = (offsetChange > 0)? x + unit : x - unit
+            }
+            if(x < 0 || x > sender.contentSize.width - unit) {
+              x = Math.round(moveXOffsetOld / unit) * unit
+            }
+            sender.scrollToOffset($point(x, 0))
+          }
+        }
+      },]
+    },]
+  });
 }
 
 function setLineSpacing(text, spacing) {

@@ -78,7 +78,11 @@ function setupUploadView(updateApp) {
           make.center.equalTo(view.super)
           make.size.equalTo(view.super)
         },
-        views: ui.genAppPreviewPhotosView(myApp.previews, function(i) {
+        views: ui.genAppPreviewPhotosView(myApp.previews, function(sender) {
+          $quicklook.open({
+            image: sender.image
+          })
+        }, function(i) {
           $ui.menu({
             items: ["删除"],
             handler: function(title, idx) {
@@ -988,7 +992,11 @@ function setupUploadView(updateApp) {
               make.center.equalTo(view.super)
               make.size.equalTo(view.super)
             },
-            views: ui.genAppPreviewPhotosView(myApp.previews, function(i) {
+            views: ui.genAppPreviewPhotosView(myApp.previews, function(sender) {
+              $quicklook.open({
+                image: sender.image
+              })
+            }, function(i) {
               $ui.menu({
                 items: ["删除"],
                 handler: function(title, idx) {
@@ -1261,7 +1269,7 @@ function setupUploadView(updateApp) {
             //加入作者信息
             let author = user.getLoginUser()
             myApp.author = author.nickname
-            myApp.authorAccount = author.username
+            myApp.authorAccount = author.objectId
 
             //删除json中多余信息
             if(myApp.createdAt) {
