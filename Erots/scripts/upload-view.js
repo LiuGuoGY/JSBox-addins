@@ -60,7 +60,9 @@ function setupUploadView(updateApp) {
       $("topPreView").views[0].add(ui.genAppShowView(myApp.appIcon, myApp.appName, myApp.appCate, (updateApp)?"更新":"下载", ()=>{}))
     }
     if(myApp.previews.length >= 0 && previewsPrev.length !== myApp.previews.length) {
+      let preViewOffset = 0
       if($("appPreviewPhotosScroll")) {
+        preViewOffset = $("appPreviewPhotosScroll").contentOffset.x
         $("appPreviewPhotosScroll").remove()
       }
       $("appPreviewPhotosScrollParent").add({
@@ -96,6 +98,7 @@ function setupUploadView(updateApp) {
       })
       $("appPreviewPhotosScroll").resize()
       $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+      $("appPreviewPhotosScroll").contentOffset = $point(preViewOffset, 0)
       setPreviewPre()
     }
     if(!updateApp) {
@@ -1269,7 +1272,7 @@ function setupUploadView(updateApp) {
             //加入作者信息
             let author = user.getLoginUser()
             myApp.author = author.nickname
-            myApp.authorAccount = author.objectId
+            myApp.authorId = author.objectId
 
             //删除json中多余信息
             if(myApp.createdAt) {

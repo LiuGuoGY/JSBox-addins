@@ -252,10 +252,17 @@ function setupWelcome() {
                   events: {
                     tapped: function(sender) {
                       if(!authSucces && sender.icon) {
-                        $ui.alert({
-                          title: "提示",
-                          message: "待开发者审核，请在公众号后台发送你的微信昵称以通过审核，请耐心等待",
-                        });
+                        if($("nicknameInput").text.indexOf("&") >= 0) {
+                          $ui.alert({
+                            title: "提示",
+                            message: "昵称中含有 & 符号，请在公众号后台联系开发者",
+                          });
+                        } else {
+                          $ui.alert({
+                            title: "提示",
+                            message: "待开发者审核，请在公众号后台发送你的微信昵称以通过审核，请耐心等待",
+                          });
+                        }
                       }
                     }
                   }
@@ -337,7 +344,7 @@ function detectNickname(nickname) {
     },
     handler: function(resp) {
       let data = resp.data.results
-      if(data.length > 0) {
+      if(data && data.length > 0) {
         if($("toastIcon")) {
           $("toastIcon").icon = $icon("064", $color("#00CC7A"), $size(20, 20))
           authSucces = true

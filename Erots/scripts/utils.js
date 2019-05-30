@@ -102,7 +102,7 @@ function getInstalledApps() {
   for(let i = 0; i < addins.length; i++) {
     if(addins[i].name.endsWith(".js")) {
       let data = addins[i].data
-      if(data.string && data.string.indexOf("/**erots") >= 0) {
+      if(data && data.string.indexOf("/**erots") >= 0) {
         let id = data.string.match(/id: (\S*)\n/)[1]
         let build = parseInt(data.string.match(/build: (\S*)\n/)[1])
         apps.push({

@@ -519,7 +519,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
       type: "label",
       props: {
         text: name,
-        font: $font(16),
+        font: $font("PingFangSC-Regular", 15.5),
         textColor: $color("black"),
         align: $align.left,
       },

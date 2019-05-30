@@ -639,7 +639,6 @@ function genCloudAppListView() {
     layout: $layout.fill,
     events: {
       didScroll: function(sender) {
-        let topOffset = 0//-20
         if(sender.contentOffset.y >= 40 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
           $("cloudPageHeaderLabel").hidden = false
           $("cloudPageHeaderBlur").bgcolor = $color("clear")
@@ -730,7 +729,6 @@ function genUpdateAppListView() {
     layout: $layout.fill,
     events: {
       didScroll: function(sender) {
-        let topOffset = 0//-20
         if(sender.contentOffset.y >= 40 + topOffset && $("updatePageHeaderLabel").hidden === true) {
           $("updatePageHeaderLabel").hidden = false
           $("updatePageHeaderBlur").bgcolor = $color("clear")
@@ -783,72 +781,95 @@ function genAppListView(apps) {
         if(!apps[i].needUpdate && apps[i].haveInstalled) {
           $addin.run(apps[i].appName)
         } else {
-          // buttonView.title = ""
-          // buttonView.updateLayout(function(make, view) {
-          //   make.size.equalTo($size(30, 30))
-          // })
-          // $ui.animate({
-          //   duration: 0.2,
-          //   animation: function() {
-          //     buttonView.relayout()
-          //   },
-          //   completion: function() {
-          //     buttonView.hidden = true
-          //     buttonView.super.add({
-          //       type: "canvas",
-          //       props: {
-          //         id: "canvas"
-          //       },
-          //       layout: (make, view) => {
-          //         make.center.equalTo(view.super)
-          //         make.size.equalTo($size(30, 30))
-          //       },
-          //       events: {
-          //         draw: (view, ctx) => {
-          //           ctx.strokeColor = $color(vcolor)
-          //           ctx.setLineWidth(3)
-          //           ctx.addArc(15, 15, 10, 3.14, 4 * 3.14)
-          //           ctx.strokePath()
-          //         }
-          //       },
-          //       views: [{
-          //         type: "canvas",
-          //         layout: $layout.fill,
-          //         events: {
-          //           draw: (view, ctx) => {
-          //             ctx.fillColor = $color("white")
-          //             ctx.strokeColor = $color(vcolor)
-          //             ctx.addArc(15, 5, 3, 3.14, 4 * 3.14)
-          //             ctx.fillPath()
-          //             ctx.strokePath()
-          //           }
-          //         }
-          //       }]
-          //     },)
-          //   }
-          // })
-          $http.download({
-            url: apps[i].file,
-            showsProgress: false,
-            handler: function(resp) {
-              let json = utils.getSearchJson(apps[i].appIcon)
-              let icon_code = (json.code)?json.code:"124";
-              $addin.save({
-                name: apps[i].appName,
-                data: resp.data,
-                icon: "icon_" + icon_code + ".png",
-              });
-              let cloudApps = utils.getCache("cloudApps", [])
-              for(let j = 0; j < cloudApps.length; j++) {
-                if(cloudApps[j].objectId == apps[i].objectId) {
-                  cloudApps[j].haveInstalled = true
-                  cloudApps[j].needUpdate = false
+          buttonView.title = ""
+          buttonView.updateLayout(function(make, view) {
+            make.size.equalTo($size(30, 30))
+          })
+          $ui.animate({
+            duration: 0.2,
+            animation: function() {
+              buttonView.relayout()
+            },
+            completion: function() {
+              $ui.animate({
+                duration: 0.1,
+                animation: function() {
+                  buttonView.bgcolor = $color("clear")
+                },
+              })
+              buttonView.add({
+                type: "canvas",
+                layout: (make, view) => {
+                  make.center.equalTo(view.super)
+                  make.size.equalTo($size(30, 30))
+                },
+                events: {
+                  draw: (view, ctx) => {
+                    ctx.strokeColor = $rgba(100, 100, 100, 0.1)
+                    ctx.setLineWidth(2.5)
+                    ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
+                    ctx.strokePath()
+                  }
+                },
+              })
+              let radius = 0;
+              let timer = $timer.schedule({
+                interval: 0.01,
+                handler: function() {
+                  if(buttonView.get("canvas")) {
+                    buttonView.get("canvas").rotate(radius)
+                    radius = radius + Math.PI / 180 * 6
+                    $console.info(radius);
+                  } else {
+                    timer.invalidate()
+                  }
                 }
-              }
-              $cache.set("cloudApps", cloudApps);
-              refreshAllView()
-              $device.taptic(2);
-              $delay(0.2, ()=>{$device.taptic(2);})
+              });
+              $http.download({
+                url: apps[i].file,
+                showsProgress: false,
+                handler: function(resp) {
+                  let json = utils.getSearchJson(apps[i].appIcon)
+                  let icon_code = (json.code)?json.code:"124";
+                  $addin.save({
+                    name: apps[i].appName,
+                    data: resp.data,
+                    icon: "icon_" + icon_code + ".png",
+                  });
+                  let cloudApps = utils.getCache("cloudApps", [])
+                  for(let j = 0; j < cloudApps.length; j++) {
+                    if(cloudApps[j].objectId == apps[i].objectId) {
+                      cloudApps[j].haveInstalled = true
+                      cloudApps[j].needUpdate = false
+                    }
+                  }
+                  $cache.set("cloudApps", cloudApps);
+                  $ui.animate({
+                    duration: 0.1,
+                    animation: function() {
+                      buttonView.bgcolor = $rgba(100, 100, 100, 0.1)
+                    },
+                    completion: function() {
+                      buttonView.get("canvas").remove()
+                      buttonView.updateLayout(function(make, view) {
+                        make.size.equalTo($size(75, 30))
+                      })
+                      $ui.animate({
+                        duration: 0.2,
+                        animation: function() {
+                          buttonView.relayout()
+                        },
+                        completion: function() {
+                          buttonView.title = "打开"
+                          refreshAllView()
+                          $device.taptic(2);
+                          $delay(0.2, ()=>{$device.taptic(2);})
+                        }
+                      })
+                    }
+                  })
+                }
+              })
             }
           })
         }
@@ -1148,7 +1169,7 @@ function wantToRealse() {
           let author = user.getLoginUser()
           let myApps = []
           for(let i = 0; i < apps.length; i++) {
-            if(apps[i].authorAccount == author.objectId || apps[i].authorAccount == author.username) {
+            if(apps[i].authorAccount == author.objectId || apps[i].authorAccount == author.username || apps[i].authorId == author.objectId) {
               myApps.push(apps[i])
             }
           }

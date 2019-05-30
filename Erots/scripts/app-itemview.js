@@ -48,34 +48,100 @@ function show(objectId) {
           if(!app.needUpdate && app.haveInstalled) {
             $addin.run(app.appName)
           } else {
-            $http.download({
-              url: app.file,
-              showsProgress: false,
-              handler: function(resp) {
-                let json = utils.getSearchJson(app.appIcon)
-                let icon_code = (json.code)?json.code:"124";
-                $addin.save({
-                  name: app.appName,
-                  data: resp.data,
-                  icon: "icon_" + icon_code + ".png",
-                });
-                let cloudApps = utils.getCache("cloudApps", [])
-                for(let j = 0; j < cloudApps.length; j++) {
-                  if(cloudApps[j].objectId == app.objectId) {
-                    cloudApps[j].haveInstalled = true
-                    cloudApps[j].needUpdate = false
+            buttonView.title = ""
+            buttonView.updateLayout(function(make, view) {
+              make.size.equalTo($size(30, 30))
+            })
+            $ui.animate({
+              duration: 0.2,
+              animation: function() {
+                buttonView.relayout()
+              },
+              completion: function() {
+                $ui.animate({
+                  duration: 0.1,
+                  animation: function() {
+                    buttonView.bgcolor = $color("clear")
+                  },
+                })
+                buttonView.add({
+                  type: "canvas",
+                  layout: (make, view) => {
+                    make.center.equalTo(view.super)
+                    make.size.equalTo($size(30, 30))
+                  },
+                  events: {
+                    draw: (view, ctx) => {
+                      ctx.strokeColor = $rgba(100, 100, 100, 0.1)
+                      ctx.setLineWidth(2.5)
+                      ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
+                      ctx.strokePath()
+                    }
+                  },
+                })
+                let radius = 0;
+                let timer = $timer.schedule({
+                  interval: 0.01,
+                  handler: function() {
+                    if(buttonView.get("canvas")) {
+                      buttonView.get("canvas").rotate(radius)
+                      radius = radius + Math.PI / 180 * 6
+                      $console.info(radius);
+                    } else {
+                      timer.invalidate()
+                    }
                   }
-                }
-                $cache.set("cloudApps", cloudApps);
-                $app.notify({
-                  name: "refreshAll",
-                  object: {"a": "b"}
                 });
-                app.needUpdate = false
-                app.haveInstalled = true
-                buttonView.title = "打开"
-                $device.taptic(2);
-                $delay(0.2, ()=>{$device.taptic(2);})
+                $http.download({
+                  url: app.file,
+                  showsProgress: false,
+                  handler: function(resp) {
+                    let json = utils.getSearchJson(app.appIcon)
+                    let icon_code = (json.code)?json.code:"124";
+                    $addin.save({
+                      name: app.appName,
+                      data: resp.data,
+                      icon: "icon_" + icon_code + ".png",
+                    });
+                    let cloudApps = utils.getCache("cloudApps", [])
+                    for(let j = 0; j < cloudApps.length; j++) {
+                      if(cloudApps[j].objectId == app.objectId) {
+                        cloudApps[j].haveInstalled = true
+                        cloudApps[j].needUpdate = false
+                      }
+                    }
+                    $cache.set("cloudApps", cloudApps);
+                    $ui.animate({
+                      duration: 0.1,
+                      animation: function() {
+                        buttonView.bgcolor = $rgba(100, 100, 100, 0.1)
+                      },
+                      completion: function() {
+                        buttonView.get("canvas").remove()
+                        buttonView.updateLayout(function(make, view) {
+                          make.size.equalTo($size(75, 30))
+                        })
+                        $ui.animate({
+                          duration: 0.2,
+                          animation: function() {
+                            buttonView.relayout()
+                          },
+                          completion: function() {
+                            buttonView.title = "打开"
+                            $app.notify({
+                              name: "refreshAll",
+                              object: {"a": "b"}
+                            });
+                            app.needUpdate = false
+                            app.haveInstalled = true
+                            $device.taptic(2);
+                            $delay(0.2, ()=>{$device.taptic(2);})
+                          }
+                        })
+                      }
+                    })
+                  }
+                })
               }
             })
           }
@@ -106,7 +172,7 @@ function show(objectId) {
           let size = $text.sizeThatFits({
             text: app.versionInst,
             width: $device.info.screen.width - 40,
-            font: $font(15),
+            font: $font("PingFangSC-Regular", 15),
             lineSpacing: 5, // Optional
           })
           make.height.equalTo(size.height + 80)
@@ -144,14 +210,14 @@ function show(objectId) {
             text: app.versionInst,
             align: $align.left,
             lines: 0,
-            font: $font(15),
+            font: $font("PingFangSC-Regular", 15),
             attributedText: setLineSpacing(app.versionInst, 5),
           },
           layout: function(make, view) {
             let size = $text.sizeThatFits({
               text: app.versionInst,
               width: $device.info.screen.width - 40,
-              font: $font(15),
+              font: $font("PingFangSC-Regular", 15),
               lineSpacing: 5, // Optional
             })
             make.top.equalTo(view.prev.bottom).inset(5)
@@ -258,14 +324,14 @@ function show(objectId) {
           text: app.instruction,
           align: $align.left,
           lines: 0,
-          font: $font(15),
+          font: $font("PingFangSC-Regular", 15),
           attributedText: setLineSpacing(app.instruction, 5),
         },
         layout: function(make, view) {
           let size = $text.sizeThatFits({
             text: app.instruction,
             width: $device.info.screen.width - 40,
-            font: $font(15),
+            font: $font("PingFangSC-Regular", 15),
             lineSpacing: 5, // Optional
           })
           make.top.equalTo(view.prev.bottom).inset(20)
@@ -316,7 +382,7 @@ function show(objectId) {
           props: {
             text: "开发者",
             align: $align.left,
-            font: $font(14),
+            font: $font("PingFangSC-Regular", 14),
             textColor: $color("gray"),
           },
           layout: function(make, view) {
@@ -330,7 +396,7 @@ function show(objectId) {
           props: {
             text: (app.author)?app.author:"无",
             align: $align.right,
-            font: $font(14),
+            font: $font("PingFangSC-Regular", 14),
             textColor: $color("black"),
           },
           layout: function(make, view) {
@@ -434,7 +500,7 @@ function genAppPreviewPhotosScrollView(photos) {
         radius: 5,
         contentMode: $contentMode.scaleAspectFit,
         borderWidth: 1 / $device.info.screen.scale,
-        borderColor: $color("#D0D0D0"),
+        borderColor: $color("#E0E0E0"),
       },
       layout: function(make, view) {
         make.centerY.equalTo(view.super)
