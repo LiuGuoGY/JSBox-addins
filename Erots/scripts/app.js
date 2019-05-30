@@ -1148,7 +1148,7 @@ function wantToRealse() {
           let author = user.getLoginUser()
           let myApps = []
           for(let i = 0; i < apps.length; i++) {
-            if(apps[i].authorAccount == author.object || apps[i].authorAccount == author.username) {
+            if(apps[i].authorAccount == author.objectId || apps[i].authorAccount == author.username) {
               myApps.push(apps[i])
             }
           }
