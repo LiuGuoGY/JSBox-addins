@@ -76,14 +76,18 @@ function updateScript() {
     "https://github.com/LiuGuoGY/JSBox-addins/blob/master/mini-weather/.output/MiniWeather.box?raw=true";
   const scriptName = $addin.current.name;
   let ui = require('scripts/view')
-  ui.addProgressView($("mainView"))
+  if($("mainView")) {
+    ui.addProgressView($("mainView"))
+  }
   $http.download({
     url: url,
     showsProgress: false,
     timeout: 5,
     progress: function(bytesWritten, totalBytes) {
       var percentage = bytesWritten * 1.0 / totalBytes
-      $("myProgress").locations = [0.0, percentage, percentage]
+      if($("myProgress")) {
+        $("myProgress").locations = [0.0, percentage, percentage]
+      }
     },
     handler: function(resp) {
       let box = resp.data
@@ -98,7 +102,10 @@ function updateScript() {
             $delay(0.2, function() {
               $device.taptic(2)
             })
-            $("myProgressText").text = "更新完成"
+            if($("myProgressText")) {
+              $("myProgressText").text = "更新完成"
+            }
+            
             $delay(1, ()=>{
               $addin.restart()
             })

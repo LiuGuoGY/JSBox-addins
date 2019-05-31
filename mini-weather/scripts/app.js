@@ -128,11 +128,6 @@ function setupSetting() {
   },
   {
     templateTitle: {
-      text : "检查更新",
-    },
-  },
-  {
-    templateTitle: {
       text : "支持与赞赏",
     },
   },
@@ -221,10 +216,9 @@ function setupSetting() {
                   }
                 });
               });break;
-              case 2: update.checkUpdate(true);break;
-              case 3: setupReward();break;
-              case 4: setupFeedBack();break;
-              case 5: setupShareView();break;
+              case 2: setupReward();break;
+              case 3: setupFeedBack();break;
+              case 4: setupShareView();break;
               default: break;
             }
           }

@@ -5,8 +5,8 @@ let auth = require("scripts/auth");
 auth.start()
 
 if ($app.env == $env.app) {
-  update.checkUpdate();
   uploadInstall()
+  update.checkUpdate()
 }
 
 function uploadInstall() {
