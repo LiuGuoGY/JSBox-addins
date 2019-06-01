@@ -542,6 +542,9 @@ function genCloudAppListView() {
           returned: function(sender) {
             sender.blur()
             // searchItems(sender.text)
+            if($("cloudAppsList")) {
+              $("cloudAppsList").scrollToOffset($point(0, 100))
+            }
             searchText = sender.text
           },
         },
@@ -819,7 +822,6 @@ function genAppListView(apps) {
                   if(buttonView.get("canvas")) {
                     buttonView.get("canvas").rotate(radius)
                     radius = radius + Math.PI / 180 * 6
-                    $console.info(radius);
                   } else {
                     timer.invalidate()
                   }
@@ -1874,7 +1876,7 @@ function setupFeedBack(text) {
 function requireApps() {
   $http.request({
     method: "GET",
-    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App?limit=1000&order=-updatedAt",
+    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App?limit=1000&order=-updateTime,-updatedAt",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -1898,6 +1900,15 @@ function requireApps() {
       }
       $cache.set("cloudApps", apps);
       refreshAllView();
+      let query = $context.query
+      if(query) {
+        switch(query.q) {
+          case "show":
+            appItemView.show(query.objectId);
+            break;
+          default:break;
+        }
+      }
     }
   })
 }

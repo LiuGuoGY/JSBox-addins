@@ -1213,7 +1213,15 @@ function setupUploadView(updateApp) {
             //上传脚本文件
             let file = $file.read(myApp.file);
             let fileUrl = await api.shimo_uploadFile(file);
-            myApp.file = fileUrl;
+            if(fileUrl) {
+              myApp.file = fileUrl;
+            } else {
+              if($("myProgressParent")) {
+                $("myProgressParent").remove()
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "上传失败，服务器异常");
+                return 0;
+              }
+            }
 
             if($("myProgress")) {
               $("myProgress").locations = [0.0, 0.4, 0.4]
@@ -1273,6 +1281,10 @@ function setupUploadView(updateApp) {
             let author = user.getLoginUser()
             myApp.author = author.nickname
             myApp.authorId = author.objectId
+
+            //加入更多信息
+            myApp.updateTime = new Date().getTime()
+            myApp.onStore = true
 
             //删除json中多余信息
             if(myApp.createdAt) {

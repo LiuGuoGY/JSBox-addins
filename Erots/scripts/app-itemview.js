@@ -10,7 +10,6 @@ function show(objectId) {
       break;
     }
   }
-  $console.info(app);
   let buttonText = ""
   if(app.haveInstalled) {
     if(app.needUpdate) {
@@ -192,18 +191,39 @@ function show(objectId) {
             make.left.inset(20)
           },
         },{
-          type: "label",
-          props: {
-            text: "版本 " + app.appVersion,
-            font: $font(14),
-            align: $align.center,
-            textColor: $color("gray"),
-          },
+          type: "view",
           layout: function(make, view) {
             make.top.equalTo(view.prev.bottom)
             make.height.equalTo(25)
-            make.left.inset(20)
+            make.width.equalTo(view.super)
           },
+          views: [{
+            type: "label",
+            props: {
+              text: "版本 " + app.appVersion,
+              font: $font(14),
+              align: $align.center,
+              textColor: $color("gray"),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(25)
+              make.left.inset(20)
+            },
+          },{
+            type: "label",
+            props: {
+              text: utils.getUpdateDateString((app.updateTime)?app.updateTime:app.updatedAt),
+              font: $font(14),
+              align: $align.center,
+              textColor: $color("gray"),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(25)
+              make.right.inset(20)
+            },
+          }]
         },{
           type: "label",
           props: {
@@ -480,7 +500,35 @@ function show(objectId) {
             }
           }
         }]
-      }]
+      },{
+        type: "view",
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom)
+          make.height.equalTo(110)
+          make.left.right.inset(0)
+        },
+        views: [{
+          type: "button",
+          props: {
+            title: " 分享",
+            icon: $icon("022", $color(utils.mColor.blue), $size(20, 20)),
+            bgcolor: $rgba(100, 100, 100, 0.1),
+            titleColor: $color(utils.mColor.blue),
+            font: $font("bold", 16.5),
+            radius: 7,
+            align: $align.center,
+          },
+          layout: function(make, view) {
+            make.center.equalTo(view.super)
+            make.size.equalTo($size(120, 50))
+          },
+          events: {
+            tapped: function(sender) {
+              $share.sheet(["https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);
+            }
+          },
+        }]
+      },]
     },]
   });
   $("appItemShowScroll").resize()
@@ -498,7 +546,7 @@ function genAppPreviewPhotosScrollView(photos) {
       props: {
         src: photos[i],
         radius: 5,
-        contentMode: $contentMode.scaleAspectFit,
+        contentMode: $contentMode.scaleToFill,
         borderWidth: 1 / $device.info.screen.scale,
         borderColor: $color("#E0E0E0"),
       },
@@ -512,6 +560,24 @@ function genAppPreviewPhotosScrollView(photos) {
         make.width.equalTo($device.info.screen.width - 50)
         make.height.equalTo(view.super).multipliedBy(0.9)
       },
+      views: [{
+        type: "blur",
+        props: {
+          style: 1 // 0 ~ 5
+        },
+        layout: $layout.fill
+      },{
+        type: "image",
+        props: {
+          src: photos[i],
+          radius: 5,
+          contentMode: $contentMode.scaleAspectFit,
+          borderWidth: 1 / $device.info.screen.scale,
+          borderColor: $color("#E0E0E0"),
+          bgcolor: $color("clear"),
+        },
+        layout: $layout.fill,
+      }]
     })
   }
   items.push({
