@@ -6,11 +6,11 @@ let logUpView = require('scripts/login-view')
 let user = require('scripts/user')
 let userCenterView = require('scripts/user-center')
 let appItemView = require('scripts/app-itemview')
+let api = require('scripts/api')
 
 let appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
 let appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
 let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
-let colors = [$rgba(120, 219, 252, 0.9), $rgba(252, 175, 230, 0.9), $rgba(252, 200, 121, 0.9), $rgba(187, 252, 121, 0.9), $rgba(173, 121, 252, 0.9), $rgba(252, 121, 121, 0.9), $rgba(121, 252, 252, 0.9)]
 let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
 let topOffset = -20
 
@@ -863,6 +863,7 @@ function genAppListView(apps) {
                         },
                         completion: function() {
                           buttonView.title = "打开"
+                          api.uploadDownloadTimes(apps[i].objectId)
                           refreshAllView()
                           $device.taptic(2);
                           $delay(0.2, ()=>{$device.taptic(2);})

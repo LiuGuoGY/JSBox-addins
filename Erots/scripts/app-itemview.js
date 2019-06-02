@@ -1,5 +1,8 @@
 let utils = require('scripts/utils')
 let ui = require('scripts/ui')
+let user = require('scripts/user')
+let logUpView = require('scripts/login-view')
+let api = require('scripts/api')
 
 function show(objectId) {
   let app = {}
@@ -19,6 +22,102 @@ function show(objectId) {
     }
   } else {
     buttonText = "获取"
+  }
+  let comments = app.comment
+  let commentView = {}
+  let commentSubviews = []
+  $console.info(app);
+  if(comments && comments.length > 0) {
+    for(let i = 0; i < comments.length; i++) {
+      commentSubviews.push({
+        type: "view",
+        props: {
+          bgcolor: $color("#F0F0F8"),
+          radius: 8,
+        },
+        layout: function(make, view) {
+          make.top.inset(0)
+          make.height.equalTo(view.super)
+          make.width.equalTo($device.info.screen.width - 40)
+          if(i == 0) {
+            make.left.inset(20)
+          } else {
+            make.left.equalTo(view.prev.right).inset(10)
+          }
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: comments[comments.length - i - 1].name,
+            textColor: $color("gray"),
+            font: $font("PingFangSC-Regular", 15),
+          },
+          layout: function(make, view) {
+            make.top.inset(10)
+            make.height.equalTo(20)
+            make.left.right.inset(15)
+          },
+        },{
+          type: "label",
+          props: {
+            text: comments[comments.length - i - 1].comment,
+            textColor: $color("black"),
+            font: $font("PingFangSC-Regular", 15),
+            align: $align.justified,
+            bgcolor: $color("clear"),
+            lines: 0,
+          },
+          layout: function(make, view) {
+            make.top.equalTo(view.prev.bottom).inset(10)
+            make.left.right.inset(15)
+          },
+        }]
+      })
+    }
+    commentSubviews.push({
+      type: "view",
+      layout: function(make, view) {
+        make.top.inset(0)
+        make.height.equalTo(view.super)
+        make.width.equalTo(20)
+        make.left.equalTo(view.prev.right).inset(0)
+      },
+    })
+    commentView = {
+      type: "view",
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom).inset(10)
+        make.height.equalTo(150)
+        make.left.right.inset(0)
+      },
+      views: [{
+        type: "scroll",
+        props: {
+          alwaysBounceHorizontal: true,
+          alwaysBounceVertical: false,
+          userInteractionEnabled: true,
+          showsHorizontalIndicator: false,
+          showsVerticalIndicator: false,
+        },
+        layout: $layout.fill,
+        views: commentSubviews,
+      }]
+    }
+  } else {
+    commentView = {
+      type: "label",
+      props: {
+        text: "此应用尚未收到评论。",
+        font: $font(15),
+        align: $align.center,
+        textColor: $color("gray"),
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom).inset(0)
+        make.height.equalTo(30)
+        make.left.inset(20)
+      },
+    }
   }
   $ui.push({
     props: {
@@ -127,6 +226,7 @@ function show(objectId) {
                           },
                           completion: function() {
                             buttonView.title = "打开"
+                            api.uploadDownloadTimes(app.objectId)
                             $app.notify({
                               name: "refreshAll",
                               object: {"a": "b"}
@@ -145,6 +245,119 @@ function show(objectId) {
             })
           }
         })]
+      },{
+        type: "view",
+        layout: function(make, view) {
+          make.left.right.inset(0)
+          make.top.equalTo(view.prev.bottom)
+          make.centerX.equalTo(view.super)
+          make.height.equalTo(60)
+        },
+        views: [{
+          type: "view",
+          layout: function(make, view) {
+            make.width.equalTo(view.super).multipliedBy(0.3)
+            make.center.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "" + app.downloadTimes,
+              font: $font("PingFangSC-Medium", 20),
+              align: $align.center,
+              textColor: $color("gray"),
+            },
+            layout: function(make, view) {
+              make.top.inset(15)
+              make.height.equalTo(18)
+              make.centerX.equalTo(view.super)
+            },
+          },{
+            type: "label",
+            props: {
+              text: "下载量",
+              font: $font(11),
+              align: $align.center,
+              textColor: $color("lightGray"),
+            },
+            layout: function(make, view) {
+              make.top.equalTo(view.prev.bottom).inset(5)
+              make.height.equalTo(15)
+              make.centerX.equalTo(view.super)
+            },
+          }]
+        },{
+          type: "view",
+          layout: function(make, view) {
+            make.left.inset(20)
+            make.right.equalTo(view.prev.left)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "" + app.comment.length,
+              font: $font("PingFangSC-Medium", 20),
+              align: $align.center,
+              textColor: $color("gray"),
+            },
+            layout: function(make, view) {
+              make.top.inset(15)
+              make.height.equalTo(18)
+              make.centerX.equalTo(view.super)
+            },
+          },{
+            type: "label",
+            props: {
+              text: "评论",
+              font: $font(11),
+              align: $align.center,
+              textColor: $color("lightGray"),
+            },
+            layout: function(make, view) {
+              make.top.equalTo(view.prev.bottom).inset(5)
+              make.height.equalTo(15)
+              make.centerX.equalTo(view.super)
+            },
+          }]
+        },{
+          type: "view",
+          layout: function(make, view) {
+            make.right.inset(20)
+            make.left.equalTo(view.prev.prev.right)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "0",
+              font: $font("PingFangSC-Medium", 20),
+              align: $align.center,
+              textColor: $color("gray"),
+            },
+            layout: function(make, view) {
+              make.top.inset(15)
+              make.height.equalTo(18)
+              make.centerX.equalTo(view.super)
+            },
+          },{
+            type: "label",
+            props: {
+              text: "点赞",
+              font: $font(11),
+              align: $align.center,
+              textColor: $color("lightGray"),
+            },
+            layout: function(make, view) {
+              make.top.equalTo(view.prev.bottom).inset(5)
+              make.height.equalTo(15)
+              make.centerX.equalTo(view.super)
+            },
+          }]
+        }]
       },{
         type: "canvas",
         layout: function(make, view) {
@@ -378,6 +591,72 @@ function show(objectId) {
           }
         }
       },{
+        type: "view",
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(10)
+          make.height.equalTo(50)
+          make.left.right.inset(20)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "评论",
+            font: $font("bold", 22),
+            align: $align.center,
+            textColor: $color("black"),
+          },
+          layout: function(make, view) {
+            make.top.inset(0)
+            make.height.equalTo(50)
+            make.left.inset(0)
+          },
+        },{
+          type: "button",
+          props: {
+            title: "撰写评论",
+            bgcolor: $color("clear"),
+            titleColor: $color(utils.mColor.blue),
+            font: $font(17),
+          },
+          layout: function(make, view) {
+            make.top.inset(0)
+            make.height.equalTo(50)
+            make.right.inset(0)
+          },
+          events: {
+            tapped: function(sender) {
+              if(!user.haveLogined()) {
+                $ui.alert({
+                  title: "提示",
+                  message: "未登录用户无法发布评论，请先登录",
+                  actions: [
+                    {
+                      title: "我要登录",
+                      handler: function() {
+                        logUpView.setupLoginView()
+                      }
+                    },
+                    {
+                      title: "我要注册",
+                      handler: function() {
+                        logUpView.setupLogUpView()
+                      }
+                    },
+                    {
+                      title: "好的",
+                      handler: function() {
+                        
+                      }
+                    },
+                  ]
+                });
+              } else {
+                genCommentView(app)
+              }
+            }
+          }
+        }]
+      },commentView,{
         type: "label",
         props: {
           text: "信息",
@@ -653,6 +932,171 @@ function genAppPreviewPhotosScrollView(photos) {
       },]
     },]
   });
+}
+
+function genCommentView(app) {
+  $ui.push({
+    props: {
+      id: "addCommentView",
+      navBarHidden: true,
+      statusBarStyle: 0,
+    },
+    views: [{
+      type: "view",
+      layout: function(make, view) {
+        if($device.info.version >= "11"){
+          make.top.equalTo(view.super.safeAreaTop)
+        } else {
+          make.top.inset(20)
+        }
+        make.left.right.inset(0)
+        make.height.equalTo(45)
+      },
+      views:[{
+        type: "label",
+        props: {
+          text: "评论",
+          font: $font("bold", 17),
+          align: $align.center,
+          bgcolor: $color("white"),
+          textColor: $color("black"),
+        },
+        layout: $layout.fill,
+      },{
+        type: "canvas",
+        layout: function(make, view) {
+          make.bottom.inset(0)
+          make.height.equalTo(1 / $device.info.screen.scale)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("darkGray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },{
+        type: "button",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.left.inset(0)
+          make.width.equalTo(100)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.pop()
+          },
+        },
+        views:[{
+          type: "image",
+          props: {
+            src: "assets/back.png",
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.left.inset(10)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(12, 23))
+          },
+        },{
+          type: "label",
+          props: {
+            text: "应用",
+            align: $align.center,
+            textColor: $color(utils.mColor.blue),
+            font: $font(17)
+          },
+          layout: function(make, view) {
+            make.height.equalTo(view.super)
+            make.left.equalTo(view.prev.right).inset(3)
+          }
+        }],
+      },{
+        type: "button",
+        props: {
+          title: "发送",
+          titleColor: $color(utils.mColor.blue),
+          font: $font("bold", 17),
+          bgcolor: $color("clear"),
+          borderColor: $color("clear"),
+
+        },
+        layout: function(make, view) {
+          make.right.inset(20)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: async function(sender) {
+            if($("commentText").text.length >= 5) {
+              let userInfo = user.getLoginUser()
+              let json = {
+                userId: userInfo.objectId,
+                name: userInfo.nickname,
+                comment: $("commentText").text,
+              }
+              await api.uploadComment(app.objectId, json)
+              ui.showToastView($("addCommentView"), utils.mColor.green, "发送成功")
+              $delay(1, ()=>{
+                $ui.pop();
+              })
+            } else {
+              ui.showToastView($("addCommentView"), utils.mColor.red, "字数不得少于 5 个")
+            }
+          },
+        },
+      }]
+    },{
+      type: "text",
+      props: {
+        id: "commentText",
+        text: "",
+        align: $align.left,
+        radius: 0,
+        textColor: $color("#333333"),
+        font: $font(17),
+        borderColor: $color("clear"),
+        insets: $insets(12, 20, 12, 20),
+        alwaysBounceVertical: true,
+      },
+      layout: function(make, view) {
+        make.height.equalTo(view.super)
+        make.top.equalTo(view.prev.bottom)
+        make.centerX.equalTo(view.center)
+        make.left.right.inset(0)
+      },
+      events: {
+        changed: function(sender) {
+          if(sender.text.length > 0) {
+            $("commentTextHint").hidden = true
+          } else {
+            $("commentTextHint").hidden = false
+          }
+        },
+      },
+      views: [{
+        type: "label",
+        props: {
+          id: "commentTextHint",
+          text: "评论（必填）",
+          align: $align.left,
+          textColor: $color("lightGray"),
+          font: $font(17)
+        },
+        layout: function(make, view) {
+          make.left.inset(24)
+          make.top.inset(12)
+        }
+      }]
+    }]
+  })
 }
 
 function setLineSpacing(text, spacing) {

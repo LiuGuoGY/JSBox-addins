@@ -77,11 +77,54 @@ async function shimo_uploadFile(file) {
   }
 }
 
+async function uploadComment(objectId, commentJson) {
+  let resp = await $http.request({
+    method: "PUT",
+    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App/" + objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+    body: {
+      comment: {
+        __op: "AddUnique",
+        objects: [commentJson],
+      }
+    },
+  })
+  $console.info(resp);
+  return resp.data
+}
+
+async function uploadDownloadTimes(objectId) {
+  let resp = await $http.request({
+    method: "PUT",
+    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App/" + objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+    body: {
+      downloadTimes: {
+        __op: "Increment",
+        amount: parseInt($text.base64Decode("MQ==")),
+      }
+    },
+  })
+  $console.info(resp);
+  return resp.data
+}
 
 module.exports = {
   uploadSM: uploadSM,
   uploadApp: uploadApp,
   putApp: putApp,
   shimo_uploadFile: shimo_uploadFile,
+  uploadComment: uploadComment,
+  uploadDownloadTimes: uploadDownloadTimes,
 }
 

@@ -26,7 +26,7 @@ function setupUserCenterView(prevTitle) {
     views: [ui.genPageHeader("主页", "个人中心"), {
       type: "scroll",
       props: {
-        bgcolor: $color("#F9F9F8"),
+        bgcolor: $color("clear"),
         showsVerticalIndicator: true,
       },
       layout: function(make, view) {
