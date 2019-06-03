@@ -26,7 +26,6 @@ function show(objectId) {
   let comments = app.comment
   let commentView = {}
   let commentSubviews = []
-  $console.info(app);
   if(comments && comments.length > 0) {
     for(let i = 0; i < comments.length; i++) {
       commentSubviews.push({
@@ -74,6 +73,7 @@ function show(objectId) {
         }]
       })
     }
+    let commentMoveXOffsetOld,commentMoveXOffsetNew = 0;
     commentSubviews.push({
       type: "view",
       layout: function(make, view) {
@@ -101,6 +101,38 @@ function show(objectId) {
         },
         layout: $layout.fill,
         views: commentSubviews,
+        events: {
+          willBeginDragging: function(sender) {
+            commentMoveXOffsetOld = sender.contentOffset.x;
+          },
+          willEndDragging: function(sender, decelerate) {
+            commentMoveXOffsetNew = sender.contentOffset.x;
+          },
+          willBeginDecelerating: function(sender) {
+            let offsetChange = commentMoveXOffsetNew - commentMoveXOffsetOld
+            let unit = (sender.contentSize.width - 40) / comments.length
+            let x = Math.round(commentMoveXOffsetOld / unit) * unit
+            if(Math.abs(offsetChange) > 40) {
+              x = (offsetChange > 0)? x + unit : x - unit
+            }
+            if(x < 0 || x > sender.contentSize.width - unit) {
+              x = Math.round(commentMoveXOffsetOld / unit) * unit
+            }
+            sender.scrollToOffset($point(x, 0))
+          },
+          didEndDragging: function(sender, decelerate) {
+            let offsetChange = commentMoveXOffsetNew - commentMoveXOffsetOld
+            let unit = (sender.contentSize.width - 40) / comments.length
+            let x = Math.round(commentMoveXOffsetOld / unit) * unit
+            if(Math.abs(offsetChange) > 40) {
+              x = (offsetChange > 0)? x + unit : x - unit
+            }
+            if(x < 0 || x > sender.contentSize.width - unit) {
+              x = Math.round(commentMoveXOffsetOld / unit) * unit
+            }
+            sender.scrollToOffset($point(x, 0))
+          }
+        }
       }]
     }
   } else {
@@ -391,18 +423,44 @@ function show(objectId) {
           make.left.right.inset(0)
         },
         views: [{
-          type: "label",
-          props: {
-            text: "新功能",
-            font: $font("bold", 22),
-            align: $align.center,
-            textColor: $color("black"),
-          },
+          type: "view",
           layout: function(make, view) {
             make.top.inset(10)
-            make.height.equalTo(40)
-            make.left.inset(20)
+            make.height.equalTo(50)
+            make.left.right.inset(0)
           },
+          views: [{
+            type: "label",
+            props: {
+              text: "新功能",
+              font: $font("bold", 22),
+              align: $align.center,
+              textColor: $color("black"),
+            },
+            layout: function(make, view) {
+              make.top.inset(0)
+              make.height.equalTo(50)
+              make.left.inset(20)
+            },
+          },{
+            type: "button",
+            props: {
+              title: "版本历史记录",
+              bgcolor: $color("clear"),
+              titleColor: $color(utils.mColor.blue),
+              font: $font(17),
+            },
+            layout: function(make, view) {
+              make.top.inset(0)
+              make.height.equalTo(50)
+              make.right.inset(20)
+            },
+            events: {
+              tapped: function(sender) {
+                genUpdateHistoryView(app)
+              }
+            }
+          },]
         },{
           type: "view",
           layout: function(make, view) {
@@ -657,6 +715,24 @@ function show(objectId) {
           }
         }]
       },commentView,{
+        type: "canvas",
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(20)
+          make.height.equalTo(1 / $device.info.screen.scale)
+          make.left.right.inset(20)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("lightGray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },{
         type: "label",
         props: {
           text: "信息",
@@ -1095,6 +1171,122 @@ function genCommentView(app) {
           make.top.inset(12)
         }
       }]
+    }]
+  })
+}
+
+function genUpdateHistoryView(app) {
+  let history = app.versionHistory
+  let historyViews = []
+  for(let i = history.length - 1; i >= 0; i--) {
+    historyViews.push({
+      type: "view",
+      layout: function(make, view) {
+        make.centerX.equalTo(view.super)
+        if(i == history.length - 1) {
+          make.top.inset(0)
+        } else {
+          make.top.equalTo(view.prev.bottom)
+        }
+        let size = $text.sizeThatFits({
+          text: history[i].versionInst,
+          width: $device.info.screen.width - 40,
+          font: $font("PingFangSC-Regular", 15),
+          lineSpacing: 5,
+        })
+        make.height.equalTo(size.height + 60)
+        make.left.right.inset(0)
+      },
+      views: [{
+        type: "view",
+        layout: function(make, view) {
+          make.top.inset(10)
+          make.width.equalTo(view.super)
+          make.centerX.equalTo(view.super)
+          make.height.equalTo(30)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: history[i].version,
+            font: $font("PingFangSC-Medium", 15),
+            align: $align.center,
+            textColor: $color("black"),
+          },
+          layout: function(make, view) {
+            make.left.inset(20)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        },{
+          type: "label",
+          props: {
+            text: utils.getUpdateDateString(history[i].time),
+            font: $font(15),
+            align: $align.center,
+            textColor: $color("gray"),
+          },
+          layout: function(make, view) {
+            make.right.inset(20)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        }]
+      },{
+        type: "label",
+        props: {
+          text: history[i].versionInst,
+          font: $font("PingFangSC-Regular", 15),
+          align: $align.left,
+          textColor: $color("black"),
+          lines: 0,
+          attributedText: setLineSpacing(history[i].versionInst, 5),
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(5)
+          make.centerX.equalTo(view.super)
+          let size = $text.sizeThatFits({
+            text: history[i].versionInst,
+            width: $device.info.screen.width - 40,
+            font: $font("PingFangSC-Regular", 15),
+            lineSpacing: 5,
+          })
+          make.height.equalTo(size.height)
+          make.left.right.inset(20)
+        },
+      },{
+        type: "canvas",
+        layout: function(make, view) {
+          make.bottom.inset(0)
+          make.height.equalTo(1 / $device.info.screen.scale)
+          make.left.right.inset(20)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("lightGray")
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      }]
+    })
+  }
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: 0,
+    },
+    views: [ui.genPageHeader("应用", "版本历史记录"), {
+      type: "scroll",
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.right.bottom.inset(0)
+      },
+      views: historyViews,
     }]
   })
 }

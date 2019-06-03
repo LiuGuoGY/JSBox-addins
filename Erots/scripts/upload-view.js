@@ -1156,11 +1156,25 @@ function setupUploadView(updateApp) {
               return 0;
             }
 
+            //初校验
+            let cloudApps = utils.getCache("cloudApps", [])
+            for(let i = 0; i < cloudApps.length; i++) {
+              if(myApp.appName === cloudApps[i].appName && myApp.objectId != cloudApps[i].objectId) {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "应用名称已存在，请更换应用名称");
+                return 0;
+              }
+            }
+
             if($("uploadItemView")) {
               ui.addProgressView($("uploadItemView"))
             }
-
-            let objectJson = (myApp.objectId)?{objectId: myApp.objectId}:await api.uploadApp(myApp);
+            let objectJson = {}
+            if(myApp.objectId) {
+              objectJson = {objectId: myApp.objectId};
+            } else {
+              myApp.onStore = false;
+              objectJson = await api.uploadApp(myApp);
+            }
             $console.info(objectJson);
 
             //修改脚本文件
@@ -1282,9 +1296,21 @@ function setupUploadView(updateApp) {
             myApp.author = author.nickname
             myApp.authorId = author.objectId
 
+            let time = new Date().getTime()
             //加入更多信息
-            myApp.updateTime = new Date().getTime()
+            myApp.updateTime = time
             myApp.onStore = true
+
+            //版本更新记录
+            if(!myApp.versionHistory) {
+              myApp.versionHistory = []
+            }
+            myApp.versionHistory.push({
+              time: time,
+              build: myApp.build,
+              version: myApp.appVersion,
+              versionInst: myApp.versionInst,
+            })
 
             //删除json中多余信息
             if(myApp.createdAt) {
