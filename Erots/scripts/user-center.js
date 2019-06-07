@@ -7,7 +7,8 @@ function setupUserCenterView(prevTitle) {
     props: {
       id: "userCenterView",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     events: {
       appeared: function(sender) {

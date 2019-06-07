@@ -37,7 +37,7 @@ function showToastView(view, color, text, duration) {
     views: [{
       type: "blur",
       props: {
-        style: 1, // 0 ~ 5
+        style: utils.themeColor.blurType,
         radius: 5,
       },
       layout: $layout.fill
@@ -65,7 +65,7 @@ function showToastView(view, color, text, duration) {
         props: {
           text: text,
           bgcolor: $color("clear"),
-          textColor: $color(utils.mColor.black),
+          textColor: utils.themeColor.listHeaderTextColor,
           font: $font(15),
         },
         layout: function(make, view) {
@@ -348,8 +348,8 @@ function genPageHeader(backName, title) {
         text: title,
         font: $font("bold", 17),
         align: $align.center,
-        bgcolor: $color("white"),
-        textColor: $color("black"),
+        bgcolor: utils.themeColor.mainColor,
+        textColor: utils.themeColor.listHeaderTextColor,
       },
       layout: $layout.fill,
     },{
@@ -363,7 +363,7 @@ function genPageHeader(backName, title) {
         draw: function(view, ctx) {
           var width = view.frame.width
           var scale = $device.info.screen.scale
-          ctx.strokeColor = $color("darkGray")
+          ctx.strokeColor = utils.themeColor.appObviousColor
           ctx.setLineWidth(1 / scale)
           ctx.moveToPoint(0, 0)
           ctx.addLineToPoint(width, 0)
@@ -434,14 +434,14 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
     let fontcolor = $color("#" + json.color)
     if(json.mode == "1") {
       bgcolor = $color("#" + json.color)
-      fontcolor = $color("white")
+      fontcolor = utils.themeColor.mainColor
     }
     iconView = {
       type: "image",
       props: {
         bgcolor: (json.mode == "1")?bgcolor:$color("clear"),
         radius: 12,
-        borderColor: $color("#DEDEDF"),
+        borderColor: utils.themeColor.iconBorderColor,
         borderWidth: 0.8,
       },
       layout: function(make, view) {
@@ -468,7 +468,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
         src: icon,
         bgcolor: $color("clear"),
         radius: 12,
-        borderColor: $color("#DEDEDF"),
+        borderColor: utils.themeColor.iconBorderColor,
         borderWidth: 0.8,
       },
       layout: function(make, view) {
@@ -498,7 +498,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
         type: "button",
         props: {
           title: buttonText,
-          bgcolor: $rgba(100, 100, 100, 0.1),
+          bgcolor: utils.themeColor.appButtonBgColor,
           titleColor: $color(mColor.blue),
           font: $font("bold", 15),
           radius: 15,
@@ -520,7 +520,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
       props: {
         text: name,
         font: $font("PingFangSC-Regular", 15.5),
-        textColor: $color("black"),
+        textColor: utils.themeColor.listHeaderTextColor,
         align: $align.left,
       },
       layout: function(make, view) {
@@ -533,7 +533,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
       props: {
         text: cate,
         font: $font(13),
-        textColor: $color(mColor.gray),
+        textColor: utils.themeColor.appCateTextColor,
         align: $align.left,
       },
       layout: function(make, view) {
@@ -559,7 +559,7 @@ function genAppPreviewPhotosView(photos, tappedHandler, longPressedHandler) {
           src: photos[i],
           bgcolor: $color("clear"),
           borderWidth: 1,
-          borderColor: $color("#EEEEEF"),
+          borderColor: utils.themeColor.iconBorderColor,
           radius: 4,
           info: i,
         },

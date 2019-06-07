@@ -17,17 +17,17 @@ function detect() {
       },
       handler: function(resp) {
         let data = resp.data.results
-        if(data.length > 0) {
-          authPass()
-        } else {
-          setupWelcome()
-        }
+        authCheck(data.length > 0)
+        $delay(0.1, function() {
+          go();
+        });
       }
     })
     $ui.render({
       props: {
         navBarHidden: true,
-        statusBarStyle: 0,
+        statusBarStyle: 1,
+        bgcolor: utils.getCache("darkMode")?$color("black"):$color("white"),
       },
       views: [{
         type: "view",
@@ -39,6 +39,7 @@ function detect() {
           type: "spinner",
           props: {
             loading: true,
+            style: utils.getCache("darkMode")?1:2,
           },
           layout: function(make, view) {
             make.top.inset(0)
@@ -50,6 +51,7 @@ function detect() {
             text: "正在载入...",
             align: $align.center,
             font: $font(12),
+            textColor: utils.getCache("darkMode")?$color("white"):$color("darkGray"),
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super).offset(4)
@@ -59,7 +61,7 @@ function detect() {
       },]
     });
   } else {
-    authPass();
+    go();
   }
 }
 let authSucces = false
@@ -185,7 +187,7 @@ function setupWelcome() {
                 ]
               });
             } else {
-              authPass();
+              authCheck();
             }
           }
         },
@@ -382,7 +384,17 @@ function regisiter(objectId) {
     }
   })
 }
-function authPass() {
+
+function authCheck(pass) {
+  if(!pass) {
+    $cache.remove("darkMode");
+    $cache.set("authPass", false);
+  } else {
+    $cache.set("authPass", true);
+  }
+}
+
+function go() {
   if ($app.env != $env.app) {
     if(utils.getCache("haveBanned") === true) {
       ui.showBannedAlert()

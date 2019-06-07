@@ -12,17 +12,52 @@ const appCates = ["工具", "效率", "开发", "社交", "视频", "音乐", "�
 const appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
 const appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
 
+const tColor = {
+  light: {
+    mainColor: $color("white"),
+    bgcolor: $color("clear"),
+    blurType: 1,
+    listHeaderTextColor: $color("black"),
+    appButtonBgColor: $rgba(100, 100, 100, 0.1),
+    iconBorderColor: $color("#DEDEDF"),
+    separatorColor: $color("#E0E0E0"),
+    statusBarStyle: 0,
+    appCateTextColor: $color("gray"),
+    listContentTextColor: $color("#444444"),
+    darkKeyboard: false,
+    mainTabGrayColor: $color(mColor.gray),
+    commentBgColor: $color("#F0F0F8"),
+    appHintColor: $color("lightGray"),
+    appObviousColor: $color("darkGray"),
+  },
+  dark: {
+    mainColor: $color("black"),
+    bgcolor: $color("black"),
+    blurType: 3,
+    listHeaderTextColor: $color("lightGray"),//gray
+    appButtonBgColor: $rgba(100, 100, 100, 0.5),
+    iconBorderColor: $color("gray"),
+    separatorColor: $color("darkGray"),
+    statusBarStyle: 1,
+    appCateTextColor: $color("darkGray"),
+    listContentTextColor: $color("lightGray"),//gray
+    darkKeyboard: true,
+    mainTabGrayColor: $color("darkGray"),
+    commentBgColor: $color("#202020"),
+    appHintColor: $color("darkGray"),
+    appObviousColor: $color("lightGray"),
+  }
+}
+
+let themeColor = tColor.light;
+
 function getCache(key, def) {
   let temp = $cache.get(key)
   if (temp == undefined) {
     if(def == undefined){
       switch(key) { 
-        case "columns": def = 4; break;
-        case "showMode": def = 0; break;
-        case "openBroswer": def = 0; break;
-        case "backgroundTranparent": def = true; break;
-        case "pullToClose": def = true; break;
-        case "staticHeight": def = false; break;
+        case "darkMode": def = false; break;
+        case "authPass": def = false; break;
       }
     }
     $cache.set(key, def)
@@ -170,4 +205,6 @@ module.exports = {
   appKey: appKey,
   getInstalledApps: getInstalledApps,
   getUpdateDateString: getUpdateDateString,
+  tColor: tColor,
+  themeColor: themeColor,
 }

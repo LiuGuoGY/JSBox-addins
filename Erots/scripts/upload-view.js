@@ -50,8 +50,12 @@ function setupUploadView(updateApp) {
     }
   }
   function refreshPreview() {
-    $("preView").views[0].views[0].remove()
-    $("topPreView").views[0].views[0].remove()
+    if($("preView")) {
+      $("preView").views[0].views[0].remove()
+    }
+    if($("topPreView")) {
+      $("topPreView").views[0].views[0].remove()
+    }
     if(myApp.subtitle.length > 0) {
       $("preView").views[0].add(ui.genAppShowView(myApp.appIcon, myApp.appName, myApp.subtitle, (updateApp)?"更新":"下载", ()=>{}))
       $("topPreView").views[0].add(ui.genAppShowView(myApp.appIcon, myApp.appName, myApp.subtitle, (updateApp)?"更新":"下载", ()=>{}))
@@ -110,7 +114,8 @@ function setupUploadView(updateApp) {
     props: {
       id: "uploadItemView",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     events: {
       appeared: function(sender) {
@@ -131,7 +136,7 @@ function setupUploadView(updateApp) {
       type: "scroll",
       props: {
         id: "uploadScroll",
-        bgcolor: $color("#F9F9F8"),
+        bgcolor: utils.themeColor.commentBgColor,
         showsVerticalIndicator: true,
       },
       layout: function(make, view) {
@@ -178,6 +183,7 @@ function setupUploadView(updateApp) {
           text: "预览",
           align: $align.left,
           font: $font(16),
+          textColor: utils.themeColor.appObviousColor,
         },
         layout: function(make, view) {
           make.top.inset(10)
@@ -189,7 +195,7 @@ function setupUploadView(updateApp) {
         type: "view",
         props: {
           id: "preView",
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.left.right.inset(0)
@@ -214,6 +220,7 @@ function setupUploadView(updateApp) {
           text: "参数",
           align: $align.left,
           font: $font(16),
+          textColor: utils.themeColor.appObviousColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
@@ -224,7 +231,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -239,6 +246,7 @@ function setupUploadView(updateApp) {
             text: "文件",
             align: $align.left,
             font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -355,7 +363,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -370,6 +378,7 @@ function setupUploadView(updateApp) {
             text: "名称",
             align: $align.left,
             font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -381,9 +390,11 @@ function setupUploadView(updateApp) {
           type: "input",
           props: {
             id: "titleInput",
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
             radius: 0,
             text: myApp.appName,
+            textColor: utils.themeColor.appObviousColor,
+            darkKeyboard: utils.themeColor.darkKeyboard,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -408,7 +419,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -423,6 +434,7 @@ function setupUploadView(updateApp) {
             text: "分类",
             align: $align.left,
             font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -486,7 +498,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -501,6 +513,7 @@ function setupUploadView(updateApp) {
             text: "版本号",
             align: $align.left,
             font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -512,10 +525,11 @@ function setupUploadView(updateApp) {
           type: "input",
           props: {
             id: "versionInput",
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
             radius: 0,
             type: $kbType.decimal,
             text: myApp.appVersion,
+            darkKeyboard: utils.themeColor.darkKeyboard,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -541,6 +555,7 @@ function setupUploadView(updateApp) {
           text: "自定义图标",
           align: $align.left,
           font: $font(16),
+          textColor: utils.themeColor.appObviousColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
@@ -551,7 +566,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -566,6 +581,7 @@ function setupUploadView(updateApp) {
             text: "图标",
             align: $align.left,
             font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -663,7 +679,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -678,6 +694,7 @@ function setupUploadView(updateApp) {
             text: "样式",
             align: $align.left,
             font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -748,7 +765,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -761,7 +778,8 @@ function setupUploadView(updateApp) {
           props: {
             id: "hex_v",
             text: "#" + iconColor,
-            font: $font("bold", 18)
+            font: $font("bold", 18),
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.top.equalTo(view.super).inset(10)
@@ -770,7 +788,7 @@ function setupUploadView(updateApp) {
         },{
           type: "view",
           props: {
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
@@ -789,7 +807,7 @@ function setupUploadView(updateApp) {
             text: "调色工具由 Palette ©Zigma 提供",
             font: $font(11),
             align: $align.center,
-            textColor: $color("lightGray"),
+            textColor: utils.themeColor.appHintColor,
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
@@ -804,6 +822,7 @@ function setupUploadView(updateApp) {
           text: "附加（可选）",
           align: $align.left,
           font: $font(16),
+          textColor: utils.themeColor.appObviousColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
@@ -814,7 +833,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -829,6 +848,7 @@ function setupUploadView(updateApp) {
             text: "副标题",
             align: $align.left,
             font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -840,9 +860,10 @@ function setupUploadView(updateApp) {
           type: "input",
           props: {
             id: "subtitleInput",
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
             radius: 0,
             text: myApp.subtitle,
+            darkKeyboard: utils.themeColor.darkKeyboard,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -864,7 +885,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -875,7 +896,7 @@ function setupUploadView(updateApp) {
         views: [{
           type: "view",
           props: {
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
@@ -889,6 +910,7 @@ function setupUploadView(updateApp) {
               text: "预览图",
               align: $align.left,
               font: $font(16),
+              textColor: utils.themeColor.appObviousColor,
             },
             layout: function(make, view) {
               make.centerY.equalTo(view.super)
@@ -972,7 +994,7 @@ function setupUploadView(updateApp) {
           type: "view",
           props: {
             id: "appPreviewPhotosScrollParent",
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
@@ -1034,6 +1056,7 @@ function setupUploadView(updateApp) {
           text: "介绍",
           align: $align.left,
           font: $font(16),
+          textColor: utils.themeColor.appObviousColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
@@ -1044,7 +1067,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -1057,9 +1080,11 @@ function setupUploadView(updateApp) {
           props: {
             id: "descriptInput",
             text: myApp.instruction,
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
             radius: 0,
             font: $font(15),
+            textColor: utils.themeColor.appObviousColor,
+            darkKeyboard: utils.themeColor.darkKeyboard,
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
@@ -1081,6 +1106,7 @@ function setupUploadView(updateApp) {
           text: "新功能",
           align: $align.left,
           font: $font(16),
+          textColor: utils.themeColor.appObviousColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
@@ -1091,7 +1117,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -1104,9 +1130,11 @@ function setupUploadView(updateApp) {
           props: {
             id: "updateDesInput",
             text: myApp.versionInst,
-            bgcolor: $color("white"),
+            bgcolor: utils.themeColor.mainColor,
             radius: 0,
             font: $font(15),
+            textColor: utils.themeColor.appObviousColor,
+            darkKeyboard: utils.themeColor.darkKeyboard,
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
@@ -1228,7 +1256,25 @@ function setupUploadView(updateApp) {
             let file = $file.read(myApp.file);
             let fileUrl = await api.shimo_uploadFile(file);
             if(fileUrl) {
-              myApp.file = fileUrl;
+              if($("myProgress")) {
+                $("myProgress").locations = [0.0, 0.3, 0.3]
+              }
+              if($("myProgressText")) {
+                $("myProgressText").text = "检验文件中..."
+              }
+              let resp = await $http.download({
+                url: fileUrl,
+                showsProgress: false,
+              })
+              if(resp.data && resp.data.info && resp.data.info.size == file.info.size) {
+                myApp.file = fileUrl;
+              } else {
+                if($("myProgressParent")) {
+                  $("myProgressParent").remove()
+                  ui.showToastView($("uploadItemView"), utils.mColor.red, "文件校验失败，服务器异常，请等10分钟后继续尝试");
+                  return 0;
+                }
+              }
             } else {
               if($("myProgressParent")) {
                 $("myProgressParent").remove()
@@ -1238,7 +1284,7 @@ function setupUploadView(updateApp) {
             }
 
             if($("myProgress")) {
-              $("myProgress").locations = [0.0, 0.4, 0.4]
+              $("myProgress").locations = [0.0, 0.5, 0.5]
             }
             if($("myProgressText")) {
               $("myProgressText").text = "上传图标中..."
@@ -1254,7 +1300,7 @@ function setupUploadView(updateApp) {
             }
 
             if($("myProgress")) {
-              $("myProgress").locations = [0.0, 0.5, 0.5]
+              $("myProgress").locations = [0.0, 0.7, 0.7]
             }
 
 
@@ -1288,7 +1334,7 @@ function setupUploadView(updateApp) {
               $console.info(myApp.previews);
             }
             if($("myProgress")) {
-              $("myProgress").locations = [0.0, 0.8, 0.8]
+              $("myProgress").locations = [0.0, 0.9, 0.9]
             }
 
             //加入作者信息
@@ -1352,7 +1398,7 @@ function setupUploadView(updateApp) {
       type: "view",
       props: {
         id: "topPreView",
-        bgcolor: $color("white"),
+        bgcolor: utils.themeColor.mainColor,
         hidden: true,
       },
       layout: function(make, view) {

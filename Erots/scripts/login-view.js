@@ -7,7 +7,8 @@ function setupLogUpView() {
     props: {
       id: "logUpView",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     events: {
       appeared: function(sender) {
@@ -250,7 +251,7 @@ function setupLogUpView() {
             },
             didEndEditing: function(sender) {
               checkLogUpAll()
-            }
+            },
           },
         },{
           type: "label",
@@ -415,7 +416,8 @@ function setupLoginView() {
     props: {
       id: "loginView",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     events: {
       appeared: function(sender) {
@@ -584,6 +586,9 @@ function setupLoginView() {
             didEndEditing: function(sender) {
               checkLoginAll()
             },
+            changed: function(sender) {
+              checkLoginAll()
+            },
             returned: function(sender) {
               sender.blur()
             }
@@ -673,7 +678,8 @@ function setupPasswordResetView(source, email) {
     props: {
       id: "passwordResetView",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     events: {
       appeared: function(sender) {

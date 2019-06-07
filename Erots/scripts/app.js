@@ -13,38 +13,22 @@ let appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
 let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
 let topOffset = -20
+let searchText = ""
 
-const mColor = {
-  gray: "#a2a2a2",
-  blue: "#3478f7",
-  black: "#303032",
-  green: "#27AE60",
-  red: "#E74C3C",
-  iosGreen: "#4CD964",
-}
-const mIcon = [
-  {
-    blue: $icon("102", $color(mColor.blue), $size(25, 25)),
-    gray: $icon("102", $color(mColor.gray), $size(25, 25)),
-  },
-  {
-    blue: $icon("164", $color(mColor.blue), $size(25, 25)),
-    gray: $icon("164", $color(mColor.gray), $size(25, 25)),
-  },
-  {
-    blue: $icon("109", $color(mColor.blue), $size(25, 25)),
-    gray: $icon("109", $color(mColor.gray), $size(25, 25)),
-  },
-]
+let mIcon = []
+
 function show() {
   uploadInstall()
   checkBlackList()
+  setThemeColor()
   if(!utils.getCache("haveBanned", false)) {
     main()
   } else {
     ui.showBannedAlert()
   }
 }
+
+// api.shimo_newUploadFile()
 
 function main() {
   setupMainView()
@@ -61,6 +45,26 @@ $app.listen({
 });
 
 let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 
+
+function setThemeColor() {
+  if(utils.getCache("darkMode")) {
+    utils.themeColor = utils.tColor.dark
+  }
+  mIcon = [
+    {
+      blue: $icon("102", $color(utils.mColor.blue), $size(25, 25)),
+      gray: $icon("102", utils.themeColor.mainTabGrayColor, $size(25, 25)),
+    },
+    {
+      blue: $icon("164", $color(utils.mColor.blue), $size(25, 25)),
+      gray: $icon("164", utils.themeColor.mainTabGrayColor, $size(25, 25)),
+    },
+    {
+      blue: $icon("109", $color(utils.mColor.blue), $size(25, 25)),
+      gray: $icon("109", utils.themeColor.mainTabGrayColor, $size(25, 25)),
+    },
+  ]
+}
   
 function setupMainView() {
   $app.autoKeyboardEnabled = false
@@ -69,13 +73,14 @@ function setupMainView() {
     props: {
       id: "mainView",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      // debugging: true,
     },
     views: [{
       type: "view",
       props: {
         id: "content",
-        bgcolor: $color("clear"),
+        bgcolor: utils.themeColor.bgcolor,
         clipsToBounds: true,
       },
       layout: function(make, view) {
@@ -107,7 +112,7 @@ function setupMainView() {
       views: [{
         type: "blur",
         props: {
-          style: 1,
+          style: utils.themeColor.blurType,
         },
         layout: $layout.fill,
       },{
@@ -151,7 +156,7 @@ function setupMainView() {
               },
               menu_label: {
                 text: "应用",
-                textColor: $color(mColor.blue)
+                textColor: $color(utils.mColor.blue)
               }
             },
             {
@@ -160,7 +165,7 @@ function setupMainView() {
               },
               menu_label: {
                 text: "更新",
-                textColor: $color(mColor.gray)
+                textColor: utils.themeColor.mainTabGrayColor
               }
             },
             {
@@ -169,7 +174,7 @@ function setupMainView() {
               },
               menu_label: {
                 text: "我的",
-                textColor: $color(mColor.gray)
+                textColor: utils.themeColor.mainTabGrayColor
               }
             },
           ],
@@ -224,14 +229,14 @@ function handleSelect(view, row) {
   let newData = view.data
   for(let i = 0; i < newData.length; i++) {
     if (i == row) {
-      newData[i].menu_label.textColor = $color(mColor.blue)
+      newData[i].menu_label.textColor = $color(utils.mColor.blue)
       newData[i].menu_image.icon = mIcon[i].blue
       if($(contentViews[i]) == undefined) {
         $("content").add(getContentView(i)) 
       }
       $(contentViews[i]).hidden = false
     } else {
-      newData[i].menu_label.textColor = $color(mColor.gray)
+      newData[i].menu_label.textColor = utils.themeColor.mainTabGrayColor
       newData[i].menu_image.icon = mIcon[i].gray
       if($(contentViews[i]) != undefined) {
         $(contentViews[i]).hidden = true
@@ -287,8 +292,8 @@ function genUpdateView() {
         type: "blur",
         props: {
           id: "updatePageHeaderBlur",
-          style: 1, // 0 ~ 5
-          bgcolor: $color("white"),
+          style: utils.themeColor.blurType, // 0 ~ 5
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: $layout.fill,
       },{
@@ -307,7 +312,7 @@ function genUpdateView() {
             font: $font("bold", 17),
             align: $align.center,
             bgcolor: $color("clear"),
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
             hidden: true,
           },
           layout: $layout.fill,
@@ -336,6 +341,7 @@ function genCloudView() {
     type: "view",
     props: {
       id: "cloudView",
+      bgcolor: utils.themeColor.bgcolor,
       hidden: false,
     },
     layout: $layout.fill,
@@ -343,6 +349,7 @@ function genCloudView() {
       type: "view",
       props: {
         id: "cloudAppListParent",
+        bgcolor: utils.themeColor.bgcolor,
       },
       layout: function(make, view) {
         make.width.equalTo(view.super)
@@ -368,8 +375,8 @@ function genCloudView() {
         type: "blur",
         props: {
           id: "cloudPageHeaderBlur",
-          style: 1, // 0 ~ 5
-          bgcolor: $color("white"),
+          style: utils.themeColor.blurType, // 0 ~ 5
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: $layout.fill,
       },{
@@ -388,7 +395,7 @@ function genCloudView() {
             font: $font("bold", 17),
             align: $align.center,
             bgcolor: $color("clear"),
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
             hidden: true,
           },
           layout: $layout.fill,
@@ -402,7 +409,6 @@ function genCloudView() {
 }
 
 function genCloudAppListView() {
-  let searchText = ""
   let searchBar = {
     type: "view",
     layout: $layout.fill,
@@ -425,13 +431,15 @@ function genCloudAppListView() {
           let input = $("search_input")
           input.text = ""
           $("search_hint").hidden = false
-          if(searchText !== "") {
-            // searchItems("")
-          }
+          $delay(0.1, ()=>{
+            if(searchText !== "") {
+              searchText = ""
+              refreshAllView()
+            }
+          })
           if($("noSearchItemView")) {
             $("noSearchItemView").remove()
           }
-          searchText = ""
           input.blur()
         }
       }
@@ -439,7 +447,7 @@ function genCloudAppListView() {
     {
       type: "view",
       props: {
-        bgcolor: $rgba(100, 100, 100, 0.1),
+        bgcolor: utils.themeColor.appButtonBgColor,
         radius: 10,
       },
       layout: function(make, view) {
@@ -463,9 +471,13 @@ function genCloudAppListView() {
         type: "input",
         props: {
           id: "search_input",
+          bgcolor: $color("clear"),
           returnKeyType: 6,
           userInteractionEnabled: false,
           tintColor: $color(utils.mColor.blue),
+          text: searchText,
+          textColor: utils.themeColor.listHeaderTextColor,
+          darkKeyboard: utils.themeColor.darkKeyboard,
         },
         layout: function(make, view) {
           make.centerY.equalTo(view.super)
@@ -541,11 +553,10 @@ function genCloudAppListView() {
           },
           returned: function(sender) {
             sender.blur()
-            // searchItems(sender.text)
-            if($("cloudAppsList")) {
-              $("cloudAppsList").scrollToOffset($point(0, 100))
-            }
             searchText = sender.text
+            $delay(0.1, ()=>{
+              refreshAllView()
+            })
           },
         },
         views: [{
@@ -555,7 +566,7 @@ function genCloudAppListView() {
             text: "Apps",
             align: $align.center,
             textColor: $rgba(100, 100, 100, 0.4),
-            hidden: false,
+            hidden: searchText != "",
           },
           layout: function(make, view) {
             make.left.inset(8)
@@ -566,15 +577,17 @@ function genCloudAppListView() {
     }]
   }
   let appViewItems = []
-  let apps = utils.getCache("cloudApps", [])
+  let apps = getCloudAppDisplaySource()
   appViewItems = genAppListView(apps)
   let cloudView = {
     type: "list",
     props: {
       id: "cloudAppsList",
-      template: [],
-      separatorInset: $insets(0, 85, 0, 15),
+      template: {},
+      bgcolor: $color("clear"),
       indicatorInsets: $insets(45, 0, 50, 0),
+      separatorColor: utils.themeColor.separatorColor,
+      separatorInset: $insets(0, 85, 0, 15),
       header: {
         type: "view",
         props:{
@@ -586,7 +599,7 @@ function genCloudAppListView() {
             id: "cloudListHeaderTitle",
             text: "应用",
             font: $font("Avenir-Black", 35),
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
             align: $align.center,
           },
           layout: function(make, view) {
@@ -612,7 +625,7 @@ function genCloudAppListView() {
               id: "searchBarParent",
               clipsToBounds: true,
               userInteractionEnabled: true,
-              bgcolor: $color("white"),
+              bgcolor: utils.themeColor.bgcolor,
             },
             layout: function(make, view) {
               make.left.right.inset(15)
@@ -648,7 +661,7 @@ function genCloudAppListView() {
           $("cloudListHeaderTitle").hidden = true
         } else if(sender.contentOffset.y < 40 + topOffset && $("cloudPageHeaderLabel").hidden === false) {
           $("cloudPageHeaderLabel").hidden = true
-          $("cloudPageHeaderBlur").bgcolor = $color("white")
+          $("cloudPageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("cloudListHeaderTitle").hidden = false
         }else if(sender.contentOffset.y < topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
@@ -684,7 +697,7 @@ function genUpdateAppListView() {
         text: "所有应用已是最新",
         align: $align.center,
         font: $font(14),
-        textColor: $color(mColor.gray),
+        textColor: utils.themeColor.mainTabGrayColor,
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
@@ -696,7 +709,9 @@ function genUpdateAppListView() {
     props: {
       id: "updateAppsList",
       template: [],
+      bgcolor: $color("clear"),
       separatorInset: $insets(0, 85, 0, 15),
+      separatorColor: utils.themeColor.separatorColor,
       header: {
         type: "view",
         props:{
@@ -708,7 +723,7 @@ function genUpdateAppListView() {
             id: "updateListHeaderTitle",
             text: "更新",
             font: $font("Avenir-Black", 35),
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
             align: $align.center,
             indicatorInsets: $insets(45, 0, 50, 0),
           },
@@ -738,7 +753,7 @@ function genUpdateAppListView() {
           $("updateListHeaderTitle").hidden = true
         } else if(sender.contentOffset.y < 40 + topOffset && $("updatePageHeaderLabel").hidden === false) {
           $("updatePageHeaderLabel").hidden = true
-          $("updatePageHeaderBlur").bgcolor = $color("white")
+          $("updatePageHeaderBlur").bgcolor = utils.themeColor.bgcolor
           $("updateListHeaderTitle").hidden = false
         }else if(sender.contentOffset.y < topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
@@ -774,109 +789,123 @@ function genAppListView(apps) {
       type: "view",
       props: {
         info: apps[i].objectId,
+        // bgcolor: utils.themeColor.bgcolor,
+        bgcolor: $color("clear"),
       },
       layout: function(make, view) {
-        make.left.right.inset(15)
+        make.left.right.inset(0)
         make.height.equalTo(80)
         make.center.equalTo(view.super)
       },
-      views: [ui.genAppShowView(apps[i].appIcon, apps[i].appName, (apps[i].subtitle != "")?apps[i].subtitle:apps[i].appCate, buttonText, function(buttonView) {
-        if(!apps[i].needUpdate && apps[i].haveInstalled) {
-          $addin.run(apps[i].appName)
-        } else {
-          buttonView.title = ""
-          buttonView.updateLayout(function(make, view) {
-            make.size.equalTo($size(30, 30))
-          })
-          $ui.animate({
-            duration: 0.2,
-            animation: function() {
-              buttonView.relayout()
-            },
-            completion: function() {
-              $ui.animate({
-                duration: 0.1,
-                animation: function() {
-                  buttonView.bgcolor = $color("clear")
-                },
-              })
-              buttonView.add({
-                type: "canvas",
-                layout: (make, view) => {
-                  make.center.equalTo(view.super)
-                  make.size.equalTo($size(30, 30))
-                },
-                events: {
-                  draw: (view, ctx) => {
-                    ctx.strokeColor = $rgba(100, 100, 100, 0.1)
-                    ctx.setLineWidth(2.5)
-                    ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
-                    ctx.strokePath()
-                  }
-                },
-              })
-              let radius = 0;
-              let timer = $timer.schedule({
-                interval: 0.01,
-                handler: function() {
-                  if(buttonView.get("canvas")) {
-                    buttonView.get("canvas").rotate(radius)
-                    radius = radius + Math.PI / 180 * 6
-                  } else {
-                    timer.invalidate()
-                  }
-                }
-              });
-              $http.download({
-                url: apps[i].file,
-                showsProgress: false,
-                handler: function(resp) {
-                  let json = utils.getSearchJson(apps[i].appIcon)
-                  let icon_code = (json.code)?json.code:"124";
-                  $addin.save({
-                    name: apps[i].appName,
-                    data: resp.data,
-                    icon: "icon_" + icon_code + ".png",
-                  });
-                  let cloudApps = utils.getCache("cloudApps", [])
-                  for(let j = 0; j < cloudApps.length; j++) {
-                    if(cloudApps[j].objectId == apps[i].objectId) {
-                      cloudApps[j].haveInstalled = true
-                      cloudApps[j].needUpdate = false
+      views: [{
+        type: "view",
+        layout: function(make, view) {
+          make.left.right.inset(15)
+          make.height.equalTo(80)
+          make.center.equalTo(view.super)
+        },
+        views: [ui.genAppShowView(apps[i].appIcon, apps[i].appName, (apps[i].subtitle != "")?apps[i].subtitle:apps[i].appCate, buttonText, function(buttonView) {
+          if(!apps[i].needUpdate && apps[i].haveInstalled) {
+            $addin.run(apps[i].appName)
+          } else {
+            buttonView.title = ""
+            buttonView.updateLayout(function(make, view) {
+              make.size.equalTo($size(30, 30))
+            })
+            $ui.animate({
+              duration: 0.2,
+              animation: function() {
+                buttonView.relayout()
+              },
+              completion: function() {
+                $ui.animate({
+                  duration: 0.1,
+                  animation: function() {
+                    buttonView.bgcolor = $color("clear")
+                  },
+                })
+                buttonView.add({
+                  type: "canvas",
+                  layout: (make, view) => {
+                    make.center.equalTo(view.super)
+                    make.size.equalTo($size(30, 30))
+                  },
+                  events: {
+                    draw: (view, ctx) => {
+                      ctx.strokeColor = utils.themeColor.appButtonBgColor
+                      ctx.setLineWidth(2.5)
+                      ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
+                      ctx.strokePath()
+                    }
+                  },
+                })
+                let radius = 0;
+                let timer = $timer.schedule({
+                  interval: 0.01,
+                  handler: function() {
+                    if(buttonView.get("canvas")) {
+                      buttonView.get("canvas").rotate(radius)
+                      radius = radius + Math.PI / 180 * 6
+                    } else {
+                      timer.invalidate()
                     }
                   }
-                  $cache.set("cloudApps", cloudApps);
-                  $ui.animate({
-                    duration: 0.1,
-                    animation: function() {
-                      buttonView.bgcolor = $rgba(100, 100, 100, 0.1)
-                    },
-                    completion: function() {
-                      buttonView.get("canvas").remove()
-                      buttonView.updateLayout(function(make, view) {
-                        make.size.equalTo($size(75, 30))
-                      })
-                      $ui.animate({
-                        duration: 0.2,
-                        animation: function() {
-                          buttonView.relayout()
-                        },
-                        completion: function() {
-                          buttonView.title = "打开"
-                          api.uploadDownloadTimes(apps[i].objectId)
-                          refreshAllView()
-                          $device.taptic(2);
-                          $delay(0.2, ()=>{$device.taptic(2);})
-                        }
-                      })
+                });
+                $http.download({
+                  url: apps[i].file,
+                  showsProgress: false,
+                  handler: function(resp) {
+                    let json = utils.getSearchJson(apps[i].appIcon)
+                    let icon_code = (json.code)?json.code:"124";
+                    $addin.save({
+                      name: apps[i].appName,
+                      data: resp.data,
+                      icon: "icon_" + icon_code + ".png",
+                    });
+                    let cloudApps = utils.getCache("cloudApps", [])
+                    for(let j = 0; j < cloudApps.length; j++) {
+                      if(cloudApps[j].objectId == apps[i].objectId) {
+                        cloudApps[j].haveInstalled = true
+                        cloudApps[j].needUpdate = false
+                      }
                     }
-                  })
-                }
-              })
-            }
-          })
-        }
-      })]
+                    $cache.set("cloudApps", cloudApps);
+                    $ui.animate({
+                      duration: 0.1,
+                      animation: function() {
+                        buttonView.bgcolor = utils.themeColor.appButtonBgColor
+                      },
+                      completion: function() {
+                        buttonView.get("canvas").remove()
+                        buttonView.updateLayout(function(make, view) {
+                          make.size.equalTo($size(75, 30))
+                        })
+                        $ui.animate({
+                          duration: 0.2,
+                          animation: function() {
+                            buttonView.relayout()
+                          },
+                          completion: function() {
+                            buttonView.title = "打开"
+                            api.uploadDownloadTimes(apps[i].objectId)
+                            $device.taptic(2);
+                            $delay(0.2, ()=>{
+                              $device.taptic(2);
+                            })
+                            $delay(0.5,()=>{
+                              refreshAllView()
+                            })
+                          }
+                        })
+                      }
+                    })
+                  }
+                })
+              }
+            })
+          }
+        })]
+      }]
     })
   }
   return appViewItems
@@ -898,36 +927,52 @@ function refreshAllView() {
 }
 
 function genMeView() {
-  const feedBackTemplate = [{
-    type: "label",
+  const feedBackTemplate = {
+    type: "view",
     props: {
-      id: "templateTitle",
-    },
-    layout: function(make, view) {
-      make.left.inset(15);
-      make.centerY.equalTo(view.super);
-    }
-  },
-  {
-    type: "image",
-    props: {
-      src: "assets/enter.png",
       bgcolor: $color("clear"),
     },
-    layout: function(make, view) {
-      make.right.inset(15)
-      make.centerY.equalTo(view.super)
-      make.size.equalTo($size(8, 18))
-    },
-  }]
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      layout: $layout.fill,
+      views: [{
+        type: "label",
+        props: {
+          id: "templateTitle",
+          textColor: utils.themeColor.listContentTextColor,
+        },
+        layout: function(make, view) {
+          make.left.inset(15);
+          make.centerY.equalTo(view.super);
+        }
+      },
+      {
+        type: "image",
+        props: {
+          src: "assets/enter.png",
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+          make.size.equalTo($size(8, 18))
+        },
+      }]
+    }]
+  }
 
   const tabShowInstalls = {
     type: "view",
+    props: {
+      bgcolor: utils.themeColor.bgcolor,
+    },
     views: [{
         type: "label",
         props: {
           id: "tabShowInstalls",
           text: "安装量统计",
+          textColor: utils.themeColor.listContentTextColor,
         },
         layout: function(make, view) {
           make.left.inset(15)
@@ -939,7 +984,7 @@ function genMeView() {
         props: {
           id: "tabShowInstallsDetail",
           text: utils.getCache("installNumbers", 0).toString(),
-          textColor: $color("#AAAAAA"),
+          textColor: utils.themeColor.appCateTextColor,
         },
         layout: function(make, view) {
           make.right.inset(15)
@@ -990,6 +1035,12 @@ function genMeView() {
     },
   },]
 
+  let fuctionArray = [{
+    templateTitle: {
+      text : "主题设置",
+    },
+  },]
+
   let view = {
     type: "view",
     props: {
@@ -1000,10 +1051,11 @@ function genMeView() {
     views: [{
       type: "list",
       props: {
-        id: "list",
+        id: "melist",
         bgcolor: $color("clear"),
         template: feedBackTemplate,
         indicatorInsets: $insets(45, 0, 50, 0),
+        separatorColor: utils.themeColor.separatorColor,
         header: {
           type: "view",
           props:{
@@ -1015,7 +1067,7 @@ function genMeView() {
               id: "meListHeaderTitle",
               text: "我的",
               font: $font("Avenir-Black", 35),
-              textColor: $color("black"),
+              textColor: utils.themeColor.listHeaderTextColor,
               align: $align.center,
             },
             layout: function(make, view) {
@@ -1034,7 +1086,7 @@ function genMeView() {
             type: "label",
             props: {
               text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
-              textColor: $color("#BBBBBB"),
+              textColor: utils.themeColor.appCateTextColor,
               align: $align.center,
               font: $font(13)
             },
@@ -1050,6 +1102,9 @@ function genMeView() {
         },{
           title: "操作",
           rows: actionArray,
+        },{
+          title: "功能",
+          rows: fuctionArray,
         },{
           title: "关于",
           rows: array,
@@ -1076,9 +1131,10 @@ function genMeView() {
             switch(indexPath.row + indexPath.section) {
               case 0: user.haveLogined()?userCenterView.setupUserCenterView():wantToLogin();break;
               case 1: wantToRealse();break;
-              case 4: update.checkUpdate(true);break;
-              case 5: setupFeedBack();break;
-              case 6: setupReward();break;
+              case 2: (utils.getCache("authPass"))?genThemeSettingView():genWxWelcomView();break;
+              case 5: update.checkUpdate(true);break;
+              case 6: setupFeedBack();break;
+              case 7: setupReward();break;
               default:break;
             }
           }
@@ -1090,7 +1146,7 @@ function genMeView() {
             $("meListHeaderTitle").hidden = true
           } else if(sender.contentOffset.y < 40 + topOffset && $("mePageHeaderLabel").hidden === false) {
             $("mePageHeaderLabel").hidden = true
-            $("mePageHeaderBlur").bgcolor = $color("white")
+            $("mePageHeaderBlur").bgcolor = utils.themeColor.mainColor
             $("meListHeaderTitle").hidden = false
           }else if(sender.contentOffset.y < topOffset) {
             let size = 35 - sender.contentOffset.y * 0.04
@@ -1117,8 +1173,8 @@ function genMeView() {
         type: "blur",
         props: {
           id: "mePageHeaderBlur",
-          style: 1, // 0 ~ 5
-          bgcolor: $color("white"),
+          style: utils.themeColor.blurType, // 0 ~ 5
+          bgcolor: utils.themeColor.mainColor,
         },
         layout: $layout.fill,
       },{
@@ -1136,7 +1192,7 @@ function genMeView() {
             font: $font("bold", 17),
             align: $align.center,
             bgcolor: $color("clear"),
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
           },
           layout: $layout.fill,
         },],
@@ -1215,7 +1271,349 @@ function wantToRealse() {
       ]
     })
   }
-  
+}
+
+function genThemeSettingView() {
+  let tabDarkMode = {
+    type: "view",
+    props: {
+      bgcolor: utils.themeColor.bgcolor,
+    },
+    layout: $layout.fill,
+    views: [{
+        type: "label",
+        props: {
+          id: "tabDarkMode",
+          text: "暗色模式",
+          textColor: utils.themeColor.listContentTextColor,
+        },
+        layout: function(make, view) {
+          make.left.inset(20)
+          make.centerY.equalTo(view.super)
+        }
+      },{
+        type: "switch",
+        props: {
+          id: "tabDarkModeSwitch",
+          onColor: $color(utils.mColor.iosGreen),
+          on: utils.getCache("darkMode"),
+        },
+        layout: function(make, view) {
+          make.right.inset(20)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+            $cache.set("darkMode", sender.on)
+            $delay(0.3, ()=>{
+              $addin.restart()
+            })
+          }
+        }
+      }
+    ],
+  }
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
+    },
+    views: [ui.genPageHeader("主页", "主题设置"), {
+      type: "list",
+      props: {
+        bgcolor: $color("clear"),
+        template: [],
+        indicatorInsets: $insets(45, 0, 50, 0),
+        separatorColor: utils.themeColor.separatorColor,
+        itemHeight: 50,
+        data: [{
+          type: "view",
+          props: {
+            bgcolor: utils.themeColor.bgcolor,
+          },
+          layout: $layout.fill,
+        },tabDarkMode],
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.right.bottom.inset(0)
+      },
+    }]
+  })
+}
+
+function genWxWelcomView() {
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
+    },
+    events: {
+      appeared: function(sender) {
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      didAppear: function(sender) {
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      disappeared: function() {
+        $app.autoKeyboardEnabled = false
+        $app.keyboardToolbarEnabled = false
+      }
+    },
+    views: [ui.genPageHeader("主页", "解锁功能"), {
+      type: "scroll",
+      props: {
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.right.bottom.inset(0)
+      },
+      views: [{
+        type: "gallery",
+        props: {
+          items: [
+            {
+              type: "image",
+              props: {
+                src: "assets/show1.png",
+                contentMode: $contentMode.scaleAspectFit,
+              }
+            },
+          ],
+          interval: 4,
+          radius: 5.0
+        },
+        layout: function(make, view) {
+          make.left.right.inset(10)
+          make.centerX.equalTo(view.super)
+          make.top.inset(30)
+          make.height.equalTo(200)
+        }
+      },{
+        type: "label",
+        props: {
+          id: "welcomeDetailLabel",
+          text: "关注微信公众号「纵享派」即可解锁主题设置，感谢你对作者辛苦开发和维护的支持 :)",
+          font: $font("bold", 20),
+          align: $align.center,
+          lines: 0,
+        },
+        layout: function(make, view) {
+          make.left.right.inset(20)
+          make.centerX.equalTo(view.super)
+          make.top.equalTo(view.prev.bottom).inset(30)
+        },
+      },{
+        type: "view",
+        props: {
+          id: "showWindow",
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(20)
+          make.centerX.equalTo(view.super)
+          make.width.equalTo(200)
+          make.height.equalTo(40)
+        },
+        views: []
+      },{
+        type: "button",
+        props: {
+          id: "subscribeButton",
+          title: "关注以继续使用",
+          circular: true,
+          titleColor: $color("white"),
+          bgcolor: $color("#00CC7A"),
+          font: $font("bold", 15),
+        },
+        layout: function(make, view) {
+          make.width.equalTo(220)
+          make.centerX.equalTo(view.super)
+          make.height.equalTo(50)
+          make.top.equalTo(view.prev.bottom).inset(30)
+        },
+        events: {
+          tapped: function(sender) {
+            if(!authSucces) {
+              $ui.alert({
+                title: "提示",
+                message: "下载二维码图片或复制公众号名并跳转到微信，只需选择图片或者搜索即可关注公众号。",
+                actions: [
+                  {
+                    title: "下载二维码",
+                    handler: function() {
+                      gotoWxScan()
+                    }
+                  },
+                  {
+                    title: "复制公众号名",
+                    handler: function() {
+                      gotoWx()
+                    }
+                  },
+                  {
+                    title: "取消",
+                    handler: function() {
+                      
+                    }
+                  }
+                ]
+              });
+            } else {
+              $ui.pop();
+              $cache.set("authPass", true);
+              genThemeSettingView()
+            }
+          }
+        },
+      },{
+        type: "button",
+        props: {
+          title: "我已关注",
+          circular: true,
+          titleColor: $color("#a2a2a2"), //#3478f7
+          bgcolor: $color("white"),
+          font: $font("bold", 13),
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(20)
+          make.centerX.equalTo(view.super)
+          make.width.equalTo(100)
+          make.height.equalTo(30)
+        },
+        events: {
+          tapped: function(sender) {
+            if(!$("nicknameInput")) {
+              $("showWindow").add({
+                type: "view",
+                props: {
+                  id: "inputParent",
+                },
+                layout: $layout.fill,
+                views:[{
+                  type: "input",
+                  props: {
+                    id: "nicknameInput",
+                    borderColor: $color("#00CC7A"),
+                    borderWidth: 3,
+                    bgcolor: $color("white"),
+                    tintColor: $color("#00CC7A"),
+                    placeholder: "输入你的微信用户昵称",
+                    font: $font("bold", 13),
+                  },
+                  layout: function(make, view) {
+                    make.center.equalTo(view.super)
+                    make.height.equalTo(32)
+                    make.width.equalTo(150)
+                  },
+                  events: {
+                    returned: function(sender) {
+                      sender.blur()
+                    },
+                    didEndEditing: function(sender) {
+                      detectNickname(sender.text)
+                    }
+                  }
+                },{
+                  type: "image",
+                  props: {
+                    id: "toastIcon",
+                    bgcolor: $color("clear"),
+                    icon: null,
+                  },
+                  layout: function(make, view) {
+                    make.centerY.equalTo(view.super)
+                    make.size.equalTo($size(20, 20))
+                    make.left.equalTo(view.prev.right).inset(5)
+                  },
+                  events: {
+                    tapped: function(sender) {
+                      if(!authSucces && sender.icon) {
+                        if($("nicknameInput").text.indexOf("&") >= 0) {
+                          $ui.alert({
+                            title: "提示",
+                            message: "昵称中含有 & 符号，请在公众号后台联系开发者",
+                          });
+                        } else {
+                          $ui.alert({
+                            title: "提示",
+                            message: "待开发者审核，请在公众号后台发送你的微信昵称以通过审核，请耐心等待，注意是昵称不是微信号",
+                          });
+                        }
+                      }
+                    }
+                  }
+                }]
+              })
+            }
+            $("nicknameInput").focus()
+          }
+        },
+      }]
+    }],
+  })
+  function detectNickname(nickname) {
+    if(nickname.length <= 0 && $("toastIcon")) {
+      $("toastIcon").icon = null
+      authSucces = false
+      return 0
+    }
+    if($("toastIcon")) {
+      $("toastIcon").icon = $icon("162", $color("gray"), $size(20, 20))
+    }
+    let url = "https://wcphv9sr.api.lncld.net/1.1/classes/fansList?where={\"nickname\":\"" + nickname + "\"}"
+    $http.request({
+      method: "GET",
+      url: encodeURI(url),
+      timeout: 5,
+      header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
+        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+      },
+      handler: function(resp) {
+        let data = resp.data.results
+        if(data && data.length > 0) {
+          if($("toastIcon")) {
+            $("toastIcon").icon = $icon("064", $color("#00CC7A"), $size(20, 20))
+            authSucces = true
+            $("subscribeButton").bgcolor = $color("#3478f7");
+            $("subscribeButton").title = "开始使用"
+            regisiter(data[0].objectId)
+          }
+        } else {
+          if($("toastIcon")) {
+            $("toastIcon").icon = $icon("009", $color("gray"), $size(20, 20))
+            authSucces = false
+          }
+        }
+      }
+    })
+  }
+  function regisiter(objectId) {
+    $http.request({
+      method: "PUT",
+      url: "https://wcphv9sr.api.lncld.net/1.1/classes/fansList/" + objectId,
+      timeout: 5,
+      header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
+        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+      },
+      body: {
+        deviceId: {
+          __op: "AddUnique",
+          objects: [$objc("FCUUID").invoke("uuidForDevice").rawValue()],
+        }
+      },
+      handler: function(resp) {
+      }
+    })
+  }
 }
 
 function shadow(view) {
@@ -1232,7 +1630,7 @@ function share(link) {
     items: [link], // 也支持 item
     handler: function(success) {
       if(success) {
-        ui.showToastView($("mainView"), mColor.blue, "感谢您的分享")
+        ui.showToastView($("mainView"), utils.mColor.blue, "感谢您的分享")
       }
     }
   })
@@ -1244,7 +1642,8 @@ function setupWebView(title, url) {
       id: "myWebView",
       title: title,
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     views: [ui.genPageHeader("我的", title), {
       type: "web",
@@ -1263,31 +1662,38 @@ function setupWebView(title, url) {
 
 //赞赏页面
 function setupReward() {
-  const rewardTemplate = [{
-    type: "label",
+  const rewardTemplate = {
+    type: "view",
     props: {
-      id: "templateTitle",
-      textColor: $color("#333333"),
-      font: $font("TrebuchetMS-Italic",17)
-    },
-    layout: function(make, view) {
-      make.left.inset(40);
-      make.centerY.equalTo(view.super);
-    }
-  },
-  {
-    type: "image",
-    props: {
-      id: "templateImage",
-      icon: $icon("061", $color("#FF823E"), $size(15, 15)),
       bgcolor: $color("clear"),
-      hidden: false,
     },
-    layout: function(make, view) {
-      make.right.inset(40);
-      make.centerY.equalTo(view.super);
-    }
-  }]
+    layout: $layout.fill,
+    views: [{
+      type: "label",
+      props: {
+        id: "templateTitle",
+        textColor: $color("#333333"),
+        font: $font("TrebuchetMS-Italic",17)
+      },
+      layout: function(make, view) {
+        make.left.inset(40);
+        make.centerY.equalTo(view.super);
+      }
+    },
+    {
+      type: "image",
+      props: {
+        id: "templateImage",
+        icon: $icon("061", $color("#FF823E"), $size(15, 15)),
+        bgcolor: $color("clear"),
+        hidden: false,
+      },
+      layout: function(make, view) {
+        make.right.inset(40);
+        make.centerY.equalTo(view.super);
+      }
+    }]
+  }
   let array = $cache.get("rewardList")
   if(array == undefined) {
     array = []
@@ -1297,7 +1703,8 @@ function setupReward() {
       id: "rewardMainView",
       title: "支持与赞赏",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     layout: $layout.fill,
     events: {
@@ -1314,86 +1721,7 @@ function setupReward() {
         $app.keyboardToolbarEnabled = false
       }
     },
-    views: [{
-      type: "view",
-      layout: function(make, view) {
-        if($device.info.version >= "11"){
-          make.top.equalTo(view.super.safeAreaTop)
-        } else {
-          make.top.inset(20)
-        }
-        make.left.right.inset(0)
-        make.height.equalTo(45)
-      },
-      views:[{
-        type: "label",
-        props: {
-          text: "支持与赞赏",
-          font: $font("bold", 17),
-          align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
-        },
-        layout: $layout.fill,
-      },{
-        type: "canvas",
-        layout: function(make, view) {
-          make.bottom.inset(0)
-          make.height.equalTo(1)
-          make.left.right.inset(0)
-        },
-        events: {
-          draw: function(view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("darkGray")
-            ctx.setLineWidth(1 / scale)
-            ctx.moveToPoint(0, 0)
-            ctx.addLineToPoint(width, 0)
-            ctx.strokePath()
-          }
-        }
-      },{
-        type: "button",
-        props: {
-          bgcolor: $color("clear"),
-        },
-        layout: function(make, view) {
-          make.left.inset(0)
-          make.width.equalTo(60)
-          make.height.equalTo(view.super)
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.pop()
-          },
-        },
-        views:[{
-          type: "image",
-          props: {
-            src: "assets/back.png",
-            bgcolor: $color("clear"),
-          },
-          layout: function(make, view) {
-            make.left.inset(10)
-            make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
-          },
-        },{
-          type: "label",
-          props: {
-            text: "设置",
-            align: $align.center,
-            textColor: $color(mColor.blue),
-            font: $font(17)
-          },
-          layout: function(make, view) {
-            make.height.equalTo(view.super)
-            make.left.equalTo(view.prev.right).inset(3)
-          }
-        }],
-      },],
-    },{
+    views: [ui.genPageHeader("主页", "支持与赞赏"), {
       type: "view",
       props: {
         id: "reward",
@@ -1413,7 +1741,7 @@ function setupReward() {
         props: {
           id: "rewardTextTitle",
           text: "赞赏名单(按时间排序)：",
-          textColor: $color("#333333"),
+          textColor: utils.themeColor.listContentTextColor,
           font: $font(15),
         },
         layout: function(make, view) {
@@ -1426,7 +1754,7 @@ function setupReward() {
         props: {
           id: "selection",
           items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
-          tintColor: $color("#333333"),
+          tintColor: utils.themeColor.listContentTextColor,
           index: 0,
         },
         layout: function(make, view) {
@@ -1515,7 +1843,7 @@ function setupReward() {
         props: {
           id: "recommandText",
           text: "— 推荐方式 —",
-          textColor: $rgba(100, 100, 100, 0.5),
+          textColor: utils.themeColor.appHintColor,
           font: $font(10),
         },
         layout: function(make, view) {
@@ -1527,7 +1855,7 @@ function setupReward() {
         props: {
           id: "recommandText",
           text: "— 零成本支持 —",
-          textColor: $rgba(100, 100, 100, 0.5),
+          textColor: utils.themeColor.appHintColor,
           font: $font(10),
         },
         layout: function(make, view) {
@@ -1651,7 +1979,8 @@ function setupFeedBack(text) {
       id: "feedbackView",
       title: "反馈建议",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     layout: $layout.fill,
     events: {
@@ -1668,86 +1997,7 @@ function setupFeedBack(text) {
         $app.keyboardToolbarEnabled = false
       }
     },
-    views: [{
-      type: "view",
-      layout: function(make, view) {
-        if($device.info.version >= "11"){
-          make.top.equalTo(view.super.safeAreaTop)
-        } else {
-          make.top.inset(20)
-        }
-        make.left.right.inset(0)
-        make.height.equalTo(45)
-      },
-      views:[{
-        type: "label",
-        props: {
-          text: "反馈建议",
-          font: $font("bold", 17),
-          align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
-        },
-        layout: $layout.fill,
-      },{
-        type: "canvas",
-        layout: function(make, view) {
-          make.bottom.inset(0)
-          make.height.equalTo(1)
-          make.left.right.inset(0)
-        },
-        events: {
-          draw: function(view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("darkGray")
-            ctx.setLineWidth(1 / scale)
-            ctx.moveToPoint(0, 0)
-            ctx.addLineToPoint(width, 0)
-            ctx.strokePath()
-          }
-        }
-      },{
-        type: "button",
-        props: {
-          bgcolor: $color("clear"),
-        },
-        layout: function(make, view) {
-          make.left.inset(0)
-          make.width.equalTo(60)
-          make.height.equalTo(view.super)
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.pop()
-          },
-        },
-        views:[{
-          type: "image",
-          props: {
-            src: "assets/back.png",
-            bgcolor: $color("clear"),
-          },
-          layout: function(make, view) {
-            make.left.inset(10)
-            make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
-          },
-        },{
-          type: "label",
-          props: {
-            text: "设置",
-            align: $align.center,
-            textColor: $color(mColor.blue),
-            font: $font(17)
-          },
-          layout: function(make, view) {
-            make.height.equalTo(view.super)
-            make.left.equalTo(view.prev.right).inset(3)
-          }
-        }],
-      },],
-    },{
+    views: [ui.genPageHeader("主页", "反馈建议"), {
         type: "view",
         props: {
           id: "feedback",
@@ -1768,7 +2018,7 @@ function setupFeedBack(text) {
             props: {
               id: "feedbackTextTitle",
               text: "反馈内容：",
-              textColor: $color("#333333"),
+              textColor: utils.themeColor.listContentTextColor,
               font: $font(15),
             },
             layout: function(make, view) {
@@ -1783,12 +2033,14 @@ function setupFeedBack(text) {
               text: (text)?text:"",
               align: $align.left,
               radius: 5,
-              textColor: $color("#333333"),
+              textColor: utils.themeColor.appObviousColor,
               font: $font(15),
               borderColor: $rgba(90, 90, 90, 0.6),
               borderWidth: 1,
               insets: $insets(5, 5, 5, 5),
               alwaysBounceVertical: true,
+              bgcolor: $color("clear"),
+              darkKeyboard: utils.themeColor.darkKeyboard,
             },
             layout: function(make, view) {
               make.height.equalTo(160)
@@ -1802,7 +2054,7 @@ function setupFeedBack(text) {
             props: {
               id: "feedbackContactTitle",
               text: "联系方式(选填):",
-              textColor: $color("#333333"),
+              textColor: utils.themeColor.listContentTextColor,
               font: $font(15),
             },
             layout: function(make, view) {
@@ -1814,14 +2066,15 @@ function setupFeedBack(text) {
             type: "text",
             props: {
               id: "feedbackContact",
-              textColor: $color("#333333"),
+              textColor: utils.themeColor.appObviousColor,
               font: $font(15),
-              bgcolor: $color("white"),
               borderColor: $rgba(90, 90, 90, 0.6),
               borderWidth: 1,
               insets: $insets(5, 5, 5, 5),
               radius: 5,
               align: $align.center,
+              bgcolor: $color("clear"),
+              darkKeyboard: utils.themeColor.darkKeyboard,
             },
             layout: function(make, view) {
               make.left.equalTo($("feedbackContactTitle").right).inset(10)
@@ -1858,7 +2111,7 @@ function setupFeedBack(text) {
             type: "label",
             props: {
               text: "如果需要发送图片或者视频，请在公众号中进行反馈。",
-              textColor: $color("#AAAAAA"),
+              textColor: utils.themeColor.appHintColor,
               align: $align.left,
               font: $font(12),
               lines: 0,
@@ -1914,6 +2167,27 @@ function requireApps() {
   })
 }
 
+function getCloudAppDisplaySource() {
+  let cloudApps = utils.getCache("cloudApps", [])
+  let onstoreApps = []
+  for(let i = 0; i < cloudApps.length; i++) {
+    if(cloudApps[i].onStore) {
+      onstoreApps.push(cloudApps[i]);
+    }
+  }
+  let results = []
+  if(searchText != "") {
+    for(let i = 0; i < onstoreApps.length; i++) {
+      if(onstoreApps[i].appName.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].author.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].subtitle.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].instruction.toLowerCase().indexOf(searchText.toLowerCase()) >= 0) {
+        results.push(onstoreApps[i])
+      }
+    }
+    return results;
+  } else {
+    return onstoreApps;
+  }
+}
+
 function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
   let json = {}
   if(title != undefined) {
@@ -1954,7 +2228,7 @@ function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
     handler: function(resp) {
       $("cloudButton").info = {isfinish: true}
       let view = $("progress")
-      ui.showToastView($("uploadItemView"), mColor.green, "上传成功")
+      ui.showToastView($("uploadItemView"), utils.mColor.green, "上传成功")
       if(view != undefined) {
         let finishTimer = $timer.schedule({
           interval: 0.001,
@@ -2098,7 +2372,7 @@ function uploadSM(action, pic, objectId, indexPath, fileName) {
     }
   } else {
     if (typeof(pic) != "undefined") {
-      ui.showToastView($("uploadItemView"), mColor.blue, "请稍候")
+      ui.showToastView($("uploadItemView"), utils.mColor.blue, "请稍候")
       $http.upload({
         url: "https://sm.ms/api/upload",
         files: [{ "data": pic, "name": "smfile", "filename": fileName}],
@@ -2113,7 +2387,7 @@ function uploadSM(action, pic, objectId, indexPath, fileName) {
 }
 
 function uploadTinyPng(action, pic, objectId, indexPath, fileName) {
-  ui.showToastView($("uploadItemView"), mColor.blue, "压缩上传中，请耐心等候", 5)
+  ui.showToastView($("uploadItemView"), utils.mColor.blue, "压缩上传中，请耐心等候", 5)
   $http.request({
     method: "POST",
     url: "https://api.tinify.com/shrink",

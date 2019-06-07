@@ -31,7 +31,7 @@ function show(objectId) {
       commentSubviews.push({
         type: "view",
         props: {
-          bgcolor: $color("#F0F0F8"),
+          bgcolor: utils.themeColor.commentBgColor,
           radius: 8,
         },
         layout: function(make, view) {
@@ -48,7 +48,7 @@ function show(objectId) {
           type: "label",
           props: {
             text: comments[comments.length - i - 1].name,
-            textColor: $color("gray"),
+            textColor: utils.themeColor.appHintColor,
             font: $font("PingFangSC-Regular", 15),
           },
           layout: function(make, view) {
@@ -60,7 +60,7 @@ function show(objectId) {
           type: "label",
           props: {
             text: comments[comments.length - i - 1].comment,
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
             font: $font("PingFangSC-Regular", 15),
             align: $align.justified,
             bgcolor: $color("clear"),
@@ -154,7 +154,8 @@ function show(objectId) {
   $ui.push({
     props: {
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     views: [ui.genPageHeader("主页", ""),{
       type: "scroll",
@@ -202,7 +203,7 @@ function show(objectId) {
                   },
                   events: {
                     draw: (view, ctx) => {
-                      ctx.strokeColor = $rgba(100, 100, 100, 0.1)
+                      ctx.strokeColor = utils.themeColor.appButtonBgColor,
                       ctx.setLineWidth(2.5)
                       ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
                       ctx.strokePath()
@@ -244,7 +245,7 @@ function show(objectId) {
                     $ui.animate({
                       duration: 0.1,
                       animation: function() {
-                        buttonView.bgcolor = $rgba(100, 100, 100, 0.1)
+                        buttonView.bgcolor = utils.themeColor.appButtonBgColor
                       },
                       completion: function() {
                         buttonView.get("canvas").remove()
@@ -311,7 +312,7 @@ function show(objectId) {
               text: "下载量",
               font: $font(11),
               align: $align.center,
-              textColor: $color("lightGray"),
+              textColor: utils.themeColor.appHintColor,
             },
             layout: function(make, view) {
               make.top.equalTo(view.prev.bottom).inset(5)
@@ -346,7 +347,7 @@ function show(objectId) {
               text: "评论",
               font: $font(11),
               align: $align.center,
-              textColor: $color("lightGray"),
+              textColor: utils.themeColor.appHintColor,
             },
             layout: function(make, view) {
               make.top.equalTo(view.prev.bottom).inset(5)
@@ -381,7 +382,7 @@ function show(objectId) {
               text: "点赞",
               font: $font(11),
               align: $align.center,
-              textColor: $color("lightGray"),
+              textColor: utils.themeColor.appHintColor,
             },
             layout: function(make, view) {
               make.top.equalTo(view.prev.bottom).inset(5)
@@ -435,7 +436,7 @@ function show(objectId) {
               text: "新功能",
               font: $font("bold", 22),
               align: $align.center,
-              textColor: $color("black"),
+              textColor: utils.themeColor.listHeaderTextColor,
             },
             layout: function(make, view) {
               make.top.inset(0)
@@ -474,7 +475,7 @@ function show(objectId) {
               text: "版本 " + app.appVersion,
               font: $font(14),
               align: $align.center,
-              textColor: $color("gray"),
+              textColor: utils.themeColor.appCateTextColor,
             },
             layout: function(make, view) {
               make.centerY.equalTo(view.super)
@@ -487,7 +488,7 @@ function show(objectId) {
               text: utils.getUpdateDateString((app.updateTime)?app.updateTime:app.updatedAt),
               font: $font(14),
               align: $align.center,
-              textColor: $color("gray"),
+              textColor: utils.themeColor.appCateTextColor,
             },
             layout: function(make, view) {
               make.centerY.equalTo(view.super)
@@ -503,6 +504,7 @@ function show(objectId) {
             lines: 0,
             font: $font("PingFangSC-Regular", 15),
             attributedText: setLineSpacing(app.versionInst, 5),
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             let size = $text.sizeThatFits({
@@ -545,7 +547,7 @@ function show(objectId) {
           text: "预览",
           font: $font("bold", 22),
           align: $align.center,
-          textColor: $color("black"),
+          textColor: utils.themeColor.listHeaderTextColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(10)
@@ -560,7 +562,7 @@ function show(objectId) {
         type: "view",
         props: {
           id: "appPreviewPhotosScrollParent",
-          bgcolor: $color("white"),
+          bgcolor: utils.themeColor.bgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -617,6 +619,7 @@ function show(objectId) {
           lines: 0,
           font: $font("PingFangSC-Regular", 15),
           attributedText: setLineSpacing(app.instruction, 5),
+          textColor: utils.themeColor.listContentTextColor,
         },
         layout: function(make, view) {
           let size = $text.sizeThatFits({
@@ -661,7 +664,7 @@ function show(objectId) {
             text: "评论",
             font: $font("bold", 22),
             align: $align.center,
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
           },
           layout: function(make, view) {
             make.top.inset(0)
@@ -738,7 +741,7 @@ function show(objectId) {
           text: "信息",
           font: $font("bold", 22),
           align: $align.center,
-          textColor: $color("black"),
+          textColor: utils.themeColor.listHeaderTextColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(10)
@@ -758,7 +761,7 @@ function show(objectId) {
             text: "开发者",
             align: $align.left,
             font: $font("PingFangSC-Regular", 14),
-            textColor: $color("gray"),
+            textColor: utils.themeColor.appCateTextColor,
           },
           layout: function(make, view) {
             make.top.inset(0)
@@ -772,7 +775,7 @@ function show(objectId) {
             text: (app.author)?app.author:"无",
             align: $align.right,
             font: $font("PingFangSC-Regular", 14),
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
           },
           layout: function(make, view) {
             make.top.inset(0)
@@ -813,7 +816,7 @@ function show(objectId) {
             text: "类别",
             align: $align.left,
             font: $font(14),
-            textColor: $color("gray"),
+            textColor: utils.themeColor.appCateTextColor,
           },
           layout: function(make, view) {
             make.top.inset(0)
@@ -827,7 +830,7 @@ function show(objectId) {
             text: app.appCate,
             align: $align.right,
             font: $font(14),
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
           },
           layout: function(make, view) {
             make.top.inset(0)
@@ -867,7 +870,7 @@ function show(objectId) {
           props: {
             title: " 分享",
             icon: $icon("022", $color(utils.mColor.blue), $size(20, 20)),
-            bgcolor: $rgba(100, 100, 100, 0.1),
+            bgcolor: utils.themeColor.appButtonBgColor,
             titleColor: $color(utils.mColor.blue),
             font: $font("bold", 16.5),
             radius: 7,
@@ -928,7 +931,7 @@ function genAppPreviewPhotosScrollView(photos) {
           radius: 5,
           contentMode: $contentMode.scaleAspectFit,
           borderWidth: 1 / $device.info.screen.scale,
-          borderColor: $color("#E0E0E0"),
+          borderColor: utils.themeColor.separatorColor,
           bgcolor: $color("clear"),
         },
         layout: $layout.fill,
@@ -947,12 +950,13 @@ function genAppPreviewPhotosScrollView(photos) {
   $ui.push({
     props: {
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     views: [ui.genPageHeader("应用", "预览"), {
       type: "view",
       props: {
-        bgcolor: $color("white"),
+        bgcolor: utils.themeColor.bgcolor,
       },
       layout: function(make, view) {
         make.top.equalTo(view.prev.bottom).inset(0)
@@ -1015,7 +1019,8 @@ function genCommentView(app) {
     props: {
       id: "addCommentView",
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     views: [{
       type: "view",
@@ -1034,8 +1039,8 @@ function genCommentView(app) {
           text: "评论",
           font: $font("bold", 17),
           align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
+          bgcolor: utils.themeColor.mainColor,
+          textColor: utils.themeColor.listHeaderTextColor,
         },
         layout: $layout.fill,
       },{
@@ -1136,11 +1141,14 @@ function genCommentView(app) {
         text: "",
         align: $align.left,
         radius: 0,
-        textColor: $color("#333333"),
+        textColor: utils.themeColor.listContentTextColor,
         font: $font(17),
         borderColor: $color("clear"),
         insets: $insets(12, 20, 12, 20),
         alwaysBounceVertical: true,
+        bgcolor: utils.themeColor.bgcolor,
+        tintColor: utils.themeColor.listContentTextColor,
+        darkKeyboard: utils.themeColor.darkKeyboard,
       },
       layout: function(make, view) {
         make.height.equalTo(view.super)
@@ -1163,7 +1171,7 @@ function genCommentView(app) {
           id: "commentTextHint",
           text: "评论（必填）",
           align: $align.left,
-          textColor: $color("lightGray"),
+          textColor: utils.themeColor.appHintColor,
           font: $font(17)
         },
         layout: function(make, view) {
@@ -1211,7 +1219,7 @@ function genUpdateHistoryView(app) {
             text: history[i].version,
             font: $font("PingFangSC-Medium", 15),
             align: $align.center,
-            textColor: $color("black"),
+            textColor: utils.themeColor.listHeaderTextColor,
           },
           layout: function(make, view) {
             make.left.inset(20)
@@ -1224,7 +1232,7 @@ function genUpdateHistoryView(app) {
             text: utils.getUpdateDateString(history[i].time),
             font: $font(15),
             align: $align.center,
-            textColor: $color("gray"),
+            textColor: utils.themeColor.appCateTextColor,
           },
           layout: function(make, view) {
             make.right.inset(20)
@@ -1238,7 +1246,7 @@ function genUpdateHistoryView(app) {
           text: history[i].versionInst,
           font: $font("PingFangSC-Regular", 15),
           align: $align.left,
-          textColor: $color("black"),
+          textColor: utils.themeColor.listHeaderTextColor,
           lines: 0,
           attributedText: setLineSpacing(history[i].versionInst, 5),
         },
@@ -1278,7 +1286,8 @@ function genUpdateHistoryView(app) {
   $ui.push({
     props: {
       navBarHidden: true,
-      statusBarStyle: 0,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
     },
     views: [ui.genPageHeader("应用", "版本历史记录"), {
       type: "scroll",

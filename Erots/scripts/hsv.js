@@ -1,6 +1,7 @@
 var calc = require('scripts/calc')
 var cover = require('scripts/cover')
 var wid = $device.info.screen.width
+let utils = require('scripts/utils')
 
 function genHSVView(color, handler) {
   let sliderValues = calc.HEX2HSV(color)[0]
@@ -12,6 +13,7 @@ function genHSVView(color, handler) {
         props: {
           font: $font(13),
           text: "色调",
+          textColor: utils.themeColor.listContentTextColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.super)
@@ -22,6 +24,7 @@ function genHSVView(color, handler) {
         props: {
           font: $font(13),
           text: "饱和度",
+          textColor: utils.themeColor.listContentTextColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.super).offset(45)
@@ -32,6 +35,7 @@ function genHSVView(color, handler) {
         props: {
           font: $font(13),
           text: "明亮度",
+          textColor: utils.themeColor.listContentTextColor,
         },
         layout: function(make, view) {
           make.top.equalTo(view.super).offset(90)
@@ -51,7 +55,8 @@ function genHSVView(color, handler) {
             id: "h_v",
             font: $font(13),
             text: sliderValues[0] + "",
-            align: $align.right
+            align: $align.right,
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -61,7 +66,8 @@ function genHSVView(color, handler) {
           type: "label",
           props: {
             font: $font(13),
-            text: "°"
+            text: "°",
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -148,7 +154,8 @@ function genHSVView(color, handler) {
           props: {
             id: "s_v",
             font: $font(13),
-            text: sliderValues[1] + ""
+            text: sliderValues[1] + "",
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -158,7 +165,8 @@ function genHSVView(color, handler) {
           type: "label",
           props: {
             font: $font(13),
-            text: "%"
+            text: "%",
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -232,6 +240,7 @@ function genHSVView(color, handler) {
             id: "v_v",
             font: $font(13),
             text: sliderValues[2] + "",
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -241,7 +250,8 @@ function genHSVView(color, handler) {
           type: "label",
           props: {
             font: $font(13),
-            text: "%"
+            text: "%",
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
