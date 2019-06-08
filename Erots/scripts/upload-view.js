@@ -395,6 +395,7 @@ function setupUploadView(updateApp) {
             text: myApp.appName,
             textColor: utils.themeColor.appObviousColor,
             darkKeyboard: utils.themeColor.darkKeyboard,
+            tintColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -530,6 +531,7 @@ function setupUploadView(updateApp) {
             type: $kbType.decimal,
             text: myApp.appVersion,
             darkKeyboard: utils.themeColor.darkKeyboard,
+            tintColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -864,6 +866,7 @@ function setupUploadView(updateApp) {
             radius: 0,
             text: myApp.subtitle,
             darkKeyboard: utils.themeColor.darkKeyboard,
+            tintColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -1085,6 +1088,7 @@ function setupUploadView(updateApp) {
             font: $font(15),
             textColor: utils.themeColor.appObviousColor,
             darkKeyboard: utils.themeColor.darkKeyboard,
+            tintColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
@@ -1135,6 +1139,7 @@ function setupUploadView(updateApp) {
             font: $font(15),
             textColor: utils.themeColor.appObviousColor,
             darkKeyboard: utils.themeColor.darkKeyboard,
+            tintColor: utils.themeColor.appObviousColor,
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)

@@ -434,12 +434,12 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
     let fontcolor = $color("#" + json.color)
     if(json.mode == "1") {
       bgcolor = $color("#" + json.color)
-      fontcolor = utils.themeColor.mainColor
+      fontcolor = $color("white")
     }
     iconView = {
       type: "image",
       props: {
-        bgcolor: (json.mode == "1")?bgcolor:$color("clear"),
+        bgcolor: (json.mode == "1")?bgcolor:$color("white"),
         radius: 12,
         borderColor: utils.themeColor.iconBorderColor,
         borderWidth: 0.8,
@@ -466,7 +466,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
       type: "image",
       props: {
         src: icon,
-        bgcolor: $color("clear"),
+        bgcolor: $color("white"),
         radius: 12,
         borderColor: utils.themeColor.iconBorderColor,
         borderWidth: 0.8,

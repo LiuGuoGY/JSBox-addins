@@ -10,7 +10,6 @@ let api = require('scripts/api')
 
 let appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
 let appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
-let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
 let topOffset = -20
 let searchText = ""
@@ -48,7 +47,11 @@ let contentViews = ["cloudView", "updateView", "meView"] //"exploreView",
 
 function setThemeColor() {
   if(utils.getCache("darkMode")) {
-    utils.themeColor = utils.tColor.dark
+    if(utils.getCache("darkModeAuto")) {
+      utils.themeColor = ($system.brightness < 0.15)?utils.tColor.dark:utils.tColor.light;
+    } else {
+      utils.themeColor = utils.tColor.dark;
+    }
   }
   mIcon = [
     {
@@ -212,17 +215,6 @@ function setupMainView() {
     },
   ]
   })
-}
-
-function solveQuery() {
-  let query = $context.query
-  if(query) {
-    switch(query.q) {
-      case "show":
-      showOneItem(query.objectId);break;
-      default:break;
-    }
-  }
 }
 
 function handleSelect(view, row) {
@@ -565,7 +557,7 @@ function genCloudAppListView() {
             id: "search_hint",
             text: "Apps",
             align: $align.center,
-            textColor: $rgba(100, 100, 100, 0.4),
+            textColor: utils.themeColor.appHintColor,
             hidden: searchText != "",
           },
           layout: function(make, view) {
@@ -753,7 +745,7 @@ function genUpdateAppListView() {
           $("updateListHeaderTitle").hidden = true
         } else if(sender.contentOffset.y < 40 + topOffset && $("updatePageHeaderLabel").hidden === false) {
           $("updatePageHeaderLabel").hidden = true
-          $("updatePageHeaderBlur").bgcolor = utils.themeColor.bgcolor
+          $("updatePageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("updateListHeaderTitle").hidden = false
         }else if(sender.contentOffset.y < topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
@@ -1283,7 +1275,6 @@ function genThemeSettingView() {
     views: [{
         type: "label",
         props: {
-          id: "tabDarkMode",
           text: "暗色模式",
           textColor: utils.themeColor.listContentTextColor,
         },
@@ -1294,7 +1285,6 @@ function genThemeSettingView() {
       },{
         type: "switch",
         props: {
-          id: "tabDarkModeSwitch",
           onColor: $color(utils.mColor.iosGreen),
           on: utils.getCache("darkMode"),
         },
@@ -1308,6 +1298,40 @@ function genThemeSettingView() {
             $delay(0.3, ()=>{
               $addin.restart()
             })
+          }
+        }
+      }
+    ],
+  }
+  let tabDarkModeAuto = {
+    type: "view",
+    props: {
+      bgcolor: utils.themeColor.bgcolor,
+    },
+    layout: $layout.fill,
+    views: [{
+        type: "label",
+        props: {
+          text: "根据亮度自动变换主题",
+          textColor: utils.themeColor.listContentTextColor,
+        },
+        layout: function(make, view) {
+          make.left.inset(20)
+          make.centerY.equalTo(view.super)
+        }
+      },{
+        type: "switch",
+        props: {
+          onColor: $color(utils.mColor.iosGreen),
+          on: utils.getCache("darkModeAuto"),
+        },
+        layout: function(make, view) {
+          make.right.inset(20)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          changed: function(sender) {
+            $cache.set("darkModeAuto", sender.on)
           }
         }
       }
@@ -1333,7 +1357,7 @@ function genThemeSettingView() {
             bgcolor: utils.themeColor.bgcolor,
           },
           layout: $layout.fill,
-        },tabDarkMode],
+        },tabDarkMode,tabDarkModeAuto],
       },
       layout: function(make, view) {
         make.top.equalTo(view.prev.bottom)
@@ -1344,6 +1368,7 @@ function genThemeSettingView() {
 }
 
 function genWxWelcomView() {
+  let authSucces = false
   $ui.push({
     props: {
       navBarHidden: true,
@@ -1594,6 +1619,38 @@ function genWxWelcomView() {
       }
     })
   }
+  function gotoWxScan() {
+    $("showWindow").add({
+      type: "spinner",
+      props: {
+        id: "loadingView",
+        loading: true,
+      },
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+      }
+    })
+    $http.download({
+      url: "https://github.com/LiuGuoGY/JSBox-addins/raw/master/resources/OfficialAccountQr.jpg",
+      handler: function(resp) {
+        $photo.save({
+          data: resp.data,
+          handler: function(success) {
+            if($("loadingView")) {
+              $("loadingView").remove()
+            }
+            if (success) {
+              $app.openURL("weixin://scanqrcode")
+            }
+          }
+        })
+      }
+    })
+  }
+  function gotoWx() {
+    $clipboard.text = "纵享派"
+    $app.openURL("weixin://")
+  }  
   function regisiter(objectId) {
     $http.request({
       method: "PUT",
@@ -2188,78 +2245,6 @@ function getCloudAppDisplaySource() {
   }
 }
 
-function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
-  let json = {}
-  if(title != undefined) {
-    json.title = title
-  }
-  if(icon != undefined) {
-    json.icon = icon
-  }
-  if(url != undefined) {
-    json.url = url
-  }
-  if(descript != undefined) {
-    json.descript = descript
-  }
-  if(size != undefined) {
-    let size_k = ""
-    if (size < 1000000) {
-      size_k = size / 1000 + " K"
-    } else {
-      size_k = size / 1000000 + " M"
-    }
-    json.size = size_k
-  }
-  if(deviceToken != undefined) {
-    json.deviceToken = deviceToken
-  }
-  let objectUrl = "https://kscf2nxm.api.lncld.net/1.1/classes/Items".concat((objectId == undefined)?(""):("/" + objectId))
-  $http.request({
-    method: (objectId == undefined)?"POST":"PUT",
-    url: objectUrl,
-    timeout: 5,
-    header: {
-      "Content-Type": "application/json",
-      "X-LC-Id": appId,
-      "X-LC-Key": appKey,
-    },
-    body: json,
-    handler: function(resp) {
-      $("cloudButton").info = {isfinish: true}
-      let view = $("progress")
-      ui.showToastView($("uploadItemView"), utils.mColor.green, "上传成功")
-      if(view != undefined) {
-        let finishTimer = $timer.schedule({
-          interval: 0.001,
-          handler: function() {
-            if(view != undefined) {
-              if(view.value < 1) {
-                view.value += 0.001
-              } else {
-                finishTimer.invalidate()
-                $delay(0.5, function() {
-                  if($("toastView") != undefined) {
-                    $("toastView").remove()
-                  }
-                  $ui.pop()
-                })
-              }
-            }
-          }
-        })
-      } else {
-        $delay(0.5, function() {
-          if($("toastView") != undefined) {
-            $("toastView").remove()
-          }
-          $ui.pop()
-        })
-      }
-    }
-  })
-}
-
 function requireReward() {
   $http.request({
     method: "GET",
@@ -2352,70 +2337,6 @@ function uploadInstall() {
       }
     })
   }
-}
-
-function uploadSM(action, pic, objectId, indexPath, fileName) {
-  if(action != "edit") {
-    if (typeof(pic) != "undefined") {
-      $http.upload({
-        url: "https://sm.ms/api/upload",
-        files: [{ "data": pic, "name": "smfile", "filename": fileName}],
-        handler: function(resp) {
-          var data = resp.data.data
-          let deviceId = undefined
-          if(action != "renew") {
-            deviceId = $objc("FCUUID").invoke("uuidForDevice").rawValue()
-          }
-          uploadItem($("title").text, data.url, $("schemeInput").text, $("descriptInput").text, data.size, deviceId, objectId)
-        }
-      })
-    }
-  } else {
-    if (typeof(pic) != "undefined") {
-      ui.showToastView($("uploadItemView"), utils.mColor.blue, "请稍候")
-      $http.upload({
-        url: "https://sm.ms/api/upload",
-        files: [{ "data": pic, "name": "smfile", "filename": fileName}],
-        handler: function(resp) {
-          var data = resp.data.data
-          updateToLocal($("rowsShow"), indexPath, $("titleInput").text, data.url, $("schemeInput").text, $("descriptInput").text)
-          $ui.pop()
-        }
-      })
-    }
-  }
-}
-
-function uploadTinyPng(action, pic, objectId, indexPath, fileName) {
-  ui.showToastView($("uploadItemView"), utils.mColor.blue, "压缩上传中，请耐心等候", 5)
-  $http.request({
-    method: "POST",
-    url: "https://api.tinify.com/shrink",
-    header: {
-      Authorization: "Basic " + $text.base64Encode("api:" + randomValue(apiKeys)),
-    },
-    body: pic,
-    handler: function (resp) {
-      let response = resp.response;
-      if (response.statusCode === 201 || response.statusCode === 200) {
-        let compressedImageUrl = response.headers["Location"]
-        $http.download({
-          url: compressedImageUrl,
-          handler: function (resp_) {
-            if (resp_.data) {
-              let imageData = resp_.data
-              uploadSM(action, imageData, objectId, indexPath, fileName)
-            }
-          }
-        })
-      }
-    }
-  })
-}
-
-function randomValue(object) {
-  let x = Math.floor(Math.random()*object.length)
-  return object[x]
 }
 
 function sendFeedBack(text, contact) {

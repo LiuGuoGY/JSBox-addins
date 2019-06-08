@@ -34,18 +34,18 @@ const tColor = {
     mainColor: $color("black"),
     bgcolor: $color("black"),
     blurType: 3,
-    listHeaderTextColor: $color("lightGray"),//gray
+    listHeaderTextColor: $color("white"),//gray
     appButtonBgColor: $rgba(100, 100, 100, 0.5),
     iconBorderColor: $color("gray"),
     separatorColor: $color("darkGray"),
     statusBarStyle: 1,
-    appCateTextColor: $color("darkGray"),
-    listContentTextColor: $color("lightGray"),//gray
+    appCateTextColor: $color("gray"),
+    listContentTextColor: $color("white"),//gray
     darkKeyboard: true,
-    mainTabGrayColor: $color("darkGray"),
+    mainTabGrayColor: $color("gray"),
     commentBgColor: $color("#202020"),
-    appHintColor: $color("darkGray"),
-    appObviousColor: $color("lightGray"),
+    appHintColor: $color("gray"),
+    appObviousColor: $color("white"),
   }
 }
 
@@ -58,6 +58,7 @@ function getCache(key, def) {
       switch(key) { 
         case "darkMode": def = false; break;
         case "authPass": def = false; break;
+        case "darkModeAuto": def = false; break;
       }
     }
     $cache.set(key, def)
