@@ -47,10 +47,14 @@ let contentViews = ["cloudView", "updateView", "meView"] //"exploreView",
 
 function setThemeColor() {
   if(utils.getCache("darkMode")) {
-    if(utils.getCache("darkModeAuto")) {
-      utils.themeColor = ($system.brightness < 0.15)?utils.tColor.dark:utils.tColor.light;
-    } else {
+    if($device.isDarkMode) {
       utils.themeColor = utils.tColor.dark;
+    } else {
+      if(utils.getCache("darkModeAuto")) {
+        utils.themeColor = ($system.brightness < 0.15)?utils.tColor.dark:utils.tColor.light;
+      } else {
+        utils.themeColor = utils.tColor.dark;
+      }
     }
   }
   mIcon = [
@@ -77,6 +81,7 @@ function setupMainView() {
       id: "mainView",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
       // debugging: true,
     },
     views: [{
@@ -1269,7 +1274,7 @@ function genThemeSettingView() {
   let tabDarkMode = {
     type: "view",
     props: {
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     layout: $layout.fill,
     views: [{
@@ -1295,9 +1300,6 @@ function genThemeSettingView() {
         events: {
           changed: function(sender) {
             $cache.set("darkMode", sender.on)
-            $delay(0.3, ()=>{
-              $addin.restart()
-            })
           }
         }
       }
@@ -1341,7 +1343,7 @@ function genThemeSettingView() {
     props: {
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     views: [ui.genPageHeader("主页", "主题设置"), {
       type: "list",
@@ -1373,7 +1375,7 @@ function genWxWelcomView() {
     props: {
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     events: {
       appeared: function(sender) {
@@ -1700,7 +1702,7 @@ function setupWebView(title, url) {
       title: title,
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     views: [ui.genPageHeader("我的", title), {
       type: "web",
@@ -1761,7 +1763,7 @@ function setupReward() {
       title: "支持与赞赏",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     layout: $layout.fill,
     events: {
@@ -2037,7 +2039,7 @@ function setupFeedBack(text) {
       title: "反馈建议",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     layout: $layout.fill,
     events: {

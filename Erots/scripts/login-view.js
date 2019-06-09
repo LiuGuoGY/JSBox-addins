@@ -8,7 +8,7 @@ function setupLogUpView() {
       id: "logUpView",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     events: {
       appeared: function(sender) {
@@ -417,7 +417,7 @@ function setupLoginView() {
       id: "loginView",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     events: {
       appeared: function(sender) {
@@ -679,7 +679,7 @@ function setupPasswordResetView(source, email) {
       id: "passwordResetView",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     events: {
       appeared: function(sender) {

@@ -29,6 +29,7 @@ const tColor = {
     commentBgColor: $color("#F0F0F8"),
     appHintColor: $color("lightGray"),
     appObviousColor: $color("darkGray"),
+    uploadBgcolor: $color("#F9F9F8"),
   },
   dark: {
     mainColor: $color("black"),
@@ -46,6 +47,7 @@ const tColor = {
     commentBgColor: $color("#202020"),
     appHintColor: $color("gray"),
     appObviousColor: $color("white"),
+    uploadBgcolor: $color("#202020"),
   }
 }
 

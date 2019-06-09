@@ -67,10 +67,14 @@ function detect() {
 
 function getThemeMode() {
   if(utils.getCache("darkMode")) {
-    if(utils.getCache("darkModeAuto")) {
-      return ($system.brightness < 0.15)?"dark":"light";
-    } else {
+    if($device.isDarkMode) {
       return "dark";
+    } else {
+      if(utils.getCache("darkModeAuto")) {
+        return ($system.brightness < 0.15)?"dark":"light";
+      } else {
+        return "dark";
+      }
     }
   } else {
     return "light";

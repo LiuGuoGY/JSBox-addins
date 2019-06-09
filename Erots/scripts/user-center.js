@@ -8,7 +8,7 @@ function setupUserCenterView(prevTitle) {
       id: "userCenterView",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     events: {
       appeared: function(sender) {

@@ -115,7 +115,7 @@ function setupUploadView(updateApp) {
       id: "uploadItemView",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     events: {
       appeared: function(sender) {
@@ -136,7 +136,7 @@ function setupUploadView(updateApp) {
       type: "scroll",
       props: {
         id: "uploadScroll",
-        bgcolor: utils.themeColor.commentBgColor,
+        bgcolor: utils.themeColor.uploadBgcolor,
         showsVerticalIndicator: true,
       },
       layout: function(make, view) {
@@ -1397,6 +1397,20 @@ function setupUploadView(updateApp) {
             });
           }
         }
+      },{
+        type: "label",
+        props: {
+          text: "请注意： 仅可以上传原创应用，对于不合理的上传，你的账号可能会被封禁，设备也同样可能会被封禁！",
+          lines: 0,
+          textColor: utils.themeColor.appHintColor,
+          font: $font(13),
+          lineSpacing: 20,
+        },
+        layout: function(make, view) {
+          make.left.right.inset(20)
+          make.top.equalTo(view.prev.bottom).inset(15)
+          make.centerX.equalTo(view.super)
+        },
       },]
     },
     {

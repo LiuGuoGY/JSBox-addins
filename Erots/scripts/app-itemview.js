@@ -155,7 +155,7 @@ function show(objectId) {
     props: {
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     views: [ui.genPageHeader("主页", ""),{
       type: "scroll",
@@ -951,7 +951,7 @@ function genAppPreviewPhotosScrollView(photos) {
     props: {
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     views: [ui.genPageHeader("应用", "预览"), {
       type: "view",
@@ -1020,7 +1020,7 @@ function genCommentView(app) {
       id: "addCommentView",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     views: [{
       type: "view",
@@ -1287,7 +1287,7 @@ function genUpdateHistoryView(app) {
     props: {
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.bgcolor,
+      bgcolor: utils.themeColor.mainColor,
     },
     views: [ui.genPageHeader("应用", "版本历史记录"), {
       type: "scroll",
