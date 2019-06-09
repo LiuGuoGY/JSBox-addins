@@ -234,6 +234,9 @@ function show(objectId) {
                       data: resp.data,
                       icon: "icon_" + icon_code + ".png",
                     });
+                    if(app.needUpdate && app.haveInstalled) {
+                      utils.addUpdateApps(app.objectId);
+                    }
                     let cloudApps = utils.getCache("cloudApps", [])
                     for(let j = 0; j < cloudApps.length; j++) {
                       if(cloudApps[j].objectId == app.objectId) {

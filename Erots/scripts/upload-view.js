@@ -7,6 +7,7 @@ let user = require('scripts/user')
 function setupUploadView(updateApp) {
   let myApp = {}
   let previewsPrev = []
+  let oldVersion = 0
   if(updateApp) {
     $cache.remove("unfinishData");
     if($file.exists("assets/temp")) {
@@ -15,6 +16,7 @@ function setupUploadView(updateApp) {
     myApp = updateApp
     myApp.file = ""
     myApp.buildVersion ++;
+    oldVersion = updateApp.appVersion;
   } else {
     myApp = utils.getCache("unfinishData")
     if(!myApp) {
@@ -276,6 +278,10 @@ function setupUploadView(updateApp) {
               $ui.menu({
                 items: addinNames,
                 handler: function(title, idx) {
+                  if(addins[idx].data.info.size > 10000000) {
+                    ui.showToastView($("uploadItemView"), utils.mColor.red, "不支持上传大于10M的文件");
+                    return 0;
+                  }
                   if(!$file.exists("assets/temp")) {
                     $file.mkdir("assets/temp")
                   }
@@ -1194,6 +1200,12 @@ function setupUploadView(updateApp) {
             for(let i = 0; i < cloudApps.length; i++) {
               if(myApp.appName === cloudApps[i].appName && myApp.objectId != cloudApps[i].objectId) {
                 ui.showToastView($("uploadItemView"), utils.mColor.red, "应用名称已存在，请更换应用名称");
+                return 0;
+              }
+            }
+            if(updateApp) {
+              if(myApp.appVersion == oldVersion) {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "更新应用请更改版本号");
                 return 0;
               }
             }

@@ -585,6 +585,7 @@ function genCloudAppListView() {
       indicatorInsets: $insets(45, 0, 50, 0),
       separatorColor: utils.themeColor.separatorColor,
       separatorInset: $insets(0, 85, 0, 15),
+      separatorHidden: true,
       header: {
         type: "view",
         props:{
@@ -678,17 +679,205 @@ function genCloudAppListView() {
 }
 
 function genUpdateAppListView() {
-  let appViewItems = []
+  let watingAppViewItems = []
+  let updatedAppViewItems = []
+  let appListData = []
   let apps = utils.getCache("cloudApps", [])
-  let showApps = []
+  let updateIds = utils.getCache("updateIds", [])
+  let updatedApps = []
+  let watingApps = []
   for(let i = 0; i < apps.length; i++) {
     if(apps[i].needUpdate == true) {
-      showApps.push(apps[i])
+      watingApps.push(apps[i])
     }
   }
-  appViewItems = genAppListView(showApps)
-  if(appViewItems.length == 0) {
-    appViewItems = [{
+  for(let i = 0; i < apps.length; i++) {
+    for(let j = 0; j < updateIds.length; j++) {
+      if(apps[i].objectId == updateIds[j]) {
+        updatedApps.push(apps[i])
+      }
+    }
+  }
+  watingAppViewItems = genAppListView(watingApps)
+  updatedAppViewItems = genAppListView(updatedApps)
+  if(watingAppViewItems.length > 0) {
+    appListData.push({
+      rows: [{
+        type: "view",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.left.right.top.inset(0)
+          make.height.equalTo(50)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "等待中",
+            font: $font("bold", 21),
+            textColor: utils.themeColor.listHeaderTextColor,
+            align: $align.center,
+          },
+          layout: function(make, view) {
+            make.left.inset(15)
+            make.centerY.equalTo(view.super)
+          },
+        },{
+          type: "button",
+          props: {
+            title: "全部更新",
+            titleColor: $color(utils.mColor.blue),
+            bgcolor: $color("clear"),
+            font: $font(17),
+          },
+          layout: function(make, view) {
+            make.right.inset(15)
+            make.centerY.equalTo(view.super)
+          },
+          events: {
+            tapped: function(sender) {
+              let listView = $("updateAppsList")
+              let needUpdateNumber = watingApps.length
+              if(listView) {
+                for(let i = 0; i < watingApps.length; i++) {
+                  let itemView = listView.cell($indexPath(0, i + 1))
+                  let buttonView = itemView.get("button")
+                  buttonView.title = ""
+                  buttonView.updateLayout(function(make, view) {
+                    make.size.equalTo($size(30, 30))
+                  })
+                  $ui.animate({
+                    duration: 0.2,
+                    animation: function() {
+                      buttonView.relayout()
+                    },
+                    completion: function() {
+                      $ui.animate({
+                        duration: 0.1,
+                        animation: function() {
+                          buttonView.bgcolor = $color("clear")
+                        },
+                      })
+                      buttonView.add({
+                        type: "canvas",
+                        layout: (make, view) => {
+                          make.center.equalTo(view.super)
+                          make.size.equalTo($size(30, 30))
+                        },
+                        events: {
+                          draw: (view, ctx) => {
+                            ctx.strokeColor = utils.themeColor.appButtonBgColor
+                            ctx.setLineWidth(2.5)
+                            ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
+                            ctx.strokePath()
+                          }
+                        },
+                      })
+                      let radius = 0;
+                      let timer = $timer.schedule({
+                        interval: 0.01,
+                        handler: function() {
+                          if(buttonView.get("canvas")) {
+                            buttonView.get("canvas").rotate(radius)
+                            radius = radius + Math.PI / 180 * 6
+                          } else {
+                            timer.invalidate()
+                          }
+                        }
+                      });
+                      $http.download({
+                        url: watingApps[i].file,
+                        showsProgress: false,
+                        handler: function(resp) {
+                          let json = utils.getSearchJson(watingApps[i].appIcon)
+                          let icon_code = (json.code)?json.code:"124";
+                          $addin.save({
+                            name: watingApps[i].appName,
+                            data: resp.data,
+                            icon: "icon_" + icon_code + ".png",
+                          });
+                          if(watingApps[i].needUpdate && watingApps[i].haveInstalled) {
+                            utils.addUpdateApps(watingApps[i].objectId);
+                          }
+                          let cloudApps = utils.getCache("cloudApps", [])
+                          for(let j = 0; j < cloudApps.length; j++) {
+                            if(cloudApps[j].objectId == watingApps[i].objectId) {
+                              cloudApps[j].haveInstalled = true
+                              cloudApps[j].needUpdate = false
+                              break;
+                            }
+                          }
+                          $cache.set("cloudApps", cloudApps);
+                          $ui.animate({
+                            duration: 0.1,
+                            animation: function() {
+                              buttonView.bgcolor = utils.themeColor.appButtonBgColor
+                            },
+                            completion: function() {
+                              buttonView.get("canvas").remove()
+                              buttonView.updateLayout(function(make, view) {
+                                make.size.equalTo($size(75, 30))
+                              })
+                              $ui.animate({
+                                duration: 0.2,
+                                animation: function() {
+                                  buttonView.relayout()
+                                },
+                                completion: function() {
+                                  buttonView.title = "打开"
+                                  api.uploadDownloadTimes(watingApps[i].objectId)
+                                  needUpdateNumber--;
+                                  if(needUpdateNumber <= 0) {
+                                    $delay(0.5,()=>{
+                                      refreshAllView()
+                                    })
+                                  }
+                                }
+                              })
+                            }
+                          })
+                        }
+                      })
+                    }
+                  })
+                }
+              }
+            }
+          }
+        }]
+      }].concat(watingAppViewItems)
+    })
+  }
+  if(updatedAppViewItems.length > 0) {
+    appListData.push({
+      rows: [{
+        type: "view",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.left.right.top.inset(0)
+          make.height.equalTo(50)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "近期更新",
+            font: $font("bold", 21),
+            textColor: utils.themeColor.listHeaderTextColor,
+            align: $align.center,
+          },
+          layout: function(make, view) {
+            make.left.inset(15)
+            make.centerY.equalTo(view.super)
+          },
+        }]
+      }].concat(updatedAppViewItems)
+    })
+  }
+  if(watingAppViewItems.length == 0 && updatedAppViewItems == 0) {
+    appListData = [{
       type: "label",
       props: {
         text: "所有应用已是最新",
@@ -701,6 +890,7 @@ function genUpdateAppListView() {
       }
     }]
   }
+
   let updateView = {
     type: "list",
     props: {
@@ -709,6 +899,7 @@ function genUpdateAppListView() {
       bgcolor: $color("clear"),
       separatorInset: $insets(0, 85, 0, 15),
       separatorColor: utils.themeColor.separatorColor,
+      separatorHidden: true,
       header: {
         type: "view",
         props:{
@@ -739,10 +930,17 @@ function genUpdateAppListView() {
         }
       },
       rowHeight: 80,
-      data: appViewItems,
+      data: appListData,
     },
     layout: $layout.fill,
     events: {
+      rowHeight: function(sender, indexPath) {
+        if (indexPath.row == 0) {
+          return 50
+        } else {
+          return 80
+        }
+      },
       didScroll: function(sender) {
         if(sender.contentOffset.y >= 40 + topOffset && $("updatePageHeaderLabel").hidden === true) {
           $("updatePageHeaderLabel").hidden = false
@@ -859,6 +1057,9 @@ function genAppListView(apps) {
                       data: resp.data,
                       icon: "icon_" + icon_code + ".png",
                     });
+                    if(apps[i].needUpdate && apps[i].haveInstalled) {
+                      utils.addUpdateApps(apps[i].objectId);
+                    }
                     let cloudApps = utils.getCache("cloudApps", [])
                     for(let j = 0; j < cloudApps.length; j++) {
                       if(cloudApps[j].objectId == apps[i].objectId) {

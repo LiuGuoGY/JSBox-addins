@@ -161,6 +161,17 @@ function getInstalledApps() {
   return apps
 }
 
+function addUpdateApps(objectId) {
+  let ids = getCache("updateIds", [])
+  for(let i = 0; i < ids.length; i++) {
+    if(ids[i] == objectId) {
+      ids.splice(i, 1);
+    }
+  }
+  ids.unshift(objectId)
+  $cache.set("updateIds", ids);
+}
+
 function getUpdateDateString(time) {
   let result = ""
   let minute = 1000 * 60;
@@ -210,4 +221,5 @@ module.exports = {
   getUpdateDateString: getUpdateDateString,
   tColor: tColor,
   themeColor: themeColor,
+  addUpdateApps: addUpdateApps,
 }
