@@ -1294,11 +1294,21 @@ function genUpdateHistoryView(app) {
     },
     views: [ui.genPageHeader("应用", "版本历史记录"), {
       type: "scroll",
+      props: {
+        alwaysBounceHorizontal: false,
+      },
       layout: function(make, view) {
         make.top.equalTo(view.prev.bottom)
         make.left.right.bottom.inset(0)
       },
       views: historyViews,
+      events: {
+        ready: function(sender) {
+          sender.resize()
+          sender.alwaysBounceHorizontal = false
+          sender.contentSize = $size(0, sender.contentSize.height + 20)
+        }
+      }
     }]
   })
 }

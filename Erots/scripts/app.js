@@ -684,6 +684,7 @@ function genUpdateAppListView() {
   let appListData = []
   let apps = utils.getCache("cloudApps", [])
   let updateIds = utils.getCache("updateIds", [])
+  let newUpdateIds = []
   let updatedApps = []
   let watingApps = []
   for(let i = 0; i < apps.length; i++) {
@@ -691,13 +692,16 @@ function genUpdateAppListView() {
       watingApps.push(apps[i])
     }
   }
-  for(let i = 0; i < apps.length; i++) {
-    for(let j = 0; j < updateIds.length; j++) {
-      if(apps[i].objectId == updateIds[j]) {
+  
+  for(let j = 0; j < updateIds.length; j++) {
+    for(let i = 0; i < apps.length; i++) {
+      if(apps[i].objectId == updateIds[j] && apps[i].needUpdate == false) {
         updatedApps.push(apps[i])
+        newUpdateIds.push(updateIds[j])
       }
     }
   }
+  $cache.set("updateIds", newUpdateIds);
   watingAppViewItems = genAppListView(watingApps)
   updatedAppViewItems = genAppListView(updatedApps)
   if(watingAppViewItems.length > 0) {
@@ -715,7 +719,7 @@ function genUpdateAppListView() {
           type: "label",
           props: {
             text: "等待中",
-            font: $font("bold", 21),
+            font: $font("bold", 22),
             textColor: utils.themeColor.listHeaderTextColor,
             align: $align.center,
           },
@@ -740,6 +744,8 @@ function genUpdateAppListView() {
               let listView = $("updateAppsList")
               let needUpdateNumber = watingApps.length
               if(listView) {
+                sender.titleColor = utils.themeColor.appCateTextColor
+                sender.userInteractionEnabled = false
                 for(let i = 0; i < watingApps.length; i++) {
                   let itemView = listView.cell($indexPath(0, i + 1))
                   let buttonView = itemView.get("button")
@@ -864,7 +870,7 @@ function genUpdateAppListView() {
           type: "label",
           props: {
             text: "近期更新",
-            font: $font("bold", 21),
+            font: $font("bold", 22),
             textColor: utils.themeColor.listHeaderTextColor,
             align: $align.center,
           },
