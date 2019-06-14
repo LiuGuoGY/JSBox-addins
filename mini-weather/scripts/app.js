@@ -139,6 +139,10 @@ function setupSetting() {
     templateTitle: {
       text : "分享给朋友",
     },
+  },{
+    templateTitle: {
+      text : "安装 Erots",
+    },
   },]
   $ui.push({
     props: {
@@ -219,6 +223,7 @@ function setupSetting() {
               case 2: setupReward();break;
               case 3: setupFeedBack();break;
               case 4: setupShareView();break;
+              case 5: installErots();break;
               default: break;
             }
           }
@@ -227,6 +232,28 @@ function setupSetting() {
     }]
   })
   requireInstallNumbers()
+}
+
+function installErots() {
+  $ui.alert({
+    title: "提示",
+    message: "以后的脚本更新只会在 Erots 中发布，\n确定要安装 Erots 吗？",
+    actions: [
+      {
+        title: "确定",
+        disabled: false, // Optional
+        handler: function() {
+          $app.openURL("jsbox://import?url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fraw%2Fmaster%2FErots%2F.output%2FErots.box")
+        }
+      },
+      {
+        title: "取消",
+        handler: function() {
+  
+        }
+      }
+    ]
+  });
 }
 
 function setupForcastRemindView() {

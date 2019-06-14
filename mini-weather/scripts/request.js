@@ -163,6 +163,12 @@ async function getHeFengForecast(lng, lat) {
     $("forecastList").data = listData;
     $cache.set("forecastData", listData);
     $push.clear();
+    let ids = utils.getCache("pushId")
+    if(ids) {
+      for(let i = 0; i < ids.length; i ++) {
+        $push.cancel({id: ids[i]})
+      }
+    }
     if(utils.getCache("forcastRemind") || utils.getCache("tempRemind")) {
       for(let i = 1; i < listData.length; i++) {
         let isWeatherAbnormal = listData[i].list_weather.text.indexOf("雨") >= 0 || listData[i].list_weather.text.indexOf("雪") >= 0
@@ -199,7 +205,10 @@ async function getHeFengForecast(lng, lat) {
               date: desDate,
               script: $addin.current.name,
               handler: function(result) {
-                
+                let id = result.id
+                let ids = utils.getCache("pushId", [])
+                ids.push(id)
+                $cache.set("pushId", ids);
               }
             })
           }
