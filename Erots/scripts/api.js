@@ -64,7 +64,7 @@ async function shimo_uploadFile(file) {
       "accessToken": token,
     },
     showsProgress: false,
-    timeout: 5,
+    timeout: 60,
     files: [{
       "name": "file",
       "data": file,
@@ -74,6 +74,7 @@ async function shimo_uploadFile(file) {
   if(resp.data && resp.data.data) {
     return resp.data.data.url
   } else {
+    $console.info(resp.error);
     return undefined
   }
 }

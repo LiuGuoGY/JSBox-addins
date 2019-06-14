@@ -1236,7 +1236,7 @@ function setupUploadView(updateApp) {
                 data: $data({string: newStr}),
                 path: myApp.file,
               })
-            } else {
+            } else if(myApp.file.endsWith("/box")){
               let json = {
                 id: objectJson.objectId,
                 build: myApp.buildVersion,
@@ -1279,11 +1279,11 @@ function setupUploadView(updateApp) {
               if($("myProgressText")) {
                 $("myProgressText").text = "检验文件中..."
               }
-              let resp = await $http.download({
+              let resp2 = await $http.download({
                 url: fileUrl,
                 showsProgress: false,
               })
-              if(resp.data && resp.data.info && resp.data.info.size == file.info.size) {
+              if(resp2.data && resp2.data.info && resp2.data.info.size == file.info.size) {
                 myApp.file = fileUrl;
               } else {
                 if($("myProgressParent")) {
@@ -1295,7 +1295,7 @@ function setupUploadView(updateApp) {
             } else {
               if($("myProgressParent")) {
                 $("myProgressParent").remove()
-                ui.showToastView($("uploadItemView"), utils.mColor.red, "上传失败，服务器异常");
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "上传失败，服务器异常，请稍后尝试");
                 return 0;
               }
             }
