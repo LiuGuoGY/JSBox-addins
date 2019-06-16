@@ -19,7 +19,6 @@ let mIcon = []
 function show() {
   uploadInstall()
   checkBlackList()
-  setThemeColor()
   if(!utils.getCache("haveBanned", false)) {
     main()
   } else {
@@ -31,6 +30,7 @@ function show() {
 
 function main() {
   setupMainView()
+  requireApps()
   // solveQuery()
 }
 
@@ -56,34 +56,49 @@ function setThemeColor() {
         utils.themeColor = utils.tColor.dark;
       }
     }
+  } else {
+    utils.themeColor = utils.tColor.light;
   }
   mIcon = [
     {
-      blue: $icon("102", $color(utils.mColor.blue), $size(25, 25)),
+      blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
       gray: $icon("102", utils.themeColor.mainTabGrayColor, $size(25, 25)),
     },
     {
-      blue: $icon("164", $color(utils.mColor.blue), $size(25, 25)),
+      blue: $icon("164", utils.getCache("themeColor"), $size(25, 25)),
       gray: $icon("164", utils.themeColor.mainTabGrayColor, $size(25, 25)),
     },
     {
-      blue: $icon("109", $color(utils.mColor.blue), $size(25, 25)),
+      blue: $icon("109", utils.getCache("themeColor"), $size(25, 25)),
       gray: $icon("109", utils.themeColor.mainTabGrayColor, $size(25, 25)),
     },
   ]
 }
   
 function setupMainView() {
+  setThemeColor()
   $app.autoKeyboardEnabled = false
   $app.keyboardToolbarEnabled = false
   $ui.render({
     props: {
-      id: "mainView",
+      id: "mainViewParent",
       navBarHidden: true,
       statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.mainColor,
+      bgcolor: $color("clear"),
       // debugging: true,
     },
+    views: [genMainView()]
+  })
+}
+
+function genMainView() {
+  let mainView = {
+    type: "view",
+    props: {
+      id: "mainView",
+      bgcolor: utils.themeColor.mainColor,
+    },
+    layout: $layout.fill,
     views: [{
       type: "view",
       props: {
@@ -164,7 +179,7 @@ function setupMainView() {
               },
               menu_label: {
                 text: "应用",
-                textColor: $color(utils.mColor.blue)
+                textColor: utils.getCache("themeColor")
               }
             },
             {
@@ -218,15 +233,15 @@ function setupMainView() {
         }
       }
     },
-  ]
-  })
+  ]}
+  return mainView;
 }
 
 function handleSelect(view, row) {
   let newData = view.data
   for(let i = 0; i < newData.length; i++) {
     if (i == row) {
-      newData[i].menu_label.textColor = $color(utils.mColor.blue)
+      newData[i].menu_label.textColor = utils.getCache("themeColor")
       newData[i].menu_image.icon = mIcon[i].blue
       if($(contentViews[i]) == undefined) {
         $("content").add(getContentView(i)) 
@@ -400,8 +415,6 @@ function genCloudView() {
       },],
     }],
   }
-  
-  requireApps()
   return view
 }
 
@@ -415,7 +428,7 @@ function genCloudAppListView() {
         id: "cancel_button",
         title: "取消",
         font: $font(17),
-        titleColor: $color(utils.mColor.blue),
+        titleColor: utils.getCache("themeColor"),
         bgcolor: $color("clear"),
       },
       layout: function(make, view) {
@@ -471,7 +484,7 @@ function genCloudAppListView() {
           bgcolor: $color("clear"),
           returnKeyType: 6,
           userInteractionEnabled: false,
-          tintColor: $color(utils.mColor.blue),
+          tintColor: utils.getCache("themeColor"),
           text: searchText,
           textColor: utils.themeColor.listHeaderTextColor,
           darkKeyboard: utils.themeColor.darkKeyboard,
@@ -731,7 +744,7 @@ function genUpdateAppListView() {
           type: "button",
           props: {
             title: "全部更新",
-            titleColor: $color(utils.mColor.blue),
+            titleColor: utils.getCache("themeColor"),
             bgcolor: $color("clear"),
             font: $font(17),
           },
@@ -1225,6 +1238,11 @@ function genMeView() {
     templateTitle: {
       text : "支持与赞赏",
     },
+  },
+  {
+    templateTitle: {
+      text : "分享︎︎给朋友",
+    },
   },]
 
   let userArray = [{
@@ -1335,10 +1353,11 @@ function genMeView() {
             switch(indexPath.row + indexPath.section) {
               case 0: user.haveLogined()?userCenterView.setupUserCenterView():wantToLogin();break;
               case 1: wantToRealse();break;
-              case 2: (utils.getCache("authPass"))?genThemeSettingView():genWxWelcomView();break;
+              case 2: (utils.getCache("authPass"))?setupThemeSettingView():genWxWelcomView();break;
               case 5: update.checkUpdate(true);break;
               case 6: setupFeedBack();break;
               case 7: setupReward();break;
+              case 8: share("http://t.cn/AiNM3N1T");break;
               default:break;
             }
           }
@@ -1477,6 +1496,38 @@ function wantToRealse() {
   }
 }
 
+function setupThemeSettingView() {
+  $ui.push({
+    props: {
+      id: "themeSettingViewParent",
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [genThemeSettingView()]
+  })
+}
+
+function refreshAllTheme(delay) {
+  $delay(delay?delay:0, ()=>{
+    setThemeColor()
+    if($("mainView")) {
+      $("mainView").remove()
+      $("mainViewParent").add(genMainView())
+      // $("mainViewParent").$statusBarStyle(utils.themeColor.statusBarStyle)
+      // $("mainViewParent").bgcolor = utils.themeColor.mainColor
+      // $objc("UIApplication").$setStatusBarStyle(utils.themeColor.statusBarStyle)
+    }
+    if($("themeSettingView")) {
+      $("themeSettingView").remove()
+      $("themeSettingViewParent").add(genThemeSettingView())
+      // $objc("UIApplication").$setStatusBarStyle(utils.themeColor.statusBarStyle)
+      // $("themeSettingViewParent").statusBarStyle = utils.themeColor.statusBarStyle
+      // $("themeSettingViewParent").bgcolor = utils.themeColor.mainColor
+    }
+  })
+}
+
 function genThemeSettingView() {
   let tabDarkMode = {
     type: "view",
@@ -1507,6 +1558,7 @@ function genThemeSettingView() {
         events: {
           changed: function(sender) {
             $cache.set("darkMode", sender.on)
+            refreshAllTheme(0.05)
           }
         }
       }
@@ -1541,17 +1593,62 @@ function genThemeSettingView() {
         events: {
           changed: function(sender) {
             $cache.set("darkModeAuto", sender.on)
+            refreshAllTheme(0.05)
           }
         }
       }
     ],
   }
-  $ui.push({
+  let tabThemeColor = {
+    type: "view",
     props: {
-      navBarHidden: true,
-      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.bgcolor,
+    },
+    layout: $layout.fill,
+    views: [{
+        type: "label",
+        props: {
+          text: "主题颜色",
+          textColor: utils.themeColor.listContentTextColor,
+        },
+        layout: function(make, view) {
+          make.left.inset(20)
+          make.centerY.equalTo(view.super)
+        }
+      },{
+        type: "image",
+        props: {
+          src: "assets/enter.png",
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.right.inset(20)
+          make.centerY.equalTo(view.super)
+          make.size.equalTo($size(8, 18))
+        },
+      },{
+        type: "view",
+        props: {
+          circular: true,
+          borderColor: utils.themeColor.iconBorderColor,
+          borderWidth: 1,
+          bgcolor: utils.getCache("themeColor"),
+        },
+        layout: function(make, view) {
+          make.right.equalTo(view.prev.left).inset(20)
+          make.centerY.equalTo(view.super)
+          make.size.equalTo($size(20, 20))
+        },
+      }
+    ],
+  }
+  let themeSettingView = {
+    type: "view",
+    props: {
+      id: "themeSettingView",
       bgcolor: utils.themeColor.mainColor,
     },
+    layout: $layout.fill,
     views: [ui.genPageHeader("主页", "主题设置"), {
       type: "list",
       props: {
@@ -1566,14 +1663,242 @@ function genThemeSettingView() {
             bgcolor: utils.themeColor.bgcolor,
           },
           layout: $layout.fill,
-        },tabDarkMode,tabDarkModeAuto],
+        },tabDarkMode,tabDarkModeAuto,tabThemeColor],
       },
       layout: function(make, view) {
         make.top.equalTo(view.prev.bottom)
         make.left.right.bottom.inset(0)
       },
+      events: {
+        didSelect: function(sender, indexPath, title) {
+          switch(indexPath.row + indexPath.section) {
+            case 3: showColorSelectView($("themeSettingView"));break;
+            default:break;
+          }
+        }
+      }
     }]
+  }
+  return themeSettingView;
+}
+
+function showColorSelectView(superView) {
+  let itemColors = []
+  let colors = [utils.mColor.blue, "#F83B4C", "#FF7519", "#EBA239", "#29B327", "#00C2ED", "#7748FE", "#FF5DA2"]
+  let selectedColor = utils.getCache("themeColor")
+  for(let i = 0; i < colors.length; i++) {
+    itemColors.push({
+      itemColor: {
+        bgcolor: $color(colors[i]),
+      },
+      colorSelect: {
+        hidden: selectedColor.hexCode.toUpperCase() != colors[i].toUpperCase(),
+      }
+    })
+  }
+  superView.add({
+    type: "view",
+    props: {
+      id: "infoView",
+      alpha: 0,
+      clipsToBounds: true,
+    },
+    layout: function(make, view) {
+      make.size.equalTo(view.super)
+      make.center.equalTo(view.super)
+    },
+    views: [{
+      type: "view",
+      props: {
+        bgcolor: utils.themeColor.actionSheetBgColor,
+      },
+      layout: $layout.fill,
+      events: {
+        tapped: sender => {
+          hideView()
+        }
+      }
+    },{
+      type: "view",
+      props: {
+        id: "windowView",
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.height.equalTo(270)
+        if(superView.frame.width > 600) {
+          make.width.equalTo(600)
+        } else {
+          make.width.equalTo(view.super)
+        }
+        make.centerX.equalTo(view.super)
+        make.top.equalTo(view.super.bottom)
+      },
+      views: [{
+        type: "view",
+        props: {
+          bgcolor: utils.themeColor.mainColor,
+          radius: 15,
+        },
+        layout: function(make, view) {
+          make.height.equalTo(view.super).multipliedBy(0.73)
+          make.left.right.inset(15)
+          make.centerX.equalTo(view.super)
+          make.top.inset(0)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "选择主题颜色",
+            textColor: utils.themeColor.listContentTextColor,
+            font: $font("bold", 16),
+            align: $align.center,
+          },
+          layout: function(make, view) {
+            make.top.inset(15)
+            make.centerX.equalTo(view.super)
+            make.height.equalTo(23)
+            make.width.equalTo(view.super)
+          }
+        },{
+          type: "matrix",
+          props: {
+            columns: 4,
+            itemHeight: 58,
+            spacing: 8,
+            scrollEnabled: false,
+            bgcolor: $color("clear"),
+            template: [{
+                type: "view",
+                props: {
+                  id: "itemColor",
+                  circular: true,
+                  borderWidth: 0,
+                  bgcolor: utils.getCache("themeColor"),
+                },
+                layout: function(make, view) {
+                  make.centerX.equalTo(view.super)
+                  make.width.height.equalTo(54)
+                  make.top.inset(7)
+                },
+                views: [{
+                  type: "view",
+                  props: {
+                    id: "colorSelect",
+                    hidden: true,
+                  },
+                  layout: function(make, view) {
+                    make.center.equalTo(view.super)
+                    make.height.equalTo(view.super).multipliedBy(0.3)
+                    make.width.equalTo(view.super).multipliedBy(0.4)
+                  },
+                  views: [ui.createRight($color("white"), 2.5)]
+                }],
+              },
+            ],
+            data: itemColors,
+          },
+          events: {
+            didSelect: function(sender, indexPath, data) {
+              for(let i = 0; i < itemColors.length; i++) {
+                itemColors[i].colorSelect.hidden = true
+              }
+              itemColors[indexPath.row].colorSelect.hidden = false
+              sender.data = itemColors
+              $cache.set("themeColor", $color(colors[indexPath.row]));
+              $delay(0.1, ()=>{
+                hideView()
+              })
+              setThemeColor()
+              refreshAllTheme(0.12)
+            }
+          },
+          layout: function(make, view) {
+            make.top.equalTo(view.prev.bottom).inset(5)
+            make.bottom.inset(10)
+            make.centerX.equalTo(view.super)
+            make.left.right.inset(20)
+          }
+        }]
+      },{
+        type: "view",
+        props: {
+          bgcolor: utils.themeColor.mainColor,
+          radius: 15,
+        },
+        layout: function(make, view) {
+          make.left.right.inset(15)
+          make.centerX.equalTo(view.super)
+          make.top.equalTo(view.prev.bottom).inset(10)
+          make.bottom.inset(10)
+        },
+        views: [{
+          type: "button",
+          props: {
+            borderWidth: 0,
+            bgcolor: $color("clear"),
+            titleColor: utils.getCache("themeColor"),
+            font: $font(18),
+            title: "Cancel",
+          },
+          layout: function(make, view) {
+            make.center.equalTo(view.super)
+            make.size.equalTo(view.super)
+          },
+          events: {
+            tapped: function(sender) {
+              hideView()
+            }
+          }
+        }]
+      }],
+    }],
   })
+  $("windowView").relayout()
+  $("windowView").remakeLayout(function(make) {
+    make.height.equalTo(270)
+    if(superView.frame.width > 600) {
+      make.width.equalTo(600)
+    } else {
+      make.width.equalTo(superView)
+    }
+    make.centerX.equalTo(superView)
+    make.bottom.inset(0)
+  })
+  $ui.animate({
+    duration: 0.25,
+    velocity: 1,
+    // damping: 0.6,
+    animation: () => {
+      $("infoView").alpha = 1
+      $("windowView").relayout()
+    }
+  })
+  function hideView() {
+    $("windowView").remakeLayout(function(make) {
+      make.height.equalTo(270)
+      if(superView.frame.width > 600) {
+        make.width.equalTo(600)
+      } else {
+        make.width.equalTo($("infoView"))
+      }
+      make.centerX.equalTo($("infoView"))
+      make.top.equalTo($("infoView").bottom)
+    })
+    $ui.animate({
+      duration: 0.2,
+      velocity: 0.5,
+      animation: () => {
+        $("infoView").alpha = 0;
+        $("windowView").relayout()
+      },
+      completion: () => {
+        if($("infoView")) {
+          $("infoView").remove();
+        }
+      }
+    });
+  }
 }
 
 function genWxWelcomView() {
@@ -1700,7 +2025,7 @@ function genWxWelcomView() {
             } else {
               $ui.pop();
               $cache.set("authPass", true);
-              genThemeSettingView()
+              setupThemeSettingView()
             }
           }
         },

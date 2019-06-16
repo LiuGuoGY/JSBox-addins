@@ -79,7 +79,7 @@ function show(objectId) {
       layout: function(make, view) {
         make.top.inset(0)
         make.height.equalTo(view.super)
-        make.width.equalTo(20)
+        make.width.equalTo(30)
         make.left.equalTo(view.prev.right).inset(0)
       },
     })
@@ -451,7 +451,7 @@ function show(objectId) {
             props: {
               title: "版本历史记录",
               bgcolor: $color("clear"),
-              titleColor: $color(utils.mColor.blue),
+              titleColor: utils.getCache("themeColor"),
               font: $font(17),
             },
             layout: function(make, view) {
@@ -679,7 +679,7 @@ function show(objectId) {
           props: {
             title: "撰写评论",
             bgcolor: $color("clear"),
-            titleColor: $color(utils.mColor.blue),
+            titleColor: utils.getCache("themeColor"),
             font: $font(17),
           },
           layout: function(make, view) {
@@ -872,9 +872,9 @@ function show(objectId) {
           type: "button",
           props: {
             title: " 分享",
-            icon: $icon("022", $color(utils.mColor.blue), $size(20, 20)),
+            icon: $icon("022", utils.getCache("themeColor"), $size(20, 20)),
             bgcolor: utils.themeColor.appButtonBgColor,
-            titleColor: $color(utils.mColor.blue),
+            titleColor: utils.getCache("themeColor"),
             font: $font("bold", 16.5),
             radius: 7,
             align: $align.center,
@@ -1025,96 +1025,17 @@ function genCommentView(app) {
       statusBarStyle: utils.themeColor.statusBarStyle,
       bgcolor: utils.themeColor.mainColor,
     },
-    views: [{
-      type: "view",
-      layout: function(make, view) {
-        if($device.info.version >= "11"){
-          make.top.equalTo(view.super.safeAreaTop)
-        } else {
-          make.top.inset(20)
-        }
-        make.left.right.inset(0)
-        make.height.equalTo(45)
-      },
-      views:[{
-        type: "label",
-        props: {
-          text: "评论",
-          font: $font("bold", 17),
-          align: $align.center,
-          bgcolor: utils.themeColor.mainColor,
-          textColor: utils.themeColor.listHeaderTextColor,
-        },
-        layout: $layout.fill,
-      },{
-        type: "canvas",
-        layout: function(make, view) {
-          make.bottom.inset(0)
-          make.height.equalTo(1 / $device.info.screen.scale)
-          make.left.right.inset(0)
-        },
-        events: {
-          draw: function(view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("darkGray")
-            ctx.setLineWidth(1 / scale)
-            ctx.moveToPoint(0, 0)
-            ctx.addLineToPoint(width, 0)
-            ctx.strokePath()
-          }
-        }
-      },{
-        type: "button",
-        props: {
-          bgcolor: $color("clear"),
-        },
-        layout: function(make, view) {
-          make.left.inset(0)
-          make.width.equalTo(100)
-          make.height.equalTo(view.super)
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.pop()
-          },
-        },
-        views:[{
-          type: "image",
-          props: {
-            src: "assets/back.png",
-            bgcolor: $color("clear"),
-          },
-          layout: function(make, view) {
-            make.left.inset(10)
-            make.centerY.equalTo(view.super)
-            make.size.equalTo($size(12, 23))
-          },
-        },{
-          type: "label",
-          props: {
-            text: "应用",
-            align: $align.center,
-            textColor: $color(utils.mColor.blue),
-            font: $font(17)
-          },
-          layout: function(make, view) {
-            make.height.equalTo(view.super)
-            make.left.equalTo(view.prev.right).inset(3)
-          }
-        }],
-      },{
+    views: [ui.genPageHeader("应用", "撰写评论", {
         type: "button",
         props: {
           title: "发送",
-          titleColor: $color(utils.mColor.blue),
+          titleColor: utils.getCache("themeColor"),
           font: $font("bold", 17),
           bgcolor: $color("clear"),
           borderColor: $color("clear"),
-
         },
         layout: function(make, view) {
-          make.right.inset(20)
+          make.right.inset(0)
           make.height.equalTo(view.super)
         },
         events: {
@@ -1136,8 +1057,7 @@ function genCommentView(app) {
             }
           },
         },
-      }]
-    },{
+      }),{
       type: "text",
       props: {
         id: "commentText",
@@ -1150,7 +1070,7 @@ function genCommentView(app) {
         insets: $insets(12, 20, 12, 20),
         alwaysBounceVertical: true,
         bgcolor: utils.themeColor.bgcolor,
-        tintColor: utils.themeColor.listContentTextColor,
+        tintColor: utils.getCache("themeColor"),
         darkKeyboard: utils.themeColor.darkKeyboard,
       },
       layout: function(make, view) {

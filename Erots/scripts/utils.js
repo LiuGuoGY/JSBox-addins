@@ -6,7 +6,13 @@ const mColor = {
   green: "#27AE60",
   red: "#E74C3C",
   iosGreen: "#4CD964",
-  lightBlue: "#00A2FF"
+  lightBlue: "#00A2FF",
+  // orangeRed: "#FF4500",
+  // forcasetGreen: "#228B22",
+  // gold: "#FFD700",
+  // purple: "#9370DB",
+  // brown: "#A52A2A",
+  // steelBlue: "#4682B4"
 }
 const appCates = ["工具", "效率", "开发", "社交", "视频", "音乐", "游戏", "学习"]
 const appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
@@ -30,6 +36,7 @@ const tColor = {
     appHintColor: $color("lightGray"),
     appObviousColor: $color("darkGray"),
     uploadBgcolor: $color("#F9F9F8"),
+    actionSheetBgColor: $rgba(0, 0, 0, 0.25),
   },
   dark: {
     mainColor: $color("black"),
@@ -48,6 +55,7 @@ const tColor = {
     appHintColor: $color("gray"),
     appObviousColor: $color("white"),
     uploadBgcolor: $color("#202020"),
+    actionSheetBgColor: $rgba(255, 255, 255, 0.20),
   }
 }
 
@@ -61,6 +69,7 @@ function getCache(key, def) {
         case "darkMode": def = false; break;
         case "authPass": def = false; break;
         case "darkModeAuto": def = false; break;
+        case "themeColor": def = $color(mColor.blue); break;
       }
     }
     $cache.set(key, def)

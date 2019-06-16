@@ -401,7 +401,7 @@ function setupUploadView(updateApp) {
             text: myApp.appName,
             textColor: utils.themeColor.appObviousColor,
             darkKeyboard: utils.themeColor.darkKeyboard,
-            tintColor: utils.themeColor.appObviousColor,
+            tintColor: utils.getCache("themeColor"),
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -537,7 +537,7 @@ function setupUploadView(updateApp) {
             type: $kbType.decimal,
             text: myApp.appVersion,
             darkKeyboard: utils.themeColor.darkKeyboard,
-            tintColor: utils.themeColor.appObviousColor,
+            tintColor: utils.getCache("themeColor"),
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -725,17 +725,10 @@ function setupUploadView(updateApp) {
           events: {
             tapped: function(sender) {
               $ui.menu({
-                items: ["白底彩标", "彩底白标"],
+                items: ["白底彩标", "彩底白标", "圆形彩底白标", "圆形白底彩标"],
                 handler: function(title, idx) {
                   if(myApp.appIcon.startsWith("erots")) {
-                    switch(idx) {
-                      case 0: {
-                        myApp.appIcon = setUrlPara(myApp.appIcon, undefined, undefined, "0") 
-                      };break;
-                      case 1: {
-                        myApp.appIcon = setUrlPara(myApp.appIcon, undefined, undefined, "1") 
-                      };break;
-                    }
+                    myApp.appIcon = setUrlPara(myApp.appIcon, undefined, undefined, "" + idx) 
                     refreshPreview()
                   }
                 }
@@ -872,7 +865,7 @@ function setupUploadView(updateApp) {
             radius: 0,
             text: myApp.subtitle,
             darkKeyboard: utils.themeColor.darkKeyboard,
-            tintColor: utils.themeColor.appObviousColor,
+            tintColor: utils.getCache("themeColor"),
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
@@ -1094,7 +1087,7 @@ function setupUploadView(updateApp) {
             font: $font(15),
             textColor: utils.themeColor.appObviousColor,
             darkKeyboard: utils.themeColor.darkKeyboard,
-            tintColor: utils.themeColor.appObviousColor,
+            tintColor: utils.getCache("themeColor"),
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
@@ -1145,7 +1138,7 @@ function setupUploadView(updateApp) {
             font: $font(15),
             textColor: utils.themeColor.appObviousColor,
             darkKeyboard: utils.themeColor.darkKeyboard,
-            tintColor: utils.themeColor.appObviousColor,
+            tintColor: utils.getCache("themeColor"),
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
@@ -1165,9 +1158,10 @@ function setupUploadView(updateApp) {
         props: {
           id: "cloudButton",
           title: actionText,
-          bgcolor: $color(utils.mColor.lightBlue),
-          titleColor: $color("white"),
-          circular: true,
+          bgcolor: utils.themeColor.commentBgColor,
+          titleColor: utils.getCache("themeColor"),
+          font: $font("bold", 16),
+          radius: 12,
           info: {isfinish: false}
         },
         layout: function(make, view) {

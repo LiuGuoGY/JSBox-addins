@@ -1,12 +1,4 @@
 let utils = require('scripts/utils')
-const mColor = {
-  gray: "#a2a2a2",
-  blue: "#3478f7",
-  black: "#303032",
-  green: "#27AE60",
-  red: "#E74C3C",
-  iosGreen: "#4CD964",
-}
 
 function showToastView(view, color, text, duration) {
   let time = new Date().getTime()
@@ -120,188 +112,6 @@ function showToastView(view, color, text, duration) {
   })
 }
 
-function genTemplate() {
-  let showMode = utils.getCache("showMode", 0)
-  let template = []
-  if(showMode == 0) {
-    template.push({
-      type: "blur",
-      props: {
-        radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-        style: 1 // 0 ~ 5 调整背景的颜色程度
-      },
-      layout: $layout.fill,
-    },{
-      type: "label",
-      props: {
-        id: "title",
-        textColor: $color("black"),
-        bgcolor: $color("clear"),
-        font: $font(13),
-        align: $align.center,
-      },
-      layout: function(make, view) {
-        make.bottom.inset(0)
-        make.centerX.equalTo(view.super)
-        make.height.equalTo(25)
-        make.width.equalTo(view.super)
-      }
-    },{
-      type: "image",
-      props: {
-        id: "icon",
-        bgcolor: $color("clear"),
-        smoothRadius: 5,
-        size: $size(20, 20),
-      },
-      layout: function(make, view) {
-        make.top.inset(9)
-        make.centerX.equalTo(view.super)
-        make.size.equalTo($size(20, 20))
-      }
-    })
-  } else if(showMode == 1) {
-    template.push({
-      type: "blur",
-      props: {
-        circular: true,
-        style: 1, // 0 ~ 5 调整背景的颜色程度
-      },
-      layout: function(make, view) {
-        make.center.equalTo(view.super)
-        make.size.equalTo($size(40, 40))
-      },
-    },{
-      type: "image",
-      props: {
-        id: "icon",
-        bgcolor: $color("clear"),
-        smoothRadius: 5,
-        size: $size(20, 20),
-      },
-      layout: function(make, view) {
-        make.center.equalTo(view.super)
-        make.size.equalTo($size(20, 20))
-      }
-    })
-  } else if(showMode == 2) {
-    let bgcolor = utils.randomValue(utils.colors)
-    template.push({
-      type: "label",
-      props: {
-        id: "title",
-        textColor: $color("black"),
-        bgcolor: $color("clear"),
-        font: $font(13),
-        align: $align.center,
-      },
-      layout: function(make, view) {
-        make.center.equalTo(view.super)
-        make.height.equalTo(25)
-        make.width.equalTo(view.super)
-      }
-    },{
-      type: "view",
-      props: {
-        bgcolor: bgcolor,
-      },
-      layout: function(make, view) {
-        make.centerX.equalTo(view.super)
-        make.height.equalTo(1)
-        make.width.equalTo(30)
-        make.top.equalTo($("title").bottom).inset(1)
-      }
-    },{
-      type: "view",
-      props: {
-        bgcolor: bgcolor,
-      },
-      layout: function(make, view) {
-        make.centerX.equalTo(view.super)
-        make.height.equalTo(1)
-        make.width.equalTo(30)
-        make.bottom.equalTo($("title").top).inset(1)
-      }
-    })
-  } else if(showMode == 3) {
-    template.push({
-      type: "blur",
-      props: {
-        radius: 5, //调整边框是什么形状的如:方形圆形什么的
-        style: 1 // 0 ~ 5 调整背景的颜色程度
-      },
-      layout: function(make, view) {
-        make.center.equalTo(view.super)
-        make.top.bottom.inset(0.5)
-        make.width.equalTo(view.super)
-      },
-    },{
-      type: "image",
-      props: {
-        id: "icon",
-        bgcolor: $color("clear"),
-        smoothRadius: 5,
-        size: $size(20, 20),
-      },
-      layout: function(make, view) {
-        make.left.inset(8)
-        make.centerY.equalTo(view.super)
-        make.size.equalTo($size(20, 20))
-      }
-    },{
-      type: "label",
-      props: {
-        id: "title",
-        textColor: $color("black"),
-        bgcolor: $color("clear"),
-        font: $font(13),
-        align: $align.center,
-      },
-      layout: function(make, view) {
-        make.left.equalTo(view.prev.right).inset(0)
-        make.centerY.equalTo(view.super)
-        make.height.equalTo(25)
-        make.right.inset(8)
-      }
-    })
-  } else if(showMode == 4) {
-    template.push({
-      type: "view",
-      props: {
-        radius: 12, //调整边框是什么形状的如:方形圆形什么的
-      },
-      layout: function(make, view) {
-        make.center.equalTo(view.super)
-        make.size.equalTo($size(46, 46))
-      },
-      views: [{
-        type: "view",
-        props: {
-          clipsToBounds: false,
-        },
-        layout: function(make, view) {
-          make.center.equalTo(view.super)
-          make.size.equalTo(view.super)
-        },
-        views: [{
-          type: "image",
-          props: {
-            id: "icon",
-            bgcolor: $color("clear"),
-            size: $size(29, 29),
-            radius: 5,
-          },
-          layout: function(make, view) {
-            make.center.equalTo(view.super)
-            make.size.equalTo($size(29, 29))
-          }
-        }]
-      }]
-    })
-  }
-  return template
-}
-
 function addButtonMore(items) {
   items.push({
     title: {
@@ -330,7 +140,7 @@ function showBannedAlert() {
   })
 }
 
-function genPageHeader(backName, title) {
+function genPageHeader(backName, title, rightView) {
   let view = {
     type: "view",
     layout: function(make, view) {
@@ -386,22 +196,22 @@ function genPageHeader(backName, title) {
         },
       },
       views:[{
-        type: "image",
+        type: "view",
         props: {
-          src: "assets/back.png",
           bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.left.inset(10)
           make.centerY.equalTo(view.super)
-          make.size.equalTo($size(12, 23))
+          make.size.equalTo($size(12.5, 21))
         },
+        views: [createBack(utils.getCache("themeColor"))]
       },{
         type: "label",
         props: {
           text: backName,
           align: $align.center,
-          textColor: $color(mColor.blue),
+          textColor: utils.getCache("themeColor"),
           font: $font(17)
         },
         layout: function(make, view) {
@@ -409,7 +219,39 @@ function genPageHeader(backName, title) {
           make.left.equalTo(view.prev.right).inset(3)
         }
       }],
-    },]
+    },{
+      type: "view",
+      props: {
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.right.inset(20)
+        make.height.equalTo(view.super)
+        make.width.equalTo(50)
+      },
+      views: [rightView?rightView:{}]
+    }]
+  }
+  return view
+}
+
+function createBack(color) {
+  let view = {
+    type: "canvas",
+    layout: $layout.fill,
+    events: {
+      draw: function(view, ctx) {
+        ctx.fillColor = color
+        ctx.strokeColor = color
+        ctx.allowsAntialiasing = true
+        ctx.setLineCap(1)
+        ctx.setLineWidth(3)
+        ctx.moveToPoint(view.frame.width - 2, 2)
+        ctx.addLineToPoint(2, view.frame.height / 2)
+        ctx.addLineToPoint(view.frame.width - 2, view.frame.height - 2)
+        ctx.strokePath()
+      }
+    }
   }
   return view
 }
@@ -426,40 +268,105 @@ function selectIcon(action) {
   icons.invoke("show")
 }
 
+function createRight(color, lineWidth) {
+  let view = {
+    type: "canvas",
+    props: {
+      clipsToBounds: false,
+    },
+    layout: $layout.fill,
+    events: {
+      draw: function(view, ctx) {
+        ctx.fillColor = color
+        ctx.strokeColor = color
+        ctx.allowsAntialiasing = true
+        ctx.setLineCap(1)
+        ctx.setLineWidth(lineWidth)
+        ctx.moveToPoint(2, view.frame.height / 2)
+        ctx.addLineToPoint(view.frame.width / 2.5, view.frame.height - 2)
+        ctx.addLineToPoint(view.frame.width - 2, 2)
+        ctx.strokePath()
+      }
+    }
+  }
+  return view
+}
+
 function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
   let iconView = {}
   if(icon.startsWith("erots")) {
     let json = utils.getSearchJson(icon)
-    let bgcolor = $color("clear")
-    let fontcolor = $color("#" + json.color)
-    if(json.mode == "1") {
-      bgcolor = $color("#" + json.color)
-      fontcolor = $color("white")
-    }
-    iconView = {
-      type: "image",
-      props: {
-        bgcolor: (json.mode == "1")?bgcolor:$color("white"),
-        radius: 12,
-        borderColor: utils.themeColor.iconBorderColor,
-        borderWidth: 0.8,
-      },
-      layout: function(make, view) {
-        make.size.equalTo($size(60, 60))
-        make.left.inset(0)
-        make.centerY.equalTo(view.super)
-      },
-      views: [{
-        type: "image",
+    if(json.mode == "0" || json.mode == "1") {
+      let bgcolor = $color("clear")
+      let fontcolor = $color("#" + json.color)
+      if(json.mode == "1") {
+        bgcolor = $color("#" + json.color)
+        fontcolor = $color("white")
+      }
+      iconView = {
+        type: "view",
         props: {
-          icon: $icon(json.code, fontcolor, $size(35, 35)),
-          bgcolor: bgcolor,
+          bgcolor: (json.mode == "1")?bgcolor:$color("white"),
+          radius: 12,
+          borderColor: utils.themeColor.iconBorderColor,
+          borderWidth: 0.8,
         },
         layout: function(make, view) {
-          make.size.equalTo($size(35, 35))
-          make.center.equalTo(view.super)
+          make.size.equalTo($size(60, 60))
+          make.left.inset(0)
+          make.centerY.equalTo(view.super)
         },
-      }]
+        views: [{
+          type: "image",
+          props: {
+            icon: $icon(json.code, fontcolor, $size(35, 35)),
+            bgcolor: bgcolor,
+          },
+          layout: function(make, view) {
+            make.size.equalTo($size(35, 35))
+            make.center.equalTo(view.super)
+          },
+        }]
+      }
+    } else if(json.mode == "2" || json.mode == "3") {
+      let bgcolor = $color("white")
+      let fontcolor = $color("#" + json.color)
+      iconView = {
+        type: "view",
+        props: {
+          bgcolor: (json.mode == "3")?fontcolor:bgcolor,
+          radius: 12,
+          borderColor: utils.themeColor.iconBorderColor,
+          borderWidth: 0.8,
+        },
+        layout: function(make, view) {
+          make.size.equalTo($size(60, 60))
+          make.left.inset(0)
+          make.centerY.equalTo(view.super)
+        },
+        views: [{
+          type: "view",
+          props: {
+            bgcolor: (json.mode == "3")?bgcolor:fontcolor,
+            circular: true,
+          },
+          layout: function(make, view) {
+            make.size.equalTo($size(50, 50))
+            make.center.equalTo(view.super)
+          },
+          views: [{
+            type: "image",
+            props: {
+              icon: $icon(json.code, (json.mode == "3")?fontcolor:bgcolor, $size(30, 30)),
+              bgcolor: (json.mode == "3")?bgcolor:fontcolor,
+            },
+            layout: function(make, view) {
+              make.size.equalTo($size(30, 30))
+              make.center.equalTo(view.super)
+            },
+          }]
+        }]
+      }
     }
   } else {
     iconView = {
@@ -499,7 +406,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
         props: {
           title: buttonText,
           bgcolor: utils.themeColor.appButtonBgColor,
-          titleColor: $color(mColor.blue),
+          titleColor: utils.getCache("themeColor"),
           font: $font("bold", 15),
           radius: 15,
           align: $align.center,
@@ -658,7 +565,6 @@ function addProgressView(superView) {
 
 module.exports = {
   showToastView: showToastView,
-  genTemplate: genTemplate,
   showBannedAlert: showBannedAlert,
   addButtonMore: addButtonMore,
   genAppShowView: genAppShowView,
@@ -666,4 +572,6 @@ module.exports = {
   selectIcon: selectIcon,
   genAppPreviewPhotosView: genAppPreviewPhotosView,
   addProgressView: addProgressView,
+  createRight: createRight,
+  createBack: createBack,
 }

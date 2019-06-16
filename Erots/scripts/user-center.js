@@ -58,9 +58,10 @@ function setupUserCenterView(prevTitle) {
         type: "button",
           props: {
             title: "退出登录",
-            bgcolor: $color(utils.mColor.lightBlue),
-            titleColor: $color("white"),
-            circular: true,
+            bgcolor: utils.themeColor.commentBgColor,
+            titleColor: utils.getCache("themeColor"),
+            font: $font("bold", 16),
+            radius: 12,
           },
           layout: function(make, view) {
             make.left.right.inset(20)
