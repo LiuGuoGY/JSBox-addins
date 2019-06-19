@@ -4,7 +4,7 @@ let utils = require('scripts/utils')
 async function uploadSM(data, fileName) {
   let resp = await $http.upload({
     url: "https://sm.ms/api/upload",
-    timeout: 5,
+    timeout: 30,
     files: [{ "data": data, "name": "smfile", "filename": fileName}],
   })
   $console.info(resp);

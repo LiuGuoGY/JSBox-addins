@@ -504,7 +504,7 @@ function addProgressView(superView) {
     type: "blur",
     props: {
       id: "myProgressParent",
-      style: 1,
+      style: utils.themeColor.blurType,
       alpha: 0,
     },
     layout: $layout.fill,
@@ -537,6 +537,7 @@ function addProgressView(superView) {
       props: {
         id: "myProgressText",
         text: "开始上传",
+        textColor: utils.themeColor.appObviousColor,
         font: $font("bold", 15),
         align: $align.center
       },

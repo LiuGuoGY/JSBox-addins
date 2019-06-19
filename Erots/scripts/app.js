@@ -290,7 +290,9 @@ function genUpdateView() {
     },{
       type: "view",
       props: {
+        id: "updatePageHeaderView",
         hidden: false,
+        alpha: 0,
       },
       layout: function(make, view) {
         make.left.top.right.inset(0)
@@ -373,7 +375,9 @@ function genCloudView() {
     },{
       type: "view",
       props: {
+        id: "cloudPageHeaderView",
         hidden: false,
+        alpha: 0,
       },
       layout: function(make, view) {
         make.left.top.right.inset(0)
@@ -666,6 +670,21 @@ function genCloudAppListView() {
     layout: $layout.fill,
     events: {
       didScroll: function(sender) {
+        if(sender.contentOffset.y >= 5 + topOffset && $("cloudPageHeaderView").alpha == 0) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function() {
+              $("cloudPageHeaderView").alpha = 1;
+            },
+          });
+        } else if(sender.contentOffset.y < 5 + topOffset && $("cloudPageHeaderView").alpha == 1) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function() {
+              $("cloudPageHeaderView").alpha = 0;
+            },
+          });
+        }
         if(sender.contentOffset.y >= 40 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
           $("cloudPageHeaderLabel").hidden = false
           $("cloudPageHeaderBlur").bgcolor = $color("clear")
@@ -961,6 +980,21 @@ function genUpdateAppListView() {
         }
       },
       didScroll: function(sender) {
+        if(sender.contentOffset.y >= 5 + topOffset && $("updatePageHeaderView").alpha == 0) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function() {
+              $("updatePageHeaderView").alpha = 1;
+            },
+          });
+        } else if(sender.contentOffset.y < 5 + topOffset && $("updatePageHeaderView").alpha == 1) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function() {
+              $("updatePageHeaderView").alpha = 0;
+            },
+          });
+        }
         if(sender.contentOffset.y >= 40 + topOffset && $("updatePageHeaderLabel").hidden === true) {
           $("updatePageHeaderLabel").hidden = false
           $("updatePageHeaderBlur").bgcolor = $color("clear")
@@ -1363,6 +1397,21 @@ function genMeView() {
           }
         },
         didScroll: function(sender) {
+          if(sender.contentOffset.y >= 5 + topOffset && $("mePageHeaderView").alpha == 0) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function() {
+                $("mePageHeaderView").alpha = 1;
+              },
+            });
+          } else if(sender.contentOffset.y < 5 + topOffset && $("mePageHeaderView").alpha == 1) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function() {
+                $("mePageHeaderView").alpha = 0;
+              },
+            });
+          }
           if(sender.contentOffset.y >= 40 + topOffset && $("mePageHeaderLabel").hidden === true) {
             $("mePageHeaderLabel").hidden = false
             $("mePageHeaderBlur").bgcolor = $color("clear")
@@ -1382,7 +1431,9 @@ function genMeView() {
     },{
       type: "view",
       props: {
+        id: "mePageHeaderView",
         hidden: false,
+        alpha: 0,
       },
       layout: function(make, view) {
         make.left.top.right.inset(0)
@@ -1866,11 +1917,16 @@ function showColorSelectView(superView) {
     make.bottom.inset(0)
   })
   $ui.animate({
-    duration: 0.25,
-    velocity: 1,
-    // damping: 0.6,
+    duration: 0.15,
     animation: () => {
       $("infoView").alpha = 1
+    }
+  })
+  $ui.animate({
+    delay: 0.1,
+    duration: 0.25,
+    velocity: 1,
+    animation: () => {
       $("windowView").relayout()
     }
   })
@@ -2377,11 +2433,11 @@ function setupReward() {
         events: {
           tapped: function(sender) {
             switch($("selection").index) {
-              case 0: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX02994GPGIJ8ACYWFQD8")
+              case 0: $app.openURL("https://qr.alipay.com/fkx050667bqnzgnmfyqod4d")
                 break
-              case 1: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX075764EQ49XNSVFA0BC")
+              case 1: $app.openURL("https://qr.alipay.com/fkx095547lpjdisvgwkvzbc")
                 break
-              case 2: $app.openURL("HTTPS://QR.ALIPAY.COM/FKX07563B7TFDJBIRDFX45")
+              case 2: $app.openURL("https://qr.alipay.com/fkx04580mfavvdvwdwetd29")
                 break
             }
           }
@@ -2425,7 +2481,26 @@ function setupReward() {
         },
         events: {
           tapped: function(sender) {
-            $app.openURL("https://qr.alipay.com/c1x01118pzbsiaajndmmp65")
+            $clipboard.text = "623098624"
+            $ui.alert({
+              title: "提示",
+              message: "感谢你的支持！\n红包码 623098624 即将复制到剪切板，到支付宝首页粘贴红包码即可领取",
+              actions: [
+                {
+                  title: "确定",
+                  disabled: false, // Optional
+                  handler: function() {
+                    $app.openURL("alipays://")
+                  }
+                },
+                {
+                  title: "取消",
+                  handler: function() {
+            
+                  }
+                }
+              ]
+            })
           }
         }
       },
@@ -2545,7 +2620,7 @@ function downloadRewardPic(way) {
       break
   }
   $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center/" + PicWay + "_reward_" + PicMoney + ".JPG",
+    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/erots-res/" + PicWay + "_reward_" + PicMoney + ".JPG",
     handler: function(resp) {
       $photo.save({
         data: resp.data,
@@ -2632,6 +2707,7 @@ function setupFeedBack(text) {
               alwaysBounceVertical: true,
               bgcolor: $color("clear"),
               darkKeyboard: utils.themeColor.darkKeyboard,
+              tintColor: utils.getCache("themeColor"),
             },
             layout: function(make, view) {
               make.height.equalTo(160)
@@ -2666,6 +2742,7 @@ function setupFeedBack(text) {
               align: $align.center,
               bgcolor: $color("clear"),
               darkKeyboard: utils.themeColor.darkKeyboard,
+              tintColor: utils.getCache("themeColor"),
             },
             layout: function(make, view) {
               make.left.equalTo($("feedbackContactTitle").right).inset(10)
@@ -2679,9 +2756,10 @@ function setupFeedBack(text) {
             props: {
               id: "sendFeedback",
               title: "发送",
-              bgcolor: $color("#62BEF2"),
-              titleColor: $color("white"),
-              font: $font(15),
+              bgcolor: utils.themeColor.commentBgColor,
+              titleColor: utils.getCache("themeColor"),
+              font: $font("bold", 16),
+              radius: 12,
               titleEdgeInsets: $insets(2, 5, 2, 5)
             },
             layout: function(make, view) {

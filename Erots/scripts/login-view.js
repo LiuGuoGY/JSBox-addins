@@ -586,9 +586,6 @@ function setupLoginView() {
             didEndEditing: function(sender) {
               checkLoginAll()
             },
-            changed: function(sender) {
-              checkLoginAll()
-            },
             returned: function(sender) {
               sender.blur()
             }
@@ -614,7 +611,7 @@ function setupLoginView() {
         props: {
           id: "loginButton",
           title: "登录 >",
-          bgcolor: $color(utils.mColor.gray),
+          bgcolor: $color(utils.mColor.blue),
           titleColor: $color("white"),
           radius: 3,
         },

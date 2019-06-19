@@ -55,7 +55,7 @@ const tColor = {
     appHintColor: $color("gray"),
     appObviousColor: $color("white"),
     uploadBgcolor: $color("#202020"),
-    actionSheetBgColor: $rgba(255, 255, 255, 0.20),
+    actionSheetBgColor: $rgba(255, 255, 255, 0.15),
   }
 }
 
