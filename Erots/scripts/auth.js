@@ -16,11 +16,15 @@ function detect() {
         "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
       },
       handler: function(resp) {
-        let data = resp.data.results
-        authCheck(data.length > 0)
-        $delay(0.1, function() {
-          go();
-        });
+        if(!resp.data) {
+          setupNotConnectView()
+        } else {
+          let data = resp.data.results
+          authCheck(data.length > 0)
+          $delay(0.1, function() {
+            go();
+          });
+        }
       }
     })
     $ui.render({
@@ -63,6 +67,57 @@ function detect() {
   } else {
     go();
   }
+}
+
+function setupNotConnectView() {
+  $ui.render({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: 1,
+      bgcolor: (getThemeMode() == "dark")?$color("black"):$color("white"),
+    },
+    views: [{
+      type: "view",
+      layout: function(make, view) {
+        make.center.equalTo(view.super)
+        make.height.equalTo(110)
+        make.width.equalTo(view.super)
+      },
+      views:[{
+        type: "label",
+        props: {
+          text: "无法连接到 Erots",
+          align: $align.center,
+          font: $font(32),
+          textColor: $color("gray"),
+        },
+        layout: function(make, view) {
+          make.top.inset(0)
+          make.centerX.equalTo(view.super)
+        }
+      },{
+        type: "button",
+        props: {
+          title: "重试",
+          align: $align.center,
+          font: $font(15),
+          titleColor: $color("gray"),
+          borderWidth: 1,
+          borderColor: $color("gray"),
+          contentEdgeInsets: $insets(5, 15, 6, 15),
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super).offset(4)
+          make.bottom.inset(0)
+        },
+        events: {
+          tapped: function(sender) {
+            detect()
+          }
+        }
+      }],
+    },]
+  });
 }
 
 function getThemeMode() {

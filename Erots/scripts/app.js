@@ -2809,9 +2809,11 @@ function requireApps() {
     handler: function(resp) {
       let apps = resp.data.results
       let installedApps = utils.getInstalledApps()
+      $console.info(installedApps);
       for(let i = 0; i < apps.length; i++) {
         for(let j = 0; j < installedApps.length; j++) {
-          if(apps[i].objectId === installedApps[j].id) {
+          let localName = (installedApps[j].localName.endsWith(".js"))?installedApps[j].localName.slice(0, -3):installedApps[j].localName;
+          if(apps[i].objectId === installedApps[j].id && apps[i].appName == localName) {
             apps[i].haveInstalled = true;
             if(apps[i].buildVersion > installedApps[j].build) {
               apps[i].needUpdate = true
