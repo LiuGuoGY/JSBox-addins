@@ -5,7 +5,7 @@ let utils = require("scripts/utils");
 
 function detect() {
   if($app.env == $env.app) {
-    let url = "https://wcphv9sr.api.lncld.net/1.1/classes/fansList?where={\"deviceId\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+    let url = "https://avoscloud.com/1.1/classes/fansList?where={\"deviceId\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
     $http.request({
       method: "GET",
       url: encodeURI(url),

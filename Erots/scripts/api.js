@@ -18,7 +18,7 @@ async function uploadSM(data, fileName) {
 async function uploadApp(json) {
   let resp = await $http.request({
     method: "POST",
-    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App",
+    url: "https://avoscloud.com/1.1/classes/App",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -34,7 +34,7 @@ async function uploadApp(json) {
 async function putApp(objectId, json) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App/" + objectId,
+    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -103,7 +103,7 @@ async function shimo_newUploadFile() {
 // function leanCloud_uploadFile(fileName, file) {
 //   let resp = await $http.request({
 //     method: "POST",
-//     url: "https://kscf2nxm.api.lncld.net/1.1/files/" + fileName,
+//     url: "https://avoscloud.com/1.1/files/" + fileName,
 //     timeout: 5,
 //     header: {
 //       "Content-Type": "application/json",
@@ -124,7 +124,7 @@ async function shimo_newUploadFile() {
 async function uploadComment(objectId, commentJson) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App/" + objectId,
+    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -145,7 +145,7 @@ async function uploadComment(objectId, commentJson) {
 async function uploadDownloadTimes(objectId) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App/" + objectId,
+    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
