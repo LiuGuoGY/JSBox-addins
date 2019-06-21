@@ -7,7 +7,7 @@ function logUp(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://kscf2nxm.api.lncld.net/1.1/users",
+    url: "https://avoscloud.com/1.1/users",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -46,7 +46,7 @@ function login(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://kscf2nxm.api.lncld.net/1.1/login",
+    url: "https://avoscloud.com/1.1/login",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -111,7 +111,7 @@ function passwordReset(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://kscf2nxm.api.lncld.net/1.1/requestPasswordReset",
+    url: "https://avoscloud.com/1.1/requestPasswordReset",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -147,7 +147,7 @@ function requestEmailVerify(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://kscf2nxm.api.lncld.net/1.1/requestEmailVerify",
+    url: "https://avoscloud.com/1.1/requestEmailVerify",
     timeout: 5,
     header: {
       "Content-Type": "application/json",

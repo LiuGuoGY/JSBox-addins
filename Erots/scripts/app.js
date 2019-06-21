@@ -2799,7 +2799,7 @@ function setupFeedBack(text) {
 function requireApps() {
   $http.request({
     method: "GET",
-    url: "https://kscf2nxm.api.lncld.net/1.1/classes/App?limit=1000&order=-updateTime,-updatedAt",
+    url: "https://avoscloud.com/1.1/classes/App?limit=1000&order=-updateTime,-updatedAt",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2862,7 +2862,7 @@ function getCloudAppDisplaySource() {
 function requireReward() {
   $http.request({
     method: "GET",
-    url: "https://kscf2nxm.api.lncld.net/1.1/classes/Reward",
+    url: "https://avoscloud.com/1.1/classes/Reward",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2893,7 +2893,7 @@ function requireReward() {
 function requireInstallNumbers() {
   $http.request({
     method: "GET",
-    url: "https://kscf2nxm.api.lncld.net/1.1/installations?count=1&limit=0",
+    url: "https://avoscloud.com/1.1/installations?count=1&limit=0",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2933,7 +2933,7 @@ function uploadInstall() {
     $cache.set("installInfo", info)
     $http.request({
       method: "POST",
-      url: "https://kscf2nxm.api.lncld.net/1.1/installations",
+      url: "https://avoscloud.com/1.1/installations",
       timeout: 5,
       header: {
         "Content-Type": "application/json",
@@ -2956,7 +2956,7 @@ function uploadInstall() {
 function sendFeedBack(text, contact) {
   $http.request({
     method: "POST",
-    url: "https://kscf2nxm.api.lncld.net/1.1/feedback",
+    url: "https://avoscloud.com/1.1/feedback",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2999,7 +2999,7 @@ function checkBlackList() {
   if(needCheckBlackList) {
     $cache.remove("haveBanned")
     $cache.set("lastCheckBlackTime", nowTime)
-    let url = "https://kscf2nxm.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+    let url = "https://avoscloud.com/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
     $http.request({
       method: "GET",
       url: encodeURI(url),
