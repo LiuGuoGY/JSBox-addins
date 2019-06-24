@@ -1,3 +1,6 @@
+let ui = require('scripts/ui')
+let utils = require('scripts/utils')
+
 function getCurVersion() {
   let version = $file.exists("app.json")
     ? JSON.parse($file.read("app.json").string).version
@@ -44,7 +47,7 @@ function getLatestVersion() {
   })
 }
 
-function getLatestBuild() {
+function getLatestBuild(now) {
   $http.download({
     url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/app.json",
     showsProgress: false,
@@ -65,6 +68,10 @@ function getLatestBuild() {
               }
             }
           })
+        } else {
+          if(now && $("mainView")) {
+            ui.showToastView($("mainView"), utils.mColor.blue, "已是最新")
+          }
         }
       }
     }
@@ -140,7 +147,7 @@ function needUpdate(nv, ov) {
 
 function checkUpdate(now) {
   if(needCheckup() || now) {
-    getLatestBuild()
+    getLatestBuild(now)
   }
 }
 

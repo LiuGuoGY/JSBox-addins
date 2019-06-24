@@ -885,7 +885,7 @@ function show(objectId) {
           },
           events: {
             tapped: function(sender) {
-              $share.sheet(["https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);
+              $share.sheet([app.appName,"https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);
             }
           },
         }]
@@ -924,7 +924,7 @@ function genAppPreviewPhotosScrollView(photos) {
       views: [{
         type: "blur",
         props: {
-          style: 1 // 0 ~ 5
+          style: utils.themeColor.blurType, // 0 ~ 5
         },
         layout: $layout.fill
       },{

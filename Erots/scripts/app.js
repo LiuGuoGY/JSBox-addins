@@ -130,6 +130,7 @@ function genMainView() {
           make.height.equalTo(50)
         }
         make.left.right.inset(0)
+        // make.width.equalTo(view.super)
         make.bottom.inset(0)
       },
       views: [{
@@ -204,7 +205,12 @@ function genMainView() {
         },
         layout: function(make, view) {
           make.top.inset(0)
-          make.left.right.inset(0)
+          if($device.info.screen.width > 500) {
+            make.width.equalTo(500)
+          } else {
+            make.left.right.inset(0)
+          }
+          make.centerX.equalTo(view.super)
           make.height.equalTo(50)
         },
         events: {
@@ -1734,6 +1740,7 @@ function genThemeSettingView() {
 }
 
 function showColorSelectView(superView) {
+  let windowWidth = 400
   let itemColors = []
   let colors = [utils.mColor.blue, "#F83B4C", "#FF7519", "#EBA239", "#29B327", "#00C2ED", "#7748FE", "#FF5DA2"]
   let selectedColor = utils.getCache("themeColor")
@@ -1777,8 +1784,8 @@ function showColorSelectView(superView) {
       },
       layout: function(make, view) {
         make.height.equalTo(270)
-        if(superView.frame.width > 600) {
-          make.width.equalTo(600)
+        if(superView.frame.width > windowWidth) {
+          make.width.equalTo(windowWidth)
         } else {
           make.width.equalTo(view.super)
         }
@@ -1908,8 +1915,8 @@ function showColorSelectView(superView) {
   $("windowView").relayout()
   $("windowView").remakeLayout(function(make) {
     make.height.equalTo(270)
-    if(superView.frame.width > 600) {
-      make.width.equalTo(600)
+    if(superView.frame.width > windowWidth) {
+      make.width.equalTo(windowWidth)
     } else {
       make.width.equalTo(superView)
     }
@@ -1933,8 +1940,8 @@ function showColorSelectView(superView) {
   function hideView() {
     $("windowView").remakeLayout(function(make) {
       make.height.equalTo(270)
-      if(superView.frame.width > 600) {
-        make.width.equalTo(600)
+      if(superView.frame.width > windowWidth) {
+        make.width.equalTo(windowWidth)
       } else {
         make.width.equalTo($("infoView"))
       }
@@ -1995,7 +2002,7 @@ function genWxWelcomView() {
             {
               type: "image",
               props: {
-                src: "assets/show1.png",
+                src: "assets/show2.jpg",
                 contentMode: $contentMode.scaleAspectFit,
               }
             },
@@ -2180,7 +2187,7 @@ function genWxWelcomView() {
     if($("toastIcon")) {
       $("toastIcon").icon = $icon("162", $color("gray"), $size(20, 20))
     }
-    let url = "https://wcphv9sr.api.lncld.net/1.1/classes/fansList?where={\"nickname\":\"" + nickname + "\"}"
+    let url = "https://avoscloud.com/1.1/classes/fansList?where={\"nickname\":\"" + nickname + "\"}"
     $http.request({
       method: "GET",
       url: encodeURI(url),
@@ -2244,7 +2251,7 @@ function genWxWelcomView() {
   function regisiter(objectId) {
     $http.request({
       method: "PUT",
-      url: "https://wcphv9sr.api.lncld.net/1.1/classes/fansList/" + objectId,
+      url: "https://avoscloud.com/1.1/classes/fansList/" + objectId,
       timeout: 5,
       header: {
         "Content-Type": "application/json",
@@ -2809,7 +2816,6 @@ function requireApps() {
     handler: function(resp) {
       let apps = resp.data.results
       let installedApps = utils.getInstalledApps()
-      $console.info(installedApps);
       for(let i = 0; i < apps.length; i++) {
         for(let j = 0; j < installedApps.length; j++) {
           let localName = (installedApps[j].localName.endsWith(".js"))?installedApps[j].localName.slice(0, -3):installedApps[j].localName;
