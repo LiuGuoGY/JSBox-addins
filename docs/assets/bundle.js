@@ -319,8 +319,11 @@ function() {
             d.onclick = function(e) {
                 var rqstJson = getRequest()
                 var link = "jsbox://run?name=Erots&q=" + rqstJson.q + "&objectId=" + rqstJson.objectId;
-                document.location = link;
-            };
+                e.preventDefault(),document.location = link;
+            },
+            c.onclick = function(e) {
+                e.preventDefault()
+            }
         }
     };
     window.main = new n,
