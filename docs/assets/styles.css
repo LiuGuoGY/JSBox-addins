@@ -353,7 +353,7 @@ body.ja-jp,body.zh-cn,body.zh-tw {
 
 .footer {
 	background-size: 736px 44px;
-	background-image: url(./assets/images/footer_gradient_web.png);
+	background-image: url(./images/footer_gradient_web.png);
 	margin: 0 auto;
 	max-width: 736px;
 	height: 44px;
@@ -459,7 +459,7 @@ body.rtl .copyright-dir {
 		background-size: 320px 36px;
 		background-repeat: no-repeat;
 		background-position: 0 0;
-		background-image: url(./assets/images/footer_gradient_iphone.png);
+		background-image: url(./images/footer_gradient_iphone.png);
 		width: 320px;
 		height: 36px
 	}
@@ -474,7 +474,7 @@ body.rtl .copyright-dir {
 		background-size: 580px 44px;
 		background-repeat: no-repeat;
 		background-position: 0 0;
-		background-image: url(./assets/images/gradient_footer_580.png);
+		background-image: url(./images/gradient_footer_580.png);
 		max-width: 580px;
 		height: 44px
 	}
@@ -485,7 +485,7 @@ body.rtl .copyright-dir {
 	height: 32px;
 	background-repeat: no-repeat;
 	background-size: 32px 32px;
-	background-image: url(./assets/images/spinner_32px_f3f5f5.gif);
+	background-image: url(./images/spinner_32px_f3f5f5.gif);
 	background-position: 0 0
 }
 
@@ -493,7 +493,7 @@ body.rtl .copyright-dir {
 	.spinner-32px-f3f5f5 {
 		background-position: 0 0;
 		background-repeat: no-repeat;
-		background-image: url(./assets/images/spinner_32px_f3f5f5@2x.gif);
+		background-image: url(./images/spinner_32px_f3f5f5@2x.gif);
 		background-size: 32px 32px
 	}
 }
@@ -510,7 +510,7 @@ body.rtl .copyright-dir {
 }
 
 .app-button>.left,.app-button>.middle {
-	background-image: url(./assets/images/btn_more.png);
+	background-image: url(./images/btn_more.png);
 	background-size: 244px 43px;
 	top: 0;
 	bottom: 0;
@@ -525,7 +525,7 @@ body.rtl .copyright-dir {
 }
 
 .app-button>.right {
-	background-image: url(./assets/images/btn_more.png);
+	background-image: url(./images/btn_more.png);
 	background-size: 244px 43px;
 	background-position: -204px 0;
 	background-repeat: no-repeat;
@@ -551,7 +551,7 @@ body.rtl .copyright-dir {
 body.rtl .app-button {
 	background-size: 244px 43px;
 	background-repeat: no-repeat;
-	background-image: url(./assets/images/btn_more_rtl.png);
+	background-image: url(./images/btn_more_rtl.png);
 	background-position: 40px 16px
 }
 
@@ -741,7 +741,7 @@ main #loading .spinner-32px-f3f5f5 {
 	background-position: 0 0;
 	background-repeat: no-repeat;
 	background-size: 32px 32px;
-	background-image: url(./assets/images/spinner_32px_f3f5f5.gif);
+	background-image: url(./images/spinner_32px_f3f5f5.gif);
 	vertical-align: middle;
 	display: inline-block;
 	float: none
@@ -771,7 +771,7 @@ main #shortcut-icon {
 	width: 60px;
 	height: 60px;
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,.14);
-	border-radius: 10px
+	border-radius: 12px
 }
 
 main #shortcut-name {
@@ -1040,38 +1040,38 @@ footer .footer .copyright {
 	}
 
 	.footer {
-		background-image: url(./assets/images/footer_gradient_web@2x.png)
+		background-image: url(./images/footer_gradient_web@2x.png)
 	}
 
 	.footer .footer-icloud {
 		background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/icloud/icloud_footer_signoff@2x.png)
 	}@	media only screen and (max-device-width:568px) {
-		.footer{background-image: url(./assets/images/footer_gradient_iphone@2x.png)
+		.footer{background-image: url(./images/footer_gradient_iphone@2x.png)
 	}
 }
 
 @media only screen and (min-device-width:600px) and (max-device-width:800px) {
 	.footer {
-		background-image: url(./assets/images/gradient_footer_580@2x.png)
+		background-image: url(./images/gradient_footer_580@2x.png)
 	}
 }
 
 .spinner-32px-f3f5f5 {
-	background-image: url(./assets/images/spinner_32px_f3f5f5@2x.gif)
+	background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
 }
 
 @media (-webkit-min-device-pixel-ratio:1.5),(min--moz-device-pixel-ratio:1.5),(min-resolution:1.5dppx) {
 	.spinner-32px-f3f5f5 {
-		background-image: url(./assets/images/spinner_32px_f3f5f5@2x@2x.gif)
+		background-image: url(./images/spinner_32px_f3f5f5@2x@2x.gif)
 	}
 }
 
 .app-button>.left,.app-button>.middle,.app-button>.right {
-	background-image: url(./assets/images/btn_more@2x.png)
+	background-image: url(./images/btn_more@2x.png)
 }
 
 body.rtl .app-button {
-	background-image: url(./assets/images/btn_more_rtl@2x.png)
+	background-image: url(./images/btn_more_rtl@2x.png)
 }
 
 .check-30 {
@@ -1083,5 +1083,5 @@ body.rtl .app-button {
 }
 
 main #loading .spinner-32px-f3f5f5 {
-	background-image: url(./assets/images/spinner_32px_f3f5f5@2x.gif)
+	background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
 }}
