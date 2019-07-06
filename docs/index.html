@@ -24,7 +24,7 @@
         return false
       }
     }
-    if (is_weixin()) {
+    if (!is_weixin()) {
       var url = location.search;
       var qrurl = "./instruction.html?"
       if (url.indexOf("?") >= 0) {
