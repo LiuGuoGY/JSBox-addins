@@ -256,6 +256,27 @@ function createBack(color) {
   return view
 }
 
+function createEnter(color) {
+  let view = {
+    type: "canvas",
+    layout: $layout.fill,
+    events: {
+      draw: function(view, ctx) {
+        ctx.fillColor = color
+        ctx.strokeColor = color
+        ctx.allowsAntialiasing = true
+        ctx.setLineCap(1)
+        ctx.setLineWidth(1.5)
+        ctx.moveToPoint(2, 2)
+        ctx.addLineToPoint(view.frame.width - 2, view.frame.height / 2)
+        ctx.addLineToPoint(2, view.frame.height - 2)
+        ctx.strokePath()
+      }
+    }
+  }
+  return view
+}
+
 function selectIcon(action) {
   var iconHandler = $block("void, NSString *", function(icon) {
     var text = icon.rawValue()
@@ -575,4 +596,5 @@ module.exports = {
   addProgressView: addProgressView,
   createRight: createRight,
   createBack: createBack,
+  createEnter: createEnter,
 }

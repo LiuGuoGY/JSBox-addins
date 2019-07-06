@@ -1205,16 +1205,16 @@ function genMeView() {
         }
       },
       {
-        type: "image",
+        type: "view",
         props: {
-          src: "assets/enter.png",
           bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.right.inset(15)
           make.centerY.equalTo(view.super)
-          make.size.equalTo($size(8, 18))
+          make.size.equalTo($size(10, 16))
         },
+        views: [ui.createEnter(utils.themeColor.appHintColor)]
       }]
     }]
   }
@@ -1673,16 +1673,16 @@ function genThemeSettingView() {
           make.centerY.equalTo(view.super)
         }
       },{
-        type: "image",
+        type: "view",
         props: {
-          src: "assets/enter.png",
           bgcolor: $color("clear"),
         },
         layout: function(make, view) {
-          make.right.inset(20)
+          make.right.inset(15)
           make.centerY.equalTo(view.super)
-          make.size.equalTo($size(8, 18))
+          make.size.equalTo($size(10, 16))
         },
+        views: [ui.createEnter(utils.themeColor.appHintColor)]
       },{
         type: "view",
         props: {

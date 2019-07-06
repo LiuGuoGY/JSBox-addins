@@ -1046,6 +1046,7 @@ function genCommentView(app) {
                 userId: userInfo.objectId,
                 name: userInfo.nickname,
                 comment: $("commentText").text,
+                time: new Date().getTime(),
               }
               await api.uploadComment(app.objectId, json)
               ui.showToastView($("addCommentView"), utils.mColor.green, "发送成功")

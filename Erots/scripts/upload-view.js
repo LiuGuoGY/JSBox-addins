@@ -338,16 +338,16 @@ function setupUploadView(updateApp) {
             }
           },
           views: [{
-            type: "image",
+            type: "view",
             props: {
-              src: "assets/enter.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
               make.right.inset(0)
               make.centerY.equalTo(view.super)
-              make.size.equalTo($size(8, 18))
+              make.size.equalTo($size(10, 16))
             },
+            views: [ui.createEnter(utils.themeColor.appHintColor)]
           },{
             type: "label",
             props: {
@@ -474,16 +474,16 @@ function setupUploadView(updateApp) {
             }
           },
           views: [{
-            type: "image",
+            type: "view",
             props: {
-              src: "assets/enter.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
               make.right.inset(0)
               make.centerY.equalTo(view.super)
-              make.size.equalTo($size(8, 18))
+              make.size.equalTo($size(10, 16))
             },
+            views: [ui.createEnter(utils.themeColor.appHintColor)]
           },{
             type: "label",
             props: {
@@ -658,16 +658,16 @@ function setupUploadView(updateApp) {
             }
           },
           views: [{
-            type: "image",
+            type: "view",
             props: {
-              src: "assets/enter.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
               make.right.inset(0)
               make.centerY.equalTo(view.super)
-              make.size.equalTo($size(8, 18))
+              make.size.equalTo($size(10, 16))
             },
+            views: [ui.createEnter(utils.themeColor.appHintColor)]
           },{
             type: "label",
             props: {
@@ -737,16 +737,16 @@ function setupUploadView(updateApp) {
             }
           },
           views: [{
-            type: "image",
+            type: "view",
             props: {
-              src: "assets/enter.png",
               bgcolor: $color("clear"),
             },
             layout: function(make, view) {
               make.right.inset(0)
               make.centerY.equalTo(view.super)
-              make.size.equalTo($size(8, 18))
+              make.size.equalTo($size(10, 16))
             },
+            views: [ui.createEnter(utils.themeColor.appHintColor)]
           },{
             type: "label",
             props: {
@@ -968,16 +968,16 @@ function setupUploadView(updateApp) {
               }
             },
             views: [{
-              type: "image",
+              type: "view",
               props: {
-                src: "assets/enter.png",
                 bgcolor: $color("clear"),
               },
               layout: function(make, view) {
                 make.right.inset(0)
                 make.centerY.equalTo(view.super)
-                make.size.equalTo($size(8, 18))
+                make.size.equalTo($size(10, 16))
               },
+              views: [ui.createEnter(utils.themeColor.appHintColor)]
             },{
               type: "label",
               props: {
