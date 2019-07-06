@@ -18,13 +18,15 @@
       return searchJson
     }
     function is_weixin() {
-      if (/MicroMessenger/i.test(navigator.userAgent)) {
-        return true
+      var ua, _ref;
+      ua = navigator.userAgent.toLowerCase();
+      if (((_ref = ua.match(/MicroMessenger/i)) != null ? _ref[0] : void 0) === "micromessenger") {
+        return true;
       } else {
-        return false
+        return false;
       }
     }
-    if (!is_weixin()) {
+    if (is_weixin()) {
       var url = location.search;
       var qrurl = "./instruction.html?"
       if (url.indexOf("?") >= 0) {

@@ -70,7 +70,7 @@
       }
       return searchJson
     }
-    if (is_weixin()) {
+    if (!is_weixin()) {
       var url = location.search;
       var qrurl = "./index.html?"
       if (url.indexOf("?") >= 0) {
