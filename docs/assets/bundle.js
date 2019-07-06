@@ -312,6 +312,7 @@ function() {
             u = document.getElementById(e.ShortcutLinksID),
             d = document.getElementById(e.ShortcutLinkID),
             c = document.getElementById(e.ShortcutShowActionsID);
+            (app.appIcon.startsWith("http"))?(i.src = app.appIcon):i.className = e.HiddenClass,
             document.title = app.appName,
             s.innerText = app.appName,
             a.innerText = app.instruction,
