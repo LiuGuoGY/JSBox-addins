@@ -1,17 +1,17 @@
 @font-face {
-	font-family:SF Pro Text;font-weight:400;font-display:swap;src:local(".SFProText-Regular"),url(/fonts/current/fonts/SF-Pro-Text-Regular.woff) format("woff")
+	font-family:SF Pro Text;font-weight:400;font-display:swap;src:local(".SFProText-Regular"),url(./SF-Pro-Text-Regular.woff) format("woff")
 }
 
 @font-face {
-	font-family:SF Pro Text;font-weight:500;font-display:swap;src:local(".SFProText-Medium"),url(/fonts/current/fonts/SF-Pro-Text-Medium.woff) format("woff")
+	font-family:SF Pro Text;font-weight:500;font-display:swap;src:local(".SFProText-Medium"),url(./SF-Pro-Text-Medium.woff) format("woff")
 }
 
 @font-face {
-	font-family:SF Pro Display;font-weight:400;font-display:swap;src:local(".SFProDisplay-Regular"),url(/fonts/current/fonts/SF-Pro-Display-Regular.woff) format("woff")
+	font-family:SF Pro Display;font-weight:400;font-display:swap;src:local(".SFProDisplay-Regular"),url(./SF-Pro-Display-Regular.woff) format("woff")
 }
 
 @font-face {
-	font-family:SF Pro Display;font-weight:500;font-display:swap;src:local(".SFProDisplay-Medium"),url(/fonts/current/fonts/SF-Pro-Display-Medium.woff) format("woff")
+	font-family:SF Pro Display;font-weight:500;font-display:swap;src:local(".SFProDisplay-Medium"),url(./SF-Pro-Display-Medium.woff) format("woff")
 }
 
 body {
@@ -771,7 +771,7 @@ main #shortcut-icon {
 	width: 60px;
 	height: 60px;
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,.14);
-	border-radius: 12px
+	border-radius: 15px
 }
 
 main #shortcut-name {
@@ -1062,7 +1062,7 @@ footer .footer .copyright {
 
 @media (-webkit-min-device-pixel-ratio:1.5),(min--moz-device-pixel-ratio:1.5),(min-resolution:1.5dppx) {
 	.spinner-32px-f3f5f5 {
-		background-image: url(./images/spinner_32px_f3f5f5@2x@2x.gif)
+		background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
 	}
 }
 

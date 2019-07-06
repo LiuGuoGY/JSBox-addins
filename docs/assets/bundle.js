@@ -312,7 +312,7 @@ function() {
             u = document.getElementById(e.ShortcutLinksID),
             d = document.getElementById(e.ShortcutLinkID),
             c = document.getElementById(e.ShortcutShowActionsID);
-            (app.appIcon.startsWith("http"))?(i.src = app.appIcon):i.className = e.HiddenClass,
+            (app.appIcon.startsWith("http"))?(i.src = app.appIcon):i.src = "./assets/images/glyphs/icon_" + getSearchJson(app.appIcon).code + ".png",
             document.title = app.appName,
             s.innerText = app.appName,
             a.innerText = app.instruction,
@@ -358,7 +358,7 @@ function() {
 } ();
 
 function getRequest() {
-    var url = location.search; //获取url中"?"符后的字串
+    var url = location.search;
     var theRequest = new Object();
     if (url.indexOf("?") != -1) {
         var str = url.substr(1);
@@ -369,3 +369,13 @@ function getRequest() {
     }
     return theRequest;
 }
+
+function getSearchJson(url){
+    let deUrl = decodeURI(url)
+    let searchArr = deUrl.substr(deUrl.indexOf("?") + 1).split("&");
+    let searchJson = {}
+    for(let i = 0; i < searchArr.length; i++){
+      searchJson[searchArr[i].split("=")[0]] = searchArr[i].split("=")[1]
+    }
+    return searchJson
+  }

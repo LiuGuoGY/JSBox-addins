@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="./assets/styles.css">
     <script type="text/javascript" src="./assets/bundle.js"></script>
+    <link rel="shortcut icon" href="favicon.png" />
     <script type="text/javascript">
       var B, Browser = B = function() {
       for (var e = navigator.userAgent.toLowerCase(), t = ((e.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1] || "").split("."), i = 0; i < t.length; i++) t[i] = parseInt(t[i], 10);
@@ -72,19 +73,21 @@
     </main>
     <footer id="footer">
       <div id="shortcut-links" class="hidden">
-        <a href="https://itunes.apple.com/app/shortcuts/id915249334" class="primary" id="shortcut-link" ontouchstart="">在 Erots 中打开</a>
+        <a href="https://apps.apple.com/cn/app/jsbox-%E5%AD%A6%E4%B9%A0%E5%86%99%E4%BB%A3%E7%A0%81/id1312014438" class="primary" id="shortcut-link" ontouchstart="">获取脚本</a>
         <a href="#" id="shortcut-show-actions" class="hidden" ontouchstart="">Show actions</a></div>
       <div class="footer">
         <div class="footer-icloud"></div>
         <script>var date = new Date,
           year = date.getFullYear(),
-          terms = "http://www.apple.com/legal/icloud/ww/",
-          privacy = "http://www.apple.com/cn/privacy/",
-          termsText = "条款与条件",
-          privacyText = "隐私政策",
-          copyrightText = "Copyright &copy; %{year} Linger.".replace(/%\{year\}/g, year),
-          disclaimerText = "保留所有权利。";
-          document.write('<div class="copyright"><span  class="copyright-dir">' + copyrightText + "</span>" + disclaimerText + '<div class="bar-after"><a class= "underline" target="_blank" href="' + terms + '"><span class="terms" id="terms">' + termsText + '</span></a></div><a class= "underline" target="_blank" href="' + privacy + '"><span class="privacy" id="privacy">' + privacyText + "</span></a></div>")</script></div>
+          terms = "jsbox://import?name=Erots&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fraw%2Fmaster%2FErots%2F.output%2FErots.box&icon=icon_055.png",
+          privacy = "https://apps.apple.com/cn/app/jsbox-%E5%AD%A6%E4%B9%A0%E5%86%99%E4%BB%A3%E7%A0%81/id1312014438",
+          termsText = "安装 Erots",
+          privacyText = "安装 JSBox",
+          copyrightText = "Power by JSBox. Copyright &copy; %{year} Linger.".replace(/%\{year\}/g, year),
+          disclaimerText = "";
+          document.write('<div class="copyright"><span  class="copyright-dir">' + copyrightText + "</span>" + disclaimerText + '<div class="bar-after"><a class= "underline" target="_blank" href="' + terms + '"><span class="terms" id="terms">' + termsText + '</span></a></div><a class= "underline" target="_blank" href="' + privacy + '"><span class="privacy" id="privacy">' + privacyText + "</span></a></div>")
+          </script>
+        </div>
     </footer>
     <script type="text/javascript">var lang = BUILD_INFO.buildLocale;
       "ar-sa" !== lang && "iw-il" !== lang || (document.body.className += " rtl"),
