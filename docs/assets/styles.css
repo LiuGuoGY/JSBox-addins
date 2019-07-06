@@ -368,7 +368,7 @@ body.ja-jp,body.zh-cn,body.zh-tw {
 
 .footer .footer-icloud {
 	background-size: 81px 22px;
-	background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/icloud/icloud_footer_signoff.png);
+	background-image: url(./images/wx_footer_signoff.png);
 	height: 22px;
 	width: 81px;
 	margin: 10px auto;
@@ -1044,7 +1044,7 @@ footer .footer .copyright {
 	}
 
 	.footer .footer-icloud {
-		background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/icloud/icloud_footer_signoff@2x.png)
+		background-image: url(./images/wx_footer_signoff@2x.png)
 	}@	media only screen and (max-device-width:568px) {
 		.footer{background-image: url(./images/footer_gradient_iphone@2x.png)
 	}

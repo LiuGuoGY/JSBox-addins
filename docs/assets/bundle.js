@@ -346,7 +346,6 @@ function() {
         })
         .then(function(myJson) {
           if(myJson.objectId) {
-            console.log(myJson);
             window.main.showErotsItem(myJson)
           } else {
             return void window.main.showError(e.ErrorNotFoundID);
