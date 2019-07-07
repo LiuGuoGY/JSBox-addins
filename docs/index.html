@@ -8,34 +8,6 @@
   <script type="text/javascript" src="./assets/bundle.js"></script>
   <link rel="shortcut icon" href="favicon.png" />
   <script type="text/javascript">
-    function getSearchJson(url) {
-      let deUrl = decodeURI(url)
-      let searchArr = deUrl.substr(deUrl.indexOf("?") + 1).split("&");
-      let searchJson = {}
-      for (let i = 0; i < searchArr.length; i++) {
-        searchJson[searchArr[i].split("=")[0]] = searchArr[i].split("=")[1]
-      }
-      return searchJson
-    }
-    function is_weixin() {
-      var ua, _ref;
-      ua = navigator.userAgent.toLowerCase();
-      if (((_ref = ua.match(/MicroMessenger/i)) != null ? _ref[0] : void 0) === "micromessenger") {
-        return true;
-      } else {
-        return false;
-      }
-    }
-    if (is_weixin()) {
-      var url = location.search;
-      var qrurl = "./instruction.html?"
-      if (url.indexOf("?") >= 0) {
-        qrurl = qrurl + url.substring(1);
-      }
-      window.location.href = qrurl
-    }
-  </script>
-  <script type="text/javascript">
     var B, Browser = B = function () {
       for (var e = navigator.userAgent.toLowerCase(), t = ((e.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1] || "").split("."), i = 0; i < t.length; i++) t[i] = parseInt(t[i], 10);
       var a = 0;
