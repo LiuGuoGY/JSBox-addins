@@ -326,7 +326,7 @@
                 if (url.indexOf("?") >= 0) {
                   qrurl = qrurl + url.substring(1);
                 }
-                document.location = qrurl;
+                e.preventDefault(), document.location = qrurl;
               } else {
                 e.preventDefault(), document.location = link;
               }
