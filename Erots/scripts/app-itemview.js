@@ -4,7 +4,43 @@ let user = require('scripts/user')
 let logUpView = require('scripts/login-view')
 let api = require('scripts/api')
 
-function show(objectId) {
+let objectId = ""
+
+$app.listen({
+  refreshAll: function (object) {
+    refreshAppItemView()
+  },
+});
+
+function show(id) {
+  objectId = id
+  $ui.push({
+    props: {
+      id: "appItemViewParent",
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [genAppItemShowView()]
+  });
+  $("appItemShowScroll").resize()
+  $("appItemShowScroll").contentSize = $size(0, $("appItemShowScroll").contentSize.height + 50)
+  $("appPreviewPhotosScroll").resize()
+  $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+}
+
+function refreshAppItemView() {
+ if($("appItemView")) {
+  $("appItemView").remove()
+  $("appItemViewParent").add(genAppItemShowView())
+  $("appItemShowScroll").resize()
+  $("appItemShowScroll").contentSize = $size(0, $("appItemShowScroll").contentSize.height + 50)
+  $("appPreviewPhotosScroll").resize()
+  $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+ }
+}
+
+function genAppItemShowView() {
   let app = {}
   let cloudApps = utils.getCache("cloudApps", [])
   for(let i = 0; i < cloudApps.length; i++) {
@@ -54,7 +90,19 @@ function show(objectId) {
           layout: function(make, view) {
             make.top.inset(10)
             make.height.equalTo(20)
-            make.left.right.inset(15)
+            make.left.inset(15)
+          },
+        },{
+          type: "label",
+          props: {
+            text: utils.getUpdateDateString(comments[comments.length - i - 1].time),
+            textColor: utils.themeColor.appHintColor,
+            font: $font("PingFangSC-Regular", 14),
+          },
+          layout: function(make, view) {
+            make.top.inset(10)
+            make.height.equalTo(20)
+            make.right.inset(15)
           },
         },{
           type: "label",
@@ -151,12 +199,12 @@ function show(objectId) {
       },
     }
   }
-  $ui.push({
+  return {
+    type: "view",
     props: {
-      navBarHidden: true,
-      statusBarStyle: utils.themeColor.statusBarStyle,
-      bgcolor: utils.themeColor.mainColor,
+      id: "appItemView",
     },
+    layout: $layout.fill,
     views: [ui.genPageHeader("主页", ""),{
       type: "scroll",
       props: {
@@ -217,7 +265,6 @@ function show(objectId) {
                     if(buttonView.get("canvas")) {
                       buttonView.get("canvas").rotate(radius)
                       radius = radius + Math.PI / 180 * 6
-                      $console.info(radius);
                     } else {
                       timer.invalidate()
                     }
@@ -229,11 +276,7 @@ function show(objectId) {
                   handler: function(resp) {
                     let json = utils.getSearchJson(app.appIcon)
                     let icon_code = (json.code)?json.code:"124";
-                    $addin.save({
-                      name: app.appName,
-                      data: resp.data,
-                      icon: "icon_" + icon_code + ".png",
-                    });
+                    utils.saveAddin(app.appName, "icon_" + icon_code + ".png", resp.data);
                     if(app.needUpdate && app.haveInstalled) {
                       utils.addUpdateApps(app.objectId);
                     }
@@ -891,11 +934,7 @@ function show(objectId) {
         }]
       },]
     },]
-  });
-  $("appItemShowScroll").resize()
-  $("appItemShowScroll").contentSize = $size(0, $("appItemShowScroll").contentSize.height + 50)
-  $("appPreviewPhotosScroll").resize()
-  $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+  }
 }
 
 function genAppPreviewPhotosScrollView(photos) {
@@ -1049,6 +1088,17 @@ function genCommentView(app) {
                 time: new Date().getTime(),
               }
               await api.uploadComment(app.objectId, json)
+              let cloudApps = utils.getCache("cloudApps", [])
+              for(let i = 0; i < cloudApps.length; i++) {
+                if(cloudApps[i].objectId === app.objectId) {
+                  cloudApps[i].comment.push(json)
+                }
+              }
+              $cache.set("cloudApps", cloudApps);
+              $app.notify({
+                name: "refreshAll",
+                object: {"a": "b"}
+              });
               ui.showToastView($("addCommentView"), utils.mColor.green, "发送成功")
               $delay(1, ()=>{
                 $ui.pop();

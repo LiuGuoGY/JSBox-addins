@@ -19,7 +19,7 @@ let mIcon = []
 function show() {
   uploadInstall()
   checkBlackList()
-  if(!utils.getCache("haveBanned", false)) {
+  if (!utils.getCache("haveBanned", false)) {
     main()
   } else {
     ui.showBannedAlert()
@@ -35,10 +35,10 @@ function main() {
 }
 
 $app.listen({
-  refreshAll: function(object) {
+  refreshAll: function (object) {
     refreshAllView()
   },
-  requireCloud: function(object) {
+  requireCloud: function (object) {
     requireApps()
   },
 });
@@ -46,12 +46,12 @@ $app.listen({
 let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 
 
 function setThemeColor() {
-  if(utils.getCache("darkMode")) {
-    if($device.isDarkMode) {
+  if (utils.getCache("darkMode")) {
+    if ($device.isDarkMode) {
       utils.themeColor = utils.tColor.dark;
     } else {
-      if(utils.getCache("darkModeAuto")) {
-        utils.themeColor = ($system.brightness < 0.15)?utils.tColor.dark:utils.tColor.light;
+      if (utils.getCache("darkModeAuto")) {
+        utils.themeColor = ($system.brightness < 0.15) ? utils.tColor.dark : utils.tColor.light;
       } else {
         utils.themeColor = utils.tColor.dark;
       }
@@ -59,22 +59,21 @@ function setThemeColor() {
   } else {
     utils.themeColor = utils.tColor.light;
   }
-  mIcon = [
-    {
-      blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
-      gray: $icon("102", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-    },
-    {
-      blue: $icon("164", utils.getCache("themeColor"), $size(25, 25)),
-      gray: $icon("164", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-    },
-    {
-      blue: $icon("109", utils.getCache("themeColor"), $size(25, 25)),
-      gray: $icon("109", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-    },
+  mIcon = [{
+    blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
+    gray: $icon("102", utils.themeColor.mainTabGrayColor, $size(25, 25)),
+  },
+  {
+    blue: $icon("164", utils.getCache("themeColor"), $size(25, 25)),
+    gray: $icon("164", utils.themeColor.mainTabGrayColor, $size(25, 25)),
+  },
+  {
+    blue: $icon("109", utils.getCache("themeColor"), $size(25, 25)),
+    gray: $icon("109", utils.themeColor.mainTabGrayColor, $size(25, 25)),
+  },
   ]
 }
-  
+
 function setupMainView() {
   setThemeColor()
   $app.autoKeyboardEnabled = false
@@ -106,7 +105,7 @@ function genMainView() {
         bgcolor: utils.themeColor.bgcolor,
         clipsToBounds: true,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.width.equalTo(view.super)
         make.left.right.inset(0)
         make.bottom.inset(0)
@@ -114,7 +113,7 @@ function genMainView() {
       },
       events: {
         ready(sender) {
-          $delay(0.1, ()=>{
+          $delay(0.1, () => {
             topOffset = $("cloudAppsList").contentOffset.y
           })
         },
@@ -123,8 +122,8 @@ function genMainView() {
     },
     {
       type: "view",
-      layout: function(make, view) {
-        if($device.info.version >= "11"){
+      layout: function (make, view) {
+        if ($device.info.version >= "11") {
           make.top.equalTo(view.super.safeAreaBottom).offset(-50)
         } else {
           make.height.equalTo(50)
@@ -139,7 +138,7 @@ function genMainView() {
           style: utils.themeColor.blurType,
         },
         layout: $layout.fill,
-      },{
+      }, {
         type: "matrix",
         props: {
           id: "tab",
@@ -149,63 +148,62 @@ function genMainView() {
           scrollEnabled: false,
           bgcolor: $color("clear"),
           template: [{
-              type: "image",
-              props: {
-                id: "menu_image",
-                bgcolor: $color("clear")
-              },
-              layout: function(make, view) {
-                make.centerX.equalTo(view.super)
-                make.width.height.equalTo(25)
-                make.top.inset(7)
-              },
+            type: "image",
+            props: {
+              id: "menu_image",
+              bgcolor: $color("clear")
             },
-            {
-              type: "label",
-              props: {
-                id: "menu_label",
-                font: $font(10),
-              },
-              layout: function(make, view) {
-                var preView = view.prev
-                make.centerX.equalTo(preView)
-                make.bottom.inset(5)
-              }
+            layout: function (make, view) {
+              make.centerX.equalTo(view.super)
+              make.width.height.equalTo(25)
+              make.top.inset(7)
+            },
+          },
+          {
+            type: "label",
+            props: {
+              id: "menu_label",
+              font: $font(10),
+            },
+            layout: function (make, view) {
+              var preView = view.prev
+              make.centerX.equalTo(preView)
+              make.bottom.inset(5)
             }
+          }
           ],
-          data: [
-            {
-              menu_image: {
-                icon: mIcon[0].blue,
-              },
-              menu_label: {
-                text: "应用",
-                textColor: utils.getCache("themeColor")
-              }
+          data: [{
+            menu_image: {
+              icon: mIcon[0].blue,
             },
-            {
-              menu_image: {
-                icon: mIcon[1].gray,
-              },
-              menu_label: {
-                text: "更新",
-                textColor: utils.themeColor.mainTabGrayColor
-              }
+            menu_label: {
+              text: "应用",
+              textColor: utils.getCache("themeColor")
+            }
+          },
+          {
+            menu_image: {
+              icon: mIcon[1].gray,
             },
-            {
-              menu_image: {
-                icon: mIcon[2].gray,
-              },
-              menu_label: {
-                text: "我的",
-                textColor: utils.themeColor.mainTabGrayColor
-              }
+            menu_label: {
+              text: "更新",
+              textColor: utils.themeColor.mainTabGrayColor
+            }
+          },
+          {
+            menu_image: {
+              icon: mIcon[2].gray,
             },
+            menu_label: {
+              text: "我的",
+              textColor: utils.themeColor.mainTabGrayColor
+            }
+          },
           ],
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.top.inset(0)
-          if($device.info.screen.width > 500) {
+          if ($device.info.screen.width > 500) {
             make.width.equalTo(500)
           } else {
             make.left.right.inset(0)
@@ -219,16 +217,16 @@ function genMainView() {
           },
         }
       },],
-    },{
+    }, {
       type: "canvas",
-      layout: function(make, view) {
+      layout: function (make, view) {
         var preView = view.prev
         make.top.equalTo(preView.top)
         make.height.equalTo(1 / $device.info.screen.scale)
         make.left.right.inset(0)
       },
       events: {
-        draw: function(view, ctx) {
+        draw: function (view, ctx) {
           var width = view.frame.width
           var scale = $device.info.screen.scale
           ctx.strokeColor = $color("gray")
@@ -239,24 +237,25 @@ function genMainView() {
         }
       }
     },
-  ]}
+    ]
+  }
   return mainView;
 }
 
 function handleSelect(view, row) {
   let newData = view.data
-  for(let i = 0; i < newData.length; i++) {
+  for (let i = 0; i < newData.length; i++) {
     if (i == row) {
       newData[i].menu_label.textColor = utils.getCache("themeColor")
       newData[i].menu_image.icon = mIcon[i].blue
-      if($(contentViews[i]) == undefined) {
-        $("content").add(getContentView(i)) 
+      if ($(contentViews[i]) == undefined) {
+        $("content").add(getContentView(i))
       }
       $(contentViews[i]).hidden = false
     } else {
       newData[i].menu_label.textColor = utils.themeColor.mainTabGrayColor
       newData[i].menu_image.icon = mIcon[i].gray
-      if($(contentViews[i]) != undefined) {
+      if ($(contentViews[i]) != undefined) {
         $(contentViews[i]).hidden = true
       }
     }
@@ -265,11 +264,14 @@ function handleSelect(view, row) {
 }
 
 function getContentView(number) {
-  switch(number) {
+  switch (number) {
     // case 0: return genExploreView()
-    case 0: return genCloudView()
-    case 1: return genUpdateView()
-    case 2: return genMeView()
+    case 0:
+      return genCloudView()
+    case 1:
+      return genUpdateView()
+    case 2:
+      return genMeView()
   }
 }
 
@@ -286,29 +288,29 @@ function genUpdateView() {
       props: {
         id: "updateAppListParent",
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.width.equalTo(view.super)
         make.top.inset(0)
         make.bottom.inset(0)
         make.centerX.equalTo(view.super)
       },
       views: [genUpdateAppListView()]
-    },{
+    }, {
       type: "view",
       props: {
         id: "updatePageHeaderView",
         hidden: false,
         alpha: 0,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.left.top.right.inset(0)
-        if($device.info.version >= "11"){
+        if ($device.info.version >= "11") {
           make.bottom.equalTo(view.super.topMargin).offset(40)
         } else {
           make.height.equalTo(65)
         }
       },
-      views:[{
+      views: [{
         type: "blur",
         props: {
           id: "updatePageHeaderBlur",
@@ -316,11 +318,10 @@ function genUpdateView() {
           bgcolor: utils.themeColor.mainColor,
         },
         layout: $layout.fill,
-      },{
+      }, {
         type: "view",
-        props: {
-        },
-        layout: function(make, view) {
+        props: {},
+        layout: function (make, view) {
           make.left.bottom.right.inset(0)
           make.height.equalTo(45)
         },
@@ -371,29 +372,29 @@ function genCloudView() {
         id: "cloudAppListParent",
         bgcolor: utils.themeColor.bgcolor,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.width.equalTo(view.super)
         make.top.inset(0)
         make.bottom.inset(0)
         make.centerX.equalTo(view.super)
       },
       views: [genCloudAppListView()]
-    },{
+    }, {
       type: "view",
       props: {
         id: "cloudPageHeaderView",
         hidden: false,
         alpha: 0,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.left.top.right.inset(0)
-        if($device.info.version >= "11"){
+        if ($device.info.version >= "11") {
           make.bottom.equalTo(view.super.topMargin).offset(40)
         } else {
           make.height.equalTo(65)
         }
       },
-      views:[{
+      views: [{
         type: "blur",
         props: {
           id: "cloudPageHeaderBlur",
@@ -401,11 +402,10 @@ function genCloudView() {
           bgcolor: utils.themeColor.mainColor,
         },
         layout: $layout.fill,
-      },{
+      }, {
         type: "view",
-        props: {
-        },
-        layout: function(make, view) {
+        props: {},
+        layout: function (make, view) {
           make.left.bottom.right.inset(0)
           make.height.equalTo(45)
         },
@@ -441,23 +441,23 @@ function genCloudAppListView() {
         titleColor: utils.getCache("themeColor"),
         bgcolor: $color("clear"),
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.centerY.equalTo(view.super)
         make.right.inset(0).offset(55)
         make.size.equalTo($size(55, 35))
       },
       events: {
-        tapped: function(sender) {
+        tapped: function (sender) {
           let input = $("search_input")
           input.text = ""
           $("search_hint").hidden = false
-          $delay(0.1, ()=>{
-            if(searchText !== "") {
+          $delay(0.1, () => {
+            if (searchText !== "") {
               searchText = ""
               refreshAllView()
             }
           })
-          if($("noSearchItemView")) {
+          if ($("noSearchItemView")) {
             $("noSearchItemView").remove()
           }
           input.blur()
@@ -470,7 +470,7 @@ function genCloudAppListView() {
         bgcolor: utils.themeColor.appButtonBgColor,
         radius: 10,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.centerY.equalTo(view.super)
         make.left.inset(0)
         make.right.equalTo(view.prev.left)
@@ -482,12 +482,12 @@ function genCloudAppListView() {
           icon: $icon("023", $rgba(100, 100, 100, 0.4), $size(15, 15)),
           bgcolor: $color("clear"),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.centerY.equalTo(view.super)
           make.left.inset(7)
           make.size.equalTo($size(15, 15))
         },
-      },{
+      }, {
         type: "input",
         props: {
           id: "search_input",
@@ -499,7 +499,7 @@ function genCloudAppListView() {
           textColor: utils.themeColor.listHeaderTextColor,
           darkKeyboard: utils.themeColor.darkKeyboard,
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.centerY.equalTo(view.super)
           make.right.inset(0)
           make.height.equalTo(view.super)
@@ -507,8 +507,8 @@ function genCloudAppListView() {
           make.width.equalTo(view.frame.width - 22)
         },
         events: {
-          didBeginEditing: function(sender, view) {
-            $("searchBarParent").remakeLayout(function(make) {
+          didBeginEditing: function (sender, view) {
+            $("searchBarParent").remakeLayout(function (make) {
               make.left.inset(15)
               make.height.equalTo($("headerView").height)
               make.centerY.equalTo($("headerView").centerY)
@@ -516,35 +516,35 @@ function genCloudAppListView() {
             })
             $ui.animate({
               duration: 0.2,
-              animation: function() {
+              animation: function () {
                 $("searchBarParent").relayout()
               },
-              completion: function() {
-                $("cancel_button").updateLayout(function(make) {
+              completion: function () {
+                $("cancel_button").updateLayout(function (make) {
                   make.right.inset(0).offset(0)
                 })
                 $ui.animate({
                   duration: 0.4,
                   damping: 0.8,
-                  animation: function() {
+                  animation: function () {
                     $("cancel_button").relayout()
                   }
                 })
               }
             })
           },
-          didEndEditing: function(sender) {
-            if($("cancel_button") != undefined) {
-              $("cancel_button").updateLayout(function(make) {
+          didEndEditing: function (sender) {
+            if ($("cancel_button") != undefined) {
+              $("cancel_button").updateLayout(function (make) {
                 make.right.inset(0).offset(55)
               })
               $ui.animate({
                 duration: 0.2,
-                animation: function() {
+                animation: function () {
                   $("cancel_button").relayout()
                 },
-                completion: function() {
-                  $("searchBarParent").remakeLayout(function(make) {
+                completion: function () {
+                  $("searchBarParent").remakeLayout(function (make) {
                     make.left.inset(15)
                     make.height.equalTo($("headerView").height)
                     make.centerY.equalTo($("headerView").centerY)
@@ -552,29 +552,29 @@ function genCloudAppListView() {
                   })
                   $ui.animate({
                     duration: 0.2,
-                    animation: function() {
+                    animation: function () {
                       $("searchBarParent").relayout()
                     },
-                    completion: function() {
+                    completion: function () {
                       $("search_input").userInteractionEnabled = false
                     }
                   })
                 }
               })
-              
+
             }
           },
-          changed: function(sender) {
-            if(sender.text.length > 0) {
+          changed: function (sender) {
+            if (sender.text.length > 0) {
               $("search_hint").hidden = true
             } else {
               $("search_hint").hidden = false
             }
           },
-          returned: function(sender) {
+          returned: function (sender) {
             sender.blur()
             searchText = sender.text
-            $delay(0.1, ()=>{
+            $delay(0.1, () => {
               refreshAllView()
             })
           },
@@ -588,13 +588,14 @@ function genCloudAppListView() {
             textColor: utils.themeColor.appHintColor,
             hidden: searchText != "",
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.left.inset(8)
             make.centerY.equalTo(view.super)
           }
         }]
       },]
-    }]
+    }
+    ]
   }
   let appViewItems = []
   let apps = getCloudAppDisplaySource()
@@ -611,7 +612,7 @@ function genCloudAppListView() {
       separatorHidden: true,
       header: {
         type: "view",
-        props:{
+        props: {
           height: 150,
         },
         views: [{
@@ -623,18 +624,18 @@ function genCloudAppListView() {
             textColor: utils.themeColor.listHeaderTextColor,
             align: $align.center,
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.left.inset(15)
             make.top.inset(50)
             make.height.equalTo(45)
           }
-        },{
+        }, {
           type: "view",
           props: {
             id: "headerView",
             clipsToBounds: true,
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.centerX.equalTo(view.super)
             make.left.right.inset(0)
             make.top.equalTo(view.prev.bottom)
@@ -648,14 +649,14 @@ function genCloudAppListView() {
               userInteractionEnabled: true,
               bgcolor: utils.themeColor.bgcolor,
             },
-            layout: function(make, view) {
+            layout: function (make, view) {
               make.left.right.inset(15)
               make.height.equalTo(view.super)
               make.centerY.equalTo(view.super)
             },
             views: [searchBar],
             events: {
-              tapped: function(sender) {
+              tapped: function (sender) {
                 $("search_input").userInteractionEnabled = true
                 $("search_input").focus()
               }
@@ -675,39 +676,39 @@ function genCloudAppListView() {
     },
     layout: $layout.fill,
     events: {
-      didScroll: function(sender) {
-        if(sender.contentOffset.y >= 5 + topOffset && $("cloudPageHeaderView").alpha == 0) {
+      didScroll: function (sender) {
+        if (sender.contentOffset.y >= 5 + topOffset && $("cloudPageHeaderView").alpha == 0) {
           $ui.animate({
             duration: 0.2,
-            animation: function() {
+            animation: function () {
               $("cloudPageHeaderView").alpha = 1;
             },
           });
-        } else if(sender.contentOffset.y < 5 + topOffset && $("cloudPageHeaderView").alpha == 1) {
+        } else if (sender.contentOffset.y < 5 + topOffset && $("cloudPageHeaderView").alpha == 1) {
           $ui.animate({
             duration: 0.2,
-            animation: function() {
+            animation: function () {
               $("cloudPageHeaderView").alpha = 0;
             },
           });
         }
-        if(sender.contentOffset.y >= 40 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
+        if (sender.contentOffset.y >= 40 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
           $("cloudPageHeaderLabel").hidden = false
           $("cloudPageHeaderBlur").bgcolor = $color("clear")
           $("cloudListHeaderTitle").hidden = true
-        } else if(sender.contentOffset.y < 40 + topOffset && $("cloudPageHeaderLabel").hidden === false) {
+        } else if (sender.contentOffset.y < 40 + topOffset && $("cloudPageHeaderLabel").hidden === false) {
           $("cloudPageHeaderLabel").hidden = true
           $("cloudPageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("cloudListHeaderTitle").hidden = false
-        }else if(sender.contentOffset.y < topOffset) {
+        } else if (sender.contentOffset.y < topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
-          if(size > 40)
+          if (size > 40)
             size = 40
           $("cloudListHeaderTitle").font = $font("Avenir-Black", size)
         }
       },
-      didSelect: function(sender, indexPath, data) {
-        if(data.props.info) {
+      didSelect: function (sender, indexPath, data) {
+        if (data.props.info) {
           appItemView.show(data.props.info);
         }
       }
@@ -725,15 +726,15 @@ function genUpdateAppListView() {
   let newUpdateIds = []
   let updatedApps = []
   let watingApps = []
-  for(let i = 0; i < apps.length; i++) {
-    if(apps[i].needUpdate == true) {
+  for (let i = 0; i < apps.length; i++) {
+    if (apps[i].needUpdate == true) {
       watingApps.push(apps[i])
     }
   }
-  
-  for(let j = 0; j < updateIds.length; j++) {
-    for(let i = 0; i < apps.length; i++) {
-      if(apps[i].objectId == updateIds[j] && apps[i].needUpdate == false) {
+
+  for (let j = 0; j < updateIds.length; j++) {
+    for (let i = 0; i < apps.length; i++) {
+      if (apps[i].objectId == updateIds[j] && apps[i].needUpdate == false) {
         updatedApps.push(apps[i])
         newUpdateIds.push(updateIds[j])
       }
@@ -742,14 +743,14 @@ function genUpdateAppListView() {
   $cache.set("updateIds", newUpdateIds);
   watingAppViewItems = genAppListView(watingApps)
   updatedAppViewItems = genAppListView(updatedApps)
-  if(watingAppViewItems.length > 0) {
+  if (watingAppViewItems.length > 0) {
     appListData.push({
       rows: [{
         type: "view",
         props: {
           bgcolor: $color("clear"),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.right.top.inset(0)
           make.height.equalTo(50)
         },
@@ -761,11 +762,11 @@ function genUpdateAppListView() {
             textColor: utils.themeColor.listHeaderTextColor,
             align: $align.center,
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.left.inset(15)
             make.centerY.equalTo(view.super)
           },
-        },{
+        }, {
           type: "button",
           props: {
             title: "全部更新",
@@ -773,33 +774,33 @@ function genUpdateAppListView() {
             bgcolor: $color("clear"),
             font: $font(17),
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.right.inset(15)
             make.centerY.equalTo(view.super)
           },
           events: {
-            tapped: function(sender) {
+            tapped: function (sender) {
               let listView = $("updateAppsList")
               let needUpdateNumber = watingApps.length
-              if(listView) {
+              if (listView) {
                 sender.titleColor = utils.themeColor.appCateTextColor
                 sender.userInteractionEnabled = false
-                for(let i = 0; i < watingApps.length; i++) {
+                for (let i = 0; i < watingApps.length; i++) {
                   let itemView = listView.cell($indexPath(0, i + 1))
                   let buttonView = itemView.get("button")
                   buttonView.title = ""
-                  buttonView.updateLayout(function(make, view) {
+                  buttonView.updateLayout(function (make, view) {
                     make.size.equalTo($size(30, 30))
                   })
                   $ui.animate({
                     duration: 0.2,
-                    animation: function() {
+                    animation: function () {
                       buttonView.relayout()
                     },
-                    completion: function() {
+                    completion: function () {
                       $ui.animate({
                         duration: 0.1,
-                        animation: function() {
+                        animation: function () {
                           buttonView.bgcolor = $color("clear")
                         },
                       })
@@ -821,8 +822,8 @@ function genUpdateAppListView() {
                       let radius = 0;
                       let timer = $timer.schedule({
                         interval: 0.01,
-                        handler: function() {
-                          if(buttonView.get("canvas")) {
+                        handler: function () {
+                          if (buttonView.get("canvas")) {
                             buttonView.get("canvas").rotate(radius)
                             radius = radius + Math.PI / 180 * 6
                           } else {
@@ -833,20 +834,16 @@ function genUpdateAppListView() {
                       $http.download({
                         url: watingApps[i].file,
                         showsProgress: false,
-                        handler: function(resp) {
+                        handler: function (resp) {
                           let json = utils.getSearchJson(watingApps[i].appIcon)
-                          let icon_code = (json.code)?json.code:"124";
-                          $addin.save({
-                            name: watingApps[i].appName,
-                            data: resp.data,
-                            icon: "icon_" + icon_code + ".png",
-                          });
-                          if(watingApps[i].needUpdate && watingApps[i].haveInstalled) {
+                          let icon_code = (json.code) ? json.code : "124";
+                          utils.saveAddin(watingApps[i].appName, "icon_" + icon_code + ".png", resp.data);
+                          if (watingApps[i].needUpdate && watingApps[i].haveInstalled) {
                             utils.addUpdateApps(watingApps[i].objectId);
                           }
                           let cloudApps = utils.getCache("cloudApps", [])
-                          for(let j = 0; j < cloudApps.length; j++) {
-                            if(cloudApps[j].objectId == watingApps[i].objectId) {
+                          for (let j = 0; j < cloudApps.length; j++) {
+                            if (cloudApps[j].objectId == watingApps[i].objectId) {
                               cloudApps[j].haveInstalled = true
                               cloudApps[j].needUpdate = false
                               break;
@@ -855,25 +852,25 @@ function genUpdateAppListView() {
                           $cache.set("cloudApps", cloudApps);
                           $ui.animate({
                             duration: 0.1,
-                            animation: function() {
+                            animation: function () {
                               buttonView.bgcolor = utils.themeColor.appButtonBgColor
                             },
-                            completion: function() {
+                            completion: function () {
                               buttonView.get("canvas").remove()
-                              buttonView.updateLayout(function(make, view) {
+                              buttonView.updateLayout(function (make, view) {
                                 make.size.equalTo($size(75, 30))
                               })
                               $ui.animate({
                                 duration: 0.2,
-                                animation: function() {
+                                animation: function () {
                                   buttonView.relayout()
                                 },
-                                completion: function() {
+                                completion: function () {
                                   buttonView.title = "打开"
                                   api.uploadDownloadTimes(watingApps[i].objectId)
                                   needUpdateNumber--;
-                                  if(needUpdateNumber <= 0) {
-                                    $delay(0.5,()=>{
+                                  if (needUpdateNumber <= 0) {
+                                    $delay(0.5, () => {
                                       refreshAllView()
                                     })
                                   }
@@ -893,14 +890,14 @@ function genUpdateAppListView() {
       }].concat(watingAppViewItems)
     })
   }
-  if(updatedAppViewItems.length > 0) {
+  if (updatedAppViewItems.length > 0) {
     appListData.push({
       rows: [{
         type: "view",
         props: {
           bgcolor: $color("clear"),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.right.top.inset(0)
           make.height.equalTo(50)
         },
@@ -912,7 +909,7 @@ function genUpdateAppListView() {
             textColor: utils.themeColor.listHeaderTextColor,
             align: $align.center,
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.left.inset(15)
             make.centerY.equalTo(view.super)
           },
@@ -920,7 +917,7 @@ function genUpdateAppListView() {
       }].concat(updatedAppViewItems)
     })
   }
-  if(watingAppViewItems.length == 0 && updatedAppViewItems == 0) {
+  if (watingAppViewItems.length == 0 && updatedAppViewItems == 0) {
     appListData = [{
       type: "label",
       props: {
@@ -929,7 +926,7 @@ function genUpdateAppListView() {
         font: $font(14),
         textColor: utils.themeColor.mainTabGrayColor,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.center.equalTo(view.super)
       }
     }]
@@ -946,7 +943,7 @@ function genUpdateAppListView() {
       separatorHidden: true,
       header: {
         type: "view",
-        props:{
+        props: {
           height: 95,
         },
         views: [{
@@ -959,7 +956,7 @@ function genUpdateAppListView() {
             align: $align.center,
             indicatorInsets: $insets(45, 0, 50, 0),
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.left.inset(15)
             make.top.inset(50)
             make.height.equalTo(45)
@@ -978,46 +975,46 @@ function genUpdateAppListView() {
     },
     layout: $layout.fill,
     events: {
-      rowHeight: function(sender, indexPath) {
+      rowHeight: function (sender, indexPath) {
         if (indexPath.row == 0) {
           return 50
         } else {
           return 80
         }
       },
-      didScroll: function(sender) {
-        if(sender.contentOffset.y >= 5 + topOffset && $("updatePageHeaderView").alpha == 0) {
+      didScroll: function (sender) {
+        if (sender.contentOffset.y >= 5 + topOffset && $("updatePageHeaderView").alpha == 0) {
           $ui.animate({
             duration: 0.2,
-            animation: function() {
+            animation: function () {
               $("updatePageHeaderView").alpha = 1;
             },
           });
-        } else if(sender.contentOffset.y < 5 + topOffset && $("updatePageHeaderView").alpha == 1) {
+        } else if (sender.contentOffset.y < 5 + topOffset && $("updatePageHeaderView").alpha == 1) {
           $ui.animate({
             duration: 0.2,
-            animation: function() {
+            animation: function () {
               $("updatePageHeaderView").alpha = 0;
             },
           });
         }
-        if(sender.contentOffset.y >= 40 + topOffset && $("updatePageHeaderLabel").hidden === true) {
+        if (sender.contentOffset.y >= 40 + topOffset && $("updatePageHeaderLabel").hidden === true) {
           $("updatePageHeaderLabel").hidden = false
           $("updatePageHeaderBlur").bgcolor = $color("clear")
           $("updateListHeaderTitle").hidden = true
-        } else if(sender.contentOffset.y < 40 + topOffset && $("updatePageHeaderLabel").hidden === false) {
+        } else if (sender.contentOffset.y < 40 + topOffset && $("updatePageHeaderLabel").hidden === false) {
           $("updatePageHeaderLabel").hidden = true
           $("updatePageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("updateListHeaderTitle").hidden = false
-        }else if(sender.contentOffset.y < topOffset) {
+        } else if (sender.contentOffset.y < topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
-          if(size > 40)
+          if (size > 40)
             size = 40
           $("updateListHeaderTitle").font = $font("Avenir-Black", size)
         }
       },
-      didSelect: function(sender, indexPath, data) {
-        if(data.props.info) {
+      didSelect: function (sender, indexPath, data) {
+        if (data.props.info) {
           appItemView.show(data.props.info);
         }
       }
@@ -1029,9 +1026,9 @@ function genUpdateAppListView() {
 function genAppListView(apps) {
   let appViewItems = []
   let buttonText = ""
-  for(let i = 0; i < apps.length; i++) {
-    if(apps[i].haveInstalled) {
-      if(apps[i].needUpdate) {
+  for (let i = 0; i < apps.length; i++) {
+    if (apps[i].haveInstalled) {
+      if (apps[i].needUpdate) {
         buttonText = "更新"
       } else {
         buttonText = "打开"
@@ -1046,35 +1043,35 @@ function genAppListView(apps) {
         // bgcolor: utils.themeColor.bgcolor,
         bgcolor: $color("clear"),
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.left.right.inset(0)
         make.height.equalTo(80)
         make.center.equalTo(view.super)
       },
       views: [{
         type: "view",
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.right.inset(15)
           make.height.equalTo(80)
           make.center.equalTo(view.super)
         },
-        views: [ui.genAppShowView(apps[i].appIcon, apps[i].appName, (apps[i].subtitle != "")?apps[i].subtitle:apps[i].appCate, buttonText, function(buttonView) {
-          if(!apps[i].needUpdate && apps[i].haveInstalled) {
+        views: [ui.genAppShowView(apps[i].appIcon, apps[i].appName, (apps[i].subtitle != "") ? apps[i].subtitle : apps[i].appCate, buttonText, function (buttonView) {
+          if (!apps[i].needUpdate && apps[i].haveInstalled) {
             $addin.run(apps[i].appName)
           } else {
             buttonView.title = ""
-            buttonView.updateLayout(function(make, view) {
+            buttonView.updateLayout(function (make, view) {
               make.size.equalTo($size(30, 30))
             })
             $ui.animate({
               duration: 0.2,
-              animation: function() {
+              animation: function () {
                 buttonView.relayout()
               },
-              completion: function() {
+              completion: function () {
                 $ui.animate({
                   duration: 0.1,
-                  animation: function() {
+                  animation: function () {
                     buttonView.bgcolor = $color("clear")
                   },
                 })
@@ -1096,8 +1093,8 @@ function genAppListView(apps) {
                 let radius = 0;
                 let timer = $timer.schedule({
                   interval: 0.01,
-                  handler: function() {
-                    if(buttonView.get("canvas")) {
+                  handler: function () {
+                    if (buttonView.get("canvas")) {
                       buttonView.get("canvas").rotate(radius)
                       radius = radius + Math.PI / 180 * 6
                     } else {
@@ -1108,20 +1105,16 @@ function genAppListView(apps) {
                 $http.download({
                   url: apps[i].file,
                   showsProgress: false,
-                  handler: function(resp) {
+                  handler: function (resp) {
                     let json = utils.getSearchJson(apps[i].appIcon)
-                    let icon_code = (json.code)?json.code:"124";
-                    $addin.save({
-                      name: apps[i].appName,
-                      data: resp.data,
-                      icon: "icon_" + icon_code + ".png",
-                    });
-                    if(apps[i].needUpdate && apps[i].haveInstalled) {
+                    let icon_code = (json.code) ? json.code : "124";
+                    utils.saveAddin(apps[i].appName, "icon_" + icon_code + ".png", resp.data);
+                    if (apps[i].needUpdate && apps[i].haveInstalled) {
                       utils.addUpdateApps(apps[i].objectId);
                     }
                     let cloudApps = utils.getCache("cloudApps", [])
-                    for(let j = 0; j < cloudApps.length; j++) {
-                      if(cloudApps[j].objectId == apps[i].objectId) {
+                    for (let j = 0; j < cloudApps.length; j++) {
+                      if (cloudApps[j].objectId == apps[i].objectId) {
                         cloudApps[j].haveInstalled = true
                         cloudApps[j].needUpdate = false
                       }
@@ -1129,27 +1122,27 @@ function genAppListView(apps) {
                     $cache.set("cloudApps", cloudApps);
                     $ui.animate({
                       duration: 0.1,
-                      animation: function() {
+                      animation: function () {
                         buttonView.bgcolor = utils.themeColor.appButtonBgColor
                       },
-                      completion: function() {
+                      completion: function () {
                         buttonView.get("canvas").remove()
-                        buttonView.updateLayout(function(make, view) {
+                        buttonView.updateLayout(function (make, view) {
                           make.size.equalTo($size(75, 30))
                         })
                         $ui.animate({
                           duration: 0.2,
-                          animation: function() {
+                          animation: function () {
                             buttonView.relayout()
                           },
-                          completion: function() {
+                          completion: function () {
                             buttonView.title = "打开"
                             api.uploadDownloadTimes(apps[i].objectId)
                             $device.taptic(2);
-                            $delay(0.2, ()=>{
+                            $delay(0.2, () => {
                               $device.taptic(2);
                             })
-                            $delay(0.5,()=>{
+                            $delay(0.5, () => {
                               refreshAllView()
                             })
                           }
@@ -1169,13 +1162,13 @@ function genAppListView(apps) {
 }
 
 function refreshAllView() {
-  if($("cloudAppsList")) {
+  if ($("cloudAppsList")) {
     let cloudOffset = $("cloudAppsList").contentOffset.y
     $("cloudAppsList").remove()
     $("cloudAppListParent").add(genCloudAppListView())
     $("cloudAppsList").contentOffset = $point(0, cloudOffset)
   }
-  if($("updateAppsList")) {
+  if ($("updateAppsList")) {
     let updateOffset = $("updateAppsList").contentOffset.y
     $("updateAppsList").remove()
     $("updateAppListParent").add(genUpdateAppListView())
@@ -1199,7 +1192,7 @@ function genMeView() {
           id: "templateTitle",
           textColor: utils.themeColor.listContentTextColor,
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.inset(15);
           make.centerY.equalTo(view.super);
         }
@@ -1209,13 +1202,14 @@ function genMeView() {
         props: {
           bgcolor: $color("clear"),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.right.inset(15)
           make.centerY.equalTo(view.super)
           make.size.equalTo($size(10, 16))
         },
         views: [ui.createEnter(utils.themeColor.appHintColor)]
-      }]
+      }
+      ]
     }]
   }
 
@@ -1225,81 +1219,82 @@ function genMeView() {
       bgcolor: utils.themeColor.bgcolor,
     },
     views: [{
-        type: "label",
-        props: {
-          id: "tabShowInstalls",
-          text: "安装量统计",
-          textColor: utils.themeColor.listContentTextColor,
-        },
-        layout: function(make, view) {
-          make.left.inset(15)
-          make.centerY.equalTo(view.super)
-        }
+      type: "label",
+      props: {
+        id: "tabShowInstalls",
+        text: "安装量统计",
+        textColor: utils.themeColor.listContentTextColor,
       },
-      {
-        type: "label",
-        props: {
-          id: "tabShowInstallsDetail",
-          text: utils.getCache("installNumbers", 0).toString(),
-          textColor: utils.themeColor.appCateTextColor,
-        },
-        layout: function(make, view) {
-          make.right.inset(15)
-          make.centerY.equalTo(view.super)
-        }
+      layout: function (make, view) {
+        make.left.inset(15)
+        make.centerY.equalTo(view.super)
       }
+    },
+    {
+      type: "label",
+      props: {
+        id: "tabShowInstallsDetail",
+        text: utils.getCache("installNumbers", 0).toString(),
+        textColor: utils.themeColor.appCateTextColor,
+      },
+      layout: function (make, view) {
+        make.right.inset(15)
+        make.centerY.equalTo(view.super)
+      }
+    }
     ],
     layout: $layout.fill
   }
 
   let array = [{
     templateTitle: {
-      text : "更新日志",
+      text: "更新日志",
     },
     url: "https://www.liuguogy.com/archives/jsbox-store-developing.html",
   },
   {
     templateTitle: {
-      text : "GitHub",
+      text: "GitHub",
     },
     url: "https://github.com/LiuGuoGY/JSBox-addins/",
   },
   {
     templateTitle: {
-      text : "检查更新",
+      text: "检查更新",
     },
   },
   {
     templateTitle: {
-      text : "反馈建议",
+      text: "反馈建议",
     },
   },
   {
     templateTitle: {
-      text : "支持与赞赏",
+      text: "支持与赞赏",
     },
   },
   {
     templateTitle: {
-      text : "分享︎︎给朋友",
+      text: "分享︎︎给朋友",
     },
-  },]
+  },
+  ]
 
   let userArray = [{
     templateTitle: {
-      text : user.haveLogined()?"个人中心":"未登录用户",
+      text: user.haveLogined() ? "个人中心" : "未登录用户",
     },
   },]
 
   let actionArray = [{
     templateTitle: {
-      text : "我要发布",
+      text: "我要发布",
     },
   },]
 
   let fuctionArray = [{
     templateTitle: {
-      text : "主题设置",
+      text: "主题设置",
     },
   },]
 
@@ -1320,7 +1315,7 @@ function genMeView() {
         separatorColor: utils.themeColor.separatorColor,
         header: {
           type: "view",
-          props:{
+          props: {
             height: 95,
           },
           views: [{
@@ -1332,7 +1327,7 @@ function genMeView() {
               textColor: utils.themeColor.listHeaderTextColor,
               align: $align.center,
             },
-            layout: function(make, view) {
+            layout: function (make, view) {
               make.left.inset(15)
               make.bottom.inset(0)
               make.height.equalTo(45)
@@ -1341,7 +1336,7 @@ function genMeView() {
         },
         footer: {
           type: "view",
-          props:{
+          props: {
             height: 110,
           },
           views: [{
@@ -1352,7 +1347,7 @@ function genMeView() {
               align: $align.center,
               font: $font(13)
             },
-            layout: function(make, view) {
+            layout: function (make, view) {
               make.centerX.equalTo(view.super)
               make.top.inset(23)
             }
@@ -1361,95 +1356,111 @@ function genMeView() {
         data: [{
           title: "用户",
           rows: userArray,
-        },{
+        }, {
           title: "操作",
           rows: actionArray,
-        },{
+        }, {
           title: "功能",
           rows: fuctionArray,
-        },{
+        }, {
           title: "关于",
           rows: array,
         },
         {
           title: "其他",
           rows: [tabShowInstalls],
-        }],
+        }
+        ],
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.top.inset(0)
         make.bottom.inset(0)
         make.left.right.inset(0)
       },
       events: {
-        didSelect: function(sender, indexPath, title) {
-          if(title.templateTitle == undefined) {
+        didSelect: function (sender, indexPath, title) {
+          if (title.templateTitle == undefined) {
             return 0
           }
           let titleText = title.templateTitle.text
-          if(title.url) {
+          if (title.url) {
             setupWebView(titleText, title.url)
           } else {
-            switch(indexPath.row + indexPath.section) {
-              case 0: user.haveLogined()?userCenterView.setupUserCenterView():wantToLogin();break;
-              case 1: wantToRealse();break;
-              case 2: (utils.getCache("authPass"))?setupThemeSettingView():genWxWelcomView();break;
-              case 5: update.checkUpdate(true);break;
-              case 6: setupFeedBack();break;
-              case 7: setupReward();break;
-              case 8: share("http://t.cn/AiNM3N1T");break;
-              default:break;
+            switch (indexPath.row + indexPath.section) {
+              case 0:
+                user.haveLogined() ? userCenterView.setupUserCenterView() : wantToLogin();
+                break;
+              case 1:
+                wantToRealse();
+                break;
+              case 2:
+                (utils.getCache("authPass")) ? setupThemeSettingView() : genWxWelcomView();
+                break;
+              case 5:
+                update.checkUpdate(true);
+                break;
+              case 6:
+                setupFeedBack();
+                break;
+              case 7:
+                setupReward();
+                break;
+              case 8:
+                share("http://t.cn/AiNM3N1T");
+                break;
+              default:
+                break;
             }
           }
         },
-        didScroll: function(sender) {
-          if(sender.contentOffset.y >= 5 + topOffset && $("mePageHeaderView").alpha == 0) {
+        didScroll: function (sender) {
+          if (sender.contentOffset.y >= 5 + topOffset && $("mePageHeaderView").alpha == 0) {
             $ui.animate({
               duration: 0.2,
-              animation: function() {
+              animation: function () {
                 $("mePageHeaderView").alpha = 1;
               },
             });
-          } else if(sender.contentOffset.y < 5 + topOffset && $("mePageHeaderView").alpha == 1) {
+          } else if (sender.contentOffset.y < 5 + topOffset && $("mePageHeaderView").alpha == 1) {
             $ui.animate({
               duration: 0.2,
-              animation: function() {
+              animation: function () {
                 $("mePageHeaderView").alpha = 0;
               },
             });
           }
-          if(sender.contentOffset.y >= 40 + topOffset && $("mePageHeaderLabel").hidden === true) {
+          if (sender.contentOffset.y >= 40 + topOffset && $("mePageHeaderLabel").hidden === true) {
             $("mePageHeaderLabel").hidden = false
             $("mePageHeaderBlur").bgcolor = $color("clear")
             $("meListHeaderTitle").hidden = true
-          } else if(sender.contentOffset.y < 40 + topOffset && $("mePageHeaderLabel").hidden === false) {
+          } else if (sender.contentOffset.y < 40 + topOffset && $("mePageHeaderLabel").hidden === false) {
             $("mePageHeaderLabel").hidden = true
             $("mePageHeaderBlur").bgcolor = utils.themeColor.mainColor
             $("meListHeaderTitle").hidden = false
-          }else if(sender.contentOffset.y < topOffset) {
+          } else if (sender.contentOffset.y < topOffset) {
             let size = 35 - sender.contentOffset.y * 0.04
-            if(size > 40)
+            if (size > 40)
               size = 40
             $("meListHeaderTitle").font = $font("Avenir-Black", size)
           }
         },
       }
-    },{
+    }, {
       type: "view",
       props: {
         id: "mePageHeaderView",
         hidden: false,
         alpha: 0,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.left.top.right.inset(0)
-        if($device.info.version >= "11"){
+        if ($device.info.version >= "11") {
           make.bottom.equalTo(view.super.topMargin).offset(40)
         } else {
           make.height.equalTo(65)
         }
       },
-      views:[{
+      views: [{
         type: "blur",
         props: {
           id: "mePageHeaderBlur",
@@ -1457,9 +1468,9 @@ function genMeView() {
           bgcolor: utils.themeColor.mainColor,
         },
         layout: $layout.fill,
-      },{
+      }, {
         type: "view",
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.bottom.right.inset(0)
           make.height.equalTo(45)
         },
@@ -1486,10 +1497,10 @@ function genMeView() {
 function wantToLogin() {
   $ui.menu({
     items: ["登录", "注册"],
-    handler: function(title, idx) {
-      if(idx == 0) {
+    handler: function (title, idx) {
+      if (idx == 0) {
         logUpView.setupLoginView()
-      } else if(idx == 1) {
+      } else if (idx == 1) {
         logUpView.setupLogUpView()
       }
     }
@@ -1497,28 +1508,28 @@ function wantToLogin() {
 }
 
 function wantToRealse() {
-  if(user.haveLogined()) {
+  if (user.haveLogined()) {
     $ui.menu({
       items: ["首发应用", "更新应用"],
-      handler: function(title, idx) {
-        if(idx == 0) {
+      handler: function (title, idx) {
+        if (idx == 0) {
           uploadView.setupUploadView()
-        } else if(idx == 1) {
+        } else if (idx == 1) {
           let apps = utils.getCache("cloudApps", [])
           let author = user.getLoginUser()
           let myApps = []
-          for(let i = 0; i < apps.length; i++) {
-            if(apps[i].authorAccount == author.objectId || apps[i].authorAccount == author.username || apps[i].authorId == author.objectId) {
+          for (let i = 0; i < apps.length; i++) {
+            if (apps[i].authorAccount == author.objectId || apps[i].authorAccount == author.username || apps[i].authorId == author.objectId) {
               myApps.push(apps[i])
             }
           }
           let names = []
-          for(let i = 0; i < myApps.length; i++) {
+          for (let i = 0; i < myApps.length; i++) {
             names.push(myApps[i].appName)
           }
           $ui.menu({
             items: names,
-            handler: function(title, idx) {
+            handler: function (title, idx) {
               uploadView.setupUploadView(myApps[idx])
             }
           });
@@ -1529,25 +1540,24 @@ function wantToRealse() {
     $ui.alert({
       title: "提示",
       message: "未登录用户无法发布应用，请先登录",
-      actions: [
-        {
-          title: "我要登录",
-          handler: function() {
-            logUpView.setupLoginView()
-          }
-        },
-        {
-          title: "我要注册",
-          handler: function() {
-            logUpView.setupLogUpView()
-          }
-        },
-        {
-          title: "好的",
-          handler: function() {
-            
-          }
-        },
+      actions: [{
+        title: "我要登录",
+        handler: function () {
+          logUpView.setupLoginView()
+        }
+      },
+      {
+        title: "我要注册",
+        handler: function () {
+          logUpView.setupLogUpView()
+        }
+      },
+      {
+        title: "好的",
+        handler: function () {
+
+        }
+      },
       ]
     })
   }
@@ -1566,16 +1576,16 @@ function setupThemeSettingView() {
 }
 
 function refreshAllTheme(delay) {
-  $delay(delay?delay:0, ()=>{
+  $delay(delay ? delay : 0, () => {
     setThemeColor()
-    if($("mainView")) {
+    if ($("mainView")) {
       $("mainView").remove()
       $("mainViewParent").add(genMainView())
       // $("mainViewParent").$statusBarStyle(utils.themeColor.statusBarStyle)
       // $("mainViewParent").bgcolor = utils.themeColor.mainColor
       // $objc("UIApplication").$setStatusBarStyle(utils.themeColor.statusBarStyle)
     }
-    if($("themeSettingView")) {
+    if ($("themeSettingView")) {
       $("themeSettingView").remove()
       $("themeSettingViewParent").add(genThemeSettingView())
       // $objc("UIApplication").$setStatusBarStyle(utils.themeColor.statusBarStyle)
@@ -1593,33 +1603,32 @@ function genThemeSettingView() {
     },
     layout: $layout.fill,
     views: [{
-        type: "label",
-        props: {
-          text: "暗色模式",
-          textColor: utils.themeColor.listContentTextColor,
-        },
-        layout: function(make, view) {
-          make.left.inset(20)
-          make.centerY.equalTo(view.super)
-        }
-      },{
-        type: "switch",
-        props: {
-          onColor: $color(utils.mColor.iosGreen),
-          on: utils.getCache("darkMode"),
-        },
-        layout: function(make, view) {
-          make.right.inset(20)
-          make.centerY.equalTo(view.super)
-        },
-        events: {
-          changed: function(sender) {
-            $cache.set("darkMode", sender.on)
-            refreshAllTheme(0.05)
-          }
+      type: "label",
+      props: {
+        text: "暗色模式",
+        textColor: utils.themeColor.listContentTextColor,
+      },
+      layout: function (make, view) {
+        make.left.inset(20)
+        make.centerY.equalTo(view.super)
+      }
+    }, {
+      type: "switch",
+      props: {
+        onColor: $color(utils.mColor.iosGreen),
+        on: utils.getCache("darkMode"),
+      },
+      layout: function (make, view) {
+        make.right.inset(20)
+        make.centerY.equalTo(view.super)
+      },
+      events: {
+        changed: function (sender) {
+          $cache.set("darkMode", sender.on)
+          refreshAllTheme(0.05)
         }
       }
-    ],
+    }],
   }
   let tabDarkModeAuto = {
     type: "view",
@@ -1628,33 +1637,32 @@ function genThemeSettingView() {
     },
     layout: $layout.fill,
     views: [{
-        type: "label",
-        props: {
-          text: "根据亮度自动变换主题",
-          textColor: utils.themeColor.listContentTextColor,
-        },
-        layout: function(make, view) {
-          make.left.inset(20)
-          make.centerY.equalTo(view.super)
-        }
-      },{
-        type: "switch",
-        props: {
-          onColor: $color(utils.mColor.iosGreen),
-          on: utils.getCache("darkModeAuto"),
-        },
-        layout: function(make, view) {
-          make.right.inset(20)
-          make.centerY.equalTo(view.super)
-        },
-        events: {
-          changed: function(sender) {
-            $cache.set("darkModeAuto", sender.on)
-            refreshAllTheme(0.05)
-          }
+      type: "label",
+      props: {
+        text: "根据亮度自动变换主题",
+        textColor: utils.themeColor.listContentTextColor,
+      },
+      layout: function (make, view) {
+        make.left.inset(20)
+        make.centerY.equalTo(view.super)
+      }
+    }, {
+      type: "switch",
+      props: {
+        onColor: $color(utils.mColor.iosGreen),
+        on: utils.getCache("darkModeAuto"),
+      },
+      layout: function (make, view) {
+        make.right.inset(20)
+        make.centerY.equalTo(view.super)
+      },
+      events: {
+        changed: function (sender) {
+          $cache.set("darkModeAuto", sender.on)
+          refreshAllTheme(0.05)
         }
       }
-    ],
+    }],
   }
   let tabThemeColor = {
     type: "view",
@@ -1663,41 +1671,40 @@ function genThemeSettingView() {
     },
     layout: $layout.fill,
     views: [{
-        type: "label",
-        props: {
-          text: "主题颜色",
-          textColor: utils.themeColor.listContentTextColor,
-        },
-        layout: function(make, view) {
-          make.left.inset(20)
-          make.centerY.equalTo(view.super)
-        }
-      },{
-        type: "view",
-        props: {
-          bgcolor: $color("clear"),
-        },
-        layout: function(make, view) {
-          make.right.inset(15)
-          make.centerY.equalTo(view.super)
-          make.size.equalTo($size(10, 16))
-        },
-        views: [ui.createEnter(utils.themeColor.appHintColor)]
-      },{
-        type: "view",
-        props: {
-          circular: true,
-          borderColor: utils.themeColor.iconBorderColor,
-          borderWidth: 1,
-          bgcolor: utils.getCache("themeColor"),
-        },
-        layout: function(make, view) {
-          make.right.equalTo(view.prev.left).inset(20)
-          make.centerY.equalTo(view.super)
-          make.size.equalTo($size(20, 20))
-        },
+      type: "label",
+      props: {
+        text: "主题颜色",
+        textColor: utils.themeColor.listContentTextColor,
+      },
+      layout: function (make, view) {
+        make.left.inset(20)
+        make.centerY.equalTo(view.super)
       }
-    ],
+    }, {
+      type: "view",
+      props: {
+        bgcolor: $color("clear"),
+      },
+      layout: function (make, view) {
+        make.right.inset(15)
+        make.centerY.equalTo(view.super)
+        make.size.equalTo($size(10, 16))
+      },
+      views: [ui.createEnter(utils.themeColor.appHintColor)]
+    }, {
+      type: "view",
+      props: {
+        circular: true,
+        borderColor: utils.themeColor.iconBorderColor,
+        borderWidth: 1,
+        bgcolor: utils.getCache("themeColor"),
+      },
+      layout: function (make, view) {
+        make.right.equalTo(view.prev.left).inset(20)
+        make.centerY.equalTo(view.super)
+        make.size.equalTo($size(20, 20))
+      },
+    }],
   }
   let themeSettingView = {
     type: "view",
@@ -1720,17 +1727,20 @@ function genThemeSettingView() {
             bgcolor: utils.themeColor.bgcolor,
           },
           layout: $layout.fill,
-        },tabDarkMode,tabDarkModeAuto,tabThemeColor],
+        }, tabDarkMode, tabDarkModeAuto, tabThemeColor],
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.top.equalTo(view.prev.bottom)
         make.left.right.bottom.inset(0)
       },
       events: {
-        didSelect: function(sender, indexPath, title) {
-          switch(indexPath.row + indexPath.section) {
-            case 3: showColorSelectView($("themeSettingView"));break;
-            default:break;
+        didSelect: function (sender, indexPath, title) {
+          switch (indexPath.row + indexPath.section) {
+            case 3:
+              showColorSelectView($("themeSettingView"));
+              break;
+            default:
+              break;
           }
         }
       }
@@ -1744,7 +1754,7 @@ function showColorSelectView(superView) {
   let itemColors = []
   let colors = [utils.mColor.blue, "#F83B4C", "#FF7519", "#EBA239", "#29B327", "#00C2ED", "#7748FE", "#FF5DA2"]
   let selectedColor = utils.getCache("themeColor")
-  for(let i = 0; i < colors.length; i++) {
+  for (let i = 0; i < colors.length; i++) {
     itemColors.push({
       itemColor: {
         bgcolor: $color(colors[i]),
@@ -1761,7 +1771,7 @@ function showColorSelectView(superView) {
       alpha: 0,
       clipsToBounds: true,
     },
-    layout: function(make, view) {
+    layout: function (make, view) {
       make.size.equalTo(view.super)
       make.center.equalTo(view.super)
     },
@@ -1776,15 +1786,15 @@ function showColorSelectView(superView) {
           hideView()
         }
       }
-    },{
+    }, {
       type: "view",
       props: {
         id: "windowView",
         bgcolor: $color("clear"),
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.height.equalTo(270)
-        if(superView.frame.width > windowWidth) {
+        if (superView.frame.width > windowWidth) {
           make.width.equalTo(windowWidth)
         } else {
           make.width.equalTo(view.super)
@@ -1798,7 +1808,7 @@ function showColorSelectView(superView) {
           bgcolor: utils.themeColor.mainColor,
           radius: 15,
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.height.equalTo(view.super).multipliedBy(0.73)
           make.left.right.inset(15)
           make.centerX.equalTo(view.super)
@@ -1812,13 +1822,13 @@ function showColorSelectView(superView) {
             font: $font("bold", 16),
             align: $align.center,
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.top.inset(15)
             make.centerX.equalTo(view.super)
             make.height.equalTo(23)
             make.width.equalTo(view.super)
           }
-        },{
+        }, {
           type: "matrix",
           props: {
             columns: 4,
@@ -1827,64 +1837,63 @@ function showColorSelectView(superView) {
             scrollEnabled: false,
             bgcolor: $color("clear"),
             template: [{
+              type: "view",
+              props: {
+                id: "itemColor",
+                circular: true,
+                borderWidth: 0,
+                bgcolor: utils.getCache("themeColor"),
+              },
+              layout: function (make, view) {
+                make.centerX.equalTo(view.super)
+                make.width.height.equalTo(54)
+                make.top.inset(7)
+              },
+              views: [{
                 type: "view",
                 props: {
-                  id: "itemColor",
-                  circular: true,
-                  borderWidth: 0,
-                  bgcolor: utils.getCache("themeColor"),
+                  id: "colorSelect",
+                  hidden: true,
                 },
-                layout: function(make, view) {
-                  make.centerX.equalTo(view.super)
-                  make.width.height.equalTo(54)
-                  make.top.inset(7)
+                layout: function (make, view) {
+                  make.center.equalTo(view.super)
+                  make.height.equalTo(view.super).multipliedBy(0.3)
+                  make.width.equalTo(view.super).multipliedBy(0.4)
                 },
-                views: [{
-                  type: "view",
-                  props: {
-                    id: "colorSelect",
-                    hidden: true,
-                  },
-                  layout: function(make, view) {
-                    make.center.equalTo(view.super)
-                    make.height.equalTo(view.super).multipliedBy(0.3)
-                    make.width.equalTo(view.super).multipliedBy(0.4)
-                  },
-                  views: [ui.createRight($color("white"), 2.5)]
-                }],
-              },
-            ],
+                views: [ui.createRight($color("white"), 2.5)]
+              }],
+            },],
             data: itemColors,
           },
           events: {
-            didSelect: function(sender, indexPath, data) {
-              for(let i = 0; i < itemColors.length; i++) {
+            didSelect: function (sender, indexPath, data) {
+              for (let i = 0; i < itemColors.length; i++) {
                 itemColors[i].colorSelect.hidden = true
               }
               itemColors[indexPath.row].colorSelect.hidden = false
               sender.data = itemColors
               $cache.set("themeColor", $color(colors[indexPath.row]));
-              $delay(0.1, ()=>{
+              $delay(0.1, () => {
                 hideView()
               })
               setThemeColor()
               refreshAllTheme(0.12)
             }
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.top.equalTo(view.prev.bottom).inset(5)
             make.bottom.inset(10)
             make.centerX.equalTo(view.super)
             make.left.right.inset(20)
           }
         }]
-      },{
+      }, {
         type: "view",
         props: {
           bgcolor: utils.themeColor.mainColor,
           radius: 15,
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.right.inset(15)
           make.centerX.equalTo(view.super)
           make.top.equalTo(view.prev.bottom).inset(10)
@@ -1899,12 +1908,12 @@ function showColorSelectView(superView) {
             font: $font(18),
             title: "Cancel",
           },
-          layout: function(make, view) {
+          layout: function (make, view) {
             make.center.equalTo(view.super)
             make.size.equalTo(view.super)
           },
           events: {
-            tapped: function(sender) {
+            tapped: function (sender) {
               hideView()
             }
           }
@@ -1913,9 +1922,9 @@ function showColorSelectView(superView) {
     }],
   })
   $("windowView").relayout()
-  $("windowView").remakeLayout(function(make) {
+  $("windowView").remakeLayout(function (make) {
     make.height.equalTo(270)
-    if(superView.frame.width > windowWidth) {
+    if (superView.frame.width > windowWidth) {
       make.width.equalTo(windowWidth)
     } else {
       make.width.equalTo(superView)
@@ -1937,10 +1946,11 @@ function showColorSelectView(superView) {
       $("windowView").relayout()
     }
   })
+
   function hideView() {
-    $("windowView").remakeLayout(function(make) {
+    $("windowView").remakeLayout(function (make) {
       make.height.equalTo(270)
-      if(superView.frame.width > windowWidth) {
+      if (superView.frame.width > windowWidth) {
         make.width.equalTo(windowWidth)
       } else {
         make.width.equalTo($("infoView"))
@@ -1956,7 +1966,7 @@ function showColorSelectView(superView) {
         $("windowView").relayout()
       },
       completion: () => {
-        if($("infoView")) {
+        if ($("infoView")) {
           $("infoView").remove();
         }
       }
@@ -1973,15 +1983,15 @@ function genWxWelcomView() {
       bgcolor: utils.themeColor.mainColor,
     },
     events: {
-      appeared: function(sender) {
+      appeared: function (sender) {
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
-      didAppear: function(sender) {
+      didAppear: function (sender) {
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
-      disappeared: function() {
+      disappeared: function () {
         $app.autoKeyboardEnabled = false
         $app.keyboardToolbarEnabled = false
       }
@@ -1991,32 +2001,30 @@ function genWxWelcomView() {
       props: {
         bgcolor: $color("clear"),
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.top.equalTo(view.prev.bottom)
         make.left.right.bottom.inset(0)
       },
       views: [{
         type: "gallery",
         props: {
-          items: [
-            {
-              type: "image",
-              props: {
-                src: "assets/show2.jpg",
-                contentMode: $contentMode.scaleAspectFit,
-              }
-            },
-          ],
+          items: [{
+            type: "image",
+            props: {
+              src: "assets/show2.jpg",
+              contentMode: $contentMode.scaleAspectFit,
+            }
+          },],
           interval: 4,
           radius: 5.0
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.right.inset(10)
           make.centerX.equalTo(view.super)
           make.top.inset(30)
           make.height.equalTo(200)
         }
-      },{
+      }, {
         type: "label",
         props: {
           id: "welcomeDetailLabel",
@@ -2025,24 +2033,24 @@ function genWxWelcomView() {
           align: $align.center,
           lines: 0,
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.right.inset(20)
           make.centerX.equalTo(view.super)
           make.top.equalTo(view.prev.bottom).inset(30)
         },
-      },{
+      }, {
         type: "view",
         props: {
           id: "showWindow",
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
           make.centerX.equalTo(view.super)
           make.width.equalTo(200)
           make.height.equalTo(40)
         },
         views: []
-      },{
+      }, {
         type: "button",
         props: {
           id: "subscribeButton",
@@ -2052,37 +2060,36 @@ function genWxWelcomView() {
           bgcolor: $color("#00CC7A"),
           font: $font("bold", 15),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.width.equalTo(220)
           make.centerX.equalTo(view.super)
           make.height.equalTo(50)
           make.top.equalTo(view.prev.bottom).inset(30)
         },
         events: {
-          tapped: function(sender) {
-            if(!authSucces) {
+          tapped: function (sender) {
+            if (!authSucces) {
               $ui.alert({
                 title: "提示",
                 message: "下载二维码图片或复制公众号名并跳转到微信，只需选择图片或者搜索即可关注公众号。",
-                actions: [
-                  {
-                    title: "下载二维码",
-                    handler: function() {
-                      gotoWxScan()
-                    }
-                  },
-                  {
-                    title: "复制公众号名",
-                    handler: function() {
-                      gotoWx()
-                    }
-                  },
-                  {
-                    title: "取消",
-                    handler: function() {
-                      
-                    }
+                actions: [{
+                  title: "下载二维码",
+                  handler: function () {
+                    gotoWxScan()
                   }
+                },
+                {
+                  title: "复制公众号名",
+                  handler: function () {
+                    gotoWx()
+                  }
+                },
+                {
+                  title: "取消",
+                  handler: function () {
+
+                  }
+                }
                 ]
               });
             } else {
@@ -2092,7 +2099,7 @@ function genWxWelcomView() {
             }
           }
         },
-      },{
+      }, {
         type: "button",
         props: {
           title: "我已关注",
@@ -2101,22 +2108,22 @@ function genWxWelcomView() {
           bgcolor: $color("white"),
           font: $font("bold", 13),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
           make.centerX.equalTo(view.super)
           make.width.equalTo(100)
           make.height.equalTo(30)
         },
         events: {
-          tapped: function(sender) {
-            if(!$("nicknameInput")) {
+          tapped: function (sender) {
+            if (!$("nicknameInput")) {
               $("showWindow").add({
                 type: "view",
                 props: {
                   id: "inputParent",
                 },
                 layout: $layout.fill,
-                views:[{
+                views: [{
                   type: "input",
                   props: {
                     id: "nicknameInput",
@@ -2127,35 +2134,35 @@ function genWxWelcomView() {
                     placeholder: "输入你的微信用户昵称",
                     font: $font("bold", 13),
                   },
-                  layout: function(make, view) {
+                  layout: function (make, view) {
                     make.center.equalTo(view.super)
                     make.height.equalTo(32)
                     make.width.equalTo(150)
                   },
                   events: {
-                    returned: function(sender) {
+                    returned: function (sender) {
                       sender.blur()
                     },
-                    didEndEditing: function(sender) {
+                    didEndEditing: function (sender) {
                       detectNickname(sender.text)
                     }
                   }
-                },{
+                }, {
                   type: "image",
                   props: {
                     id: "toastIcon",
                     bgcolor: $color("clear"),
                     icon: null,
                   },
-                  layout: function(make, view) {
+                  layout: function (make, view) {
                     make.centerY.equalTo(view.super)
                     make.size.equalTo($size(20, 20))
                     make.left.equalTo(view.prev.right).inset(5)
                   },
                   events: {
-                    tapped: function(sender) {
-                      if(!authSucces && sender.icon) {
-                        if($("nicknameInput").text.indexOf("&") >= 0) {
+                    tapped: function (sender) {
+                      if (!authSucces && sender.icon) {
+                        if ($("nicknameInput").text.indexOf("&") >= 0) {
                           $ui.alert({
                             title: "提示",
                             message: "昵称中含有 & 符号，请在公众号后台联系开发者",
@@ -2178,13 +2185,14 @@ function genWxWelcomView() {
       }]
     }],
   })
+
   function detectNickname(nickname) {
-    if(nickname.length <= 0 && $("toastIcon")) {
+    if (nickname.length <= 0 && $("toastIcon")) {
       $("toastIcon").icon = null
       authSucces = false
       return 0
     }
-    if($("toastIcon")) {
+    if ($("toastIcon")) {
       $("toastIcon").icon = $icon("162", $color("gray"), $size(20, 20))
     }
     let url = "https://avoscloud.com/1.1/classes/fansList?where={\"nickname\":\"" + nickname + "\"}"
@@ -2197,10 +2205,10 @@ function genWxWelcomView() {
         "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
         "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
       },
-      handler: function(resp) {
+      handler: function (resp) {
         let data = resp.data.results
-        if(data && data.length > 0) {
-          if($("toastIcon")) {
+        if (data && data.length > 0) {
+          if ($("toastIcon")) {
             $("toastIcon").icon = $icon("064", $color("#00CC7A"), $size(20, 20))
             authSucces = true
             $("subscribeButton").bgcolor = $color("#3478f7");
@@ -2208,7 +2216,7 @@ function genWxWelcomView() {
             regisiter(data[0].objectId)
           }
         } else {
-          if($("toastIcon")) {
+          if ($("toastIcon")) {
             $("toastIcon").icon = $icon("009", $color("gray"), $size(20, 20))
             authSucces = false
           }
@@ -2216,6 +2224,7 @@ function genWxWelcomView() {
       }
     })
   }
+
   function gotoWxScan() {
     $("showWindow").add({
       type: "spinner",
@@ -2223,17 +2232,17 @@ function genWxWelcomView() {
         id: "loadingView",
         loading: true,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.center.equalTo(view.super)
       }
     })
     $http.download({
       url: "https://github.com/LiuGuoGY/JSBox-addins/raw/master/resources/OfficialAccountQr.jpg",
-      handler: function(resp) {
+      handler: function (resp) {
         $photo.save({
           data: resp.data,
-          handler: function(success) {
-            if($("loadingView")) {
+          handler: function (success) {
+            if ($("loadingView")) {
               $("loadingView").remove()
             }
             if (success) {
@@ -2244,10 +2253,12 @@ function genWxWelcomView() {
       }
     })
   }
+
   function gotoWx() {
     $clipboard.text = "纵享派"
     $app.openURL("weixin://")
-  }  
+  }
+
   function regisiter(objectId) {
     $http.request({
       method: "PUT",
@@ -2264,8 +2275,7 @@ function genWxWelcomView() {
           objects: [$objc("FCUUID").invoke("uuidForDevice").rawValue()],
         }
       },
-      handler: function(resp) {
-      }
+      handler: function (resp) { }
     })
   }
 }
@@ -2282,8 +2292,8 @@ function shadow(view) {
 function share(link) {
   $share.sheet({
     items: [link], // 也支持 item
-    handler: function(success) {
-      if(success) {
+    handler: function (success) {
+      if (success) {
         ui.showToastView($("mainView"), utils.mColor.blue, "感谢您的分享")
       }
     }
@@ -2305,7 +2315,7 @@ function setupWebView(title, url) {
         id: "webView",
         url: url,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.centerX.equalTo(view.super)
         make.left.right.bottom.inset(0)
         make.top.equalTo(view.prev.bottom)
@@ -2326,10 +2336,10 @@ function setupReward() {
       type: "label",
       props: {
         id: "templateTitle",
-        textColor: $color("#333333"),
-        font: $font("TrebuchetMS-Italic",17)
+        textColor: utils.themeColor.listContentTextColor,
+        font: $font("TrebuchetMS-Italic", 17)
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.left.inset(40);
         make.centerY.equalTo(view.super);
       }
@@ -2342,14 +2352,15 @@ function setupReward() {
         bgcolor: $color("clear"),
         hidden: false,
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.right.inset(40);
         make.centerY.equalTo(view.super);
       }
-    }]
+    }
+    ]
   }
   let array = $cache.get("rewardList")
-  if(array == undefined) {
+  if (array == undefined) {
     array = []
   }
   $ui.push({
@@ -2362,15 +2373,15 @@ function setupReward() {
     },
     layout: $layout.fill,
     events: {
-      appeared: function(sender) {
+      appeared: function (sender) {
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
-      didAppear: function(sender) {
+      didAppear: function (sender) {
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
-      disappeared: function() {
+      disappeared: function () {
         $app.autoKeyboardEnabled = false
         $app.keyboardToolbarEnabled = false
       }
@@ -2380,17 +2391,17 @@ function setupReward() {
       props: {
         id: "reward",
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.left.right.inset(10)
         make.top.equalTo(view.prev.bottom).inset(30)
-        if($device.info.version >= "11"){
+        if ($device.info.version >= "11") {
           make.bottom.equalTo(view.super.safeAreaBottom).inset(30)
         } else {
           make.bottom.inset(30)
         }
         make.centerX.equalTo(view.super)
       },
-      views:[{
+      views: [{
         type: "label",
         props: {
           id: "rewardTextTitle",
@@ -2398,7 +2409,7 @@ function setupReward() {
           textColor: utils.themeColor.listContentTextColor,
           font: $font(15),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.top.inset(10)
           make.left.inset(20)
         }
@@ -2411,15 +2422,14 @@ function setupReward() {
           tintColor: utils.themeColor.listContentTextColor,
           index: 0,
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.centerX.equalTo(view.super)
           make.width.equalTo(200)
           make.bottom.inset(60)
           make.height.equalTo(25)
         },
         events: {
-          changed: function(sender) {
-          }
+          changed: function (sender) { }
         }
       },
       {
@@ -2432,19 +2442,22 @@ function setupReward() {
           titleColor: $color("#108EE9"),
           font: $font(15),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.centerX.equalTo(view.super)
           make.height.equalTo(40)
           make.bottom.inset(10)
         },
         events: {
-          tapped: function(sender) {
-            switch($("selection").index) {
-              case 0: $app.openURL("https://qr.alipay.com/fkx050667bqnzgnmfyqod4d")
+          tapped: function (sender) {
+            switch ($("selection").index) {
+              case 0:
+                $app.openURL("https://qr.alipay.com/fkx050667bqnzgnmfyqod4d")
                 break
-              case 1: $app.openURL("https://qr.alipay.com/fkx095547lpjdisvgwkvzbc")
+              case 1:
+                $app.openURL("https://qr.alipay.com/fkx095547lpjdisvgwkvzbc")
                 break
-              case 2: $app.openURL("https://qr.alipay.com/fkx04580mfavvdvwdwetd29")
+              case 2:
+                $app.openURL("https://qr.alipay.com/fkx04580mfavvdvwdwetd29")
                 break
             }
           }
@@ -2460,13 +2473,13 @@ function setupReward() {
           titleColor: $color("#1AAD19"),
           font: $font(15),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.left.inset(40)
           make.height.equalTo(40)
           make.bottom.inset(10)
         },
         events: {
-          tapped: function(sender) {
+          tapped: function (sender) {
             begainReward(sender.title)
           }
         }
@@ -2481,31 +2494,30 @@ function setupReward() {
           titleColor: $color("#E81F1F"),
           font: $font(15),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.right.inset(40)
           make.height.equalTo(40)
           make.bottom.inset(10)
         },
         events: {
-          tapped: function(sender) {
+          tapped: function (sender) {
             $clipboard.text = "623098624"
             $ui.alert({
               title: "提示",
               message: "感谢你的支持！\n红包码 623098624 即将复制到剪切板，到支付宝首页粘贴红包码即可领取",
-              actions: [
-                {
-                  title: "确定",
-                  disabled: false, // Optional
-                  handler: function() {
-                    $app.openURL("alipays://")
-                  }
-                },
-                {
-                  title: "取消",
-                  handler: function() {
-            
-                  }
+              actions: [{
+                title: "确定",
+                disabled: false, // Optional
+                handler: function () {
+                  $app.openURL("alipays://")
                 }
+              },
+              {
+                title: "取消",
+                handler: function () {
+
+                }
+              }
               ]
             })
           }
@@ -2519,11 +2531,11 @@ function setupReward() {
           textColor: utils.themeColor.appHintColor,
           font: $font(10),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.centerX.equalTo($("aliRewardButton"))
           make.bottom.inset(8)
         }
-      },{
+      }, {
         type: "label",
         props: {
           id: "recommandText",
@@ -2531,11 +2543,12 @@ function setupReward() {
           textColor: utils.themeColor.appHintColor,
           font: $font(10),
         },
-        layout: function(make, view) {
+        layout: function (make, view) {
           make.centerX.equalTo($("aliRedPackButton"))
           make.bottom.inset(8)
         }
-      },]
+      },
+      ]
     },
     {
       type: "list",
@@ -2545,41 +2558,41 @@ function setupReward() {
         radius: 5,
         borderColor: $rgba(90, 90, 90, 0.4),
         borderWidth: 1,
-        insets: $insets(5,5,5,5),
+        separatorColor: utils.themeColor.separatorColor,
+        insets: $insets(5, 5, 5, 5),
         rowHeight: 35,
         bgcolor: $color("clear"),
         selectable: false,
-        data: [
-          {
-            rows: array,
-          },
-        ],
+        data: [{
+          rows: array,
+        },],
         header: {
           type: "label",
           props: {
             height: 20,
             text: "Thank you all.",
-            textColor: $rgba(90, 90, 90, 0.6),
+            textColor: utils.themeColor.appHintColor,
             align: $align.center,
             font: $font(12)
           }
         }
       },
-      layout: function(make, view) {
+      layout: function (make, view) {
         make.top.equalTo($("rewardTextTitle").bottom).inset(5)
         make.bottom.equalTo($("selection").top).inset(20)
         make.centerX.equalTo(view.center)
         make.left.right.inset(20)
       },
       events: {
-        didSelect: function(sender, indexPath, data) {
+        didSelect: function (sender, indexPath, data) {
 
         }
       }
-    },]
+    },
+    ]
   })
   requireReward()
-  $delay(1, function(){
+  $delay(1, function () {
     $("rewardList").scrollToOffset($point(0, 20))
   })
 }
@@ -2589,14 +2602,14 @@ function begainReward(way) {
     title: "确定赞赏？",
     message: "点击确定后，将会下载付款码到手机相册，并会跳转到" + way + "扫一扫\n你只需要选择相册里的付款码即可赞赏\n----------\n赞赏完成后别忘记回来，插件会自动删除付款码图片",
     actions: [{
-        title: "确定",
-        handler: function() {
-          downloadRewardPic(way)
-        }
-      },
-      {
-        title: "取消",
+      title: "确定",
+      handler: function () {
+        downloadRewardPic(way)
       }
+    },
+    {
+      title: "取消",
+    }
     ]
   })
 }
@@ -2628,10 +2641,10 @@ function downloadRewardPic(way) {
   }
   $http.download({
     url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/erots-res/" + PicWay + "_reward_" + PicMoney + ".JPG",
-    handler: function(resp) {
+    handler: function (resp) {
       $photo.save({
         data: resp.data,
-        handler: function(success) {
+        handler: function (success) {
           if (success) {
             let nDate = new Date()
             $cache.set("stopTime", nDate.getTime())
@@ -2657,149 +2670,148 @@ function setupFeedBack(text) {
     },
     layout: $layout.fill,
     events: {
-      appeared: function(sender) {
+      appeared: function (sender) {
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
-      didAppear: function(sender) {
+      didAppear: function (sender) {
         $app.autoKeyboardEnabled = true
         $app.keyboardToolbarEnabled = true
       },
-      disappeared: function() {
+      disappeared: function () {
         $app.autoKeyboardEnabled = false
         $app.keyboardToolbarEnabled = false
       }
     },
     views: [ui.genPageHeader("主页", "反馈建议"), {
-        type: "view",
+      type: "view",
+      props: {
+        id: "feedback",
+      },
+      layout: function (make, view) {
+        make.left.right.inset(10)
+        make.height.equalTo(300)
+        make.top.equalTo(view.prev.bottom).inset(20)
+      },
+      events: {
+        tapped: function (sender) {
+          $("feedbackText").blur()
+          $("feedbackContact").blur()
+        }
+      },
+      views: [{
+        type: "label",
         props: {
-          id: "feedback",
+          id: "feedbackTextTitle",
+          text: "反馈内容：",
+          textColor: utils.themeColor.listContentTextColor,
+          font: $font(15),
         },
-        layout: function(make, view) {
-          make.left.right.inset(10)
-          make.height.equalTo(300)
-          make.top.equalTo(view.prev.bottom).inset(20)
+        layout: function (make, view) {
+          make.top.inset(10)
+          make.left.inset(20)
+        }
+      },
+      {
+        type: "text",
+        props: {
+          id: "feedbackText",
+          text: (text) ? text : "",
+          align: $align.left,
+          radius: 5,
+          textColor: utils.themeColor.appObviousColor,
+          font: $font(15),
+          borderColor: $rgba(90, 90, 90, 0.6),
+          borderWidth: 1,
+          insets: $insets(5, 5, 5, 5),
+          alwaysBounceVertical: true,
+          bgcolor: $color("clear"),
+          darkKeyboard: utils.themeColor.darkKeyboard,
+          tintColor: utils.getCache("themeColor"),
+        },
+        layout: function (make, view) {
+          make.height.equalTo(160)
+          make.top.equalTo($("feedbackTextTitle").bottom).inset(5)
+          make.centerX.equalTo(view.center)
+          make.left.right.inset(20)
+        },
+      },
+      {
+        type: "label",
+        props: {
+          id: "feedbackContactTitle",
+          text: "联系方式(选填):",
+          textColor: utils.themeColor.listContentTextColor,
+          font: $font(15),
+        },
+        layout: function (make, view) {
+          make.top.equalTo($("feedbackText").bottom).inset(20)
+          make.left.inset(20)
+        }
+      },
+      {
+        type: "text",
+        props: {
+          id: "feedbackContact",
+          textColor: utils.themeColor.appObviousColor,
+          font: $font(15),
+          borderColor: $rgba(90, 90, 90, 0.6),
+          borderWidth: 1,
+          insets: $insets(5, 5, 5, 5),
+          radius: 5,
+          align: $align.center,
+          bgcolor: $color("clear"),
+          darkKeyboard: utils.themeColor.darkKeyboard,
+          tintColor: utils.getCache("themeColor"),
+        },
+        layout: function (make, view) {
+          make.left.equalTo($("feedbackContactTitle").right).inset(10)
+          make.right.inset(20)
+          make.centerY.equalTo($("feedbackContactTitle").centerY)
+          make.height.equalTo(30)
+        }
+      },
+      {
+        type: "button",
+        props: {
+          id: "sendFeedback",
+          title: "发送",
+          bgcolor: utils.themeColor.commentBgColor,
+          titleColor: utils.getCache("themeColor"),
+          font: $font("bold", 16),
+          radius: 12,
+          titleEdgeInsets: $insets(2, 5, 2, 5)
+        },
+        layout: function (make, view) {
+          make.left.right.inset(20)
+          make.height.equalTo(40)
+          make.bottom.inset(10)
+          make.centerX.equalTo(view.super)
         },
         events: {
-          tapped: function(sender) {
-            $("feedbackText").blur()
-            $("feedbackContact").blur()
-          }
-        },
-        views: [{
-            type: "label",
-            props: {
-              id: "feedbackTextTitle",
-              text: "反馈内容：",
-              textColor: utils.themeColor.listContentTextColor,
-              font: $font(15),
-            },
-            layout: function(make, view) {
-              make.top.inset(10)
-              make.left.inset(20)
+          tapped: function (sender) {
+            if ($("feedbackText").text.length > 0) {
+              sendFeedBack($("feedbackText").text, $("feedbackContact").text)
             }
           },
-          {
-            type: "text",
-            props: {
-              id: "feedbackText",
-              text: (text)?text:"",
-              align: $align.left,
-              radius: 5,
-              textColor: utils.themeColor.appObviousColor,
-              font: $font(15),
-              borderColor: $rgba(90, 90, 90, 0.6),
-              borderWidth: 1,
-              insets: $insets(5, 5, 5, 5),
-              alwaysBounceVertical: true,
-              bgcolor: $color("clear"),
-              darkKeyboard: utils.themeColor.darkKeyboard,
-              tintColor: utils.getCache("themeColor"),
-            },
-            layout: function(make, view) {
-              make.height.equalTo(160)
-              make.top.equalTo($("feedbackTextTitle").bottom).inset(5)
-              make.centerX.equalTo(view.center)
-              make.left.right.inset(20)
-            },
-          },
-          {
-            type: "label",
-            props: {
-              id: "feedbackContactTitle",
-              text: "联系方式(选填):",
-              textColor: utils.themeColor.listContentTextColor,
-              font: $font(15),
-            },
-            layout: function(make, view) {
-              make.top.equalTo($("feedbackText").bottom).inset(20)
-              make.left.inset(20)
-            }
-          },
-          {
-            type: "text",
-            props: {
-              id: "feedbackContact",
-              textColor: utils.themeColor.appObviousColor,
-              font: $font(15),
-              borderColor: $rgba(90, 90, 90, 0.6),
-              borderWidth: 1,
-              insets: $insets(5, 5, 5, 5),
-              radius: 5,
-              align: $align.center,
-              bgcolor: $color("clear"),
-              darkKeyboard: utils.themeColor.darkKeyboard,
-              tintColor: utils.getCache("themeColor"),
-            },
-            layout: function(make, view) {
-              make.left.equalTo($("feedbackContactTitle").right).inset(10)
-              make.right.inset(20)
-              make.centerY.equalTo($("feedbackContactTitle").centerY)
-              make.height.equalTo(30)
-            }
-          },
-          {
-            type: "button",
-            props: {
-              id: "sendFeedback",
-              title: "发送",
-              bgcolor: utils.themeColor.commentBgColor,
-              titleColor: utils.getCache("themeColor"),
-              font: $font("bold", 16),
-              radius: 12,
-              titleEdgeInsets: $insets(2, 5, 2, 5)
-            },
-            layout: function(make, view) {
-              make.left.right.inset(20)
-              make.height.equalTo(40)
-              make.bottom.inset(10)
-              make.centerX.equalTo(view.super)
-            },
-            events: {
-              tapped: function(sender) {
-                if ($("feedbackText").text.length > 0) {
-                  sendFeedBack($("feedbackText").text, $("feedbackContact").text)
-                }
-              },
-            }
-          },
-          {
-            type: "label",
-            props: {
-              text: "如果需要发送图片或者视频，请在公众号中进行反馈。",
-              textColor: utils.themeColor.appHintColor,
-              align: $align.left,
-              font: $font(12),
-              lines: 0,
-            },
-            layout: function(make, view) {
-              make.top.equalTo(view.prev.bottom).inset(20)
-              make.left.inset(20)
-            }
-          }
-        ]
+        }
       },
-    ]
+      {
+        type: "label",
+        props: {
+          text: "如果需要发送图片或者视频，请在公众号中进行反馈。",
+          textColor: utils.themeColor.appHintColor,
+          align: $align.left,
+          font: $font(12),
+          lines: 0,
+        },
+        layout: function (make, view) {
+          make.top.equalTo(view.prev.bottom).inset(20)
+          make.left.inset(20)
+        }
+      }
+      ]
+    },]
   })
 }
 
@@ -2813,15 +2825,15 @@ function requireApps() {
       "X-LC-Id": utils.appId,
       "X-LC-Key": utils.appKey,
     },
-    handler: function(resp) {
+    handler: function (resp) {
       let apps = resp.data.results
       let installedApps = utils.getInstalledApps()
-      for(let i = 0; i < apps.length; i++) {
-        for(let j = 0; j < installedApps.length; j++) {
-          let localName = (installedApps[j].localName.endsWith(".js"))?installedApps[j].localName.slice(0, -3):installedApps[j].localName;
-          if(apps[i].objectId === installedApps[j].id && apps[i].appName == localName) {
+      for (let i = 0; i < apps.length; i++) {
+        for (let j = 0; j < installedApps.length; j++) {
+          let localName = (installedApps[j].localName.endsWith(".js")) ? installedApps[j].localName.slice(0, -3) : installedApps[j].localName;
+          if (apps[i].objectId === installedApps[j].id && apps[i].appName == localName) {
             apps[i].haveInstalled = true;
-            if(apps[i].buildVersion > installedApps[j].build) {
+            if (apps[i].buildVersion > installedApps[j].build) {
               apps[i].needUpdate = true
             } else {
               apps[i].needUpdate = false
@@ -2831,31 +2843,47 @@ function requireApps() {
       }
       $cache.set("cloudApps", apps);
       refreshAllView();
+      showNewCommentNumber(apps)
       let query = $context.query
-      if(query) {
-        switch(query.q) {
+      if (query) {
+        switch (query.q) {
           case "show":
             appItemView.show(query.objectId);
             break;
-          default:break;
+          default:
+            break;
         }
       }
     }
   })
 }
 
+function showNewCommentNumber(apps) {
+  let commentNum = 0;
+  for (let i = 0; i < apps.length; i++) {
+    if (apps[i].authorId === user.getLoginUser().objectId) {
+      commentNum += apps[i].comment.length;
+    }
+  }
+  let oldCommentNum = utils.getCache("commentNum", 0);
+  if (commentNum > oldCommentNum) {
+    $cache.set("commentNum", commentNum);
+    ui.showToastView($("mainView"), utils.mColor.blue, "你有 " + (commentNum - oldCommentNum) + " 个新评论哦");
+  }
+}
+
 function getCloudAppDisplaySource() {
   let cloudApps = utils.getCache("cloudApps", [])
   let onstoreApps = []
-  for(let i = 0; i < cloudApps.length; i++) {
-    if(cloudApps[i].onStore) {
+  for (let i = 0; i < cloudApps.length; i++) {
+    if (cloudApps[i].onStore) {
       onstoreApps.push(cloudApps[i]);
     }
   }
   let results = []
-  if(searchText != "") {
-    for(let i = 0; i < onstoreApps.length; i++) {
-      if(onstoreApps[i].appName.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].author.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].subtitle.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].instruction.toLowerCase().indexOf(searchText.toLowerCase()) >= 0) {
+  if (searchText != "") {
+    for (let i = 0; i < onstoreApps.length; i++) {
+      if (onstoreApps[i].appName.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].author.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].subtitle.toLowerCase().indexOf(searchText.toLowerCase()) >= 0 || onstoreApps[i].instruction.toLowerCase().indexOf(searchText.toLowerCase()) >= 0) {
         results.push(onstoreApps[i])
       }
     }
@@ -2875,7 +2903,7 @@ function requireReward() {
       "X-LC-Id": appId,
       "X-LC-Key": appKey,
     },
-    handler: function(resp) {
+    handler: function (resp) {
       let data = resp.data.results
       let array = []
       if (data != undefined) {
@@ -2906,7 +2934,7 @@ function requireInstallNumbers() {
       "X-LC-Id": appId,
       "X-LC-Key": appKey,
     },
-    handler: function(resp) {
+    handler: function (resp) {
       let results = resp.data.count
       if (results != undefined) {
         let view = $("tabShowInstallsDetail")
@@ -2926,16 +2954,17 @@ function uploadInstall() {
     deviceToken: $objc("FCUUID").invoke("uuidForDevice").rawValue()
   }
   let info_pre = utils.getCache("installInfo")
+
   function isDifferent(info, info_pre) {
-    if(info == undefined || info_pre == undefined) {
+    if (info == undefined || info_pre == undefined) {
       return true
-    } else if(info.addinVersion != info_pre.addinVersion || info.iosVersion != info_pre.iosVersion || info.jsboxVersion != info_pre.jsboxVersion || info.deviceToken != info_pre.deviceToken) {
+    } else if (info.addinVersion != info_pre.addinVersion || info.iosVersion != info_pre.iosVersion || info.jsboxVersion != info_pre.jsboxVersion || info.deviceToken != info_pre.deviceToken) {
       return true
     } else {
       return false
     }
   }
-  if(isDifferent(info, info_pre)) {
+  if (isDifferent(info, info_pre)) {
     $cache.set("installInfo", info)
     $http.request({
       method: "POST",
@@ -2953,8 +2982,7 @@ function uploadInstall() {
         deviceType: "ios",
         deviceToken: $objc("FCUUID").invoke("uuidForDevice").rawValue()
       },
-      handler: function(resp) {
-      }
+      handler: function (resp) { }
     })
   }
 }
@@ -2974,9 +3002,9 @@ function sendFeedBack(text, contact) {
       content: text + "\nID: " + $objc("FCUUID").invoke("uuidForDevice").rawValue().toString(),
       contact: contact,
     },
-    handler: function(resp) {
+    handler: function (resp) {
       $device.taptic(2)
-      $delay(0.2, function() {
+      $delay(0.2, function () {
         $device.taptic(2)
       })
       $ui.alert({
@@ -2984,7 +3012,7 @@ function sendFeedBack(text, contact) {
         message: "感谢您的反馈！开发者会认真考虑！",
         actions: [{
           title: "OK",
-          handler: function() {
+          handler: function () {
             $ui.pop()
           }
         }]
@@ -2997,12 +3025,12 @@ function checkBlackList() {
   let nowTime = new Date().getTime()
   let lastCheckTime = utils.getCache("lastCheckBlackTime")
   let needCheckBlackList = true
-  if(lastCheckTime !== undefined && utils.getCache("haveBanned") !== undefined) {
-    if((nowTime - lastCheckTime) / (60 * 1000) < 60) {
+  if (lastCheckTime !== undefined && utils.getCache("haveBanned") !== undefined) {
+    if ((nowTime - lastCheckTime) / (60 * 1000) < 60) {
       needCheckBlackList = false
     }
   }
-  if(needCheckBlackList) {
+  if (needCheckBlackList) {
     $cache.remove("haveBanned")
     $cache.set("lastCheckBlackTime", nowTime)
     let url = "https://avoscloud.com/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
@@ -3015,9 +3043,9 @@ function checkBlackList() {
         "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
         "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
       },
-      handler: function(resp) {
+      handler: function (resp) {
         let data = resp.data.results
-        if(data.length > 0) {
+        if (data.length > 0) {
           $cache.set("haveBanned", true)
           ui.showBannedAlert()
         } else {

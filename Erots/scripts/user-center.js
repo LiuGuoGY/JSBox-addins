@@ -191,7 +191,7 @@ function setupMyCommentsView() {
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
-        make.height.equalTo(150)
+        make.height.equalTo(170)
         make.left.right.inset(15)
       },
       views: [{
@@ -203,6 +203,30 @@ function setupMyCommentsView() {
         },
         layout: function(make, view) {
           make.top.inset(10)
+          make.height.equalTo(20)
+          make.left.inset(15)
+        },
+      },{
+        type: "label",
+        props: {
+          id: "comments_app",
+          textColor: utils.themeColor.appHintColor,
+          font: $font("PingFangSC-Regular", 14),
+        },
+        layout: function(make, view) {
+          make.top.inset(10)
+          make.height.equalTo(20)
+          make.right.inset(15)
+        },
+      },{
+        type: "label",
+        props: {
+          id: "comments_time",
+          textColor: utils.themeColor.appHintColor,
+          font: $font("PingFangSC-Regular", 14),
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(5)
           make.height.equalTo(20)
           make.left.right.inset(15)
         },
@@ -217,7 +241,7 @@ function setupMyCommentsView() {
           lines: 0,
         },
         layout: function(make, view) {
-          make.top.equalTo(view.prev.bottom).inset(10)
+          make.top.equalTo(view.prev.bottom).inset(5)
           make.left.right.inset(15)
         },
       }]
@@ -225,24 +249,49 @@ function setupMyCommentsView() {
   }
   let cloudApps = utils.getCache("cloudApps", [])
   let comments = []
+  let sortedComments = []
   for(let i = 0; i < cloudApps.length; i++) {
     if(cloudApps[i].authorId === user.getLoginUser().objectId && cloudApps[i].comment.length > 0) {
-      let subComents = []
       for(let j = 0; j < cloudApps[i].comment.length; j++) {
-        subComents.push({
-          comments_name: {
-            text: cloudApps[i].comment[j].name,
-          },
-          comments_text: {
-            text: cloudApps[i].comment[j].comment,
-          }
+        comments.push({
+          name: cloudApps[i].comment[j].name,
+          app: cloudApps[i].appName,
+          time: cloudApps[i].comment[j].time,
+          text: cloudApps[i].comment[j].comment,
         })
       }
-      comments.push({
-        title: cloudApps[i].appName,
-        rows: subComents,
-      })
     }
+  }
+  comments.sort(function(a, b) {
+    let aN = parseInt(a.time);
+    let bN = parseInt(b.time);
+    if(!aN && !bN) {
+      return 0;
+    } else if(aN && !bN) {
+      return -1;
+    } else if(!aN && bN) {
+      return 1;
+    } else if(aN < bN) {
+      return 1;
+    } else {
+      return -1;
+    }
+  })
+  for(let i = 0; i < comments.length; i++) {
+    sortedComments.push({
+      comments_name: {
+        text: comments[i].name,
+      },
+      comments_app: {
+        text: comments[i].app,
+      },
+      comments_time: {
+        text: utils.getUpdateDateString(comments[i].time),
+      },
+      comments_text: {
+        text: comments[i].text,
+      }
+    });
   }
   $ui.push({
     props: {
@@ -265,9 +314,22 @@ function setupMyCommentsView() {
           template: template,
           indicatorInsets: $insets(45, 0, 50, 0),
           separatorColor: utils.themeColor.separatorColor,
-          data: comments,
-          rowHeight: 180,
+          separatorHidden: true,
+          data: sortedComments,
+          rowHeight: 190,
           selectable: false,
+          header: {
+            type: "view",
+            props: {
+                height: 20,
+            },
+          },
+          footer: {
+            type: "view",
+            props: {
+                height: 20,
+            },
+          },
         },
         layout: function(make, view) {
           make.top.inset(0)
