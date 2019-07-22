@@ -1080,6 +1080,8 @@ function genCommentView(app) {
         events: {
           tapped: async function(sender) {
             if($("commentText").text.length >= 5) {
+              sender.userInteractionEnabled = false
+              sender.titleColor = utils.themeColor.appCateTextColor
               let userInfo = user.getLoginUser()
               let json = {
                 userId: userInfo.objectId,

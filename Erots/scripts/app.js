@@ -609,7 +609,7 @@ function genCloudAppListView() {
       indicatorInsets: $insets(45, 0, 50, 0),
       separatorColor: utils.themeColor.separatorColor,
       separatorInset: $insets(0, 85, 0, 15),
-      separatorHidden: true,
+      separatorHidden: ($app.info.build >= 497)?false:true,
       header: {
         type: "view",
         props: {
@@ -2866,10 +2866,11 @@ function showNewCommentNumber(apps) {
     }
   }
   let oldCommentNum = utils.getCache("commentNum", 0);
+  $console.info("comment:" + oldCommentNum + "->" + commentNum);
   if (commentNum > oldCommentNum) {
-    $cache.set("commentNum", commentNum);
     ui.showToastView($("mainView"), utils.mColor.blue, "你有 " + (commentNum - oldCommentNum) + " 个新评论哦");
   }
+  $cache.set("commentNum", commentNum);
 }
 
 function getCloudAppDisplaySource() {
