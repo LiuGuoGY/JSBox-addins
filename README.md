@@ -7,6 +7,25 @@
 
 更多介绍请移步：[**Linger 博客**](https://www.liuguogy.com)
 
+### Erots - 脚本商店 Erots
+
+#### 功能
+
+- 用户可以获取和更新脚本应用
+- 开发者可以发布和发布更新应用
+- 具有评论功能、评论统计和下载量统计等功能
+- 为公众号用户定制的暗色主题和主题颜色
+
+#### 预览
+
+![预览图1](https://i.loli.net/2019/06/07/5cfa4cde8d9c995232.jpg)
+
+![预览图2](https://i.loli.net/2019/07/17/5d2ec1e74fb4541770.jpg)
+
+#### 安装与更新
+
+[Erots.box](https://xteko.com/redir?name=Erots&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fraw%2Fmaster%2FErots%2F.output%2FErots.box)
+
 ### mini-weather - 天气小插件 Mini Weather
 
 #### 功能
