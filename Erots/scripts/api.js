@@ -163,6 +163,24 @@ async function uploadDownloadTimes(objectId) {
   return resp.data
 }
 
+async function uploadPraise(objectId, praiseUrl) {
+  let resp = await $http.request({
+    method: "PUT",
+    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+    body: {
+      praise: praiseUrl,
+    },
+  })
+  $console.info(resp);
+  return resp.data
+}
+
 module.exports = {
   uploadSM: uploadSM,
   uploadApp: uploadApp,
@@ -171,5 +189,6 @@ module.exports = {
   uploadComment: uploadComment,
   uploadDownloadTimes: uploadDownloadTimes,
   shimo_newUploadFile: shimo_newUploadFile,
+  uploadPraise: uploadPraise,
 }
 

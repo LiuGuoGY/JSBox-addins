@@ -611,7 +611,7 @@ function setupLoginView() {
         props: {
           id: "loginButton",
           title: "登录 >",
-          bgcolor: $color(utils.mColor.blue),
+          bgcolor: $color(utils.mColor.lightBlue),
           titleColor: $color("white"),
           radius: 3,
         },

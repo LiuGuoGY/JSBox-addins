@@ -114,7 +114,9 @@ function genMainView() {
       events: {
         ready(sender) {
           $delay(0.1, () => {
-            topOffset = $("cloudAppsList").contentOffset.y
+            if($("cloudAppsList")) {
+              topOffset = $("cloudAppsList").contentOffset.y
+            }
           })
         },
       },
@@ -2843,7 +2845,9 @@ function requireApps() {
       }
       $cache.set("cloudApps", apps);
       refreshAllView();
-      showNewCommentNumber(apps)
+      if(user.haveLogined()) {
+        showNewCommentNumber(apps)
+      }
       let query = $context.query
       if (query) {
         switch (query.q) {
@@ -2866,7 +2870,6 @@ function showNewCommentNumber(apps) {
     }
   }
   let oldCommentNum = utils.getCache("commentNum", 0);
-  $console.info("comment:" + oldCommentNum + "->" + commentNum);
   if (commentNum > oldCommentNum) {
     ui.showToastView($("mainView"), utils.mColor.blue, "你有 " + (commentNum - oldCommentNum) + " 个新评论哦");
   }

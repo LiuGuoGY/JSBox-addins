@@ -220,110 +220,230 @@ function genAppItemShowView() {
         layout: function(make, view) {
           make.left.right.inset(20)
           make.top.inset(10)
-          make.height.equalTo(80)
+          make.height.equalTo(120)
           make.centerX.equalTo(view.super)
         },
-        views: [ui.genAppShowView(app.appIcon, app.appName, (app.subtitle != "")?app.subtitle:app.appCate, buttonText, function(buttonView) {
-          if(!app.needUpdate && app.haveInstalled) {
-            $addin.run(app.appName)
-          } else {
-            buttonView.title = ""
-            buttonView.updateLayout(function(make, view) {
-              make.size.equalTo($size(30, 30))
-            })
-            $ui.animate({
-              duration: 0.2,
-              animation: function() {
-                buttonView.relayout()
+        views: [{
+          type: "view",
+          props: {
+            borderColor: utils.themeColor.iconBorderColor,
+            borderWidth: 1.2,
+            smoothRadius: 17,
+          },
+          layout: function(make, view) {
+            make.left.inset(0)
+            make.size.equalTo($size(90, 90))
+            make.centerY.equalTo(view.super)
+          },
+          views: [ui.genIconView(app.appIcon)]
+        },{
+          type: "view",
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.right).inset(15)
+            make.bottom.equalTo(view.prev.bottom)
+            make.right.inset(0)
+            make.height.equalTo(30)
+          },
+          views: [{
+            type: "view",
+            layout: function(make, view) {
+              make.left.inset(0)
+              make.centerY.equalTo(view.super)
+              make.size.equalTo($size(75, 30))
+            },
+            views: [{
+              type: "button",
+              props: {
+                title: buttonText,
+                bgcolor: utils.themeColor.appButtonBgColor,
+                titleColor: utils.getCache("themeColor"),
+                font: $font("bold", 15),
+                radius: 15,
+                align: $align.center,
               },
-              completion: function() {
-                $ui.animate({
-                  duration: 0.1,
-                  animation: function() {
-                    buttonView.bgcolor = $color("clear")
-                  },
-                })
-                buttonView.add({
-                  type: "canvas",
-                  layout: (make, view) => {
-                    make.center.equalTo(view.super)
-                    make.size.equalTo($size(30, 30))
-                  },
-                  events: {
-                    draw: (view, ctx) => {
-                      ctx.strokeColor = utils.themeColor.appButtonBgColor,
-                      ctx.setLineWidth(2.5)
-                      ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
-                      ctx.strokePath()
-                    }
-                  },
-                })
-                let radius = 0;
-                let timer = $timer.schedule({
-                  interval: 0.01,
-                  handler: function() {
-                    if(buttonView.get("canvas")) {
-                      buttonView.get("canvas").rotate(radius)
-                      radius = radius + Math.PI / 180 * 6
-                    } else {
-                      timer.invalidate()
-                    }
-                  }
-                });
-                $http.download({
-                  url: app.file,
-                  showsProgress: false,
-                  handler: function(resp) {
-                    let json = utils.getSearchJson(app.appIcon)
-                    let icon_code = (json.code)?json.code:"124";
-                    utils.saveAddin(app.appName, "icon_" + icon_code + ".png", resp.data);
-                    if(app.needUpdate && app.haveInstalled) {
-                      utils.addUpdateApps(app.objectId);
-                    }
-                    let cloudApps = utils.getCache("cloudApps", [])
-                    for(let j = 0; j < cloudApps.length; j++) {
-                      if(cloudApps[j].objectId == app.objectId) {
-                        cloudApps[j].haveInstalled = true
-                        cloudApps[j].needUpdate = false
-                      }
-                    }
-                    $cache.set("cloudApps", cloudApps);
+              layout: function(make, view) {
+                make.center.equalTo(view.super)
+                make.size.equalTo($size(75, 30))
+              },
+              events: {
+                tapped: function(sender) {
+                  if(!app.needUpdate && app.haveInstalled) {
+                    $addin.run(app.appName)
+                  } else {
+                    sender.title = ""
+                    sender.updateLayout(function(make, view) {
+                      make.size.equalTo($size(30, 30))
+                    })
                     $ui.animate({
-                      duration: 0.1,
+                      duration: 0.2,
                       animation: function() {
-                        buttonView.bgcolor = utils.themeColor.appButtonBgColor
+                        sender.relayout()
                       },
                       completion: function() {
-                        buttonView.get("canvas").remove()
-                        buttonView.updateLayout(function(make, view) {
-                          make.size.equalTo($size(75, 30))
-                        })
                         $ui.animate({
-                          duration: 0.2,
+                          duration: 0.1,
                           animation: function() {
-                            buttonView.relayout()
+                            sender.bgcolor = $color("clear")
                           },
-                          completion: function() {
-                            buttonView.title = "打开"
-                            api.uploadDownloadTimes(app.objectId)
-                            $app.notify({
-                              name: "refreshAll",
-                              object: {"a": "b"}
-                            });
-                            app.needUpdate = false
-                            app.haveInstalled = true
-                            $device.taptic(2);
-                            $delay(0.2, ()=>{$device.taptic(2);})
+                        })
+                        sender.add({
+                          type: "canvas",
+                          layout: (make, view) => {
+                            make.center.equalTo(view.super)
+                            make.size.equalTo($size(30, 30))
+                          },
+                          events: {
+                            draw: (view, ctx) => {
+                              ctx.strokeColor = utils.themeColor.appButtonBgColor,
+                              ctx.setLineWidth(2.5)
+                              ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
+                              ctx.strokePath()
+                            }
+                          },
+                        })
+                        let radius = 0;
+                        let timer = $timer.schedule({
+                          interval: 0.01,
+                          handler: function() {
+                            if(sender.get("canvas")) {
+                              sender.get("canvas").rotate(radius)
+                              radius = radius + Math.PI / 180 * 6
+                            } else {
+                              timer.invalidate()
+                            }
+                          }
+                        });
+                        $http.download({
+                          url: app.file,
+                          showsProgress: false,
+                          handler: function(resp) {
+                            let json = utils.getSearchJson(app.appIcon)
+                            let icon_code = (json.code)?json.code:"124";
+                            utils.saveAddin(app.appName, "icon_" + icon_code + ".png", resp.data);
+                            if(app.needUpdate && app.haveInstalled) {
+                              utils.addUpdateApps(app.objectId);
+                            }
+                            let cloudApps = utils.getCache("cloudApps", [])
+                            for(let j = 0; j < cloudApps.length; j++) {
+                              if(cloudApps[j].objectId == app.objectId) {
+                                cloudApps[j].haveInstalled = true
+                                cloudApps[j].needUpdate = false
+                              }
+                            }
+                            $cache.set("cloudApps", cloudApps);
+                            $ui.animate({
+                              duration: 0.1,
+                              animation: function() {
+                                sender.bgcolor = utils.themeColor.appButtonBgColor
+                              },
+                              completion: function() {
+                                sender.get("canvas").remove()
+                                sender.updateLayout(function(make, view) {
+                                  make.size.equalTo($size(75, 30))
+                                })
+                                $ui.animate({
+                                  duration: 0.2,
+                                  animation: function() {
+                                    sender.relayout()
+                                  },
+                                  completion: function() {
+                                    sender.title = "打开"
+                                    api.uploadDownloadTimes(app.objectId)
+                                    $app.notify({
+                                      name: "refreshAll",
+                                      object: {"a": "b"}
+                                    });
+                                    app.needUpdate = false
+                                    app.haveInstalled = true
+                                    $device.taptic(2);
+                                    $delay(0.2, ()=>{$device.taptic(2);})
+                                  }
+                                })
+                              }
+                            })
                           }
                         })
                       }
                     })
                   }
-                })
+                }
+              },
+            }]
+          },{
+            type: "button",
+            props: {
+              title: "",//"⋯",
+              bgcolor: utils.themeColor.appButtonBgColor,
+              titleColor: utils.getCache("themeColor"),
+              font: $font("bold", 20),
+              circular: true,
+              align: $align.center,
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.right.inset(0)
+              make.size.equalTo($size(30, 30))
+            },
+            events: {
+              tapped: function(sender) {
+                $ui.menu({
+                  items: ["分享"],
+                  handler: function(title, idx) {
+                    switch(idx) {
+                      case 0: $share.sheet([app.appName,"https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);break;
+                    }
+                  }
+                });
               }
-            })
+            },
+            views: [{
+              type: "canvas",
+              props: {
+                userInteractionEnabled: false,
+              },
+              layout: $layout.fill,
+              events: {
+                draw: function(view, ctx) {
+                  ctx.fillColor = utils.getCache("themeColor")
+                  ctx.strokeColor = utils.getCache("themeColor")
+                  ctx.setLineWidth(2)
+                  ctx.addArc(view.frame.width / 2, view.frame.height / 2, 1, 0, 2* Math.PI, true)
+                  ctx.strokePath()
+                  ctx.addArc(view.frame.width / 2 - 6, view.frame.height / 2, 1, 0, 2* Math.PI, true)
+                  ctx.strokePath()
+                  ctx.addArc(view.frame.width / 2 + 6, view.frame.height / 2, 1, 0, 2* Math.PI, true)
+                  ctx.strokePath()
+                }
+              }
+            }]
+          }]
+        },{
+          type: "label",
+          props: {
+            text: app.appName,
+            font: $font("PingFangSC-Medium", 20),
+            textColor: utils.themeColor.listHeaderTextColor,
+            align: $align.left,
+          },
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.left).inset(0)
+            make.right.inset(0)
+            make.top.equalTo(view.prev.prev.top)
           }
-        })]
+        },{
+          type: "label",
+          props: {
+            text: (app.subtitle != "")?app.subtitle:app.appCate,
+            font: $font(13),
+            textColor: utils.themeColor.appCateTextColor,
+            align: $align.left,
+          },
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.left)
+            make.right.equalTo(view.prev)
+            make.top.equalTo(view.prev.bottom).inset(3)
+          }
+        },]
       },{
         type: "view",
         layout: function(make, view) {
@@ -906,16 +1026,24 @@ function genAppItemShowView() {
         }]
       },{
         type: "view",
+        props: {
+          hidden: !app.praise,
+          clipsToBounds: true,
+        },
         layout: function(make, view) {
-          make.top.equalTo(view.prev.bottom)
-          make.height.equalTo(110)
+          make.top.equalTo(view.prev.bottom).inset(10)
+          if(app.praise) {
+            make.height.equalTo(110)
+          } else {
+            make.height.equalTo(0)
+          }
           make.left.right.inset(0)
         },
         views: [{
           type: "button",
           props: {
-            title: " 分享",
-            icon: $icon("022", utils.getCache("themeColor"), $size(20, 20)),
+            title: " 赞赏作者",
+            icon: $icon("103", utils.getCache("themeColor"), $size(20, 20)),
             bgcolor: utils.themeColor.appButtonBgColor,
             titleColor: utils.getCache("themeColor"),
             font: $font("bold", 16.5),
@@ -924,11 +1052,26 @@ function genAppItemShowView() {
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
-            make.size.equalTo($size(120, 50))
+            make.size.equalTo($size(150, 50))
           },
           events: {
             tapped: function(sender) {
-              $share.sheet([app.appName,"https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);
+              $ui.alert({
+                title: "提示",
+                message: "开发者 " + app.author + " 为了给你更好的体验，为该应用更新了 " + app.versionHistory.length + " 个版本，你的赞赏会给开发者更多的动力。\n\n即将跳转赞赏开发者，确定跳转？",
+                actions: [{
+                  title: "确定",
+                  handler: function() {
+                    if(app.praise) {
+                      $app.openURL(app.praise);
+                    }
+                  }
+                },{
+                  title: "取消",
+                  handler: function() {
+                  }
+                }]
+              });
             }
           },
         }]

@@ -313,7 +313,7 @@ function createRight(color, lineWidth) {
   return view
 }
 
-function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
+function genIconView(icon) {
   let iconView = {}
   if(icon.startsWith("erots")) {
     let json = utils.getSearchJson(icon)
@@ -328,23 +328,19 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
         type: "view",
         props: {
           bgcolor: (json.mode == "1")?bgcolor:$color("white"),
-          radius: 12,
-          borderColor: utils.themeColor.iconBorderColor,
-          borderWidth: 0.8,
         },
         layout: function(make, view) {
-          make.size.equalTo($size(60, 60))
-          make.left.inset(0)
-          make.centerY.equalTo(view.super)
+          make.size.equalTo(view.super)
+          make.center.equalTo(view.super)
         },
         views: [{
           type: "image",
           props: {
-            icon: $icon(json.code, fontcolor, $size(35, 35)),
+            icon: $icon(json.code, fontcolor, $size(90, 90)),
             bgcolor: bgcolor,
           },
           layout: function(make, view) {
-            make.size.equalTo($size(35, 35))
+            make.size.equalTo(view.super).multipliedBy(7/12)
             make.center.equalTo(view.super)
           },
         }]
@@ -356,14 +352,10 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
         type: "view",
         props: {
           bgcolor: (json.mode == "3")?fontcolor:bgcolor,
-          radius: 12,
-          borderColor: utils.themeColor.iconBorderColor,
-          borderWidth: 0.8,
         },
         layout: function(make, view) {
-          make.size.equalTo($size(60, 60))
-          make.left.inset(0)
-          make.centerY.equalTo(view.super)
+          make.size.equalTo(view.super)
+          make.center.equalTo(view.super)
         },
         views: [{
           type: "view",
@@ -372,17 +364,17 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
             circular: true,
           },
           layout: function(make, view) {
-            make.size.equalTo($size(50, 50))
+            make.size.equalTo(view.super).multipliedBy(5/6)
             make.center.equalTo(view.super)
           },
           views: [{
             type: "image",
             props: {
-              icon: $icon(json.code, (json.mode == "3")?fontcolor:bgcolor, $size(30, 30)),
+              icon: $icon(json.code, (json.mode == "3")?fontcolor:bgcolor, $size(90, 90)),
               bgcolor: (json.mode == "3")?bgcolor:fontcolor,
             },
             layout: function(make, view) {
-              make.size.equalTo($size(30, 30))
+              make.size.equalTo(view.super).multipliedBy(3/5)
               make.center.equalTo(view.super)
             },
           }]
@@ -395,18 +387,17 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
       props: {
         src: icon,
         bgcolor: $color("white"),
-        radius: 12,
-        borderColor: utils.themeColor.iconBorderColor,
-        borderWidth: 0.8,
       },
       layout: function(make, view) {
-        make.size.equalTo($size(60, 60))
-        make.left.inset(0)
-        make.centerY.equalTo(view.super)
+        make.size.equalTo(view.super)
+        make.center.equalTo(view.super)
       },
     }
   }
-  
+  return iconView
+}
+
+function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
   let view = {
     type: "view",
     layout: function(make, view) {
@@ -415,7 +406,20 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
       make.height.equalTo(70)
       make.center.equalTo(view.super)
     },
-    views: [iconView, {
+    views: [{
+      type: "view",
+      props: {
+        borderColor: utils.themeColor.iconBorderColor,
+        borderWidth: 0.8,
+        smoothRadius: 12,
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.super)
+        make.left.inset(0)
+        make.size.equalTo($size(60, 60))
+      },
+      views: [genIconView(icon)]
+    }, {
       type: "view",
       layout: function(make, view) {
         make.centerY.equalTo(view.super)
@@ -441,7 +445,6 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
             buttonFunction(sender)
           }
         },
-        views: []
       }]
     },{
       type: "label",
@@ -597,4 +600,5 @@ module.exports = {
   createRight: createRight,
   createBack: createBack,
   createEnter: createEnter,
+  genIconView: genIconView,
 }

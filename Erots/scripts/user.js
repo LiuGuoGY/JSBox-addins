@@ -177,6 +177,41 @@ function requestEmailVerify(json, handler) {
   })
 }
 
+async function setPraise(praiseUrl) {
+  let resp = await $http.request({
+    method: "PUT",
+    url: "https://avoscloud.com/1.1/users/" + getLoginUser().objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+      "X-LC-Session": getLoginUser().sessionToken,
+    },
+    body: {
+      praise: praiseUrl,
+    },
+  })
+  $console.info(resp);
+  return resp.data
+}
+
+async function requireUser() {
+  let resp = await $http.request({
+    method: "GET",
+    url: "https://avoscloud.com/1.1/users/" + getLoginUser().objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+  })
+  $console.info(resp);
+  saveUser(resp.data)
+  return resp.data
+}
+
 function saveUser(data) {
   $cache.set("loginUser", data)
 }
@@ -207,4 +242,6 @@ module.exports = {
   haveLogined: haveLogined,
   requestEmailVerify: requestEmailVerify,
   logout: logout,
+  setPraise: setPraise,
+  requireUser: requireUser,
 }
