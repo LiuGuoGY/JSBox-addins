@@ -26,8 +26,6 @@ function show() {
   }
 }
 
-// api.shimo_newUploadFile()
-
 function main() {
   setupMainView()
   requireApps()

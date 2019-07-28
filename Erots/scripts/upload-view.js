@@ -1267,7 +1267,7 @@ function setupUploadView(updateApp) {
             
             //上传脚本文件
             let file = $file.read(myApp.file);
-            let fileUrl = await api.shimo_uploadFile(file);
+            let fileUrl = await api.catbox_uploadFile(file);
             if(fileUrl) {
               if($("myProgress")) {
                 $("myProgress").locations = [0.0, 0.3, 0.3]
@@ -1354,6 +1354,9 @@ function setupUploadView(updateApp) {
             let author = user.getLoginUser()
             myApp.author = author.nickname
             myApp.authorId = author.objectId
+            if(author.praise) {
+              myApp.praise = author.praise
+            }
 
             let time = new Date().getTime()
             //加入更多信息
