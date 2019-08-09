@@ -8,7 +8,9 @@ let objectId = ""
 
 $app.listen({
   refreshAll: function (object) {
-    refreshAppItemView()
+    if(object.appItem) {
+      refreshAppItemView()
+    }
   },
 });
 
@@ -351,7 +353,7 @@ function genAppItemShowView() {
                                     api.uploadDownloadTimes(app.objectId)
                                     $app.notify({
                                       name: "refreshAll",
-                                      object: {"a": "b"}
+                                      object: {appItem: false}
                                     });
                                     app.needUpdate = false
                                     app.haveInstalled = true
@@ -387,7 +389,7 @@ function genAppItemShowView() {
             events: {
               tapped: function(sender) {
                 $ui.menu({
-                  items: ["分享"],
+                  items: ["分享链接"],
                   handler: function(title, idx) {
                     switch(idx) {
                       case 0: $share.sheet([app.appName,"https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);break;
@@ -1242,7 +1244,7 @@ function genCommentView(app) {
               $cache.set("cloudApps", cloudApps);
               $app.notify({
                 name: "refreshAll",
-                object: {"a": "b"}
+                object: {appItem: true}
               });
               ui.showToastView($("addCommentView"), utils.mColor.green, "发送成功")
               $delay(1, ()=>{
