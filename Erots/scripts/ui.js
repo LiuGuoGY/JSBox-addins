@@ -523,7 +523,7 @@ function genAppPreviewPhotosView(photos, tappedHandler, longPressedHandler) {
   return photosView
 }
 
-function addProgressView(superView) {
+function addProgressView(superView, text) {
   superView.add({
     type: "blur",
     props: {
@@ -560,7 +560,7 @@ function addProgressView(superView) {
       type: "label",
       props: {
         id: "myProgressText",
-        text: "开始上传",
+        text: text,
         textColor: utils.themeColor.appObviousColor,
         font: $font("bold", 15),
         align: $align.center

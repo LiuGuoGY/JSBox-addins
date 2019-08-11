@@ -1207,7 +1207,7 @@ function setupUploadView(updateApp) {
             }
 
             if($("uploadItemView")) {
-              ui.addProgressView($("uploadItemView"))
+              ui.addProgressView($("uploadItemView"), "开始上传")
             }
             let objectJson = {}
             if(myApp.objectId) {

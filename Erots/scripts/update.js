@@ -88,7 +88,7 @@ function updateScript() {
   const scriptName = $addin.current.name;
   let ui = require('scripts/ui')
   if($("mainView")) {
-    ui.addProgressView($("mainView"))
+    ui.addProgressView($("mainView"), "开始更新...")
   }
   $http.download({
     url: url,
