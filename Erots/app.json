@@ -1,5 +1,6 @@
 {
-  "version": "1.7.2",
-  "date": "190809",
-  "build": "29"
+  "version": "1.7.3",
+  "date": "190811",
+  "build": "30",
+  "force": true
 }

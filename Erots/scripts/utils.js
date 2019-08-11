@@ -17,6 +17,7 @@ const mColor = {
 const appCates = ["工具", "效率", "开发", "社交", "视频", "音乐", "游戏", "学习"]
 const appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
 const appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
+const domain = "https://avoscloud.com/1.1"
 
 const tColor = {
   light: {
@@ -288,6 +289,7 @@ module.exports = {
   randomValue: randomValue,
   mColor: mColor,
   colors: colors,
+  domain: domain,
   myOpenUrl: myOpenUrl,
   appCates: appCates,
   getSearchJson: getSearchJson,

@@ -68,8 +68,7 @@ function setThemeColor() {
   {
     blue: $icon("109", utils.getCache("themeColor"), $size(25, 25)),
     gray: $icon("109", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-  },
-  ]
+  }]
 }
 
 function setupMainView() {
@@ -1059,6 +1058,7 @@ function genAppListView(apps) {
           if (!apps[i].needUpdate && apps[i].haveInstalled) {
             $addin.run(apps[i].appName)
           } else {
+            buttonView.userInteractionEnabled = false
             buttonView.title = ""
             buttonView.updateLayout(function (make, view) {
               make.size.equalTo($size(30, 30))
@@ -1137,6 +1137,7 @@ function genAppListView(apps) {
                           },
                           completion: function () {
                             buttonView.title = "打开"
+                            buttonView.userInteractionEnabled = true
                             api.uploadDownloadTimes(apps[i].objectId)
                             $device.taptic(2);
                             $delay(0.2, () => {
@@ -1519,7 +1520,7 @@ function wantToRealse() {
           let author = user.getLoginUser()
           let myApps = []
           for (let i = 0; i < apps.length; i++) {
-            if (apps[i].authorAccount == author.objectId || apps[i].authorAccount == author.username || apps[i].authorId == author.objectId) {
+            if (apps[i].authorId == author.objectId) {
               myApps.push(apps[i])
             }
           }
@@ -2195,7 +2196,7 @@ function genWxWelcomView() {
     if ($("toastIcon")) {
       $("toastIcon").icon = $icon("162", $color("gray"), $size(20, 20))
     }
-    let url = "https://avoscloud.com/1.1/classes/fansList?where={\"nickname\":\"" + nickname + "\"}"
+    let url = utils.domain + "/classes/fansList?where={\"nickname\":\"" + nickname + "\"}"
     $http.request({
       method: "GET",
       url: encodeURI(url),
@@ -2262,7 +2263,7 @@ function genWxWelcomView() {
   function regisiter(objectId) {
     $http.request({
       method: "PUT",
-      url: "https://avoscloud.com/1.1/classes/fansList/" + objectId,
+      url: utils.domain + "/classes/fansList/" + objectId,
       timeout: 5,
       header: {
         "Content-Type": "application/json",
@@ -2818,7 +2819,7 @@ function setupFeedBack(text) {
 function requireApps() {
   $http.request({
     method: "GET",
-    url: "https://avoscloud.com/1.1/classes/App?limit=1000&order=-updateTime,-updatedAt",
+    url: utils.domain + "/classes/App?limit=1000&order=-updateTime,-updatedAt",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2898,7 +2899,7 @@ function getCloudAppDisplaySource() {
 function requireReward() {
   $http.request({
     method: "GET",
-    url: "https://avoscloud.com/1.1/classes/Reward",
+    url: utils.domain + "/classes/Reward",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2929,7 +2930,7 @@ function requireReward() {
 function requireInstallNumbers() {
   $http.request({
     method: "GET",
-    url: "https://avoscloud.com/1.1/installations?count=1&limit=0",
+    url: utils.domain + "/installations?count=1&limit=0",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -2970,7 +2971,7 @@ function uploadInstall() {
     $cache.set("installInfo", info)
     $http.request({
       method: "POST",
-      url: "https://avoscloud.com/1.1/installations",
+      url: utils.domain + "/installations",
       timeout: 5,
       header: {
         "Content-Type": "application/json",
@@ -2992,7 +2993,7 @@ function uploadInstall() {
 function sendFeedBack(text, contact) {
   $http.request({
     method: "POST",
-    url: "https://avoscloud.com/1.1/feedback",
+    url: utils.domain + "/feedback",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -3035,7 +3036,7 @@ function checkBlackList() {
   if (needCheckBlackList) {
     $cache.remove("haveBanned")
     $cache.set("lastCheckBlackTime", nowTime)
-    let url = "https://avoscloud.com/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+    let url = utils.domain + "/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
     $http.request({
       method: "GET",
       url: encodeURI(url),

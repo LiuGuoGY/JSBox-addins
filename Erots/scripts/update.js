@@ -22,31 +22,6 @@ function getCurDate() {
   return date;
 }
 
-function getLatestVersion() {
-  $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/app.json",
-    showsProgress: false,
-    timeout: 5,
-    handler: function(resp) {
-      if(resp.data) {
-        let updateVersion = JSON.parse(resp.data.string).version
-        if(needUpdate(updateVersion, getCurVersion())) {
-          $http.download({
-            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/launch-center-new/updateDetail.md",
-            showsProgress: false,
-            timeout: 5,
-            handler: function(resp) {
-              if(resp.data) {
-                sureToUpdate(updateVersion, resp.data.string)
-              }
-            }
-          })
-        }
-      }
-    }
-  })
-}
-
 function getLatestBuild(now) {
   $http.download({
     url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/app.json",
@@ -57,6 +32,7 @@ function getLatestBuild(now) {
         let appJson = JSON.parse(resp.data.string)
         let updateBuild = appJson.build
         let updateVersion = appJson.version
+        let force = appJson.force
         if(parseInt(updateBuild) > parseInt(getCurBuild())) {
           $http.download({
             url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/updateDetail.md",
@@ -64,7 +40,7 @@ function getLatestBuild(now) {
             timeout: 5,
             handler: function(resp) {
               if(resp.data) {
-                sureToUpdate(updateVersion, resp.data.string)
+                sureToUpdate(updateVersion, resp.data.string, force)
               }
             }
           })
@@ -79,23 +55,30 @@ function getLatestBuild(now) {
 }
 
 //确定升级？
-function sureToUpdate(version, des) {
+function sureToUpdate(version, des, force) {
+  let actions = (force)?[{
+    title: "立即更新",
+    handler: function() {
+      $ui.popToRoot();
+      updateScript()
+    }
+  }]:[{
+    title: "否",
+    handler: function() {
+      
+    }
+  },
+  {
+    title: "是",
+    handler: function() {
+      $ui.popToRoot();
+      updateScript()
+    }
+  }]
   $ui.alert({
     title: "发现新版本 V" + version,
     message: "\n" + des + "\n\n是否更新？",
-    actions: [{
-        title: "否",
-        handler: function() {
-          
-        }
-      },
-      {
-        title: "是",
-        handler: function() {
-          updateScript()
-        }
-      },
-    ]
+    actions: actions
   })
 }
 
@@ -103,10 +86,20 @@ function updateScript() {
   let url =
     "https://github.com/LiuGuoGY/JSBox-addins/raw/master/Erots/.output/Erots.box?raw=true";
   const scriptName = $addin.current.name;
+  let ui = require('scripts/ui')
+  if($("mainView")) {
+    ui.addProgressView($("mainView"))
+  }
   $http.download({
     url: url,
     showsProgress: false,
     timeout: 5,
+    progress: function(bytesWritten, totalBytes) {
+      var percentage = bytesWritten * 1.0 / totalBytes
+      if($("myProgress")) {
+        $("myProgress").locations = [0.0, percentage, percentage]
+      }
+    },
     handler: function(resp) {
       let box = resp.data
       $addin.save({
@@ -119,14 +112,11 @@ function updateScript() {
             $delay(0.2, function() {
               $device.taptic(2)
             })
-            $ui.alert({
-              title: "安装完成",
-              actions: [{
-                title: "OK",
-                handler: function() {
-                  $app.openExtension($addin.current.name)
-                }
-              }]
+            if($("myProgressText")) {
+              $("myProgressText").text = "更新完成"
+            }
+            $delay(1, ()=>{
+              $addin.restart()
             })
           }
         }

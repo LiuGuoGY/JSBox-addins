@@ -272,6 +272,7 @@ function genAppItemShowView() {
                   if(!app.needUpdate && app.haveInstalled) {
                     $addin.run(app.appName)
                   } else {
+                    sender.userInteractionEnabled = false
                     sender.title = ""
                     sender.updateLayout(function(make, view) {
                       make.size.equalTo($size(30, 30))
@@ -357,6 +358,7 @@ function genAppItemShowView() {
                                     });
                                     app.needUpdate = false
                                     app.haveInstalled = true
+                                    sender.userInteractionEnabled = false
                                     $device.taptic(2);
                                     $delay(0.2, ()=>{$device.taptic(2);})
                                   }

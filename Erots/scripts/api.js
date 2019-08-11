@@ -18,7 +18,7 @@ async function uploadSM(data, fileName) {
 async function uploadApp(json) {
   let resp = await $http.request({
     method: "POST",
-    url: "https://avoscloud.com/1.1/classes/App",
+    url: utils.domain + "/classes/App",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -34,7 +34,7 @@ async function uploadApp(json) {
 async function putApp(objectId, json) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
+    url: utils.domain + "/classes/App/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -82,7 +82,7 @@ async function shimo_uploadFile(file) {
 // function leanCloud_uploadFile(fileName, file) {
 //   let resp = await $http.request({
 //     method: "POST",
-//     url: "https://avoscloud.com/1.1/files/" + fileName,
+//     url: utils.domain + "/files/" + fileName,
 //     timeout: 5,
 //     header: {
 //       "Content-Type": "application/json",
@@ -116,7 +116,7 @@ async function catbox_uploadFile(file) {
 async function uploadComment(objectId, commentJson) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
+    url: utils.domain + "/classes/App/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -137,7 +137,7 @@ async function uploadComment(objectId, commentJson) {
 async function uploadDownloadTimes(objectId) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
+    url: utils.domain + "/classes/App/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -158,7 +158,7 @@ async function uploadDownloadTimes(objectId) {
 async function uploadPraise(objectId, praiseUrl) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://avoscloud.com/1.1/classes/App/" + objectId,
+    url: utils.domain + "/classes/App/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -167,6 +167,24 @@ async function uploadPraise(objectId, praiseUrl) {
     },
     body: {
       praise: praiseUrl,
+    },
+  })
+  $console.info(resp);
+  return resp.data
+}
+
+async function uploadOnStore(objectId, onStore) {
+  let resp = await $http.request({
+    method: "PUT",
+    url: utils.domain + "/classes/App/" + objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+    body: {
+      onStore: onStore,
     },
   })
   $console.info(resp);
@@ -182,5 +200,6 @@ module.exports = {
   uploadDownloadTimes: uploadDownloadTimes,
   uploadPraise: uploadPraise,
   catbox_uploadFile: catbox_uploadFile,
+  uploadOnStore: uploadOnStore,
 }
 

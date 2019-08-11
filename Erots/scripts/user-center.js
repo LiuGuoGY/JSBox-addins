@@ -99,6 +99,16 @@ function genUserCenterSubview() {
     canGo: {
       hidden: false,
     }
+  },{
+    userTitle: {
+      text: "管理我的应用"
+    },
+    userDetail: {
+      text: "",
+    },
+    canGo: {
+      hidden: false,
+    }
   },]
   let userView = {
     type: "view",
@@ -175,6 +185,7 @@ function genUserCenterSubview() {
           switch(indexPath.row + indexPath.section) {
             case 2: setupMyPraiseView();break;
             case 3: setupMyCommentsView();break;
+            case 4: setupManageMyAppsView();break;
             default:break;
           }
         }
@@ -626,6 +637,182 @@ function setupMyPraiseView() {
       }]
     }]
   });
+}
+
+function setupManageMyAppsView() {
+  let cloudApps = utils.getCache("cloudApps", [])
+  let author = user.getLoginUser()
+  let myApps = []
+  for(let i = 0; i < cloudApps.length; i++) {
+    if (cloudApps[i].authorId == author.objectId) {
+      myApps.push(cloudApps[i])
+    }
+  }
+  let appViewItems = []
+  for(let i = 0; i < myApps.length; i++) {
+    let buttonText = (myApps[i].onStore)?"上架中":"下架中";
+    appViewItems.push({
+      type: "view",
+      props: {
+        info: myApps[i].objectId,
+        bgcolor: $color("clear"),
+      },
+      layout: function (make, view) {
+        make.left.right.inset(0)
+        make.height.equalTo(80)
+        make.center.equalTo(view.super)
+      },
+      views: [{
+        type: "view",
+        layout: function (make, view) {
+          make.left.right.inset(15)
+          make.height.equalTo(80)
+          make.center.equalTo(view.super)
+        },
+        views: [ui.genAppShowView(myApps[i].appIcon, myApps[i].appName, (myApps[i].subtitle != "") ? myApps[i].subtitle : myApps[i].appCate, buttonText, function(buttonView) {
+          buttonView.userInteractionEnabled = false
+          buttonView.title = ""
+          buttonView.updateLayout(function (make, view) {
+            make.size.equalTo($size(30, 30))
+          })
+          $ui.animate({
+            duration: 0.2,
+            animation: function () {
+              buttonView.relayout()
+            },
+            completion: async function () {
+              $ui.animate({
+                duration: 0.1,
+                animation: function () {
+                  buttonView.bgcolor = $color("clear")
+                },
+              })
+              buttonView.add({
+                type: "canvas",
+                layout: (make, view) => {
+                  make.center.equalTo(view.super)
+                  make.size.equalTo($size(30, 30))
+                },
+                events: {
+                  draw: (view, ctx) => {
+                    ctx.strokeColor = utils.themeColor.appButtonBgColor
+                    ctx.setLineWidth(2.5)
+                    ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
+                    ctx.strokePath()
+                  }
+                },
+              })
+              let radius = 0;
+              let timer = $timer.schedule({
+                interval: 0.01,
+                handler: function () {
+                  if (buttonView.get("canvas")) {
+                    buttonView.get("canvas").rotate(radius)
+                    radius = radius + Math.PI / 180 * 6
+                  } else {
+                    timer.invalidate()
+                  }
+                }
+              });
+              let apps = utils.getCache("cloudApps", [])
+              for(let j = 0; j < cloudApps.length; j++) {
+                if (apps[j].objectId == myApps[i].objectId) {
+                  myApps[i].onStore = !myApps[i].onStore
+                  apps[j].onStore = myApps[i].onStore
+                  await api.uploadOnStore(apps[j].objectId, apps[j].onStore);
+                  break;
+                }
+              }
+              $cache.set("cloudApps", apps);
+              $ui.animate({
+                duration: 0.1,
+                animation: function () {
+                  buttonView.bgcolor = utils.themeColor.appButtonBgColor
+                },
+                completion: function () {
+                  buttonView.get("canvas").remove()
+                  buttonView.updateLayout(function (make, view) {
+                    make.size.equalTo($size(75, 30))
+                  })
+                  $ui.animate({
+                    duration: 0.2,
+                    animation: function () {
+                      buttonView.relayout()
+                    },
+                    completion: function () {
+                      $app.notify({
+                        name: "refreshAll",
+                        object: {}
+                      });
+                      buttonView.title = (myApps[i].onStore)?"上架中":"下架中"
+                      buttonView.userInteractionEnabled = true
+                      $device.taptic(2);
+                      $delay(0.2, () => {
+                        $device.taptic(2);
+                      })
+                    }
+                  })
+                }
+              })
+            }
+          })
+        })]
+      }]
+    })
+  }
+  $ui.push({
+    props: {
+      id: "manageMyAppsView",
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    events: {
+      appeared: function(sender) {
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      didAppear: function(sender) {
+        $app.autoKeyboardEnabled = true
+        $app.keyboardToolbarEnabled = true
+      },
+      disappeared: function() {
+        $app.autoKeyboardEnabled = false
+        $app.keyboardToolbarEnabled = false
+      }
+    },
+    views: [ui.genPageHeader("个人", "我的应用"), {
+      type: "list",
+      props: {
+        bgcolor: $color("clear"),
+        indicatorInsets: $insets(45, 0, 50, 0),
+        separatorColor: utils.themeColor.separatorColor,
+        separatorInset: $insets(0, 85, 0, 15),
+        separatorHidden: ($app.info.build >= 497)?false:true,
+        header: {
+          type: "view",
+          props: {
+            height: 10,
+          },
+          views: []
+        },
+        footer: {
+          type: "view",
+          props: {
+            height: 30,
+            bgcolor: $color("clear"),
+          }
+        },
+        rowHeight: 80,
+        data: appViewItems,
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.right.bottom.inset(0)
+        make.centerX.equalTo(view.super)
+      },
+    }]
+  })
 }
 
 module.exports = {

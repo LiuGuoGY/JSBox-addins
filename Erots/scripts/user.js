@@ -7,7 +7,7 @@ function logUp(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://avoscloud.com/1.1/users",
+    url: utils.domain + "/users",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -46,7 +46,7 @@ function login(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://avoscloud.com/1.1/login",
+    url: utils.domain + "/login",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -111,7 +111,7 @@ function passwordReset(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://avoscloud.com/1.1/requestPasswordReset",
+    url: utils.domain + "/requestPasswordReset",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -147,7 +147,7 @@ function requestEmailVerify(json, handler) {
   }
   $http.request({
     method: "POST",
-    url: "https://avoscloud.com/1.1/requestEmailVerify",
+    url: utils.domain + "/requestEmailVerify",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -180,7 +180,7 @@ function requestEmailVerify(json, handler) {
 async function setPraise(praiseUrl) {
   let resp = await $http.request({
     method: "PUT",
-    url: "https://avoscloud.com/1.1/users/" + getLoginUser().objectId,
+    url: utils.domain + "/users/" + getLoginUser().objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -199,7 +199,7 @@ async function setPraise(praiseUrl) {
 async function requireUser() {
   let resp = await $http.request({
     method: "GET",
-    url: "https://avoscloud.com/1.1/users/" + getLoginUser().objectId,
+    url: utils.domain + "/users/" + getLoginUser().objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
