@@ -358,7 +358,7 @@ function genAppItemShowView() {
                                     });
                                     app.needUpdate = false
                                     app.haveInstalled = true
-                                    sender.userInteractionEnabled = false
+                                    sender.userInteractionEnabled = true
                                     $device.taptic(2);
                                     $delay(0.2, ()=>{$device.taptic(2);})
                                   }

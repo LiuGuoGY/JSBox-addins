@@ -10,7 +10,6 @@ let api = require('scripts/api')
 
 let appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
 let appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
-let resumeAction = 0 // 1 验证 2 赞赏 3 跳转
 let topOffset = -20
 let searchText = ""
 
@@ -3029,7 +3028,7 @@ function checkBlackList() {
   let lastCheckTime = utils.getCache("lastCheckBlackTime")
   let needCheckBlackList = true
   if (lastCheckTime !== undefined && utils.getCache("haveBanned") !== undefined) {
-    if ((nowTime - lastCheckTime) / (60 * 1000) < 60) {
+    if ((nowTime - lastCheckTime) / (60 * 1000) < 10) {
       needCheckBlackList = false
     }
   }
