@@ -2202,8 +2202,8 @@ function genWxWelcomView() {
       timeout: 5,
       header: {
         "Content-Type": "application/json",
-        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
-        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+        "X-LC-Id": utils.conAppId,
+        "X-LC-Key": utils.conAppKey,
       },
       handler: function (resp) {
         let data = resp.data.results
@@ -2266,8 +2266,8 @@ function genWxWelcomView() {
       timeout: 5,
       header: {
         "Content-Type": "application/json",
-        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
-        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+        "X-LC-Id": utils.conAppId,
+        "X-LC-Key": utils.conAppKey,
       },
       body: {
         deviceId: {
@@ -2864,7 +2864,9 @@ function showNewCommentNumber(apps) {
   let commentNum = 0;
   for (let i = 0; i < apps.length; i++) {
     if (apps[i].authorId === user.getLoginUser().objectId) {
-      commentNum += apps[i].comment.length;
+      if(apps[i].comment) {
+        commentNum += apps[i].comment.length;
+      }
     }
   }
   let oldCommentNum = utils.getCache("commentNum", 0);
@@ -3042,8 +3044,8 @@ function checkBlackList() {
       timeout: 5,
       header: {
         "Content-Type": "application/json",
-        "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
-        "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+        "X-LC-Id": utils.conAppId,
+        "X-LC-Key": utils.conAppKey,
       },
       handler: function (resp) {
         let data = resp.data.results

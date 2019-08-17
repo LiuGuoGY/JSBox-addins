@@ -11,8 +11,8 @@ function detect() {
             timeout: 5,
             header: {
                 "Content-Type": "application/json",
-                "X-LC-Id": "Ah185wdqs1gPX3nYHbMnB7g4-gzGzoHsz",
-                "X-LC-Key": "HmbtutG47Fibi9vRwezIY2E7",
+                "X-LC-Id": utils.conAppId,
+                "X-LC-Key": utils.conAppKey,
             },
             handler: function(resp) {
                 if (!resp.data) {

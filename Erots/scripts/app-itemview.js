@@ -82,6 +82,22 @@ function genAppItemShowView() {
             make.left.equalTo(view.prev.right).inset(10)
           }
         },
+        events: {
+          longPressed: function(sender) {
+            let userInfo = user.getLoginUser()
+            if(user.haveLogined() && userInfo.objectId == app.authorId) {
+              $device.taptic(0);
+              $ui.menu({
+                items: ["回复评论"],
+                handler: function(title, idx) {
+                  switch(idx) {
+                    // case 0: genCommentReplyView(app, i);break;
+                  }
+                }
+              });
+            }
+          }
+        },
         views: [{
           type: "label",
           props: {
@@ -137,7 +153,7 @@ function genAppItemShowView() {
       type: "view",
       layout: function(make, view) {
         make.top.equalTo(view.prev.bottom).inset(10)
-        make.height.equalTo(150)
+        make.height.equalTo(200)
         make.left.right.inset(0)
       },
       views: [{
@@ -1254,6 +1270,109 @@ function genCommentView(app) {
               })
             } else {
               ui.showToastView($("addCommentView"), utils.mColor.red, "字数不得少于 5 个")
+            }
+          },
+        },
+      }),{
+      type: "text",
+      props: {
+        id: "commentText",
+        text: "",
+        align: $align.left,
+        radius: 0,
+        textColor: utils.themeColor.listContentTextColor,
+        font: $font(17),
+        borderColor: $color("clear"),
+        insets: $insets(12, 20, 12, 20),
+        alwaysBounceVertical: true,
+        bgcolor: utils.themeColor.bgcolor,
+        tintColor: utils.getCache("themeColor"),
+        darkKeyboard: utils.themeColor.darkKeyboard,
+      },
+      layout: function(make, view) {
+        make.height.equalTo(view.super)
+        make.top.equalTo(view.prev.bottom)
+        make.centerX.equalTo(view.center)
+        make.left.right.inset(0)
+      },
+      events: {
+        changed: function(sender) {
+          if(sender.text.length > 0) {
+            $("commentTextHint").hidden = true
+          } else {
+            $("commentTextHint").hidden = false
+          }
+        },
+      },
+      views: [{
+        type: "label",
+        props: {
+          id: "commentTextHint",
+          text: "评论（必填）",
+          align: $align.left,
+          textColor: utils.themeColor.appHintColor,
+          font: $font(17)
+        },
+        layout: function(make, view) {
+          make.left.inset(24)
+          make.top.inset(12)
+        }
+      }]
+    }]
+  })
+}
+
+function genCommentReplyView(app, position) {
+  $ui.push({
+    props: {
+      id: "addCommentReplyView",
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [ui.genPageHeader("应用", "回复评论", {
+        type: "button",
+        props: {
+          title: "发送",
+          titleColor: utils.getCache("themeColor"),
+          font: $font("bold", 17),
+          bgcolor: $color("clear"),
+          borderColor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.right.inset(0)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: async function(sender) {
+            if($("commentText").text.length >= 5) {
+              sender.userInteractionEnabled = false
+              sender.titleColor = utils.themeColor.appCateTextColor
+              let userInfo = user.getLoginUser()
+              let json = {
+                userId: userInfo.objectId,
+                name: userInfo.nickname,
+                comment: $("commentText").text,
+                time: new Date().getTime(),
+              }
+              await api.uploadComment(app.objectId, json)
+              let cloudApps = utils.getCache("cloudApps", [])
+              for(let i = 0; i < cloudApps.length; i++) {
+                if(cloudApps[i].objectId === app.objectId) {
+                  cloudApps[i].comment.push(json)
+                }
+              }
+              $cache.set("cloudApps", cloudApps);
+              $app.notify({
+                name: "refreshAll",
+                object: {appItem: true}
+              });
+              ui.showToastView($("addCommentReplyView"), utils.mColor.green, "发送成功")
+              $delay(1, ()=>{
+                $ui.pop();
+              })
+            } else {
+              ui.showToastView($("addCommentReplyView"), utils.mColor.red, "字数不得少于 5 个")
             }
           },
         },

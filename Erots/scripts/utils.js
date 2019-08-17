@@ -15,10 +15,11 @@ const mColor = {
   // steelBlue: "#4682B4"
 }
 const appCates = ["工具", "效率", "开发", "社交", "视频", "音乐", "游戏", "学习"]
-const appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
-const appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
-const domain = "https://avoscloud.com/1.1"
-
+const appId = "j3j1wl1IDqkAISktyLfBDKRL-MdYXbMMI"
+const appKey = "7HqEpjmquc1g4g4jqQFw0ekG"
+const domain = "https://j3j1wl1I.api.lncldglobal.com/1.1"
+const conAppId = "N2gkROnx43nss0Bya21rJMLH-MdYXbMMI"
+const conAppKey = "3aU5KFNuqaEbytn7Op4JDFKu"
 const tColor = {
   light: {
     mainColor: $color("white"),
@@ -296,6 +297,8 @@ module.exports = {
   getNum: getNum,
   appId: appId,
   appKey: appKey,
+  conAppId: conAppId,
+  conAppKey: conAppKey,
   getInstalledApps: getInstalledApps,
   getUpdateDateString: getUpdateDateString,
   tColor: tColor,
