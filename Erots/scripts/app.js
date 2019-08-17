@@ -8,8 +8,6 @@ let userCenterView = require('scripts/user-center')
 let appItemView = require('scripts/app-itemview')
 let api = require('scripts/api')
 
-let appId = "kscF2nXMoGQCJDLf2MQxYTGm-gzGzoHsz"
-let appKey = "Stp7wCtlaybGlMbDJ4ApYbQL"
 let topOffset = -20
 let searchText = ""
 
@@ -2904,8 +2902,8 @@ function requireReward() {
     timeout: 5,
     header: {
       "Content-Type": "application/json",
-      "X-LC-Id": appId,
-      "X-LC-Key": appKey,
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
     },
     handler: function (resp) {
       let data = resp.data.results
@@ -2935,8 +2933,8 @@ function requireInstallNumbers() {
     timeout: 5,
     header: {
       "Content-Type": "application/json",
-      "X-LC-Id": appId,
-      "X-LC-Key": appKey,
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
     },
     handler: function (resp) {
       let results = resp.data.count
@@ -2976,8 +2974,8 @@ function uploadInstall() {
       timeout: 5,
       header: {
         "Content-Type": "application/json",
-        "X-LC-Id": appId,
-        "X-LC-Key": appKey,
+        "X-LC-Id": utils.appId,
+        "X-LC-Key": utils.appKey,
       },
       body: {
         addinVersion: update.getCurVersion(),
@@ -2998,8 +2996,8 @@ function sendFeedBack(text, contact) {
     timeout: 5,
     header: {
       "Content-Type": "application/json",
-      "X-LC-Id": appId,
-      "X-LC-Key": appKey,
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
     },
     body: {
       status: "open",
