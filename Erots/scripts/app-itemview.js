@@ -66,6 +66,192 @@ function genAppItemShowView() {
   let commentSubviews = []
   if(comments && comments.length > 0) {
     for(let i = 0; i < comments.length; i++) {
+      let cardSubViews = []
+      let commentSize = $text.sizeThatFits({
+        text: comments[comments.length - i - 1].comment,
+        width: $device.info.screen.width - 70,
+        font: $font("PingFangSC-Regular", 15),
+      })
+      let haveReply = comments[comments.length - i - 1].reply
+      let showCommentMore = false
+      let commentHeight = undefined
+      if(!haveReply && commentSize.height > 153) {
+        commentHeight = 153
+        showCommentMore = true
+      } else if(haveReply && commentSize.height > 66) {
+        commentHeight = 66
+        showCommentMore = true
+      }
+      cardSubViews = [{
+        type: "label",
+        props: {
+          text: comments[comments.length - i - 1].name,
+          textColor: utils.themeColor.appHintColor,
+          font: $font("PingFangSC-Regular", 15),
+        },
+        layout: function(make, view) {
+          make.top.inset(10)
+          make.height.equalTo(20)
+          make.left.inset(15)
+        },
+      },{
+        type: "label",
+        props: {
+          text: utils.getUpdateDateString(comments[comments.length - i - 1].time),
+          textColor: utils.themeColor.appHintColor,
+          font: $font("PingFangSC-Regular", 14),
+        },
+        layout: function(make, view) {
+          make.top.inset(10)
+          make.height.equalTo(20)
+          make.right.inset(15)
+        },
+      },{
+        type: "label",
+        props: {
+          text: comments[comments.length - i - 1].comment,
+          textColor: utils.themeColor.listHeaderTextColor,
+          font: $font("PingFangSC-Regular", 15),
+          align: $align.justified,
+          bgcolor: $color("clear"),
+          lines: 0,
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(7)
+          make.left.right.inset(15)
+          if(commentHeight) {
+            make.height.equalTo(commentHeight)
+          }
+        },
+      },{
+        type: "gradient",
+        props: {
+          colors: [utils.getThemeMode() == "dark"?$rgba(0,0,0,0.0):$rgba(255,255,255,0.0), utils.themeColor.commentBgColor],
+          locations: [0.0, 0.3],
+          startPoint: $point(0, 0.5),
+          endPoint: $point(1, 0.5),
+          hidden: !showCommentMore,
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.right.bottom.equalTo(view.prev)
+          make.width.equalTo(50)
+        },
+        views: [{
+          type: "button",
+          props: {
+            title: "更多",
+            font: $font("PingFangSC-Regular", 15),
+            titleColor: utils.getCache("themeColor"),
+            bgcolor: $color("clear"),
+            radius: 0,
+            contentEdgeInsets: $insets(2, 5, 2, 5),
+          },
+          layout: function(make, view) {
+            make.right.equalTo(view.super)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+          events: {
+            tapped: function(sender) {
+              genCommentDetailView(comments[comments.length - i - 1])
+            }
+          }
+        }],
+      }]
+      if(haveReply) {
+        let replySize = $text.sizeThatFits({
+          text: comments[comments.length - i - 1].reply,
+          width: $device.info.screen.width - 70,
+          font: $font("PingFangSC-Regular", 15),
+        })
+        let showReplyMore = false
+        let replyHeight = undefined
+        if(commentSize.height > 66 && replySize.height > 46) {
+          replyHeight = 46
+          showReplyMore = true
+        } else if(commentSize.height <= 66 && replySize.height > 108-commentSize.height) {
+          replyHeight = 108-commentSize.height
+          showReplyMore = true
+        }
+        cardSubViews.push({
+          type: "label",
+          props: {
+            text: "开发者回复",
+            textColor: utils.themeColor.appHintColor,
+            font: $font("PingFangSC-Regular", 15),
+          },
+          layout: function(make, view) {
+            make.top.equalTo(view.prev.bottom).inset(10)
+            make.height.equalTo(20)
+            make.left.inset(15)
+          },
+        },{
+          type: "label",
+          props: {
+            text: utils.getUpdateDateString(comments[comments.length - i - 1].replyTime),
+            textColor: utils.themeColor.appHintColor,
+            font: $font("PingFangSC-Regular", 14),
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.prev)
+            make.height.equalTo(20)
+            make.right.inset(15)
+          },
+        },{
+          type: "label",
+          props: {
+            text: comments[comments.length - i - 1].reply,
+            textColor: utils.themeColor.listHeaderTextColor,
+            font: $font("PingFangSC-Regular", 15),
+            align: $align.justified,
+            bgcolor: $color("clear"),
+            lines: 0,
+          },
+          layout: function(make, view) {
+            make.top.equalTo(view.prev.bottom).inset(7)
+            make.left.right.inset(15)
+            if(replyHeight) {
+              make.height.equalTo(replyHeight)
+            }
+          },
+        },{
+          type: "gradient",
+          props: {
+            colors: [utils.getThemeMode() == "dark"?$rgba(0,0,0,0.0):$rgba(255,255,255,0.0), utils.themeColor.commentBgColor],
+            locations: [0.0, 0.3],
+            startPoint: $point(0, 0.5),
+            endPoint: $point(1, 0.5),
+            hidden: !showReplyMore,
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.right.bottom.equalTo(view.prev)
+            make.width.equalTo(50)
+          },
+          views: [{
+            type: "button",
+            props: {
+              title: "更多",
+              font: $font("PingFangSC-Regular", 15),
+              titleColor: utils.getCache("themeColor"),
+              bgcolor: $color("clear"),
+              radius: 0,
+              contentEdgeInsets: $insets(2, 5, 2, 5),
+            },
+            layout: function(make, view) {
+              make.right.equalTo(view.super)
+              make.centerY.equalTo(view.super)
+              make.height.equalTo(view.super)
+            },
+            events: {
+              tapped: function(sender) {
+                genCommentDetailView(comments[comments.length - i - 1])
+              }
+            }
+          }],
+        })
+      }
       commentSubviews.push({
         type: "view",
         props: {
@@ -85,58 +271,23 @@ function genAppItemShowView() {
         events: {
           longPressed: function(sender) {
             let userInfo = user.getLoginUser()
-            if(user.haveLogined() && userInfo.objectId == app.authorId) {
+            if(user.haveLogined() && comments[comments.length - i - 1].time && userInfo.objectId == app.authorId) {
               $device.taptic(0);
               $ui.menu({
                 items: ["回复评论"],
                 handler: function(title, idx) {
                   switch(idx) {
-                    // case 0: genCommentReplyView(app, i);break;
+                    case 0: {
+                      genCommentReplyView(app, comments.length - i - 1);
+                      break;
+                    }
                   }
                 }
               });
             }
           }
         },
-        views: [{
-          type: "label",
-          props: {
-            text: comments[comments.length - i - 1].name,
-            textColor: utils.themeColor.appHintColor,
-            font: $font("PingFangSC-Regular", 15),
-          },
-          layout: function(make, view) {
-            make.top.inset(10)
-            make.height.equalTo(20)
-            make.left.inset(15)
-          },
-        },{
-          type: "label",
-          props: {
-            text: utils.getUpdateDateString(comments[comments.length - i - 1].time),
-            textColor: utils.themeColor.appHintColor,
-            font: $font("PingFangSC-Regular", 14),
-          },
-          layout: function(make, view) {
-            make.top.inset(10)
-            make.height.equalTo(20)
-            make.right.inset(15)
-          },
-        },{
-          type: "label",
-          props: {
-            text: comments[comments.length - i - 1].comment,
-            textColor: utils.themeColor.listHeaderTextColor,
-            font: $font("PingFangSC-Regular", 15),
-            align: $align.justified,
-            bgcolor: $color("clear"),
-            lines: 0,
-          },
-          layout: function(make, view) {
-            make.top.equalTo(view.prev.bottom).inset(10)
-            make.left.right.inset(15)
-          },
-        }]
+        views: cardSubViews,
       })
     }
     let commentMoveXOffsetOld,commentMoveXOffsetNew = 0;
@@ -606,7 +757,7 @@ function genAppItemShowView() {
             font: $font("PingFangSC-Regular", 15),
             lineSpacing: 5, // Optional
           })
-          make.height.equalTo(size.height + 80)
+          make.height.equalTo(size.height + 90)
           make.left.right.inset(0)
         },
         views: [{
@@ -1348,18 +1499,15 @@ function genCommentReplyView(app, position) {
             if($("commentText").text.length >= 5) {
               sender.userInteractionEnabled = false
               sender.titleColor = utils.themeColor.appCateTextColor
-              let userInfo = user.getLoginUser()
-              let json = {
-                userId: userInfo.objectId,
-                name: userInfo.nickname,
-                comment: $("commentText").text,
-                time: new Date().getTime(),
-              }
-              await api.uploadComment(app.objectId, json)
+              let comment = app.comment[position]
+              comment.reply = $("commentText").text
+              comment.replyTime = new Date().getTime()
+              await api.uploadReply(app.objectId, comment)
               let cloudApps = utils.getCache("cloudApps", [])
               for(let i = 0; i < cloudApps.length; i++) {
                 if(cloudApps[i].objectId === app.objectId) {
-                  cloudApps[i].comment.push(json)
+                  cloudApps[i].comment[position].reply = comment.reply
+                  cloudApps[i].comment[position].replyTime = comment.replyTime
                 }
               }
               $cache.set("cloudApps", cloudApps);
@@ -1546,6 +1694,137 @@ function genUpdateHistoryView(app) {
           sender.resize()
           sender.alwaysBounceHorizontal = false
           sender.contentSize = $size(0, sender.contentSize.height)
+        }
+      }
+    }]
+  })
+}
+
+function genCommentDetailView(comment) {
+  let commentSize = $text.sizeThatFits({
+    text: comment.comment,
+    width: $device.info.screen.width - 70,
+    font: $font("PingFangSC-Regular", 15),
+  })
+  let replySize = $text.sizeThatFits({
+    text: comment.reply,
+    width: $device.info.screen.width - 70,
+    font: $font("PingFangSC-Regular", 15),
+  })
+  let subViews = [{
+    type: "label",
+    props: {
+      text: comment.name,
+      textColor: utils.themeColor.appHintColor,
+      font: $font("PingFangSC-Regular", 15),
+    },
+    layout: function(make, view) {
+      make.top.inset(10)
+      make.height.equalTo(20)
+      make.left.inset(15)
+    },
+  },{
+    type: "label",
+    props: {
+      text: utils.getUpdateDateString(comment.time),
+      textColor: utils.themeColor.appHintColor,
+      font: $font("PingFangSC-Regular", 14),
+    },
+    layout: function(make, view) {
+      make.top.inset(10)
+      make.height.equalTo(20)
+      make.right.inset(15)
+    },
+  },{
+    type: "label",
+    props: {
+      text: comment.comment,
+      textColor: utils.themeColor.listHeaderTextColor,
+      font: $font("PingFangSC-Regular", 15),
+      align: $align.justified,
+      bgcolor: $color("clear"),
+      lines: 0,
+    },
+    layout: function(make, view) {
+      make.top.equalTo(view.prev.bottom).inset(7)
+      make.left.right.inset(15)
+    },
+  }]
+  if(comment.reply) {
+    subViews.push({
+      type: "label",
+      props: {
+        text: "开发者回复",
+        textColor: utils.themeColor.appHintColor,
+        font: $font("PingFangSC-Regular", 15),
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom).inset(10)
+        make.height.equalTo(20)
+        make.left.inset(15)
+      },
+    },{
+      type: "label",
+      props: {
+        text: utils.getUpdateDateString(comment.replyTime),
+        textColor: utils.themeColor.appHintColor,
+        font: $font("PingFangSC-Regular", 14),
+      },
+      layout: function(make, view) {
+        make.centerY.equalTo(view.prev)
+        make.height.equalTo(20)
+        make.right.inset(15)
+      },
+    },{
+      type: "label",
+      props: {
+        text: comment.reply,
+        textColor: utils.themeColor.listHeaderTextColor,
+        font: $font("PingFangSC-Regular", 15),
+        align: $align.justified,
+        bgcolor: $color("clear"),
+        lines: 0,
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom).inset(7)
+        make.left.right.inset(15)
+      },
+    })
+  }
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [ui.genPageHeader("应用", "评论详情"), {
+      type: "scroll",
+      props: {
+        alwaysBounceHorizontal: false,
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.right.bottom.inset(0)
+      },
+      views: [{
+        type: "view",
+        props: {
+          bgcolor: utils.themeColor.commentBgColor,
+          radius: 8,
+        },
+        layout: function(make, view) {
+          make.top.inset(20)
+          make.height.equalTo(commentSize.height + replySize.height + 87)
+          make.left.inset(20)
+          make.width.equalTo($device.info.screen.width - 40)
+        },
+        views: subViews
+      }],
+      events: {
+        ready: function(sender) {
+          sender.resize()
+          sender.alwaysBounceHorizontal = false
+          sender.contentSize = $size(0, sender.contentSize.height + 20)
         }
       }
     }]

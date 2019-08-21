@@ -293,7 +293,7 @@ function setupMyCommentsView() {
   let comments = []
   let sortedComments = []
   for(let i = 0; i < cloudApps.length; i++) {
-    if(cloudApps[i].authorId === user.getLoginUser().objectId && cloudApps[i].comment.length > 0) {
+    if(cloudApps[i].authorId === user.getLoginUser().objectId && cloudApps[i].comment && cloudApps[i].comment.length > 0) {
       for(let j = 0; j < cloudApps[i].comment.length; j++) {
         comments.push({
           name: cloudApps[i].comment[j].name,

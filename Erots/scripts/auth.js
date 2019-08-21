@@ -29,7 +29,7 @@ function detect() {
         $ui.render({
             props: {
                 navBarHidden: true,
-                statusBarStyle: 1,
+                statusBarStyle: (utils.getThemeMode() == "dark") ? 1 : 0,
                 bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("white"),
             },
             views: [{
@@ -104,6 +104,7 @@ function setupNotConnectView() {
                     borderWidth: 1,
                     borderColor: $color("gray"),
                     contentEdgeInsets: $insets(5, 15, 6, 15),
+                    bgcolor: $color("clear"),
                 },
                 layout: function(make, view) {
                     make.centerX.equalTo(view.super).offset(4)

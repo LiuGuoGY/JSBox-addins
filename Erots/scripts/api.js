@@ -134,6 +134,42 @@ async function uploadComment(objectId, commentJson) {
   return resp.data
 }
 
+async function uploadReply(objectId, newComment) {
+  let resp = await $http.request({
+    method: "GET",
+    url: utils.domain + "/classes/App/" + objectId + "?include=comment",
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+  })
+  let comments = resp.data.comment
+  for(let i = 0; i < comments.length; i++) {
+    if(comments[i].time && newComment.time && comments[i].time == newComment.time) {
+      comments[i].reply = newComment.reply
+      comments[i].replyTime = newComment.replyTime
+      break;
+    }
+  }
+  resp = await $http.request({
+    method: "PUT",
+    url: utils.domain + "/classes/App/" + objectId,
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+    body: {
+      comment: comments,
+    },
+  })
+  $console.info(resp);
+  return resp.data
+}
+
 async function uploadDownloadTimes(objectId) {
   let resp = await $http.request({
     method: "PUT",
@@ -201,5 +237,6 @@ module.exports = {
   uploadPraise: uploadPraise,
   catbox_uploadFile: catbox_uploadFile,
   uploadOnStore: uploadOnStore,
+  uploadReply: uploadReply,
 }
 
