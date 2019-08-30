@@ -1098,6 +1098,7 @@ function setupUploadView(updateApp) {
           },
           events: {
             didEndEditing: function(sender) {
+              sender.text = sender.text.trim()
               myApp.instruction = sender.text
               refreshPreview()
             }
@@ -1149,6 +1150,7 @@ function setupUploadView(updateApp) {
           },
           events: {
             didEndEditing: function(sender) {
+              sender.text = sender.text.trim()
               myApp.versionInst = sender.text
               refreshPreview()
             }

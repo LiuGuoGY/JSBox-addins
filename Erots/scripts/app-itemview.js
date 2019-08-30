@@ -25,10 +25,14 @@ function show(id) {
     },
     views: [genAppItemShowView()]
   });
-  $("appItemShowScroll").resize()
-  $("appItemShowScroll").contentSize = $size(0, $("appItemShowScroll").contentSize.height + 50)
+  resizeItemScroll()
   $("appPreviewPhotosScroll").resize()
   $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+}
+
+function resizeItemScroll() {
+  $("appItemShowScroll").resize()
+  $("appItemShowScroll").contentSize = $size(0, $("appItemShowScroll").contentSize.height + 50)
 }
 
 function refreshAppItemView() {
@@ -145,7 +149,7 @@ function genAppItemShowView() {
             titleColor: utils.getCache("themeColor"),
             bgcolor: $color("clear"),
             radius: 0,
-            contentEdgeInsets: $insets(2, 5, 2, 5),
+            contentEdgeInsets: $insets(2, 5, 2, 0),
           },
           layout: function(make, view) {
             make.right.equalTo(view.super)
@@ -237,7 +241,7 @@ function genAppItemShowView() {
               titleColor: utils.getCache("themeColor"),
               bgcolor: $color("clear"),
               radius: 0,
-              contentEdgeInsets: $insets(2, 5, 2, 5),
+              contentEdgeInsets: $insets(2, 5, 2, 0),
             },
             layout: function(make, view) {
               make.right.equalTo(view.super)
@@ -368,6 +372,13 @@ function genAppItemShowView() {
       },
     }
   }
+  let appInstSize = $text.sizeThatFits({
+    text: app.instruction,
+    width: $device.info.screen.width - 40,
+    font: $font("PingFangSC-Regular", 15),
+    lineSpacing: 5, // Optional
+  })
+  let appInstShowMore = (appInstSize.height > 125);
   return {
     type: "view",
     props: {
@@ -562,6 +573,7 @@ function genAppItemShowView() {
                   handler: function(title, idx) {
                     switch(idx) {
                       case 0: $share.sheet([app.appName,"https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);break;
+                      case 1: genAppShareView(app);break;
                     }
                   }
                 });
@@ -951,6 +963,7 @@ function genAppItemShowView() {
       },{
         type: "label",
         props: {
+          id: "appInstLabel",
           text: app.instruction,
           align: $align.left,
           lines: 0,
@@ -959,17 +972,56 @@ function genAppItemShowView() {
           textColor: utils.themeColor.listContentTextColor,
         },
         layout: function(make, view) {
-          let size = $text.sizeThatFits({
-            text: app.instruction,
-            width: $device.info.screen.width - 40,
-            font: $font("PingFangSC-Regular", 15),
-            lineSpacing: 5, // Optional
-          })
           make.top.equalTo(view.prev.bottom).inset(20)
-          make.height.equalTo(size.height)
+          if(appInstShowMore) {
+            make.height.equalTo(125)
+          } else {
+            make.height.equalTo(appInstSize.height)
+          }
           make.left.right.inset(20)
           make.centerX.equalTo(view.super)
-        }
+        },
+      },{
+        type: "gradient",
+        props: {
+          colors: [utils.getThemeMode() == "dark"?$rgba(0,0,0,0.0):$rgba(255,255,255,0.0), utils.themeColor.mainColor],
+          locations: [0.0, 0.3],
+          startPoint: $point(0, 0.5),
+          endPoint: $point(1, 0.5),
+          hidden: !appInstShowMore,
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.right.bottom.equalTo(view.prev)
+          make.width.equalTo(50)
+          make.height.equalTo(20)
+        },
+        views: [{
+          type: "button",
+          props: {
+            title: "更多",
+            font: $font("PingFangSC-Regular", 15),
+            titleColor: utils.getCache("themeColor"),
+            bgcolor: $color("clear"),
+            radius: 0,
+            contentEdgeInsets: $insets(2, 5, 2, 0),
+          },
+          layout: function(make, view) {
+            make.right.equalTo(view.super)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+          events: {
+            tapped: function(sender) {
+              sender.super.hidden = true
+              $("appInstLabel").updateLayout(function(make, view) {
+                make.height.equalTo(appInstSize.height)
+              })
+              $("appInstLabel").relayout()
+              resizeItemScroll()
+            }
+          }
+        }],
       },{
         type: "canvas",
         layout: function(make, view) {
@@ -1825,6 +1877,59 @@ function genCommentDetailView(comment) {
           sender.resize()
           sender.alwaysBounceHorizontal = false
           sender.contentSize = $size(0, sender.contentSize.height + 20)
+        }
+      }
+    }]
+  })
+}
+
+function genAppShareView(app) {
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [ui.genPageHeader("应用", "分享"), {
+      type: "scroll",
+      props: {
+        alwaysBounceHorizontal: false,
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.right.bottom.inset(0)
+      },
+      views: [{
+        type: "view",
+        props: {
+          bgcolor: $color("white"),
+          radius: 0,
+        },
+        layout: function(make, view) {
+          make.top.inset(20)
+          make.height.equalTo(200)
+          make.left.inset(0)
+          make.width.equalTo($device.info.screen.width)
+        },
+        views: [{
+          type: "view",
+          props: {
+            bgcolor: $color("clear"),
+            radius: 15,
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(180)
+            make.left.right.inset(20)
+          },
+          views: []
+        }]
+      }],
+      events: {
+        ready: function(sender) {
+          sender.resize()
+          sender.alwaysBounceHorizontal = false
+          sender.contentSize = $size(0, sender.contentSize.height)
         }
       }
     }]

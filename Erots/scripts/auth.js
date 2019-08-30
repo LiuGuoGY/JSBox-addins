@@ -8,7 +8,7 @@ function detect() {
         $http.request({
             method: "GET",
             url: encodeURI(url),
-            timeout: 5,
+            timeout: 10,
             header: {
                 "Content-Type": "application/json",
                 "X-LC-Id": utils.conAppId,
