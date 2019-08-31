@@ -10,6 +10,7 @@ let api = require('scripts/api')
 
 let topOffset = -20
 let searchText = ""
+let query = $context.query
 
 let mIcon = []
 
@@ -26,14 +27,14 @@ function show() {
 function main() {
   setupMainView()
   requireApps()
-  // solveQuery()
+  solveQuery()
 }
 
 $app.listen({
-  refreshAll: function (object) {
+  refreshAll: function () {
     refreshAllView()
   },
-  requireCloud: function (object) {
+  requireCloud: function () {
     requireApps()
   },
 });
@@ -1492,6 +1493,18 @@ function genMeView() {
   return view
 }
 
+function solveQuery() {
+  if (query) {
+    switch (query.q) {
+      case "show":
+        appItemView.preview(query.objectId);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
 function wantToLogin() {
   $ui.menu({
     items: ["登录", "注册"],
@@ -2844,11 +2857,18 @@ function requireApps() {
       if(user.haveLogined()) {
         showNewCommentNumber(apps)
       }
-      let query = $context.query
       if (query) {
         switch (query.q) {
           case "show":
-            appItemView.show(query.objectId);
+            for (let i = 0; i < apps.length; i++) {
+              if(apps[i].objectId === query.objectId) {
+                $app.notify({
+                  name: "refreshItemView",
+                  object: {onStore: apps[i].onStore}
+                });
+                break;
+              }
+            }
             break;
           default:
             break;
