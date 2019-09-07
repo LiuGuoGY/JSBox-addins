@@ -1230,6 +1230,47 @@ function genAppItemShowView() {
           }
         }]
       }, commentView, {
+        type: "view",
+        props: {
+          clipsToBounds: true,
+        },
+        layout: function (make, view) {
+          if(user.haveLogined() && user.getLoginUser().objectId == app.authorId && app.comment.length > 0) {
+            make.top.equalTo(view.prev.bottom).inset(10)
+            make.height.equalTo(20)
+          } else {
+            make.top.equalTo(view.prev.bottom)
+            make.height.equalTo(0)
+          }
+          make.left.right.inset(20)
+        },
+        views: [{
+          type: "image",
+          props: {
+            icon: $icon("009", utils.themeColor.appHintColor , $size(14, 14)),
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(14, 14))
+            make.left.inset(10)
+          }
+        },{
+          type: "label",
+          props: {
+            text: "长按评论可以回复",
+            bgcolor: $color("clear"),
+            textColor: utils.themeColor.appHintColor,
+            font: $font(13),
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.left.equalTo(view.prev.right).inset(5)
+            make.right.inset(10)
+            make.height.equalTo(view.super)
+          },
+        }],
+      },{
         type: "canvas",
         layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)

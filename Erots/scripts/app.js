@@ -697,7 +697,7 @@ function genCloudAppListView() {
           $("cloudPageHeaderLabel").hidden = true
           $("cloudPageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("cloudListHeaderTitle").hidden = false
-        } else if (sender.contentOffset.y < topOffset) {
+        } else if (sender.contentOffset.y <= topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
           if (size > 40)
             size = 40
@@ -1003,7 +1003,7 @@ function genUpdateAppListView() {
           $("updatePageHeaderLabel").hidden = true
           $("updatePageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("updateListHeaderTitle").hidden = false
-        } else if (sender.contentOffset.y < topOffset) {
+        } else if (sender.contentOffset.y <= topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
           if (size > 40)
             size = 40
@@ -1436,7 +1436,7 @@ function genMeView() {
             $("mePageHeaderLabel").hidden = true
             $("mePageHeaderBlur").bgcolor = utils.themeColor.mainColor
             $("meListHeaderTitle").hidden = false
-          } else if (sender.contentOffset.y < topOffset) {
+          } else if (sender.contentOffset.y <= topOffset) {
             let size = 35 - sender.contentOffset.y * 0.04
             if (size > 40)
               size = 40
@@ -1950,7 +1950,6 @@ function showColorSelectView(superView) {
     }
   })
   $ui.animate({
-    delay: 0.1,
     duration: 0.25,
     velocity: 1,
     animation: () => {
