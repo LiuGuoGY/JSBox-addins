@@ -936,7 +936,7 @@ function genAppItemShowView() {
           align: $align.left,
           lines: 0,
           font: $font("PingFangSC-Regular", 15),
-          attributedText: setLineSpacing(app.versionInst, 5),
+          attributedText: utils.setLineSpacing(app.versionInst, 5),
           textColor: utils.themeColor.listContentTextColor,
         },
         layout: function (make, view) {
@@ -1091,7 +1091,7 @@ function genAppItemShowView() {
           align: $align.left,
           lines: 0,
           font: $font("PingFangSC-Regular", 15),
-          attributedText: setLineSpacing(app.instruction, 5),
+          attributedText: utils.setLineSpacing(app.instruction, 5),
           textColor: utils.themeColor.listContentTextColor,
         },
         layout: function (make, view) {
@@ -1854,7 +1854,7 @@ function genUpdateHistoryView(app) {
           align: $align.left,
           textColor: utils.themeColor.listHeaderTextColor,
           lines: 0,
-          attributedText: setLineSpacing(history[i].versionInst, 5),
+          attributedText: utils.setLineSpacing(history[i].versionInst, 5),
         },
         layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(5)
@@ -2098,14 +2098,6 @@ function genAppShareView(app) {
       }
     }]
   })
-}
-
-function setLineSpacing(text, spacing) {
-  var attrText = $objc("NSMutableAttributedString").invoke("alloc").invoke("initWithString", text);
-  var style = $objc("NSMutableParagraphStyle").invoke("alloc.init");
-  style.invoke("setLineSpacing", spacing);
-  attrText.invoke("addAttribute:value:range:", "NSParagraphStyle", style, $range(0, text.length));
-  return attrText.rawValue();
 }
 
 module.exports = {

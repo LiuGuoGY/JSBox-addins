@@ -608,13 +608,15 @@ function setupMyPraiseView() {
                       userInfo.praise = $("praiseInput").text
                       user.saveUser(userInfo)
                       let cloudApps = utils.getCache("cloudApps", [])
+                      let appObjects = []
                       for(let i = 0; i < cloudApps.length; i++) {
                         if(cloudApps[i].authorId === user.getLoginUser().objectId) {
                           if(!cloudApps[i].praise || cloudApps[i].praise != $("praiseInput").text) {
-                            await api.uploadPraise(cloudApps[i].objectId, $("praiseInput").text)
+                            appObjects.push(cloudApps[i].objectId);
                           }
                         }
                       }
+                      await api.uploadPraise(appObjects, $("praiseInput").text);
                       ui.showToastView($("myPraiseView"), utils.mColor.green, "设置成功");
                       $app.notify({
                         name: "refreshAll",

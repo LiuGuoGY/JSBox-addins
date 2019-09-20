@@ -42,18 +42,14 @@ $app.listen({
 let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 
 
 function setThemeColor() {
-  if (utils.getCache("darkMode")) {
-    if ($device.isDarkMode) {
-      utils.themeColor = utils.tColor.dark;
-    } else {
-      if (utils.getCache("darkModeAuto")) {
-        utils.themeColor = ($system.brightness < 0.15) ? utils.tColor.dark : utils.tColor.light;
-      } else {
-        utils.themeColor = utils.tColor.dark;
-      }
-    }
+  if ($device.isDarkMode) {
+    utils.themeColor = utils.tColor.dark;
   } else {
-    utils.themeColor = utils.tColor.light;
+    if (utils.getCache("darkModeAuto")) {
+      utils.themeColor = ($system.brightness < 0.15) ? utils.tColor.dark : utils.tColor.light;
+    } else {
+      utils.themeColor = utils.tColor.light;
+    }
   }
   mIcon = [{
     blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
@@ -1336,19 +1332,21 @@ function genMeView() {
         footer: {
           type: "view",
           props: {
-            height: 110,
+            height: 130,
           },
           views: [{
             type: "label",
             props: {
-              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
+              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.\n所有应用乃用户上传，与 JSBox 官方无关",
               textColor: utils.themeColor.appCateTextColor,
               align: $align.center,
-              font: $font(13)
+              font: $font(13),
+              lines: 2,
+              lineSpacing: 20,
             },
             layout: function (make, view) {
               make.centerX.equalTo(view.super)
-              make.top.inset(23)
+              make.top.inset(15)
             }
           },],
         },
@@ -1607,40 +1605,6 @@ function refreshAllTheme(delay) {
 }
 
 function genThemeSettingView() {
-  let tabDarkMode = {
-    type: "view",
-    props: {
-      bgcolor: utils.themeColor.mainColor,
-    },
-    layout: $layout.fill,
-    views: [{
-      type: "label",
-      props: {
-        text: "暗色模式",
-        textColor: utils.themeColor.listContentTextColor,
-      },
-      layout: function (make, view) {
-        make.left.inset(20)
-        make.centerY.equalTo(view.super)
-      }
-    }, {
-      type: "switch",
-      props: {
-        onColor: $color(utils.mColor.iosGreen),
-        on: utils.getCache("darkMode"),
-      },
-      layout: function (make, view) {
-        make.right.inset(20)
-        make.centerY.equalTo(view.super)
-      },
-      events: {
-        changed: function (sender) {
-          $cache.set("darkMode", sender.on)
-          refreshAllTheme(0.05)
-        }
-      }
-    }],
-  }
   let tabDarkModeAuto = {
     type: "view",
     props: {
@@ -1650,7 +1614,7 @@ function genThemeSettingView() {
     views: [{
       type: "label",
       props: {
-        text: "根据亮度自动变换主题",
+        text: "根据亮度自动变换",
         textColor: utils.themeColor.listContentTextColor,
       },
       layout: function (make, view) {
@@ -1738,7 +1702,7 @@ function genThemeSettingView() {
             bgcolor: utils.themeColor.bgcolor,
           },
           layout: $layout.fill,
-        }, tabDarkMode, tabDarkModeAuto, tabThemeColor],
+        }, tabDarkModeAuto, tabThemeColor],
       },
       layout: function (make, view) {
         make.top.equalTo(view.prev.bottom)
@@ -1747,7 +1711,7 @@ function genThemeSettingView() {
       events: {
         didSelect: function (sender, indexPath, title) {
           switch (indexPath.row + indexPath.section) {
-            case 3:
+            case 2:
               showColorSelectView($("themeSettingView"));
               break;
             default:

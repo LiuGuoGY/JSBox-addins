@@ -191,10 +191,20 @@ async function uploadDownloadTimes(objectId) {
   return resp.data
 }
 
-async function uploadPraise(objectId, praiseUrl) {
+async function uploadPraise(objectIds, praiseUrl) {
+  let requests = []
+  for(let i = 0; i < objectIds.length; i++) {
+    requests.push({
+      "method": "PUT",
+      "path": "/1.1/classes/App/" + objectIds[i],
+      "body": {
+        "praise": praiseUrl,
+      }
+    })
+  }
   let resp = await $http.request({
-    method: "PUT",
-    url: utils.domain + "/classes/App/" + objectId,
+    method: "POST",
+    url: utils.domain + "/batch",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -202,9 +212,22 @@ async function uploadPraise(objectId, praiseUrl) {
       "X-LC-Key": utils.appKey,
     },
     body: {
-      praise: praiseUrl,
+      requests: requests,
     },
   })
+  // let resp = await $http.request({
+  //   method: "PUT",
+  //   url: utils.domain + "/classes/App/" + objectId,
+  //   timeout: 5,
+  //   header: {
+  //     "Content-Type": "application/json",
+  //     "X-LC-Id": utils.appId,
+  //     "X-LC-Key": utils.appKey,
+  //   },
+  //   body: {
+  //     praise: praiseUrl,
+  //   },
+  // })
   $console.info(resp);
   return resp.data
 }

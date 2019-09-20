@@ -232,18 +232,14 @@ function getUpdateDateString(time) {
 }
 
 function getThemeMode() {
-  if (getCache("darkMode")) {
-    if ($device.isDarkMode) {
-      return "dark";
-    } else {
-      if (getCache("darkModeAuto")) {
-        return ($system.brightness < 0.15) ? "dark" : "light";
-      } else {
-        return "dark";
-      }
-    }
+  if ($device.isDarkMode) {
+    return "dark"
   } else {
-    return "light";
+    if (getCache("darkModeAuto")) {
+      return ($system.brightness < 0.15) ? "dark" : "light";
+    } else {
+      return "light";
+    }
   }
 }
 
@@ -285,6 +281,14 @@ async function saveAddin(name, icon, data) {
   }
 }
 
+function setLineSpacing(text, spacing) {
+  var attrText = $objc("NSMutableAttributedString").invoke("alloc").invoke("initWithString", text);
+  var style = $objc("NSMutableParagraphStyle").invoke("alloc.init");
+  style.invoke("setLineSpacing", spacing);
+  attrText.invoke("addAttribute:value:range:", "NSParagraphStyle", style, $range(0, text.length));
+  return attrText.rawValue();
+}
+
 module.exports = {
   getCache: getCache,
   randomValue: randomValue,
@@ -306,4 +310,5 @@ module.exports = {
   addUpdateApps: addUpdateApps,
   getThemeMode: getThemeMode,
   saveAddin: saveAddin,
+  setLineSpacing: setLineSpacing,
 }

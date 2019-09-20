@@ -122,7 +122,6 @@ function setupNotConnectView() {
 
 function authCheck(pass) {
     if (!pass) {
-        $cache.remove("darkMode");
         $cache.remove("themeColor");
         $cache.set("authPass", false);
     } else {
