@@ -1494,6 +1494,7 @@ function genAppPreviewPhotosScrollView(photos) {
         type: "blur",
         props: {
           style: utils.themeColor.blurType, // 0 ~ 5
+          alpha: (utils.getThemeMode() == "dark")?0.8:1,
         },
         layout: $layout.fill
       }, {

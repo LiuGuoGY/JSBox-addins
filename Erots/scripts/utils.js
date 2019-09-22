@@ -22,7 +22,7 @@ const conAppId = "N2gkROnx43nss0Bya21rJMLH-MdYXbMMI"
 const conAppKey = "3aU5KFNuqaEbytn7Op4JDFKu"
 const tColor = {
   light: {
-    mainColor: $color("white"),
+    mainColor: $color("#FEFFFE"),
     bgcolor: $color("clear"),
     blurType: 1,
     listHeaderTextColor: $color("black"),
@@ -79,6 +79,8 @@ function getCache(key, def) {
         case "darkModeAuto":
           def = false;
           break;
+        case "lightThemeColor":
+        case "darkThemeColor":
         case "themeColor":
           def = $color(mColor.blue);
           break;

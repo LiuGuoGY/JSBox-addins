@@ -30,7 +30,7 @@ function detect() {
             props: {
                 navBarHidden: true,
                 statusBarStyle: (utils.getThemeMode() == "dark") ? 1 : 0,
-                bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("white"),
+                bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("#FEFFFE"),
             },
             views: [{
                 type: "view",
@@ -73,7 +73,7 @@ function setupNotConnectView() {
         props: {
             navBarHidden: true,
             statusBarStyle: 1,
-            bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("white"),
+            bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("#FEFFFE"),
         },
         views: [{
             type: "view",

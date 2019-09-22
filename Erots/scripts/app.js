@@ -42,14 +42,12 @@ $app.listen({
 let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 
 
 function setThemeColor() {
-  if ($device.isDarkMode) {
+  if(utils.getThemeMode() == "dark") {
     utils.themeColor = utils.tColor.dark;
+    $cache.set("themeColor", utils.getCache("darkThemeColor"));
   } else {
-    if (utils.getCache("darkModeAuto")) {
-      utils.themeColor = ($system.brightness < 0.15) ? utils.tColor.dark : utils.tColor.light;
-    } else {
-      utils.themeColor = utils.tColor.light;
-    }
+    utils.themeColor = utils.tColor.light;
+    $cache.set("themeColor", utils.getCache("lightThemeColor"));
   }
   mIcon = [{
     blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
@@ -444,7 +442,7 @@ function genCloudAppListView() {
           let input = $("search_input")
           input.text = ""
           $("search_hint").hidden = false
-          $delay(0.1, () => {
+          $delay(0.2, () => {
             if (searchText !== "") {
               searchText = ""
               refreshAllView()
@@ -567,7 +565,7 @@ function genCloudAppListView() {
           returned: function (sender) {
             sender.blur()
             searchText = sender.text
-            $delay(0.1, () => {
+            $delay(0.2, () => {
               refreshAllView()
             })
           },
@@ -660,9 +658,23 @@ function genCloudAppListView() {
       footer: {
         type: "view",
         props: {
-          height: 70,
+          height: 95,
           bgcolor: $color("clear"),
-        }
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "————已经到底了————",
+            textColor: utils.themeColor.appCateTextColor,
+            align: $align.center,
+            font: $font(13),
+            lines: 2,
+          },
+          layout: function (make, view) {
+            make.centerX.equalTo(view.super)
+            make.top.inset(10)
+          }
+        }]
       },
       rowHeight: 80,
       data: appViewItems,
@@ -1614,7 +1626,7 @@ function genThemeSettingView() {
     views: [{
       type: "label",
       props: {
-        text: "根据亮度自动变换",
+        text: "根据亮度变换深浅色模式",
         textColor: utils.themeColor.listContentTextColor,
       },
       layout: function (make, view) {
@@ -1727,8 +1739,10 @@ function genThemeSettingView() {
 function showColorSelectView(superView) {
   let windowWidth = 400
   let itemColors = []
-  let colors = [utils.mColor.blue, "#F83B4C", "#FF7519", "#EBA239", "#29B327", "#00C2ED", "#7748FE", "#FF5DA2"]
+  let lightColors = ["#007AFE", "#00C2EC", "#29B227", "#EB6BA3", "#EF8200", "#9471EE", "#D23213", "#ECB403", "#6C829E", "#000000"];
+  let darkColors = ["#007AFE", "#00C2EC", "#29B227", "#EB6BA3", "#EF8200", "#9471EE", "#D23213", "#ECB403", "#EF238E", "#FEFFFE"];
   let selectedColor = utils.getCache("themeColor")
+  let colors = ($device.isDarkMode)?darkColors:lightColors;
   for (let i = 0; i < colors.length; i++) {
     itemColors.push({
       itemColor: {
@@ -1806,7 +1820,7 @@ function showColorSelectView(superView) {
         }, {
           type: "matrix",
           props: {
-            columns: 4,
+            columns: 5,
             itemHeight: 58,
             spacing: 8,
             scrollEnabled: false,
@@ -1821,7 +1835,7 @@ function showColorSelectView(superView) {
               },
               layout: function (make, view) {
                 make.centerX.equalTo(view.super)
-                make.width.height.equalTo(54)
+                make.width.height.equalTo(50)
                 make.top.inset(7)
               },
               views: [{
@@ -1847,7 +1861,11 @@ function showColorSelectView(superView) {
               }
               itemColors[indexPath.row].colorSelect.hidden = false
               sender.data = itemColors
-              $cache.set("themeColor", $color(colors[indexPath.row]));
+              if(utils.getThemeMode() == "dark") {
+                $cache.set("darkThemeColor", $color(colors[indexPath.row]));
+              } else {
+                $cache.set("lightThemeColor", $color(colors[indexPath.row]));
+              }
               $delay(0.1, () => {
                 hideView()
               })
