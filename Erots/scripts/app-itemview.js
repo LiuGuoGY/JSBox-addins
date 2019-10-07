@@ -1445,7 +1445,7 @@ function genAppItemShowView() {
             tapped: function (sender) {
               $ui.alert({
                 title: "提示",
-                message: "开发者 " + app.author + " 为了给你更好的体验，为该应用更新了 " + app.versionHistory.length + " 个版本，你的赞赏会给开发者更多的动力。\n\n即将跳转赞赏开发者，确定跳转？",
+                message: "开发者 " + app.author + " 为了给你更好的体验，为该应用更新了 " + (app.buildVersion) + " 个版本，你的赞赏会给开发者更多的动力。\n\n即将跳转赞赏开发者，确定跳转？",
                 actions: [{
                   title: "确定",
                   handler: function () {
@@ -1617,7 +1617,7 @@ function genCommentView(app) {
             let json = {
               userId: userInfo.objectId,
               name: userInfo.nickname,
-              comment: $("commentText").text,
+              comment: $("commentText").text.trim(),
               time: new Date().getTime(),
             }
             await api.uploadComment(app.objectId, json)

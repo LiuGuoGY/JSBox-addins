@@ -664,7 +664,7 @@ function genCloudAppListView() {
         views: [{
           type: "label",
           props: {
-            text: "————已经到底了————",
+            text: "———— 已经到底了 ————",
             textColor: utils.themeColor.appCateTextColor,
             align: $align.center,
             font: $font(13),
@@ -1267,6 +1267,12 @@ function genMeView() {
   },
   {
     templateTitle: {
+      text: "用户协议",
+    },
+    url: "https://www.liuguogy.com/archives/erots-user-agreement.html",
+  },
+  {
+    templateTitle: {
       text: "检查更新",
     },
   },
@@ -1405,16 +1411,16 @@ function genMeView() {
               case 2:
                 (utils.getCache("authPass")) ? setupThemeSettingView() : genWxWelcomView();
                 break;
-              case 5:
+              case 6:
                 update.checkUpdate(true);
                 break;
-              case 6:
+              case 7:
                 setupFeedBack();
                 break;
-              case 7:
+              case 8:
                 setupReward();
                 break;
-              case 8:
+              case 9:
                 share("http://t.cn/AiNM3N1T");
                 break;
               default:
@@ -1932,8 +1938,9 @@ function showColorSelectView(superView) {
     }
   })
   $ui.animate({
-    duration: 0.25,
+    duration: 0.3,
     velocity: 1,
+    damping: 2,
     animation: () => {
       $("windowView").relayout()
     }
@@ -2558,16 +2565,6 @@ function setupReward() {
         data: [{
           rows: array,
         },],
-        header: {
-          type: "label",
-          props: {
-            height: 20,
-            text: "Thank you all.",
-            textColor: utils.themeColor.appHintColor,
-            align: $align.center,
-            font: $font(12)
-          }
-        }
       },
       layout: function (make, view) {
         make.top.equalTo($("rewardTextTitle").bottom).inset(5)
@@ -2584,9 +2581,6 @@ function setupReward() {
     ]
   })
   requireReward()
-  $delay(1, function () {
-    $("rewardList").scrollToOffset($point(0, 20))
-  })
 }
 
 function begainReward(way) {

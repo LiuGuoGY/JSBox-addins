@@ -251,6 +251,18 @@ function setupMyCommentsView() {
       },{
         type: "label",
         props: {
+          id: "comments_time",
+          textColor: utils.themeColor.appHintColor,
+          font: $font("PingFangSC-Regular", 14),
+        },
+        layout: function(make, view) {
+          make.centerY.equalTo(view.prev)
+          make.height.equalTo(20)
+          make.left.equalTo(view.prev.right).inset(10)
+        },
+      },{
+        type: "label",
+        props: {
           id: "comments_app",
           textColor: utils.themeColor.appHintColor,
           font: $font("PingFangSC-Regular", 14),
@@ -259,18 +271,6 @@ function setupMyCommentsView() {
           make.top.inset(10)
           make.height.equalTo(20)
           make.right.inset(15)
-        },
-      },{
-        type: "label",
-        props: {
-          id: "comments_time",
-          textColor: utils.themeColor.appHintColor,
-          font: $font("PingFangSC-Regular", 14),
-        },
-        layout: function(make, view) {
-          make.top.equalTo(view.prev.bottom).inset(5)
-          make.height.equalTo(20)
-          make.left.right.inset(15)
         },
       },{
         type: "label",
@@ -354,7 +354,7 @@ function setupMyCommentsView() {
         props: {
           bgcolor: $color("clear"),
           template: template,
-          indicatorInsets: $insets(45, 0, 50, 0),
+          indicatorInsets: $insets(0, 0, 0, 0),
           separatorColor: utils.themeColor.separatorColor,
           separatorHidden: true,
           data: sortedComments,
@@ -786,8 +786,9 @@ function setupManageMyAppsView() {
     views: [ui.genPageHeader("个人", "我的应用"), {
       type: "list",
       props: {
+        style: 0,
         bgcolor: $color("clear"),
-        indicatorInsets: $insets(45, 0, 50, 0),
+        indicatorInsets: $insets(0, 0, 0, 0),
         separatorColor: utils.themeColor.separatorColor,
         separatorInset: $insets(0, 85, 0, 15),
         separatorHidden: ($app.info.build >= 497)?false:true,
