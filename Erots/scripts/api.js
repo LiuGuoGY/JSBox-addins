@@ -1,5 +1,4 @@
 let utils = require('scripts/utils')
-// let qiniu = require('scripts/qiniu.min')
 
 async function uploadSM(data, fileName) {
   let resp = await $http.upload({
@@ -77,6 +76,72 @@ async function shimo_uploadFile(file) {
     $console.info(resp.error);
     return undefined
   }
+}
+
+async function shimo_uploadFileNew(file, fileName) {
+  let resp = await shimo_getToken(fileName);
+  let key = resp.data[0].key;
+  let token = resp.data[0].token;
+  $console.info(key);
+  $console.info(token);
+  $console.info(file);
+  resp = await $http.upload({
+    url: "https://upload.qiniup.com/",
+    timeout: 60,
+    // header: {
+    //   "Accept": "*/*", 
+    //   "Accept-Encoding": "gzip, deflate, br", 
+    //   "Accept-Language": "zh-cn" ,
+    //   "Connection": "keep-alive" ,
+    //   // "Content-Length": "226360" ,
+    //   "Content-Type": "multipart/form-data" ,
+    //   "Host": "upload.qiniup.com" ,
+    //   "Origin": "https://shimo.im",
+    //   "Referer": "https://shimo.im/docs/Fx5b2A0Q0hke9yIT" ,
+    //   "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.1 Safari/605.1.15",
+    // },
+    form: {
+      "key": key,
+      "token": token,
+      "fname": fileName,
+    },
+    files: [
+      {
+        "data": file,
+        "name": "file",
+        "filename": fileName,
+        "content-type": "application/octet-stream"
+      }
+    ],
+  })
+  $console.info(resp);
+  if(resp.data && resp.data.data) {
+    return resp.data.data.url
+  } else {
+    $console.info(resp.error);
+    return undefined
+  }
+}
+
+async function shimo_getToken(fileName) {
+  let resp = await $http.post({
+    url: "https://api.shimo.im/action/create_upload_forms",
+    header: {
+      "Accept": "application/vnd.shimo.v2+json",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Accept-Language": "zh-cn" ,
+      "Authorization": "Bearer 3b2cb340990b27402cacbcbf2e28a2909f4ff67360e9fc1ef81db38b96d23cc96bbd797ee66baabbcdf48e0289f8fa43d175641e5977b98af4cea63c252b079c",
+      "Connection": "keep-alive" ,
+      "Content-Length": "16" ,
+      "Content-Type": "application/json" ,
+      "Cookie": "deviceId=42e5d10c-9e6c-42df-bc7a-fa13eb935406; deviceIdGenerateTime=1570855924712" ,
+      "Host": "api.shimo.im" ,
+      "User-Agent": "ShimoDocsRN/2.26.4.7953 (shimo-iphone-app) iOS/13.1.2",
+    },
+    body: [fileName]
+  })
+  $console.info(resp);
+  return resp;
 }
 
 // function leanCloud_uploadFile(fileName, file) {
@@ -261,5 +326,7 @@ module.exports = {
   catbox_uploadFile: catbox_uploadFile,
   uploadOnStore: uploadOnStore,
   uploadReply: uploadReply,
+  shimo_getToken: shimo_getToken,
+  shimo_uploadFileNew: shimo_uploadFileNew,
 }
 

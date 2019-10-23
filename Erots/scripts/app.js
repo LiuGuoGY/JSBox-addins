@@ -708,8 +708,10 @@ function genCloudAppListView() {
         } else if (sender.contentOffset.y <= topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
           if (size > 40)
-            size = 40
-          $("cloudListHeaderTitle").font = $font("Avenir-Black", size)
+            size = 40;
+          if($("cloudListHeaderTitle")) {
+            $("cloudListHeaderTitle").font = $font("Avenir-Black", size)
+          }
         }
       },
       didSelect: function (sender, indexPath, data) {

@@ -43,6 +43,7 @@ function detect() {
                     props: {
                         loading: true,
                         style: (utils.getThemeMode() == "dark") ? 1 : 2,
+                        bgcolor: $color("clear"),
                     },
                     layout: function(make, view) {
                         make.top.inset(0)

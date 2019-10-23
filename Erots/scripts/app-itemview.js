@@ -2041,7 +2041,7 @@ function genCommentDetailView(comment) {
         ready: function (sender) {
           sender.resize()
           sender.alwaysBounceHorizontal = false
-          sender.contentSize = $size(0, sender.contentSize.height + 20)
+          sender.contentSize = $size(0, sender.contentSize.height)
         }
       }
     }]
