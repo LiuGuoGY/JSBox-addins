@@ -63,6 +63,7 @@ function preview(id) {
           props: {
             loading: true,
             style: utils.themeColor.spinnerStyle,
+            bgcolor: $color("clear"),
           },
           layout: function (make, view) {
             make.top.inset(0)

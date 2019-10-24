@@ -82,9 +82,12 @@ async function shimo_uploadFileNew(file, fileName) {
   let resp = await shimo_getToken(fileName);
   let key = resp.data[0].key;
   let token = resp.data[0].token;
+
+  // file.info.mimeType = "application/octet-stream";
   $console.info(key);
   $console.info(token);
   $console.info(file);
+  
   resp = await $http.upload({
     url: "https://upload.qiniup.com/",
     timeout: 60,
