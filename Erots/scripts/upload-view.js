@@ -1010,7 +1010,7 @@ function setupUploadView(updateApp) {
             type: "scroll",
             props: {
               id: "appPreviewPhotosScroll",
-              contentSize: $size((0 + 1)*100, 260),
+              // contentSize: $size((0 + 1)*100, 260),
               alwaysBounceHorizontal: true,
               alwaysBounceVertical: false,
               userInteractionEnabled: true,
@@ -1021,7 +1021,7 @@ function setupUploadView(updateApp) {
               make.center.equalTo(view.super)
               make.size.equalTo(view.super)
             },
-            views: ui.genAppPreviewPhotosView(myApp.previews, function(sender) {
+            views: [ui.genAppPreviewPhotosStack(myApp.previews, function(sender) {
               $quicklook.open({
                 image: sender.image
               })
@@ -1035,7 +1035,7 @@ function setupUploadView(updateApp) {
                   }
                 }
               });
-            }),
+            })],
           },]
         },{
           type: "label",

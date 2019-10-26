@@ -5,6 +5,8 @@ let logUpView = require('scripts/login-view')
 let api = require('scripts/api')
 
 let objectId = ""
+let topOffset = -20
+
 
 $app.listen({
   refreshAll: function (object) {
@@ -468,27 +470,87 @@ function genAppItemShowView() {
   })
   const appInstFoldHeight = 125;
   const appVerInstFoldHeight = 125;
+  let coverOffset = (app.cover && app.cover != "")?140:0;
   return {
     type: "view",
     props: {
       id: "appItemView",
     },
     layout: $layout.fill,
-    views: [ui.genPageHeader("主页", ""), {
+    events: {
+      ready(sender) {
+        $delay(0.1, () => {
+          if($("appItemShowScroll")) {
+            topOffset = $("appItemShowScroll").contentOffset.y
+          }
+        })
+      },
+    },
+    views: [{
       type: "scroll",
       props: {
         id: "appItemShowScroll",
       },
       layout: function (make, view) {
         make.left.right.bottom.inset(0)
-        make.top.equalTo(view.prev.bottom)
+        make.top.inset(0).offset(-20)
         make.centerX.equalTo(view.super)
       },
+      events: {
+        didScroll: function(sender) {
+          if (sender.contentOffset.y >= 10 + topOffset + coverOffset && $("itemPageHeaderBlur").alpha == 0) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function () {
+                $("itemPageHeaderBlur").alpha = 1;
+              },
+            });
+          } else if (sender.contentOffset.y < 10 + topOffset + coverOffset && $("itemPageHeaderBlur").alpha == 1) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function () {
+                $("itemPageHeaderBlur").alpha = 0;
+              },
+            });
+          }
+          if (sender.contentOffset.y >= 110 + topOffset + coverOffset && $("itemPageHeaderTitle").alpha == 0) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function () {
+                $("itemPageHeaderTitle").alpha = 1;
+              },
+            });
+          } else if (sender.contentOffset.y < 110 + topOffset + coverOffset && $("itemPageHeaderTitle").alpha == 1) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function () {
+                $("itemPageHeaderTitle").alpha = 0;
+              },
+            });
+          }
+        }
+      },
       views: [{
+        type: "image",
+        props: {
+          src: (app.cover)?app.cover:"",
+          contentMode: $contentMode.scaleAspectFill,
+        },
+        layout: function (make, view) {
+          make.left.right.inset(0)
+          make.top.inset(0)
+          if(app.cover && app.cover != "") {
+            make.height.equalTo(200)
+          } else {
+            make.height.equalTo(60)
+          }
+          make.centerX.equalTo(view.super)
+        },
+      },{
         type: "view",
         layout: function (make, view) {
           make.left.right.inset(20)
-          make.top.inset(10)
+          make.top.equalTo(view.prev.bottom).inset(10)
           make.height.equalTo(120)
           make.centerX.equalTo(view.super)
         },
@@ -1051,7 +1113,7 @@ function genAppItemShowView() {
           type: "scroll",
           props: {
             id: "appPreviewPhotosScroll",
-            contentSize: $size(app.previews.length * 100, 260),
+            // contentSize: $size(app.previews.length * 100, 260),
             alwaysBounceHorizontal: true,
             alwaysBounceVertical: false,
             userInteractionEnabled: true,
@@ -1062,9 +1124,9 @@ function genAppItemShowView() {
             make.center.equalTo(view.super)
             make.size.equalTo(view.super)
           },
-          views: ui.genAppPreviewPhotosView(app.previews, function (sender) {
-            genAppPreviewPhotosScrollView(app.previews)
-          }),
+          views: [ui.genAppPreviewPhotosStack(app.previews, function (sender) {
+            genAppPreviewPhotosScrollView(app.previews, sender.info)
+          })],
         },]
       }, {
         type: "canvas",
@@ -1464,11 +1526,91 @@ function genAppItemShowView() {
           },
         }]
       },]
-    },]
+    },{
+      type: "view",
+      props: {
+        id: "itemPageHeaderView",
+      },
+      layout: function (make, view) {
+        make.left.top.right.inset(0)
+        if ($device.info.version >= "11") {
+          make.bottom.equalTo(view.super.topMargin).offset(35)
+        } else {
+          make.height.equalTo(60)
+        }
+      },
+      views: [{
+        type: "blur",
+        props: {
+          id: "itemPageHeaderBlur",
+          style: utils.themeColor.blurType, // 0 ~ 5
+          alpha: 0,
+        },
+        layout: $layout.fill,
+      },{
+        type: "view",
+        layout: function (make, view) {
+          make.left.bottom.right.inset(0)
+          make.height.equalTo(45)
+        },
+        views:[{
+          type: "label",
+          props: {
+            id: "itemPageHeaderTitle",
+            text: app.appName,
+            font: $font("PingFangSC-Medium", 17),
+            align: $align.center,
+            bgcolor: $color("clear"),
+            textColor: utils.themeColor.listHeaderTextColor,
+            alpha: 0,
+          },
+          layout: $layout.fill,
+        },{
+          type: "button",
+          props: {
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.left.inset(0)
+            make.width.equalTo(100)
+            make.height.equalTo(view.super)
+          },
+          events: {
+            tapped: function(sender) {
+              $ui.pop()
+            },
+          },
+          views:[{
+            type: "view",
+            props: {
+              bgcolor: $color("clear"),
+            },
+            layout: function(make, view) {
+              make.left.inset(10)
+              make.centerY.equalTo(view.super)
+              make.size.equalTo($size(12.5, 21))
+            },
+            views: [ui.createBack(utils.getCache("themeColor"))]
+          },{
+            type: "label",
+            props: {
+              text: "主页",
+              align: $align.center,
+              textColor: utils.getCache("themeColor"),
+              font: $font(17)
+            },
+            layout: function(make, view) {
+              make.height.equalTo(view.super)
+              make.left.equalTo(view.prev.right).inset(3)
+            }
+          }],
+        }]
+      }]
+    }]
   }
 }
 
-function genAppPreviewPhotosScrollView(photos) {
+function genAppPreviewPhotosScrollView(photos, index) {
   let moveXOffsetOld, moveXOffsetNew;
   let items = []
   for (let i = 0; i < photos.length; i++) {
@@ -1476,26 +1618,17 @@ function genAppPreviewPhotosScrollView(photos) {
       type: "image",
       props: {
         src: photos[i],
+        align: $align.center,
         radius: 5,
         contentMode: $contentMode.scaleToFill,
         borderWidth: 1 / $device.info.screen.scale,
         borderColor: $color("#E0E0E0"),
       },
-      layout: function (make, view) {
-        make.centerY.equalTo(view.super)
-        if (i == 0) {
-          make.left.inset(25)
-        } else {
-          make.left.equalTo(view.prev.right).inset(13)
-        }
-        make.width.equalTo($device.info.screen.width - 50)
-        make.height.equalTo(view.super).multipliedBy(0.9)
-      },
       views: [{
         type: "blur",
         props: {
           style: utils.themeColor.blurType, // 0 ~ 5
-          alpha: (utils.getThemeMode() == "dark")?0.8:1,
+          alpha: (utils.getThemeMode() == "dark")?0.85:1,
         },
         layout: $layout.fill
       }, {
@@ -1512,15 +1645,6 @@ function genAppPreviewPhotosScrollView(photos) {
       }]
     })
   }
-  items.push({
-    type: "view",
-    layout: function (make, view) {
-      make.centerY.equalTo(view.super)
-      make.left.equalTo(view.prev.right)
-      make.width.equalTo(25)
-      make.height.equalTo(view.super).multipliedBy(0.9)
-    }
-  })
   $ui.push({
     props: {
       navBarHidden: true,
@@ -1540,6 +1664,7 @@ function genAppPreviewPhotosScrollView(photos) {
       views: [{
         type: "scroll",
         props: {
+          contentOffset: $point(index * ($device.info.screen.width - 40 + 10/photos.length), 0),
           alwaysBounceHorizontal: true,
           alwaysBounceVertical: false,
           userInteractionEnabled: true,
@@ -1550,7 +1675,31 @@ function genAppPreviewPhotosScrollView(photos) {
           make.center.equalTo(view.super)
           make.size.equalTo(view.super)
         },
-        views: items,
+        views: [{
+          type: "stack",
+          props: {
+            spacing: 10,
+            distribution: $stackViewDistribution.fillEqually,
+            axis: $stackViewAxis.horizontal,
+            stack: {
+              views: items,
+            }
+          },
+          layout: function(make, view) {
+            make.left.inset(25)
+            make.centerY.equalTo(view.super)
+            make.width.equalTo(($device.info.screen.width - 40) * photos.length)
+            make.height.equalTo(view.super).multipliedBy(0.9)
+          },
+        },{
+          type: "view",
+          layout: function (make, view) {
+            make.centerY.equalTo(view.super)
+            make.left.equalTo(view.prev.right)
+            make.width.equalTo(25)
+            make.height.equalTo(view.super).multipliedBy(0.9)
+          }
+        }],
         events: {
           willBeginDragging: function (sender) {
             moveXOffsetOld = sender.contentOffset.x;

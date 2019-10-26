@@ -144,93 +144,99 @@ function genPageHeader(backName, title, rightView) {
   let view = {
     type: "view",
     layout: function(make, view) {
-      if($device.info.version >= "11"){
-        make.top.equalTo(view.super.safeAreaTop)
+      make.left.top.right.inset(0)
+      if ($device.info.version >= "11") {
+        make.bottom.equalTo(view.super.topMargin).offset(35)
       } else {
-        make.top.inset(20)
+        make.height.equalTo(60)
       }
-      make.left.right.inset(0)
-      make.height.equalTo(45)
     },
     views:[{
-      type: "label",
-      props: {
-        text: title,
-        font: $font("bold", 17),
-        align: $align.center,
-        bgcolor: utils.themeColor.mainColor,
-        textColor: utils.themeColor.listHeaderTextColor,
-      },
-      layout: $layout.fill,
-    },{
-      type: "canvas",
-      layout: function(make, view) {
-        make.bottom.inset(0)
-        make.height.equalTo(1 / $device.info.screen.scale)
-        make.left.right.inset(0)
-      },
-      events: {
-        draw: function(view, ctx) {
-          var width = view.frame.width
-          var scale = $device.info.screen.scale
-          ctx.strokeColor = utils.themeColor.appObviousColor
-          ctx.setLineWidth(1 / scale)
-          ctx.moveToPoint(0, 0)
-          ctx.addLineToPoint(width, 0)
-          ctx.strokePath()
-        }
-      }
-    },{
-      type: "button",
-      props: {
-        bgcolor: $color("clear"),
-      },
-      layout: function(make, view) {
-        make.left.inset(0)
-        make.width.equalTo(100)
-        make.height.equalTo(view.super)
-      },
-      events: {
-        tapped: function(sender) {
-          $ui.pop()
-        },
+      type: "view",
+      layout: function (make, view) {
+        make.left.bottom.right.inset(0)
+        make.height.equalTo(45)
       },
       views:[{
+        type: "label",
+        props: {
+          text: title,
+          font: $font("bold", 17),
+          align: $align.center,
+          bgcolor: utils.themeColor.mainColor,
+          textColor: utils.themeColor.listHeaderTextColor,
+        },
+        layout: $layout.fill,
+      },{
+        type: "canvas",
+        layout: function(make, view) {
+          make.bottom.inset(0)
+          make.height.equalTo(1 / $device.info.screen.scale)
+          make.left.right.inset(0)
+        },
+        events: {
+          draw: function(view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = utils.themeColor.appObviousColor
+            ctx.setLineWidth(1 / scale)
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      },{
+        type: "button",
+        props: {
+          bgcolor: $color("clear"),
+        },
+        layout: function(make, view) {
+          make.left.inset(0)
+          make.width.equalTo(100)
+          make.height.equalTo(view.super)
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.pop()
+          },
+        },
+        views:[{
+          type: "view",
+          props: {
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.left.inset(10)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(12.5, 21))
+          },
+          views: [createBack(utils.getCache("themeColor"))]
+        },{
+          type: "label",
+          props: {
+            text: backName,
+            align: $align.center,
+            textColor: utils.getCache("themeColor"),
+            font: $font(17)
+          },
+          layout: function(make, view) {
+            make.height.equalTo(view.super)
+            make.left.equalTo(view.prev.right).inset(3)
+          }
+        }],
+      },{
         type: "view",
         props: {
           bgcolor: $color("clear"),
         },
         layout: function(make, view) {
-          make.left.inset(10)
-          make.centerY.equalTo(view.super)
-          make.size.equalTo($size(12.5, 21))
-        },
-        views: [createBack(utils.getCache("themeColor"))]
-      },{
-        type: "label",
-        props: {
-          text: backName,
-          align: $align.center,
-          textColor: utils.getCache("themeColor"),
-          font: $font(17)
-        },
-        layout: function(make, view) {
+          make.right.inset(20)
           make.height.equalTo(view.super)
-          make.left.equalTo(view.prev.right).inset(3)
-        }
+          make.width.equalTo(50)
+        },
+        views: [rightView?rightView:{}]
       }],
-    },{
-      type: "view",
-      props: {
-        bgcolor: $color("clear"),
-      },
-      layout: function(make, view) {
-        make.right.inset(20)
-        make.height.equalTo(view.super)
-        make.width.equalTo(50)
-      },
-      views: [rightView?rightView:{}]
-    }]
+    },]
   }
   return view
 }
@@ -477,50 +483,51 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
   return view
 }
 
-function genAppPreviewPhotosView(photos, tappedHandler, longPressedHandler) {
-  let height = 240
-  let photosView = []
+function genAppPreviewPhotosStack(photos, tappedHandler, longPressedHandler) {
+  let photosViews = []
   for(let i = 0; i < photos.length; i++) {
-    if(photos[i].endsWith(".mp4")) {
-      
-    } else {
-      photosView.push({
-        type: "image",
-        props: {
-          src: photos[i],
-          bgcolor: $color("clear"),
-          borderWidth: 1,
-          borderColor: utils.themeColor.iconBorderColor,
-          radius: 4,
-          info: i,
-        },
-        layout: function(make, view) {
-          make.top.inset(10)
-          if(view.prev) {
-            make.left.equalTo(view.prev.right).inset(10)
-          } else {            
-            make.left.inset(20)
+    photosViews.push({
+      type: "image",
+      props: {
+        src: photos[i],
+        align: $align.center,
+        bgcolor: $color("clear"),
+        borderWidth: 1,
+        borderColor: utils.themeColor.iconBorderColor,
+        radius: 4,
+        info: i,
+      },
+      events: {
+        tapped: function(sender) {
+          if(tappedHandler) {
+            tappedHandler(sender)
           }
-          make.width.equalTo(height * 0.6)
-          make.height.equalTo(height)
         },
-        events: {
-          tapped: function(sender) {
-            if(tappedHandler) {
-              tappedHandler(sender)
-            }
-          },
-          longPressed: function(sender) {
-            if(longPressedHandler) {
-              longPressedHandler(sender.sender.info)
-            }
-          },
+        longPressed: function(sender) {
+          if(longPressedHandler) {
+            longPressedHandler(sender.sender.info)
+          }
         },
-      })
-    }
+      },
+    })
   }
-
-  return photosView
+  return {
+    type: "stack",
+    props: {
+      spacing: 10,
+      distribution: $stackViewDistribution.fillEqually,
+      axis: $stackViewAxis.horizontal,
+      stack: {
+        views: photosViews,
+      }
+    },
+    layout: function(make, view) {
+      make.left.inset(20)
+      make.top.inset(10)
+      make.width.equalTo(photos.length * 140)
+      make.height.equalTo(240)
+    },
+  }
 }
 
 function addProgressView(superView, text) {
@@ -595,7 +602,7 @@ module.exports = {
   genAppShowView: genAppShowView,
   genPageHeader: genPageHeader,
   selectIcon: selectIcon,
-  genAppPreviewPhotosView: genAppPreviewPhotosView,
+  genAppPreviewPhotosStack: genAppPreviewPhotosStack,
   addProgressView: addProgressView,
   createRight: createRight,
   createBack: createBack,

@@ -296,9 +296,9 @@ function genUpdateView() {
       layout: function (make, view) {
         make.left.top.right.inset(0)
         if ($device.info.version >= "11") {
-          make.bottom.equalTo(view.super.topMargin).offset(40)
+          make.bottom.equalTo(view.super.topMargin).offset(35)
         } else {
-          make.height.equalTo(65)
+          make.height.equalTo(60)
         }
       },
       views: [{
@@ -380,9 +380,9 @@ function genCloudView() {
       layout: function (make, view) {
         make.left.top.right.inset(0)
         if ($device.info.version >= "11") {
-          make.bottom.equalTo(view.super.topMargin).offset(40)
+          make.bottom.equalTo(view.super.topMargin).offset(35)
         } else {
-          make.height.equalTo(65)
+          make.height.equalTo(60)
         }
       },
       views: [{
@@ -667,7 +667,7 @@ function genCloudAppListView() {
             text: "———— 已经到底了 ————",
             textColor: utils.themeColor.appCateTextColor,
             align: $align.center,
-            font: $font(13),
+            font: $font("PingFangSC-Regular", 13),
             lines: 2,
           },
           layout: function (make, view) {
@@ -1472,9 +1472,9 @@ function genMeView() {
       layout: function (make, view) {
         make.left.top.right.inset(0)
         if ($device.info.version >= "11") {
-          make.bottom.equalTo(view.super.topMargin).offset(40)
+          make.bottom.equalTo(view.super.topMargin).offset(35)
         } else {
-          make.height.equalTo(65)
+          make.height.equalTo(60)
         }
       },
       views: [{
