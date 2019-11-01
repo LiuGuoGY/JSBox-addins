@@ -13,10 +13,11 @@ function setupUploadView(updateApp) {
     if($file.exists("assets/temp")) {
       $file.delete("assets/temp/")
     }
-    myApp = updateApp
-    myApp.file = ""
+    myApp = updateApp;
+    myApp.file = "";
     myApp.buildVersion ++;
     oldVersion = updateApp.appVersion;
+    myApp.versionInst = "";
   } else {
     myApp = utils.getCache("unfinishData")
     if(!myApp) {

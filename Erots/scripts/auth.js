@@ -73,7 +73,7 @@ function setupNotConnectView() {
     $ui.render({
         props: {
             navBarHidden: true,
-            statusBarStyle: 1,
+            statusBarStyle: (utils.getThemeMode() == "dark") ? 1 : 0,
             bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("#FEFFFE"),
         },
         views: [{

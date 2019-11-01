@@ -214,7 +214,7 @@ function genAppItemShowView() {
       }, {
         type: "gradient",
         props: {
-          colors: [utils.getThemeMode() == "dark" ? $rgba(0, 0, 0, 0.0) : $rgba(255, 255, 255, 0.0), utils.themeColor.commentBgColor],
+          colors: [utils.getThemeMode() == "dark" ? $rgba(32, 32, 32, 0.0) : $rgba(240, 240, 248, 0.0), utils.themeColor.commentBgColor],
           locations: [0.0, 0.3],
           startPoint: $point(0, 0.5),
           endPoint: $point(1, 0.5),
@@ -306,7 +306,7 @@ function genAppItemShowView() {
           }, {
             type: "gradient",
             props: {
-              colors: [utils.getThemeMode() == "dark" ? $rgba(0, 0, 0, 0.0) : $rgba(255, 255, 255, 0.0), utils.themeColor.commentBgColor],
+              colors: [utils.getThemeMode() == "dark" ? $rgba(32, 32, 32, 0.0) : $rgba(240, 240, 248, 0.0), utils.themeColor.commentBgColor],
               locations: [0.0, 0.3],
               startPoint: $point(0, 0.5),
               endPoint: $point(1, 0.5),
@@ -490,6 +490,7 @@ function genAppItemShowView() {
       type: "scroll",
       props: {
         id: "appItemShowScroll",
+        indicatorInsets: $insets(60, 0, 0, 0),
       },
       layout: function (make, view) {
         make.left.right.bottom.inset(0)
