@@ -697,11 +697,11 @@ function genCloudAppListView() {
             },
           });
         }
-        if (sender.contentOffset.y >= 40 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
+        if (sender.contentOffset.y >= 45 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
           $("cloudPageHeaderLabel").hidden = false
           $("cloudPageHeaderBlur").bgcolor = $color("clear")
           $("cloudListHeaderTitle").hidden = true
-        } else if (sender.contentOffset.y < 40 + topOffset && $("cloudPageHeaderLabel").hidden === false) {
+        } else if (sender.contentOffset.y < 45 + topOffset && $("cloudPageHeaderLabel").hidden === false) {
           $("cloudPageHeaderLabel").hidden = true
           $("cloudPageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("cloudListHeaderTitle").hidden = false
@@ -1006,11 +1006,11 @@ function genUpdateAppListView() {
             },
           });
         }
-        if (sender.contentOffset.y >= 40 + topOffset && $("updatePageHeaderLabel").hidden === true) {
+        if (sender.contentOffset.y >= 45 + topOffset && $("updatePageHeaderLabel").hidden === true) {
           $("updatePageHeaderLabel").hidden = false
           $("updatePageHeaderBlur").bgcolor = $color("clear")
           $("updateListHeaderTitle").hidden = true
-        } else if (sender.contentOffset.y < 40 + topOffset && $("updatePageHeaderLabel").hidden === false) {
+        } else if (sender.contentOffset.y < 45 + topOffset && $("updatePageHeaderLabel").hidden === false) {
           $("updatePageHeaderLabel").hidden = true
           $("updatePageHeaderBlur").bgcolor = utils.themeColor.mainColor
           $("updateListHeaderTitle").hidden = false
@@ -1447,11 +1447,11 @@ function genMeView() {
               },
             });
           }
-          if (sender.contentOffset.y >= 40 + topOffset && $("mePageHeaderLabel").hidden === true) {
+          if (sender.contentOffset.y >= 45 + topOffset && $("mePageHeaderLabel").hidden === true) {
             $("mePageHeaderLabel").hidden = false
             $("mePageHeaderBlur").bgcolor = $color("clear")
             $("meListHeaderTitle").hidden = true
-          } else if (sender.contentOffset.y < 40 + topOffset && $("mePageHeaderLabel").hidden === false) {
+          } else if (sender.contentOffset.y < 45 + topOffset && $("mePageHeaderLabel").hidden === false) {
             $("mePageHeaderLabel").hidden = true
             $("mePageHeaderBlur").bgcolor = utils.themeColor.mainColor
             $("meListHeaderTitle").hidden = false
