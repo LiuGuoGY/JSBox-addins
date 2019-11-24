@@ -166,8 +166,8 @@ function genAppItemShowView() {
       if (!haveReply && commentSize.height > 153) {
         commentHeight = 153
         showCommentMore = true
-      } else if (haveReply && commentSize.height > 66) {
-        commentHeight = 66
+      } else if (haveReply && commentSize.height > 63) {
+        commentHeight = 63//66
         showCommentMore = true
       }
       cardSubViews = [{
@@ -224,6 +224,7 @@ function genAppItemShowView() {
         layout: function (make, view) {
           make.right.bottom.equalTo(view.prev)
           make.width.equalTo(50)
+          make.height.equalTo(20)
         },
         views: [{
           type: "button",
@@ -255,11 +256,11 @@ function genAppItemShowView() {
         })
         let showReplyMore = false
         let replyHeight = undefined
-        if (commentSize.height > 66 && replySize.height > 46) {
+        if (commentSize.height > 63 && replySize.height > 46) {
           replyHeight = 46
           showReplyMore = true
-        } else if (commentSize.height <= 66 && replySize.height > 108 - commentSize.height) {
-          replyHeight = 108 - commentSize.height
+        } else if (commentSize.height <= 63 && replySize.height > 106 - commentSize.height) {
+          replyHeight = 106 - commentSize.height
           showReplyMore = true
         }
         cardSubViews.push({
@@ -316,6 +317,7 @@ function genAppItemShowView() {
             layout: function (make, view) {
               make.right.bottom.equalTo(view.prev)
               make.width.equalTo(50)
+              make.height.equalTo(20)
             },
             views: [{
               type: "button",
@@ -721,11 +723,19 @@ function genAppItemShowView() {
             events: {
               tapped: function (sender) {
                 $ui.menu({
-                  items: ["分享链接"],
+                  items: ["分享链接", "失效反馈"],
                   handler: function (title, idx) {
                     switch (idx) {
-                      case 0: $share.sheet([app.appName, "https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]); break;
-                      case 1: genAppShareView(app); break;
+                      case 0: $share.sheet(["https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]); break;
+                      case 1: {
+                        if (!user.haveLogined()) {
+                          showNotLoginError();
+                        } else {
+                          genAppReportFaultView(app);
+                        }
+                        break;
+                      }
+                      case 2: genAppShareView(app); break;
                     }
                   }
                 });
@@ -1263,30 +1273,7 @@ function genAppItemShowView() {
           events: {
             tapped: function (sender) {
               if (!user.haveLogined()) {
-                $ui.alert({
-                  title: "提示",
-                  message: "未登录用户无法发布评论，请先登录",
-                  actions: [
-                    {
-                      title: "我要登录",
-                      handler: function () {
-                        logUpView.setupLoginView()
-                      }
-                    },
-                    {
-                      title: "我要注册",
-                      handler: function () {
-                        logUpView.setupLogUpView()
-                      }
-                    },
-                    {
-                      title: "好的",
-                      handler: function () {
-
-                      }
-                    },
-                  ]
-                });
+                showNotLoginError();
               } else {
                 genCommentView(app)
               }
@@ -2068,6 +2055,33 @@ function genUpdateHistoryView(app) {
   })
 }
 
+function showNotLoginError() {
+  $ui.alert({
+    title: "提示",
+    message: "未登录用户无法发布评论，请先登录",
+    actions: [
+      {
+        title: "我要登录",
+        handler: function () {
+          logUpView.setupLoginView()
+        }
+      },
+      {
+        title: "我要注册",
+        handler: function () {
+          logUpView.setupLogUpView()
+        }
+      },
+      {
+        title: "好的",
+        handler: function () {
+
+        }
+      },
+    ]
+  });
+}
+
 function genCommentDetailView(comment) {
   let commentSize = $text.sizeThatFits({
     text: comment.comment,
@@ -2248,6 +2262,99 @@ function genAppShareView(app) {
           sender.contentSize = $size(0, sender.contentSize.height)
         }
       }
+    }]
+  })
+}
+
+function genAppReportFaultView(app) {
+  $ui.push({
+    props: {
+      id: "FaultReportView",
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [ui.genPageHeader("应用", "失效反馈", {
+      type: "button",
+      props: {
+        title: "发送",
+        titleColor: utils.getCache("themeColor"),
+        font: $font("bold", 17),
+        bgcolor: $color("clear"),
+        borderColor: $color("clear"),
+      },
+      layout: function (make, view) {
+        make.right.inset(0)
+        make.height.equalTo(view.super)
+      },
+      events: {
+        tapped: async function (sender) {
+          if ($("commentText").text.length >= 10) {
+            sender.userInteractionEnabled = false
+            sender.titleColor = utils.themeColor.appCateTextColor
+            let userInfo = user.getLoginUser()
+            let json = {
+              userId: userInfo.objectId,
+              username: userInfo.nickname,
+              appId: app.objectId,
+              appName: app.appName,
+              detail: $("commentText").text.trim(),
+            }
+            await api.uploadFaultReport(json)
+            ui.showToastView($("FaultReportView"), utils.mColor.green, "发送成功")
+            $delay(1, () => {
+              $ui.pop();
+            })
+          } else {
+            ui.showToastView($("FaultReportView"), utils.mColor.red, "字数不得少于 10 个")
+          }
+        },
+      },
+    }), {
+      type: "text",
+      props: {
+        id: "commentText",
+        text: "",
+        align: $align.left,
+        radius: 0,
+        textColor: utils.themeColor.listContentTextColor,
+        font: $font(17),
+        borderColor: $color("clear"),
+        insets: $insets(12, 20, 12, 20),
+        alwaysBounceVertical: true,
+        bgcolor: utils.themeColor.bgcolor,
+        tintColor: utils.getCache("themeColor"),
+        darkKeyboard: utils.themeColor.darkKeyboard,
+      },
+      layout: function (make, view) {
+        make.height.equalTo(view.super)
+        make.top.equalTo(view.prev.bottom)
+        make.centerX.equalTo(view.center)
+        make.left.right.inset(0)
+      },
+      events: {
+        changed: function (sender) {
+          if (sender.text.length > 0) {
+            $("commentTextHint").hidden = true
+          } else {
+            $("commentTextHint").hidden = false
+          }
+        },
+      },
+      views: [{
+        type: "label",
+        props: {
+          id: "commentTextHint",
+          text: "失效现象或原因（必填）",
+          align: $align.left,
+          textColor: utils.themeColor.appHintColor,
+          font: $font(17)
+        },
+        layout: function (make, view) {
+          make.left.inset(24)
+          make.top.inset(12)
+        }
+      }]
     }]
   })
 }

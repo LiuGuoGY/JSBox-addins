@@ -168,6 +168,33 @@ async function shimo_getToken(fileName) {
 //   return resp.data
 // }
 
+async function TinyPng_uploadPic(pic) {
+  let apiKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
+  let resp = await $http.post({
+    url: "https://api.tinify.com/shrink",
+    header: {
+      Authorization: "Basic " + $text.base64Encode("api:" + randomValue(apiKeys)),
+    },
+    body: pic,
+  })
+  $console.info(resp);
+  let response = resp.response;
+  if(!response) {
+    return undefined;
+  }
+  if (response.statusCode === 201 || response.statusCode === 200) {
+    let compressedImageUrl = response.headers["Location"]
+    let resp_ = await $http.download({
+      url: compressedImageUrl,
+    })
+    if (resp_.data) {
+      let imageData = resp_.data
+      return imageData
+    }
+  }
+  return undefined;
+}
+
 async function catbox_uploadFile(file) {
   let resp = await $http.upload({
     url: "https://catbox.moe/user/api.php",
@@ -196,6 +223,28 @@ async function uploadComment(objectId, commentJson) {
         __op: "AddUnique",
         objects: [commentJson],
       }
+    },
+  })
+  $console.info(resp);
+  return resp.data
+}
+
+async function uploadFaultReport(reportJson) {
+  let resp = await $http.request({
+    method: "POST",
+    url: utils.domain + "/classes/FaultReport",
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+    body: {
+      userId: reportJson.userId,
+      username: reportJson.username,
+      appId: reportJson.appId,
+      appName: reportJson.appName,
+      detail: reportJson.detail,
     },
   })
   $console.info(resp);
@@ -331,5 +380,7 @@ module.exports = {
   uploadReply: uploadReply,
   shimo_getToken: shimo_getToken,
   shimo_uploadFileNew: shimo_uploadFileNew,
+  TinyPng_uploadPic: TinyPng_uploadPic,
+  uploadFaultReport: uploadFaultReport,
 }
 

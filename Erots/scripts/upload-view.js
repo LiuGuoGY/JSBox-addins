@@ -66,7 +66,7 @@ function setupUploadView(updateApp) {
       $("preView").views[0].add(ui.genAppShowView(myApp.appIcon, myApp.appName, myApp.appCate, (updateApp)?"更新":"下载", ()=>{}))
       $("topPreView").views[0].add(ui.genAppShowView(myApp.appIcon, myApp.appName, myApp.appCate, (updateApp)?"更新":"下载", ()=>{}))
     }
-    if(myApp.previews.length >= 0 && previewsPrev.length !== myApp.previews.length) {
+    if(myApp.previews.length >= 0) {
       let preViewOffset = 0
       if($("appPreviewPhotosScroll")) {
         preViewOffset = $("appPreviewPhotosScroll").contentOffset.x
@@ -93,11 +93,36 @@ function setupUploadView(updateApp) {
           })
         }, function(i) {
           $ui.menu({
-            items: ["删除"],
+            items: ["删除", "前移", "后移"],
             handler: function(title, idx) {
-              if(idx == 0) {
-                myApp.previews.splice(i, 1)
-                refreshPreview()
+              switch(idx) {
+                case 0: {
+                  myApp.previews.splice(i, 1)
+                  refreshPreview()
+                  break;
+                }
+                case 1: {
+                  if(i > 0) {
+                    let tmp = myApp.previews[i]
+                    myApp.previews[i] = myApp.previews[i - 1]
+                    myApp.previews[i - 1] = tmp
+                    refreshPreview()
+                  } else {
+                    ui.showToastView($("uploadItemView"), utils.mColor.red, "已经是第一个了");
+                  }
+                  break;
+                }
+                case 2: {
+                  if(i < myApp.previews.length - 1) {
+                    let tmp = myApp.previews[i]
+                    myApp.previews[i] = myApp.previews[i + 1]
+                    myApp.previews[i + 1] = tmp
+                    refreshPreview()
+                  } else {
+                    ui.showToastView($("uploadItemView"), utils.mColor.red, "已经是最后一个了");
+                  }
+                  break;
+                }
               }
             }
           });
@@ -139,7 +164,7 @@ function setupUploadView(updateApp) {
       type: "scroll",
       props: {
         id: "uploadScroll",
-        bgcolor: utils.themeColor.uploadBgcolor,
+        bgcolor: utils.themeColor.mainColor,
         showsVerticalIndicator: true,
       },
       layout: function(make, view) {
@@ -198,7 +223,7 @@ function setupUploadView(updateApp) {
         type: "view",
         props: {
           id: "preView",
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.left.right.inset(0)
@@ -234,7 +259,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -271,70 +296,76 @@ function setupUploadView(updateApp) {
           },
           events: {
             tapped: function(sender) {
+              $console.info("string1");
               let addins = $addin.list
+              $console.info("string2");
               let addinNames = []
               for(let i = 0; i < addins.length; i++) {
                 addinNames.push(addins[i].name)
               }
-              $ui.menu({
-                items: addinNames,
-                handler: function(title, idx) {
-                  if(addins[idx].data.info.size > 10000000) {
-                    ui.showToastView($("uploadItemView"), utils.mColor.red, "不支持上传大于10M的文件");
-                    return 0;
-                  }
-                  if(!$file.exists("assets/temp")) {
-                    $file.mkdir("assets/temp")
-                  }
-                  if(title.indexOf(".js") >= 0) {
-                    if(!updateApp) {
-                      myApp.appName = title.substr(0, title.length - 3)
-                      myApp.appIcon = setUrlPara(myApp.appIcon, utils.getNum(addins[idx].icon))
+              $console.info("string3");
+              ui.showToastView($("uploadItemView"), utils.mColor.blue, "读取列表中，请稍候");
+              $delay(0.1, ()=>{
+                $ui.menu({
+                  items: addinNames,
+                  handler: function(title, idx) {
+                    if(addins[idx].data.info.size > 10000000) {
+                      ui.showToastView($("uploadItemView"), utils.mColor.red, "不支持上传大于10M的文件");
+                      return 0;
                     }
-                    $("titleInput").text = myApp.appName
-                    $("chooseFileButtonDetail").text = "已选择 " + title.substr(0, title.length - 3)
-                    let path = "assets/temp/" + title
-                    if($file.exists(path)) {
-                      $file.delete(path)
+                    if(!$file.exists("assets/temp")) {
+                      $file.mkdir("assets/temp")
                     }
-                    $file.write({
-                      data: addins[idx].data,
-                      path: path,
-                    })
-                    myApp.file = path
-                    refreshPreview()
-                  } else {
-                    if(!updateApp) {
-                      myApp.appName = title
-                    }
-                    let path = "assets/temp/box"
-                    if($file.exists(path)) {
-                      $file.delete(path)
-                    }
-                    $file.mkdir(path)
-                    $archiver.unzip({
-                      file: addins[idx].data,
-                      dest: path,
-                      handler: function(success) {
-                        if(success) {
-                          myApp.file = path
-                          let file = $file.read(path + "/assets/icon.png")
-                          let iconPath = "assets/temp/temp.png"
-                          $file.write({
-                            data: cutIcon(file.image, true).png,
-                            path: iconPath,
-                          })
-                          if(!updateApp) {
-                            myApp.appIcon = iconPath
-                          }
-                          $("titleInput").text = myApp.appName
-                          $("chooseFileButtonDetail").text = "已选择 " + title
-                          refreshPreview()
-                        }
+                    if(title.indexOf(".js") >= 0) {
+                      if(!updateApp) {
+                        myApp.appName = title.substr(0, title.length - 3)
+                        myApp.appIcon = setUrlPara(myApp.appIcon, utils.getNum(addins[idx].icon))
                       }
-                    });
+                      $("titleInput").text = myApp.appName
+                      $("chooseFileButtonDetail").text = "已选择 " + title.substr(0, title.length - 3)
+                      let path = "assets/temp/" + title
+                      if($file.exists(path)) {
+                        $file.delete(path)
+                      }
+                      $file.write({
+                        data: addins[idx].data,
+                        path: path,
+                      })
+                      myApp.file = path
+                      refreshPreview()
+                    } else {
+                      if(!updateApp) {
+                        myApp.appName = title
+                      }
+                      let path = "assets/temp/box"
+                      if($file.exists(path)) {
+                        $file.delete(path)
+                      }
+                      $file.mkdir(path)
+                      $archiver.unzip({
+                        file: addins[idx].data,
+                        dest: path,
+                        handler: function(success) {
+                          if(success) {
+                            myApp.file = path
+                            let file = $file.read(path + "/assets/icon.png")
+                            let iconPath = "assets/temp/temp.png"
+                            $file.write({
+                              data: cutIcon(file.image, true).png,
+                              path: iconPath,
+                            })
+                            if(!updateApp) {
+                              myApp.appIcon = iconPath
+                            }
+                            $("titleInput").text = myApp.appName
+                            $("chooseFileButtonDetail").text = "已选择 " + title
+                            refreshPreview()
+                          }
+                        }
+                      });
+                    }
                   }
-                }
+                })
               })
             }
           },
@@ -370,7 +401,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -397,7 +428,7 @@ function setupUploadView(updateApp) {
           type: "input",
           props: {
             id: "titleInput",
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
             radius: 0,
             text: myApp.appName,
             textColor: utils.themeColor.appObviousColor,
@@ -427,7 +458,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -506,7 +537,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -533,7 +564,7 @@ function setupUploadView(updateApp) {
           type: "input",
           props: {
             id: "versionInput",
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
             radius: 0,
             type: $kbType.decimal,
             text: myApp.appVersion,
@@ -576,7 +607,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -689,7 +720,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -768,7 +799,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -791,7 +822,7 @@ function setupUploadView(updateApp) {
         },{
           type: "view",
           props: {
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
           },
           layout: function(make, view) {
             make.center.equalTo(view.super)
@@ -836,7 +867,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -863,7 +894,7 @@ function setupUploadView(updateApp) {
           type: "input",
           props: {
             id: "subtitleInput",
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
             radius: 0,
             text: myApp.subtitle,
             textColor: utils.themeColor.appObviousColor,
@@ -890,7 +921,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -901,7 +932,7 @@ function setupUploadView(updateApp) {
         views: [{
           type: "view",
           props: {
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
@@ -954,7 +985,7 @@ function setupUploadView(updateApp) {
                     } else if(resp.data.info.mimeType.indexOf("jpeg") >= 0){
                       data = resp.data.image.jpg(1.0)
                     } else if(resp.data.info.mimeType.length == 0) {
-                      ui.showToastView($("uploadItemView"), utils.mColor.red, "不支持拍摄的照片");
+                      ui.showToastView($("uploadItemView"), utils.mColor.red, "不支持拍摄的HEIC照片");
                       return 0;
                     }
                     let filePath = path + resp.data.fileName
@@ -999,7 +1030,7 @@ function setupUploadView(updateApp) {
           type: "view",
           props: {
             id: "appPreviewPhotosScrollParent",
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
@@ -1028,11 +1059,36 @@ function setupUploadView(updateApp) {
               })
             }, function(i) {
               $ui.menu({
-                items: ["删除"],
+                items: ["删除", "前移", "后移"],
                 handler: function(title, idx) {
-                  if(idx == 0) {
-                    myApp.previews.splice(i, 1)
-                    refreshPreview()
+                  switch(idx) {
+                    case 0: {
+                      myApp.previews.splice(i, 1)
+                      refreshPreview()
+                      break;
+                    }
+                    case 1: {
+                      if(i > 0) {
+                        let tmp = myApp.previews[i]
+                        myApp.previews[i] = myApp.previews[i - 1]
+                        myApp.previews[i - 1] = tmp
+                        refreshPreview()
+                      } else {
+                        ui.showToastView($("uploadItemView"), utils.mColor.red, "已经是第一个了");
+                      }
+                      break;
+                    }
+                    case 2: {
+                      if(i < myApp.previews.length - 1) {
+                        let tmp = myApp.previews[i]
+                        myApp.previews[i] = myApp.previews[i + 1]
+                        myApp.previews[i + 1] = tmp
+                        refreshPreview()
+                      } else {
+                        ui.showToastView($("uploadItemView"), utils.mColor.red, "已经是最后一个了");
+                      }
+                      break;
+                    }
                   }
                 }
               });
@@ -1041,7 +1097,7 @@ function setupUploadView(updateApp) {
         },{
           type: "label",
           props: {
-            text: "长按删除图片",
+            text: "长按排序和删除图片",
             align: $align.center,
             font: $font(11),
             textColor: $color("lightGray"),
@@ -1072,7 +1128,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -1085,7 +1141,7 @@ function setupUploadView(updateApp) {
           props: {
             id: "descriptInput",
             text: myApp.instruction,
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
             radius: 0,
             font: $font(15),
             textColor: utils.themeColor.appObviousColor,
@@ -1124,7 +1180,7 @@ function setupUploadView(updateApp) {
       {
         type: "view",
         props: {
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: utils.themeColor.uploadBgcolor,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -1137,7 +1193,7 @@ function setupUploadView(updateApp) {
           props: {
             id: "updateDesInput",
             text: myApp.versionInst,
-            bgcolor: utils.themeColor.mainColor,
+            bgcolor: utils.themeColor.uploadBgcolor,
             radius: 0,
             font: $font(15),
             textColor: utils.themeColor.appObviousColor,
@@ -1327,16 +1383,18 @@ function setupUploadView(updateApp) {
                 if(!myApp.previews[i].startsWith("http")) {
                   if($("myProgressText")) {
                     let p = i + 1
-                    $("myProgressText").text = "上传预览图片...("+ p + "/" + myApp.previews.length + ")"
+                    $("myProgressText").text = "压缩上传预览图片...("+ p + "/" + myApp.previews.length + ")"
                   }
                   
                   if(myApp.previews[i].endsWith("png")) {
-                    $console.info($file.read(myApp.previews[i]).image);
+                    // $console.info($file.read(myApp.previews[i]).image);
+                    // let pic = await api.TinyPng_uploadPic($file.read(myApp.previews[i]).image.png)
                     let url = await api.uploadSM($file.read(myApp.previews[i]).image.png, "1.png")
                     if(url) {
                       arrays.push(url);
                     }
                   } else {
+                    // let pic = await api.TinyPng_uploadPic($file.read(myApp.previews[i]).image.jpg(1.0))
                     let url = await api.uploadSM($file.read(myApp.previews[i]).image.jpg(1.0), "1.jpg")
                     if(url) {
                       arrays.push(url);
@@ -1414,7 +1472,7 @@ function setupUploadView(updateApp) {
       },{
         type: "label",
         props: {
-          text: "请注意： 仅可以上传原创应用，对于不合理的上传，你的账号可能会被封禁，设备也同样可能会被封禁！",
+          text: "请注意： 仅可以上传原创应用，对于违反用户协议的上传，账号和设备可能会被封禁！",
           lines: 0,
           textColor: utils.themeColor.appHintColor,
           font: $font(13),
@@ -1431,7 +1489,7 @@ function setupUploadView(updateApp) {
       type: "view",
       props: {
         id: "topPreView",
-        bgcolor: utils.themeColor.mainColor,
+        bgcolor: utils.themeColor.uploadBgcolor,
         hidden: true,
       },
       layout: function(make, view) {
