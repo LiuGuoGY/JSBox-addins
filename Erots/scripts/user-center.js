@@ -736,6 +736,10 @@ function setupManageMyAppsView() {
                   buttonView.updateLayout(function (make, view) {
                     make.size.equalTo($size(75, 30))
                   })
+                  $delay(0.1, ()=>{
+                    buttonView.title = (myApps[i].onStore)?"上架中":"下架中"
+                    buttonView.titleColor = (myApps[i].onStore)?utils.getCache("themeColor"):utils.themeColor.appCateTextColor
+                  })
                   $ui.animate({
                     duration: 0.2,
                     animation: function () {
@@ -746,7 +750,6 @@ function setupManageMyAppsView() {
                         name: "refreshAll",
                         object: {}
                       });
-                      buttonView.title = (myApps[i].onStore)?"上架中":"下架中"
                       buttonView.userInteractionEnabled = true
                       $device.taptic(2);
                       $delay(0.2, () => {
@@ -758,6 +761,8 @@ function setupManageMyAppsView() {
               })
             }
           })
+        }, {
+          textColor: (!myApps[i].onStore)?utils.themeColor.appCateTextColor:undefined,
         })]
       }]
     })

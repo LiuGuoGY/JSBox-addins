@@ -19,7 +19,9 @@ function detect() {
                     setupNotConnectView()
                 } else {
                     let data = resp.data.results
-                    authCheck(data.length > 0)
+                    if(data) {
+                        authCheck(data.length > 0)
+                    }
                     $delay(0.1, function() {
                         go();
                     });

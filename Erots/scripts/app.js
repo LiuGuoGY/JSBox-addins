@@ -734,14 +734,14 @@ function genUpdateAppListView() {
   let updatedApps = []
   let watingApps = []
   for (let i = 0; i < apps.length; i++) {
-    if (apps[i].needUpdate == true) {
+    if (apps[i].needUpdate == true && apps[i].onStore) {
       watingApps.push(apps[i])
     }
   }
 
   for (let j = 0; j < updateIds.length; j++) {
     for (let i = 0; i < apps.length; i++) {
-      if (apps[i].objectId == updateIds[j] && apps[i].needUpdate == false) {
+      if (apps[i].objectId == updateIds[j] && !apps[i].needUpdate && apps[i].onStore) {
         updatedApps.push(apps[i])
         newUpdateIds.push(updateIds[j])
       }
@@ -867,13 +867,15 @@ function genUpdateAppListView() {
                               buttonView.updateLayout(function (make, view) {
                                 make.size.equalTo($size(75, 30))
                               })
+                              $delay(0.1, ()=>{
+                                buttonView.title = "打开"
+                              })
                               $ui.animate({
                                 duration: 0.2,
                                 animation: function () {
                                   buttonView.relayout()
                                 },
                                 completion: function () {
-                                  buttonView.title = "打开"
                                   api.uploadDownloadTimes(watingApps[i].objectId)
                                   needUpdateNumber--;
                                   if (needUpdateNumber <= 0) {
@@ -1139,13 +1141,15 @@ function genAppListView(apps) {
                         buttonView.updateLayout(function (make, view) {
                           make.size.equalTo($size(75, 30))
                         })
+                        $delay(0.1, ()=>{
+                          buttonView.title = "打开"
+                        })
                         $ui.animate({
                           duration: 0.2,
                           animation: function () {
                             buttonView.relayout()
                           },
                           completion: function () {
-                            buttonView.title = "打开"
                             buttonView.userInteractionEnabled = true
                             api.uploadDownloadTimes(apps[i].objectId)
                             $device.taptic(2);

@@ -403,7 +403,7 @@ function genIconView(icon) {
   return iconView
 }
 
-function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
+function genAppShowView(icon, name, cate, buttonText, buttonFunction, moreJson) {
   let view = {
     type: "view",
     layout: function(make, view) {
@@ -437,7 +437,7 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction) {
         props: {
           title: buttonText,
           bgcolor: utils.themeColor.appButtonBgColor,
-          titleColor: utils.getCache("themeColor"),
+          titleColor: (moreJson && moreJson.textColor)?moreJson.textColor:utils.getCache("themeColor"),
           font: $font("bold", 15),
           radius: 15,
           align: $align.center,

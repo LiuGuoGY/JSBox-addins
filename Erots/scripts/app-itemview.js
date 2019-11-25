@@ -342,11 +342,28 @@ function genAppItemShowView() {
             }],
           })
       }
+      let longPressMenu = {}
+      if((user.haveLogined() && comments[comments.length - i - 1].time && user.getLoginUser().objectId == app.authorId)) {
+        longPressMenu = {
+          items: [
+            {
+              title: "回复评论",
+              symbol: "arrowshape.turn.up.left",
+              handler: sender => {
+                $delay(0.05, ()=>{
+                  genCommentReplyView(app, comments.length - i - 1);
+                })
+              }
+            }
+          ]
+        }
+      }
       commentSubviews.push({
         type: "view",
         props: {
           bgcolor: utils.themeColor.commentBgColor,
           radius: 8,
+          menu: longPressMenu,
         },
         layout: function (make, view) {
           make.top.inset(0)
@@ -405,6 +422,7 @@ function genAppItemShowView() {
           userInteractionEnabled: true,
           showsHorizontalIndicator: false,
           showsVerticalIndicator: false,
+          clipsToBounds: false,
         },
         layout: $layout.fill,
         views: commentSubviews,
@@ -676,13 +694,15 @@ function genAppItemShowView() {
                                 sender.updateLayout(function (make, view) {
                                   make.size.equalTo($size(75, 30))
                                 })
+                                $delay(0.1, ()=>{
+                                  sender.title = "打开"
+                                })
                                 $ui.animate({
                                   duration: 0.2,
                                   animation: function () {
                                     sender.relayout()
                                   },
                                   completion: function () {
-                                    sender.title = "打开"
                                     api.uploadDownloadTimes(app.objectId)
                                     $app.notify({
                                       name: "refreshAll",
@@ -729,7 +749,7 @@ function genAppItemShowView() {
                       case 0: $share.sheet(["https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]); break;
                       case 1: {
                         if (!user.haveLogined()) {
-                          showNotLoginError();
+                          showNotLoginError("反馈失效");
                         } else {
                           genAppReportFaultView(app);
                         }
@@ -1273,7 +1293,7 @@ function genAppItemShowView() {
           events: {
             tapped: function (sender) {
               if (!user.haveLogined()) {
-                showNotLoginError();
+                showNotLoginError("发布评论");
               } else {
                 genCommentView(app)
               }
@@ -2055,10 +2075,10 @@ function genUpdateHistoryView(app) {
   })
 }
 
-function showNotLoginError() {
+function showNotLoginError(actionStr) {
   $ui.alert({
     title: "提示",
-    message: "未登录用户无法发布评论，请先登录",
+    message: "未登录用户无法" + actionStr + "，请先登录",
     actions: [
       {
         title: "我要登录",
