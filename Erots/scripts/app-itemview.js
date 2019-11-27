@@ -342,21 +342,28 @@ function genAppItemShowView() {
             }],
           })
       }
-      let longPressMenu = {}
-      if((user.haveLogined() && comments[comments.length - i - 1].time && user.getLoginUser().objectId == app.authorId)) {
-        longPressMenu = {
-          items: [
-            {
-              title: "回复评论",
-              symbol: "arrowshape.turn.up.left",
-              handler: sender => {
-                $delay(0.05, ()=>{
-                  genCommentReplyView(app, comments.length - i - 1);
-                })
-              }
+      let longPressMenu = {
+        items: [
+          {
+            title: "复制评论",
+            symbol: "doc.on.doc",
+            handler: sender => {
+              let replyText = (haveReply)?("\n开发者回复" + "\n" + comments[comments.length - i - 1].reply):"";
+              $clipboard.text = comments[comments.length - i - 1].name + "\n" + comments[comments.length - i - 1].comment + replyText;
             }
-          ]
-        }
+          }
+        ]
+      }
+      if((user.haveLogined() && comments[comments.length - i - 1].time && user.getLoginUser().objectId == app.authorId)) {
+        longPressMenu.items.push({
+          title: "回复评论",
+          symbol: "arrowshape.turn.up.left",
+          handler: sender => {
+            $delay(0.05, ()=>{
+              genCommentReplyView(app, comments.length - i - 1);
+            })
+          }
+        })
       }
       commentSubviews.push({
         type: "view",
@@ -1405,7 +1412,7 @@ function genAppItemShowView() {
             make.top.inset(0)
             make.height.equalTo(20)
             make.right.inset(0)
-            make.width.equalTo(100)
+            make.left.equalTo(view.prev.right).inset(20 )
             make.centerY.equalTo(view.super)
           }
         }, {
