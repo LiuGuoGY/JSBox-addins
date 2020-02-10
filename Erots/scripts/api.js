@@ -14,6 +14,34 @@ async function uploadSM(data, fileName) {
   }
 }
 
+async function uploadSMV2(data, fileName) {
+  let resp = await $http.request({
+    method: "POST",
+    url: "https://sm.ms/api/v2/upload",
+    timeout: 30,
+    header: {
+      "Authorization": "KzrXPyIkYtRTSvC0rLig6nWeNYv2zS7x"
+    },
+    body: {
+      smfile: data
+    }
+  })
+  // await $http.upload({
+  //   url: "https://sm.ms/api/v2/upload",
+  //   timeout: 30,
+  //   header: {
+  //     "Authorization": "KzrXPyIkYtRTSvC0rLig6nWeNYv2zS7x"
+  //   },
+  //   files: [{ "data": data, "name": "smfile", "filename": fileName}],
+  // })
+  $console.info(resp);
+  if(resp.data && resp.data != "") {
+    return resp.data.data.url
+  } else {
+    return undefined
+  }
+}
+
 async function uploadApp(json) {
   let resp = await $http.request({
     method: "POST",
@@ -369,6 +397,7 @@ async function uploadOnStore(objectId, onStore) {
 
 module.exports = {
   uploadSM: uploadSM,
+  uploadSMV2: uploadSMV2,
   uploadApp: uploadApp,
   putApp: putApp,
   shimo_uploadFile: shimo_uploadFile,

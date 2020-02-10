@@ -303,8 +303,6 @@ function setupUploadView(updateApp) {
               for(let i = 0; i < addins.length; i++) {
                 addinNames.push(addins[i].name)
               }
-              $console.info("string3");
-              ui.showToastView($("uploadItemView"), utils.mColor.blue, "读取列表中，请稍候");
               $delay(0.1, ()=>{
                 $ui.menu({
                   items: addinNames,
@@ -1253,7 +1251,7 @@ function setupUploadView(updateApp) {
             //初校验
             let cloudApps = utils.getCache("cloudApps", [])
             for(let i = 0; i < cloudApps.length; i++) {
-              if(myApp.appName === cloudApps[i].appName && myApp.objectId != cloudApps[i].objectId) {
+              if(myApp.appName === cloudApps[i].appName && myApp.objectId != cloudApps[i].objectId && cloudApps[i].authorId) {
                 ui.showToastView($("uploadItemView"), utils.mColor.red, "应用名称已存在，请更换应用名称");
                 return 0;
               }
@@ -1365,9 +1363,9 @@ function setupUploadView(updateApp) {
             //上传图标
             if(!myApp.appIcon.startsWith("erots://") && !myApp.appIcon.startsWith("http")) {
               if(myApp.appIcon.endsWith("png")) {
-                myApp.appIcon = await api.uploadSM($file.read(myApp.appIcon).image.png, "1.png")
+                myApp.appIcon = await api.catbox_uploadFile($file.read(myApp.appIcon).image.png) //, "1.png"
               } else {
-                myApp.appIcon = await api.uploadSM($file.read(myApp.appIcon).image.jpg(1.0), "1.jpg")
+                myApp.appIcon = await api.catbox_uploadFile($file.read(myApp.appIcon).image.jpg(1.0)) //, "1.jpg"
               }
             }
 
@@ -1383,19 +1381,19 @@ function setupUploadView(updateApp) {
                 if(!myApp.previews[i].startsWith("http")) {
                   if($("myProgressText")) {
                     let p = i + 1
-                    $("myProgressText").text = "压缩上传预览图片...("+ p + "/" + myApp.previews.length + ")"
+                    $("myProgressText").text = "上传预览图片...("+ p + "/" + myApp.previews.length + ")"
                   }
                   
                   if(myApp.previews[i].endsWith("png")) {
                     // $console.info($file.read(myApp.previews[i]).image);
                     // let pic = await api.TinyPng_uploadPic($file.read(myApp.previews[i]).image.png)
-                    let url = await api.uploadSM($file.read(myApp.previews[i]).image.png, "1.png")
+                    let url = await api.catbox_uploadFile($file.read(myApp.previews[i]).image.png) //, "1.png"
                     if(url) {
                       arrays.push(url);
                     }
                   } else {
                     // let pic = await api.TinyPng_uploadPic($file.read(myApp.previews[i]).image.jpg(1.0))
-                    let url = await api.uploadSM($file.read(myApp.previews[i]).image.jpg(1.0), "1.jpg")
+                    let url = await api.catbox_uploadFile($file.read(myApp.previews[i]).image.jpg(1.0)) //, "1.jpg"
                     if(url) {
                       arrays.push(url);
                     }
