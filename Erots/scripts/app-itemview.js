@@ -37,6 +37,9 @@ function show(id) {
   resizeItemScroll()
   $("appPreviewPhotosScroll").resize()
   $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+  if($("heart_lottie_view")) { // 赞赏动画
+    $("heart_lottie_view").play();
+  }
 }
 
 function preview(id) {
@@ -1507,8 +1510,8 @@ function genAppItemShowView() {
         views: [{
           type: "button",
           props: {
-            title: " 赞赏作者",
-            icon: $icon("103", utils.getCache("themeColor"), $size(20, 20)),
+            // title: "赞赏作者",
+            // icon: $icon("103", utils.getCache("themeColor"), $size(20, 20)),
             bgcolor: utils.themeColor.appButtonBgColor,
             titleColor: utils.getCache("themeColor"),
             font: $font("bold", 16.5),
@@ -1539,6 +1542,44 @@ function genAppItemShowView() {
               });
             }
           },
+          views: [{
+            type: "lottie",
+            props: {
+              id: "heart_lottie_view",
+              src: "assets/heart-lottie.json",
+              loop: true,
+              userInteractionEnabled: false,
+            },
+            layout: (make, view) => {
+              make.size.equalTo($size(40, 40));
+              make.left.inset(12)
+              make.centerY.equalTo(view.super).offset(-10)
+            }
+          }, {
+            type: "label",
+            props: {
+              text: "  赞赏作者",
+              font: $font("bold", 16.5),
+              textColor: utils.getCache("themeColor"),
+            },
+            layout: function (make, view) {
+              make.left.equalTo(view.prev.right)
+              make.right.equalTo(view.super)
+              make.height.equalTo(view.super)
+              make.centerY.equalTo(view.super)
+            }
+          }]
+        }, {
+          type: "label",
+          props: {
+            text: "你的赞赏是开发者最大的动力",
+            font: $font(13),
+            textColor: utils.themeColor.appCateTextColor,
+          },
+          layout: function (make, view) {
+            make.top.equalTo(view.prev.bottom).inset(14)
+            make.centerX.equalTo(view.super)
+          }
         }]
       },]
     },{

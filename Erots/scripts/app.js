@@ -658,7 +658,7 @@ function genCloudAppListView() {
       footer: {
         type: "view",
         props: {
-          height: 95,
+          height: 55,
           bgcolor: $color("clear"),
         },
         views: [{
@@ -1357,21 +1357,19 @@ function genMeView() {
         footer: {
           type: "view",
           props: {
-            height: 130,
+            height: 110,
           },
           views: [{
             type: "label",
             props: {
-              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.\n所有应用乃用户上传，与 JSBox 官方无关",
+              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
               textColor: utils.themeColor.appCateTextColor,
               align: $align.center,
-              font: $font(13),
-              lines: 2,
-              lineSpacing: 20,
+              font: $font(13)
             },
             layout: function (make, view) {
               make.centerX.equalTo(view.super)
-              make.top.inset(15)
+              make.top.inset(23)
             }
           },],
         },
@@ -2653,6 +2651,13 @@ function downloadRewardPic(way) {
 
 //反馈页面
 function setupFeedBack(text) {
+  if($device.isJailbroken) {
+    $ui.alert({
+      title: "警告",
+      message: "越狱设备不提供反馈建议功能",
+    });
+    return 0;
+  }
   $ui.push({
     props: {
       id: "feedbackView",
