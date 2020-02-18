@@ -395,6 +395,23 @@ async function uploadOnStore(objectId, onStore) {
   return resp.data
 }
 
+async function getErotsSetting() {
+  let resp = await $http.request({
+    method: "GET",
+    url: utils.domain + "/classes/Setting/5e4b9ae7f94e0f00083f98a6?keys=-updatedAt,-objectId,-createdAt",
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+  })
+  if(resp.data) {
+    $cache.set("Settings", resp.data);
+  }
+  return resp.data
+}
+
 module.exports = {
   uploadSM: uploadSM,
   uploadSMV2: uploadSMV2,
@@ -411,5 +428,6 @@ module.exports = {
   shimo_uploadFileNew: shimo_uploadFileNew,
   TinyPng_uploadPic: TinyPng_uploadPic,
   uploadFaultReport: uploadFaultReport,
+  getErotsSetting: getErotsSetting,
 }
 

@@ -296,9 +296,7 @@ function setupUploadView(updateApp) {
           },
           events: {
             tapped: function(sender) {
-              $console.info("string1");
               let addins = $addin.list
-              $console.info("string2");
               let addinNames = []
               for(let i = 0; i < addins.length; i++) {
                 addinNames.push(addins[i].name)
@@ -314,6 +312,7 @@ function setupUploadView(updateApp) {
                     if(!$file.exists("assets/temp")) {
                       $file.mkdir("assets/temp")
                     }
+                    myApp.appSize = addins[idx].data.info.size
                     if(title.indexOf(".js") >= 0) {
                       if(!updateApp) {
                         myApp.appName = title.substr(0, title.length - 3)
@@ -1213,6 +1212,122 @@ function setupUploadView(updateApp) {
         },],
       },
       {
+        type: "view",
+        props: {
+          clipsToBounds: true,
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.top.equalTo(view.prev.bottom).inset(10)
+          if(utils.getCache("Settings").canJoinRace) {
+            make.height.equalTo(50)
+          } else {
+            make.height.equalTo(0)
+          }
+          make.left.right.inset(0)
+        },
+        views: [{
+          type: "button",
+          props: {
+            id: "joinRaceSelector",
+            bgcolor: $color("clear"),
+            radius: 12,
+            info: myApp.racing,
+          },
+          layout: function(make, view) {
+            make.center.equalTo(view.super)
+            make.height.equalTo(view.super)
+            make.width.equalTo(145)
+          },
+          views: [{
+            type: "view",
+            props: {
+              circular: true,
+              borderWidth: 2,
+              borderColor: $color(utils.mColor.green),
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.left.inset(0)
+              make.size.equalTo($size(18, 18))
+            },
+            views: [{
+              type: "image",
+              props: {
+                id: "joinRaceIcon",
+                icon: $icon("064", $color(utils.mColor.green), $size(18, 18)),
+                hidden: !myApp.racing,
+              },
+              layout: function(make, view) {
+                make.center.equalTo(view.super)
+                make.size.equalTo(view.super)
+              },
+            },]
+          },{
+            type: "label",
+            props: {
+              text: "参加脚本作品竞赛",
+              align: $align.left,
+              font: $font(15),
+              textColor: utils.themeColor.appObviousColor,
+            },
+            layout: function(make, view) {
+              make.centerY.equalTo(view.super)
+              make.right.inset(0)
+            }
+          }],
+          events: {
+            tapped: function(sender) {
+              if(sender.info) {
+                if(updateApp && myApp.racing) {
+                  $ui.alert({
+                    title: "警告",
+                    message: "退出竞赛后需要大幅更新此脚本才能重新参加比赛，确定退出？",
+                    actions: [{
+                      title: "确定",
+                      handler: function () {
+                        $("joinRaceIcon").hidden = true
+                        sender.info = false
+                      }
+                    },
+                    {
+                      title: "取消",
+                      handler: function () {
+      
+                      }
+                    }
+                    ]
+                  });
+                } else {
+                  $("joinRaceIcon").hidden = true
+                  sender.info = false
+                }
+              } else {
+                if(myApp.file == "") {
+                  ui.showToastView($("uploadItemView"), utils.mColor.red, "请先选择应用文件");
+                  return 0;
+                }
+                if(updateApp && !myApp.racing) {
+                  if(myApp.versionInst == "") {
+                    ui.showToastView($("uploadItemView"), utils.mColor.red, "请填写新功能介绍");
+                    return 0;
+                  } else if(myApp.versionInst.length < 40){
+                    ui.showToastView($("uploadItemView"), utils.mColor.red, "旧脚本小幅更新无法参加竞赛");
+                    return 0;
+                  }
+                }
+                if(myApp.appSize < 2000) {
+                  ui.showToastView($("uploadItemView"), utils.mColor.red, "小型脚本无法参加竞赛");
+                  return 0;
+                }
+                $("joinRaceIcon").hidden = false
+                sender.info = true
+              }
+            }
+          }
+        }],
+      },
+      {
         type: "button",
         props: {
           id: "cloudButton",
@@ -1421,6 +1536,7 @@ function setupUploadView(updateApp) {
             //加入更多信息
             myApp.updateTime = time
             myApp.onStore = true
+            myApp.racing = $("joinRaceSelector").info
 
             //版本更新记录
             if(!myApp.versionHistory) {

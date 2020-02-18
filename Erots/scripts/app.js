@@ -28,6 +28,7 @@ function main() {
   setupMainView()
   requireApps()
   solveQuery()
+  showAnnouncement()
 }
 
 $app.listen({
@@ -1168,6 +1169,8 @@ function genAppListView(apps) {
               }
             })
           }
+        }, {
+          hintText: (apps[i].racing)?"参赛作品":"",
         })]
       }]
     })
@@ -1261,6 +1264,12 @@ function genMeView() {
   }
 
   let array = [{
+    templateTitle: {
+      text: "作品竞赛",
+    },
+    url: "https://www.liuguogy.com/archives/first-jsbox-competition.html",
+  },
+  {
     templateTitle: {
       text: "更新日志",
     },
@@ -1523,6 +1532,19 @@ function solveQuery() {
       default:
         break;
     }
+  }
+}
+
+function showAnnouncement() {
+  let show = utils.getCache("Settings").showAnnouncement
+  let anno = utils.getCache("Settings").announcement
+  if(show && anno && anno != "") {
+    $delay(0.5, ()=>{
+      $ui.alert({
+        title: "公告",
+        message: "" + anno,
+      });
+    })
   }
 }
 
@@ -2511,7 +2533,6 @@ function setupReward() {
               message: "感谢你的支持！\n红包码 623098624 即将复制到剪切板，到支付宝首页粘贴红包码即可领取",
               actions: [{
                 title: "确定",
-                disabled: false, // Optional
                 handler: function () {
                   $app.openURL("alipays://")
                 }

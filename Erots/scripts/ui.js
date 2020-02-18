@@ -430,7 +430,8 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction, moreJson) 
       layout: function(make, view) {
         make.centerY.equalTo(view.super)
         make.right.inset(0)
-        make.size.equalTo($size(75, 30))
+        make.width.equalTo(75)
+        make.height.equalTo(view.super)
       },
       views: [{
         type: "button",
@@ -451,6 +452,18 @@ function genAppShowView(icon, name, cate, buttonText, buttonFunction, moreJson) 
             buttonFunction(sender)
           }
         },
+      },{
+        type: "label",
+        props: {
+          text: (moreJson && moreJson.hintText)?moreJson.hintText:"",
+          font: $font(10),
+          textColor: utils.themeColor.appCateTextColor,
+          align: $align.center,
+        },
+        layout: function(make, view) {
+          make.top.equalTo(view.prev.bottom).inset(3)
+          make.centerX.equalTo(view.super)
+        }
       }]
     },{
       type: "label",

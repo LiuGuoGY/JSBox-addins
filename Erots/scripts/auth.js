@@ -1,6 +1,7 @@
 let app = require("scripts/app");
 let ui = require("scripts/ui");
 let utils = require("scripts/utils");
+let api = require("scripts/api");
 
 function detect() {
     if ($app.env == $env.app) {
@@ -14,7 +15,7 @@ function detect() {
                 "X-LC-Id": utils.conAppId,
                 "X-LC-Key": utils.conAppKey,
             },
-            handler: function(resp) {
+            handler: async function(resp) {
                 if (!resp.data) {
                     setupNotConnectView()
                 } else {
@@ -22,6 +23,7 @@ function detect() {
                     if(data) {
                         authCheck(data.length > 0)
                     }
+                    await api.getErotsSetting();
                     $delay(0.1, function() {
                         go();
                     });

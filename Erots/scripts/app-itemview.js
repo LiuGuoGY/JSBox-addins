@@ -166,8 +166,8 @@ function genAppItemShowView() {
       let haveReply = comments[comments.length - i - 1].reply
       let showCommentMore = false
       let commentHeight = undefined
-      if (!haveReply && commentSize.height > 153) {
-        commentHeight = 153
+      if (!haveReply && commentSize.height > 147) {
+        commentHeight = 147
         showCommentMore = true
       } else if (haveReply && commentSize.height > 63) {
         commentHeight = 63//66
@@ -819,6 +819,59 @@ function genAppItemShowView() {
             make.top.equalTo(view.prev.bottom).inset(3)
           }
         },]
+      }, {
+        type: "view",
+        props: {
+          clipsToBounds: true,
+          hidden: !app.racing,
+        },
+        layout: function (make, view) {
+          make.left.right.inset(0)
+          make.top.equalTo(view.prev.bottom)
+          make.centerX.equalTo(view.super)
+          if(app.racing) {
+            make.height.equalTo(80)
+          } else {
+            make.height.equalTo(0)
+          }
+        },
+        views: [{
+          type: "view",
+          props: {
+            bgcolor: $color(utils.mColor.green),
+          },
+          layout: function (make, view) {
+            make.left.right.inset(20)
+            make.center.equalTo(view.super)
+            make.height.equalTo(60)
+            shadow(view)
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "参赛作品",
+              font: $font("PingFangSC-Semibold", 21),
+              align: $align.center,
+              textColor: $color("white"),
+            },
+            layout: function (make, view) {
+              make.top.inset(5)
+              make.centerX.equalTo(view.super)
+            },
+          },{
+            type: "label",
+            props: {
+              text: "第一届脚本作品竞赛",
+              font: $font("PingFangSC-Regular", 13),
+              align: $align.center,
+              textColor: $color("white"),
+            },
+            layout: function (make, view) {
+              make.centerX.equalTo(view.super)
+              make.bottom.inset(5)
+            },
+          }]
+        }]
       }, {
         type: "view",
         layout: function (make, view) {
@@ -2425,6 +2478,15 @@ function genAppReportFaultView(app) {
       }]
     }]
   })
+}
+
+function shadow(view) {
+  var layer = view.runtimeValue().invoke("layer")
+  layer.invoke("setCornerRadius", 8)
+  layer.invoke("setShadowOffset", $size(0, 0))
+  layer.invoke("setShadowColor", $color(utils.mColor.green).runtimeValue().invoke("CGColor"))
+  layer.invoke("setShadowOpacity", 0.8)
+  layer.invoke("setShadowRadius", 5)
 }
 
 module.exports = {
