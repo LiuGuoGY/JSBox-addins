@@ -291,6 +291,11 @@ function setLineSpacing(text, spacing) {
   return attrText.rawValue();
 }
 
+function isVoiceOverRunning() {
+  $defc("UIAccessibilityIsVoiceOverRunning", "BOOL");
+  return UIAccessibilityIsVoiceOverRunning();
+}
+
 module.exports = {
   getCache: getCache,
   randomValue: randomValue,
@@ -313,4 +318,5 @@ module.exports = {
   getThemeMode: getThemeMode,
   saveAddin: saveAddin,
   setLineSpacing: setLineSpacing,
+  isVoiceOverRunning: isVoiceOverRunning,
 }

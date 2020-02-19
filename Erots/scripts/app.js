@@ -43,7 +43,7 @@ $app.listen({
 let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 
 
 function setThemeColor() {
-  if(utils.getThemeMode() == "dark") {
+  if (utils.getThemeMode() == "dark") {
     utils.themeColor = utils.tColor.dark;
     $cache.set("themeColor", utils.getCache("darkThemeColor"));
   } else {
@@ -104,13 +104,73 @@ function genMainView() {
       events: {
         ready(sender) {
           $delay(0.1, () => {
-            if($("cloudAppsList")) {
+            if ($("cloudAppsList")) {
               topOffset = $("cloudAppsList").contentOffset.y
             }
           })
         },
       },
-      views: [genCloudView()],
+      views: [genCloudView(), {
+        type: "view",
+        props: {
+          hidden: !utils.isVoiceOverRunning(),
+        },
+        layout: function (make, view) {
+          make.left.top.right.inset(0)
+          if ($device.info.version >= "11") {
+            make.bottom.equalTo(view.super.topMargin).offset(35)
+          } else {
+            make.height.equalTo(60)
+          }
+        },
+        views: [{
+          type: "view",
+          layout: function (make, view) {
+            make.left.bottom.right.inset(0)
+            make.height.equalTo(45)
+          },
+          views: [{
+            type: "button",
+            props: {
+              bgcolor: $color("clear"),
+            },
+            layout: function (make, view) {
+              make.left.inset(0)
+              make.width.equalTo(100)
+              make.height.equalTo(view.super)
+            },
+            events: {
+              tapped: function (sender) {
+                $app.close()
+              },
+            },
+            views: [{
+              type: "view",
+              props: {
+                bgcolor: $color("clear"),
+              },
+              layout: function (make, view) {
+                make.left.inset(10)
+                make.centerY.equalTo(view.super)
+                make.size.equalTo($size(12.5, 21))
+              },
+              views: [ui.createBack(utils.getCache("themeColor"))]
+            }, {
+              type: "label",
+              props: {
+                text: "JSBox",
+                align: $align.center,
+                textColor: utils.getCache("themeColor"),
+                font: $font(17)
+              },
+              layout: function (make, view) {
+                make.height.equalTo(view.super)
+                make.left.equalTo(view.prev.right).inset(3)
+              }
+            }],
+          }],
+        },],
+      }],
     },
     {
       type: "view",
@@ -601,7 +661,7 @@ function genCloudAppListView() {
       indicatorInsets: $insets(40, 0, 50, 0),
       separatorColor: utils.themeColor.separatorColor,
       separatorInset: $insets(0, 85, 0, 15),
-      separatorHidden: ($app.info.build >= 497)?false:true,
+      separatorHidden: ($app.info.build >= 497) ? false : true,
       header: {
         type: "view",
         props: {
@@ -710,7 +770,7 @@ function genCloudAppListView() {
           let size = 35 - sender.contentOffset.y * 0.04
           if (size > 40)
             size = 40;
-          if($("cloudListHeaderTitle")) {
+          if ($("cloudListHeaderTitle")) {
             $("cloudListHeaderTitle").font = $font("Avenir-Black", size)
           }
         }
@@ -868,7 +928,7 @@ function genUpdateAppListView() {
                               buttonView.updateLayout(function (make, view) {
                                 make.size.equalTo($size(75, 30))
                               })
-                              $delay(0.1, ()=>{
+                              $delay(0.1, () => {
                                 buttonView.title = "打开"
                               })
                               $ui.animate({
@@ -1142,7 +1202,7 @@ function genAppListView(apps) {
                         buttonView.updateLayout(function (make, view) {
                           make.size.equalTo($size(75, 30))
                         })
-                        $delay(0.1, ()=>{
+                        $delay(0.1, () => {
                           buttonView.title = "打开"
                         })
                         $ui.animate({
@@ -1170,7 +1230,7 @@ function genAppListView(apps) {
             })
           }
         }, {
-          hintText: (apps[i].racing)?"参赛作品":"",
+          hintText: (apps[i].racing) ? "参赛作品" : "",
         })]
       }]
     })
@@ -1538,8 +1598,8 @@ function solveQuery() {
 function showAnnouncement() {
   let show = utils.getCache("Settings").showAnnouncement
   let anno = utils.getCache("Settings").announcement
-  if(show && anno && anno != "") {
-    $delay(0.5, ()=>{
+  if (show && anno && anno != "") {
+    $delay(0.5, () => {
       $ui.alert({
         title: "公告",
         message: "" + anno,
@@ -1775,7 +1835,7 @@ function showColorSelectView(superView) {
   let lightColors = ["#007AFE", "#00C2EC", "#29B227", "#EB6BA3", "#EF8200", "#9471EE", "#D23213", "#ECB403", "#6C829E", "#000000"];
   let darkColors = ["#007AFE", "#00C2EC", "#29B227", "#EB6BA3", "#EF8200", "#9471EE", "#D23213", "#ECB403", "#EF238E", "#FEFFFE"];
   let selectedColor = utils.getCache("themeColor")
-  let colors = ($device.isDarkMode)?darkColors:lightColors;
+  let colors = ($device.isDarkMode) ? darkColors : lightColors;
   for (let i = 0; i < colors.length; i++) {
     itemColors.push({
       itemColor: {
@@ -1894,7 +1954,7 @@ function showColorSelectView(superView) {
               }
               itemColors[indexPath.row].colorSelect.hidden = false
               sender.data = itemColors
-              if(utils.getThemeMode() == "dark") {
+              if (utils.getThemeMode() == "dark") {
                 $cache.set("darkThemeColor", $color(colors[indexPath.row]));
               } else {
                 $cache.set("lightThemeColor", $color(colors[indexPath.row]));
@@ -2672,7 +2732,7 @@ function downloadRewardPic(way) {
 
 //反馈页面
 function setupFeedBack(text) {
-  if($device.isJailbroken) {
+  if ($device.isJailbroken) {
     $ui.alert({
       title: "警告",
       message: "越狱设备不提供反馈建议功能",
@@ -2862,17 +2922,17 @@ function requireApps() {
       }
       $cache.set("cloudApps", apps);
       refreshAllView();
-      if(user.haveLogined()) {
+      if (user.haveLogined()) {
         showNewCommentNumber(apps)
       }
       if (query) {
         switch (query.q) {
           case "show":
             for (let i = 0; i < apps.length; i++) {
-              if(apps[i].objectId === query.objectId) {
+              if (apps[i].objectId === query.objectId) {
                 $app.notify({
                   name: "refreshItemView",
-                  object: {onStore: apps[i].onStore}
+                  object: { onStore: apps[i].onStore }
                 });
                 break;
               }
@@ -2890,7 +2950,7 @@ function showNewCommentNumber(apps) {
   let commentNum = 0;
   for (let i = 0; i < apps.length; i++) {
     if (apps[i].authorId === user.getLoginUser().objectId) {
-      if(apps[i].comment) {
+      if (apps[i].comment) {
         commentNum += apps[i].comment.length;
       }
     }
