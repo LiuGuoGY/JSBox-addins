@@ -1425,16 +1425,16 @@ function genMeView() {
               case 2:
                 (utils.getCache("authPass")) ? setupThemeSettingView() : genWxWelcomView();
                 break;
-              case 6:
+              case 7:
                 update.checkUpdate(true);
                 break;
-              case 7:
+              case 8:
                 setupFeedBack();
                 break;
-              case 8:
+              case 9:
                 setupReward();
                 break;
-              case 9:
+              case 10:
                 share("http://t.cn/AiNM3N1T");
                 break;
               default:
