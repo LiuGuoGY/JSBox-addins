@@ -338,6 +338,13 @@ function() {
                                 e.preventDefault(), document.location = qrurl;
                             } else {
                                 e.preventDefault(), document.location = link;
+								setTimeout(function() {
+									if (confirm("没有反应？可能是未安装脚本商店，点击确定即可安装商店")) {
+										window.location.href = "https://xteko.com/redir?name=Erots&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fraw%2Fmaster%2FErots%2F.output%2FErots.box";
+									} else {
+										
+									}
+								}, 3000);
                             }
                         },
                         c.onclick = function(e) {
