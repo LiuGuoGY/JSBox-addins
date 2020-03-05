@@ -40,6 +40,7 @@ const tColor = {
     uploadBgcolor: $color("#F9F9F8"),
     actionSheetBgColor: $rgba(0, 0, 0, 0.25),
     spinnerStyle: 2,
+    indicatorStyle: 0,
   },
   dark: {
     mainColor: $color("black"),
@@ -60,6 +61,7 @@ const tColor = {
     uploadBgcolor: $color("#202020"),
     actionSheetBgColor: $rgba(255, 255, 255, 0.15),
     spinnerStyle: 1,
+    indicatorStyle:2,
   }
 }
 
@@ -296,6 +298,28 @@ function isVoiceOverRunning() {
   return UIAccessibilityIsVoiceOverRunning();
 }
 
+
+function numerToSize(number){
+  var size = "";
+  if( number < 0.1 * 1024 ){ //如果小于0.1KB转化成B
+    size = number.toFixed(2) + " B"; 	
+  }else if(number < 0.1 * 1024 * 1024 ){//如果小于0.1MB转化成KB
+    size = (number / 1024).toFixed(2) + " KB";			
+  }else if(number < 0.1 * 1024 * 1024 * 1024){ //如果小于0.1GB转化成MB
+    size = (number / (1024 * 1024)).toFixed(2) + " MB";
+  }else{ //其他转化成GB
+    size = (number / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+  }
+  
+  var sizestr = size + ""; 
+  var len = sizestr.indexOf("\.");
+  var dec = sizestr.substr(len + 1, 2);
+  if(dec == "00"){ //当小数点后为00时 去掉小数部分
+    return sizestr.substring(0,len) + sizestr.substr(len + 3,2);
+  }
+  return sizestr;
+}
+
 module.exports = {
   getCache: getCache,
   randomValue: randomValue,
@@ -319,4 +343,5 @@ module.exports = {
   saveAddin: saveAddin,
   setLineSpacing: setLineSpacing,
   isVoiceOverRunning: isVoiceOverRunning,
+  numerToSize: numerToSize,
 }

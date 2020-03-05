@@ -520,6 +520,7 @@ function genAppItemShowView() {
       type: "scroll",
       props: {
         id: "appItemShowScroll",
+        indicatorStyle: utils.themeColor.indicatorStyle,
         indicatorInsets: $insets(60, 0, 0, 0),
       },
       layout: function (make, view) {
@@ -1545,6 +1546,61 @@ function genAppItemShowView() {
             }
           }
         }]
+      },{
+        type: "view",
+        layout: function (make, view) {
+          make.top.equalTo(view.prev.bottom)
+          make.height.equalTo(40)
+          make.left.right.inset(20)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "大小",
+            align: $align.left,
+            font: $font(14),
+            textColor: utils.themeColor.appCateTextColor,
+          },
+          layout: function (make, view) {
+            make.top.inset(0)
+            make.height.equalTo(20)
+            make.left.inset(0)
+            make.centerY.equalTo(view.super)
+          }
+        }, {
+          type: "label",
+          props: {
+            text: utils.numerToSize(app.appSize),
+            align: $align.right,
+            font: $font(14),
+            textColor: utils.themeColor.listHeaderTextColor,
+          },
+          layout: function (make, view) {
+            make.top.inset(0)
+            make.height.equalTo(20)
+            make.right.inset(0)
+            make.width.equalTo(100)
+            make.centerY.equalTo(view.super)
+          }
+        }, {
+          type: "canvas",
+          layout: function (make, view) {
+            make.bottom.inset(0)
+            make.height.equalTo(1 / $device.info.screen.scale)
+            make.left.right.inset(0)
+          },
+          events: {
+            draw: function (view, ctx) {
+              var width = view.frame.width
+              var scale = $device.info.screen.scale
+              ctx.strokeColor = $color("#D0D0D0")
+              ctx.setLineWidth(1 / scale)
+              ctx.moveToPoint(0, 0)
+              ctx.addLineToPoint(width, 0)
+              ctx.strokePath()
+            }
+          }
+        }]
       }, {
         type: "view",
         props: {
@@ -2158,6 +2214,7 @@ function genUpdateHistoryView(app) {
     views: [ui.genPageHeader("应用", "版本历史记录"), {
       type: "scroll",
       props: {
+        indicatorStyle: utils.themeColor.indicatorStyle,
         alwaysBounceHorizontal: false,
       },
       layout: function (make, view) {

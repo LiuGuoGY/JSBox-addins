@@ -110,67 +110,7 @@ function genMainView() {
           })
         },
       },
-      views: [genCloudView(), {
-        type: "view",
-        props: {
-          hidden: !utils.isVoiceOverRunning(),
-        },
-        layout: function (make, view) {
-          make.left.top.right.inset(0)
-          if ($device.info.version >= "11") {
-            make.bottom.equalTo(view.super.topMargin).offset(35)
-          } else {
-            make.height.equalTo(60)
-          }
-        },
-        views: [{
-          type: "view",
-          layout: function (make, view) {
-            make.left.bottom.right.inset(0)
-            make.height.equalTo(45)
-          },
-          views: [{
-            type: "button",
-            props: {
-              bgcolor: $color("clear"),
-            },
-            layout: function (make, view) {
-              make.left.inset(0)
-              make.width.equalTo(100)
-              make.height.equalTo(view.super)
-            },
-            events: {
-              tapped: function (sender) {
-                $app.close()
-              },
-            },
-            views: [{
-              type: "view",
-              props: {
-                bgcolor: $color("clear"),
-              },
-              layout: function (make, view) {
-                make.left.inset(10)
-                make.centerY.equalTo(view.super)
-                make.size.equalTo($size(12.5, 21))
-              },
-              views: [ui.createBack(utils.getCache("themeColor"))]
-            }, {
-              type: "label",
-              props: {
-                text: "JSBox",
-                align: $align.center,
-                textColor: utils.getCache("themeColor"),
-                font: $font(17)
-              },
-              layout: function (make, view) {
-                make.height.equalTo(view.super)
-                make.left.equalTo(view.prev.right).inset(3)
-              }
-            }],
-          }],
-        },],
-      }],
+      views: [genCloudView()],
     },
     {
       type: "view",
@@ -288,8 +228,67 @@ function genMainView() {
           ctx.strokePath()
         }
       }
-    },
-    ]
+    },{
+      type: "view",
+      props: {
+        hidden: !utils.isVoiceOverRunning(),
+      },
+      layout: function (make, view) {
+        make.left.top.right.inset(0)
+        if ($device.info.version >= "11") {
+          make.bottom.equalTo(view.super.topMargin).offset(35)
+        } else {
+          make.height.equalTo(60)
+        }
+      },
+      views: [{
+        type: "view",
+        layout: function (make, view) {
+          make.left.bottom.right.inset(0)
+          make.height.equalTo(45)
+        },
+        views: [{
+          type: "button",
+          props: {
+            bgcolor: $color("clear"),
+          },
+          layout: function (make, view) {
+            make.left.inset(0)
+            make.width.equalTo(100)
+            make.height.equalTo(view.super)
+          },
+          events: {
+            tapped: function (sender) {
+              $app.close()
+            },
+          },
+          views: [{
+            type: "view",
+            props: {
+              bgcolor: $color("clear"),
+            },
+            layout: function (make, view) {
+              make.left.inset(10)
+              make.centerY.equalTo(view.super)
+              make.size.equalTo($size(12.5, 21))
+            },
+            views: [ui.createBack(utils.getCache("themeColor"))]
+          }, {
+            type: "label",
+            props: {
+              text: "JSBox",
+              align: $align.center,
+              textColor: utils.getCache("themeColor"),
+              font: $font(17)
+            },
+            layout: function (make, view) {
+              make.height.equalTo(view.super)
+              make.left.equalTo(view.prev.right).inset(3)
+            }
+          }],
+        }],
+      },],
+    }]
   }
   return mainView;
 }
@@ -659,6 +658,7 @@ function genCloudAppListView() {
       template: {},
       bgcolor: $color("clear"),
       indicatorInsets: $insets(40, 0, 50, 0),
+      indicatorStyle: utils.themeColor.indicatorStyle,
       separatorColor: utils.themeColor.separatorColor,
       separatorInset: $insets(0, 85, 0, 15),
       separatorHidden: ($app.info.build >= 497) ? false : true,
@@ -1009,6 +1009,7 @@ function genUpdateAppListView() {
       template: [],
       bgcolor: $color("clear"),
       indicatorInsets: $insets(40, 0, 50, 0),
+      indicatorStyle: utils.themeColor.indicatorStyle,
       separatorInset: $insets(0, 85, 0, 15),
       separatorColor: utils.themeColor.separatorColor,
       separatorHidden: true,
@@ -1323,6 +1324,60 @@ function genMeView() {
     layout: $layout.fill
   }
 
+  const tabMyVoteCode = {
+    type: "view",
+    props: {
+      bgcolor: utils.themeColor.bgcolor,
+    },
+    views: [{
+      type: "label",
+      props: {
+        text: "我的投票码",
+        textColor: utils.themeColor.listContentTextColor,
+      },
+      layout: function (make, view) {
+        make.left.inset(15)
+        make.centerY.equalTo(view.super)
+      }
+    },
+    {
+      type: "button",
+      props: {
+        borderWidth: 0,
+        bgcolor: $color("clear"),
+        titleColor: utils.getCache("themeColor"),
+        font: $font(16),
+        title: "点击查看",
+      },
+      layout: function (make, view) {
+        make.right.inset(15)
+        make.centerY.equalTo(view.super)
+      },
+      events: {
+        tapped: function (sender) {
+          let code = $objc("FCUUID").invoke("uuidForDevice").rawValue().toUpperCase().slice(0,4) + "E" + $objc("FCUUID").invoke("uuidForDevice").rawValue().toUpperCase().slice(4, 13) + "A" + $objc("FCUUID").invoke("uuidForDevice").rawValue().toUpperCase().slice(13)
+          $ui.alert({
+            title: "提示",
+            message: "你的投票码为 " + code,
+            actions: [{
+              title: "好的",
+              handler: function () {
+      
+              }
+            },{
+              title: "复制",
+              handler: function () {
+                $clipboard.text = code
+              }
+            },
+            ]
+          })
+        }
+      }
+    }],
+    layout: $layout.fill
+  }
+
   let array = [{
     templateTitle: {
       text: "作品竞赛",
@@ -1401,6 +1456,7 @@ function genMeView() {
         bgcolor: $color("clear"),
         template: feedBackTemplate,
         indicatorInsets: $insets(40, 0, 50, 0),
+        indicatorStyle: utils.themeColor.indicatorStyle,
         separatorColor: utils.themeColor.separatorColor,
         header: {
           type: "view",
@@ -1457,7 +1513,7 @@ function genMeView() {
         },
         {
           title: "其他",
-          rows: [tabShowInstalls],
+          rows: [tabShowInstalls, tabMyVoteCode],
         }
         ],
       },
@@ -1799,6 +1855,7 @@ function genThemeSettingView() {
         bgcolor: $color("clear"),
         template: [],
         indicatorInsets: $insets(45, 0, 50, 0),
+        indicatorStyle: utils.themeColor.indicatorStyle,
         separatorColor: utils.themeColor.separatorColor,
         itemHeight: 50,
         data: [{
@@ -2644,6 +2701,7 @@ function setupReward() {
         borderColor: $rgba(90, 90, 90, 0.4),
         borderWidth: 1,
         separatorColor: utils.themeColor.separatorColor,
+        indicatorStyle: utils.themeColor.indicatorStyle,
         insets: $insets(5, 5, 5, 5),
         rowHeight: 35,
         bgcolor: $color("clear"),

@@ -122,6 +122,7 @@ function genUserCenterSubview() {
         bgcolor: $color("clear"),
         template: userTemplate,
         indicatorInsets: $insets(45, 0, 50, 0),
+        indicatorStyle: utils.themeColor.indicatorStyle,
         separatorColor: utils.themeColor.separatorColor,
         header: {
           type: "view",
@@ -355,6 +356,7 @@ function setupMyCommentsView() {
           bgcolor: $color("clear"),
           template: template,
           indicatorInsets: $insets(0, 0, 0, 0),
+          indicatorStyle: utils.themeColor.indicatorStyle,
           separatorColor: utils.themeColor.separatorColor,
           separatorHidden: true,
           data: sortedComments,
@@ -794,6 +796,7 @@ function setupManageMyAppsView() {
         style: 0,
         bgcolor: $color("clear"),
         indicatorInsets: $insets(0, 0, 0, 0),
+        indicatorStyle: utils.themeColor.indicatorStyle,
         separatorColor: utils.themeColor.separatorColor,
         separatorInset: $insets(0, 85, 0, 15),
         separatorHidden: ($app.info.build >= 497)?false:true,

@@ -164,6 +164,7 @@ function setupUploadView(updateApp) {
       type: "scroll",
       props: {
         id: "uploadScroll",
+        indicatorStyle: utils.themeColor.indicatorStyle,
         bgcolor: utils.themeColor.mainColor,
         showsVerticalIndicator: true,
       },
