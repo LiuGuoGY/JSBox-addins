@@ -677,6 +677,16 @@ hr {
     background-color: #FFF;
 }
 
+@media (prefers-color-scheme: dark) {
+    .main {
+        margin-left: auto;
+        margin-right: auto;
+        width: 736px;
+        min-height: 360px;
+        background-color: #000;
+    }
+}
+
 .header-title {
     font-family: SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif;
     line-height: 35px;
