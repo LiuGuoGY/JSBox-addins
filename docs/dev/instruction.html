@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dropEffect="none">
+
+<head>
+  <meta charset="utf-8" />
+  <title>打开引导</title>
+</head>
+
+<body>
+  <div class="title" align="center" style="margin:318px 0px 0px 0px;">
+    <font style="font-weight:900;font-size:33px;color:rgb(50,50,50);">请按照下面的示意图操作打开页面 </p>
+    </font>
+  </div>
+  <div style="width:600px;height:280px;text-align:center;margin:0 auto;">
+    <div class="left" style="float:left;">
+      <div>
+        <img id="img_left" src="./assets/images/ios_more.png">
+      </div>
+      <div style="margin-top:54px;">
+        <font style="font-weight:900;font-size:30px;color:rgb(50,50,50);">
+          第 1 步
+        </font>
+      </div>
+      <div style="margin-top:33px">
+        <font style="font-size:28px;color:rgb(50,50,50);">
+          点击该页右上角</br>的「更多」按钮
+        </font>
+      </div>
+    </div>
+    <img style="margin:50px 0px 0px 81px;float:left;" src="./assets/images/common_right.png">
+    <div class="right" style="float:right;">
+      <div>
+        <img id="img_right" src="./assets/images/ios_broswer.png">
+      </div>
+      <div style="margin-top:54px;">
+        <font style="font-weight:900;font-size:30px;color:rgb(50,50,50);">
+          第 2 步
+        </font>
+      </div>
+      <div style="margin-top:33px">
+        <font id="font" style="margin:33px 0px;font-size:28px;color:rgb(50,50,50);">
+          选择用 Safari 打开
+        </font>
+      </div>
+    </div>
+  </div>
+  <script language="javascript">
+    var u = navigator.userAgent;
+    if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {//安卓手机
+      document.getElementById("img_left").src = './assets/images/android_more.png';
+      document.getElementById("img_right").src = './assets/images/android_broswer1.png';
+      document.getElementById("font").innerHTML = '选择在浏览器中打开';
+    }
+
+  </script>
+  <script>
+    function is_weixin() {
+      if (/MicroMessenger/i.test(navigator.userAgent)) {
+        return true
+      } else {
+        return false
+      }
+    }
+    function getSearchJson(url) {
+      let deUrl = decodeURI(url)
+      let searchArr = deUrl.substr(deUrl.indexOf("?") + 1).split("&");
+      let searchJson = {}
+      for (let i = 0; i < searchArr.length; i++) {
+        searchJson[searchArr[i].split("=")[0]] = searchArr[i].split("=")[1]
+      }
+      return searchJson
+    }
+    if (!is_weixin()) {
+      var url = location.search;
+      var qrurl = "./index.html?"
+      if (url.indexOf("?") >= 0) {
+        qrurl = qrurl + url.substring(1);
+      }
+      window.location.href = qrurl
+    }
+  </script>
+
+</body>
+
+</html>
