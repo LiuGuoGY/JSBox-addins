@@ -674,7 +674,7 @@ hr {
     margin-right: auto;
     width: 736px;
     min-height: 360px;
-    background-color: #FFF;
+    background-color: #000;
 }
 
 @media (prefers-color-scheme: dark) {
