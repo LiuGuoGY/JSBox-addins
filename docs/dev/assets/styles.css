@@ -835,19 +835,20 @@ main #shortcut-container {
     }
 }
 
-main #shortcut-icon {
-    width: 60px;
-    height: 60px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, .14);
-    border-radius: 15px
-}
-
 @media (prefers-color-scheme: dark) {
+  main #shortcut-icon {
+      width: 60px;
+      height: 60px;
+      box-shadow: 0 4px 8px 0 rgba(255, 255, 255, .14);
+      border-radius: 15px;
+      background-color: #FFF;
+  }
+  
 	main #shortcut-name {
     font-size: 34px;
     color: #fff;
     letter-spacing: -.82px
-}
+  }
 
   main #shortcut-description {
       font-size: 17px;
@@ -859,11 +860,19 @@ main #shortcut-icon {
 }
 
 @media (prefers-color-scheme: light) {
+
+  main #shortcut-icon {
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, .14);
+    border-radius: 15px;
+    background-color: #FFF;
+  }
   main #shortcut-name {
     font-size: 34px;
     color: #000;
     letter-spacing: -.82px
-}
+  }
 
   main #shortcut-description {
       font-size: 17px;
