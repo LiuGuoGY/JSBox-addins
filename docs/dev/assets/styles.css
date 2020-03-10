@@ -674,17 +674,18 @@ hr {
     margin-right: auto;
     width: 736px;
     min-height: 360px;
-    color: #000;
 }
 
 @media (prefers-color-scheme: dark) {
-    .main {
-        margin-left: auto;
-        margin-right: auto;
-        width: 736px;
-        min-height: 360px;
-        color: #000;
-    }
+	#main { 
+		background-color: #000; 
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	#main { 
+		background-color: #fff; 
+	}
 }
 
 .header-title {
