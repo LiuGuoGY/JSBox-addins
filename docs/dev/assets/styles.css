@@ -1,3 +1,27 @@
+@media (prefers-color-scheme: dark) {
+	#main { 
+		background-color: #000; 
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	#main { 
+		background-color: #fff; 
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	#footer { 
+		background-color: #000; 
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	#footer { 
+		background-color: #fff; 
+	}
+}
+
 @font-face {
     font-family: SF Pro Text;
     font-weight: 400;
@@ -674,18 +698,6 @@ hr {
     margin-right: auto;
     width: 736px;
     min-height: 360px;
-}
-
-@media (prefers-color-scheme: dark) {
-	#main { 
-		background-color: #000; 
-	}
-}
-
-@media (prefers-color-scheme: light) {
-	#main { 
-		background-color: #fff; 
-	}
 }
 
 .header-title {
