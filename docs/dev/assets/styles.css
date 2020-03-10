@@ -837,8 +837,20 @@ main #loading .spinner-32px-f3f5f5 {
     float: none
 }
 
-main #loading .text {
-    vertical-align: middle
+
+
+@media (prefers-color-scheme: dark) {
+    main #loading .text {
+        vertical-align: middle;
+        color: gray;
+    }
+}
+  
+@media (prefers-color-scheme: light) {
+    main #loading .text {
+        vertical-align: middle;
+        color: gray;
+    }
 }
 
 main #shortcut-container {
