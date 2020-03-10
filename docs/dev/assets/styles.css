@@ -1,23 +1,23 @@
 @media (prefers-color-scheme: dark) {
+  body{
+    background-color:#000;
+  }
 	#main { 
+		background-color: #000; 
+  }
+  #footer { 
 		background-color: #000; 
 	}
 }
 
 @media (prefers-color-scheme: light) {
-	#main { 
+  body{
+    background-color:#fff;
+  }
+	#main {
 		background-color: #fff; 
-	}
-}
-
-@media (prefers-color-scheme: dark) {
-	#footer { 
-		background-color: #000; 
-	}
-}
-
-@media (prefers-color-scheme: light) {
-	#footer { 
+  }
+  #footer { 
 		background-color: #fff; 
 	}
 }
