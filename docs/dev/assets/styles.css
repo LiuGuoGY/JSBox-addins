@@ -1,3 +1,14 @@
+
+body{
+    background-color:#fff;
+}
+#main {
+    background-color: #fff; 
+}
+#footer { 
+    background-color: #fff; 
+}
+
 @media (prefers-color-scheme: dark) {
   body{
     background-color:#000;
@@ -7,18 +18,6 @@
   }
   #footer { 
 		background-color: #000; 
-	}
-}
-
-@media (prefers-color-scheme: light) {
-  body{
-    background-color:#fff;
-  }
-	#main {
-		background-color: #fff; 
-  }
-  #footer { 
-		background-color: #fff; 
 	}
 }
 
@@ -423,14 +422,15 @@ body.zh-tw {
     color: #727272
 }
 
+
+.footer {
+    background-image: url(./images/footer_gradient_web.png);
+}
+
+
 @media (prefers-color-scheme: dark) {
     .footer {
         background-image: url(./images/footer_gradient_web_dark.png);
-    }
-}
-@media (prefers-color-scheme: light) {
-    .footer {
-        background-image: url(./images/footer_gradient_web.png);
     }
 }
 
@@ -441,20 +441,19 @@ body.zh-tw {
     position: relative
 }
 
+.footer .footer-icloud {
+    background-size: 81px 22px;
+    background-image: url(./images/wx_footer_signoff.png);
+    height: 22px;
+    width: 81px;
+    margin: 10px auto;
+    top: 15px
+}
+
 @media (prefers-color-scheme: dark) {
     .footer .footer-icloud {
         background-size: 81px 22px;
         background-image: url(./images/wx_footer_signoff_dark.png);
-        height: 22px;
-        width: 81px;
-        margin: 10px auto;
-        top: 15px
-    }
-}
-@media (prefers-color-scheme: light) {
-    .footer .footer-icloud {
-        background-size: 81px 22px;
-        background-image: url(./images/wx_footer_signoff.png);
         height: 22px;
         width: 81px;
         margin: 10px auto;
@@ -837,19 +836,15 @@ main #loading .spinner-32px-f3f5f5 {
     float: none
 }
 
-
+main #loading .text {
+    vertical-align: middle;
+    color: #000;
+}
 
 @media (prefers-color-scheme: dark) {
     main #loading .text {
         vertical-align: middle;
-        color: gray;
-    }
-}
-  
-@media (prefers-color-scheme: light) {
-    main #loading .text {
-        vertical-align: middle;
-        color: gray;
+        color: #FFF;
     }
 }
 
@@ -867,6 +862,27 @@ main #shortcut-container {
     main #shortcut-container {
         margin-top: 6em
     }
+}
+
+main #shortcut-icon {
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, .14);
+    border-radius: 15px;
+    background-color: #FFF;
+}
+main #shortcut-name {
+    font-size: 34px;
+    color: #000;
+    letter-spacing: -.82px
+}
+
+main #shortcut-description {
+    font-size: 17px;
+    color: #36393e;
+    text-align: center;
+    line-height: 22px;
+    font-weight: 400
 }
 
 @media (prefers-color-scheme: dark) {
@@ -892,32 +908,6 @@ main #shortcut-container {
       font-weight: 400
   }
 }
-
-@media (prefers-color-scheme: light) {
-
-  main #shortcut-icon {
-    width: 60px;
-    height: 60px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, .14);
-    border-radius: 15px;
-    background-color: #FFF;
-  }
-  main #shortcut-name {
-    font-size: 34px;
-    color: #000;
-    letter-spacing: -.82px
-  }
-
-  main #shortcut-description {
-      font-size: 17px;
-      color: #36393e;
-      text-align: center;
-      line-height: 22px;
-      font-weight: 400
-  }
-}
-
-
 
 footer {
     position: fixed;
@@ -1126,35 +1116,35 @@ footer .footer .copyright {
     .badge-zu {
         background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zu_generic_rgb_wo_45@2x.png)
     }
+    
+    .footer {
+        background-image: url(./images/footer_gradient_web@2x.png)
+    }
+    
     @media (prefers-color-scheme: dark) {
         .footer {
             background-image: url(./images/footer_gradient_web_dark@2x.png)
         }
     }
-    @media (prefers-color-scheme: light) {
-        .footer {
-            background-image: url(./images/footer_gradient_web@2x.png)
-        }
+    
+    .footer .footer-icloud {
+        background-image: url(./images/wx_footer_signoff@2x.png)
     }
+    
     @media (prefers-color-scheme: dark) {
         .footer .footer-icloud {
             background-image: url(./images/wx_footer_signoff_dark@2x.png)
         }
     }
-    @media (prefers-color-scheme: light) {
-        .footer .footer-icloud {
-            background-image: url(./images/wx_footer_signoff@2x.png)
-        }
-    }
+    
     @media only screen and (max-device-width:568px) {
+        .footer {
+            background-image: url(./images/footer_gradient_iphone@2x.png)
+        }
+
         @media (prefers-color-scheme: dark) {
             .footer {
                 background-image: url(./images/footer_gradient_iphone_dark@2x.png)
-            }
-        }
-        @media (prefers-color-scheme: light) {
-            .footer {
-                background-image: url(./images/footer_gradient_iphone@2x.png)
             }
         }
     }
