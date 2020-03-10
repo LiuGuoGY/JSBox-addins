@@ -11,6 +11,18 @@
 }
 
 @media (prefers-color-scheme: dark) {
+	#loading { 
+		background-color: #000; 
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	#loading { 
+		background-color: #fff; 
+	}
+}
+
+@media (prefers-color-scheme: dark) {
 	#footer { 
 		background-color: #000; 
 	}
@@ -440,9 +452,9 @@ body.zh-tw {
     top: 15px
 }
 
-.footer .footer-icloud {
+/* .footer .footer-icloud {
     background-color: transparent;
-}
+} */
 
 .footer .copyright {
     position: relative;
