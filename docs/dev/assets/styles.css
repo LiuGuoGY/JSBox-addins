@@ -22,6 +22,10 @@
 	}
 }
 
+#shortcut-links {
+  background-color: transparent; 
+}
+
 @font-face {
     font-family: SF Pro Text;
     font-weight: 400;
