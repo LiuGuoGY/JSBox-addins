@@ -11,18 +11,6 @@
 }
 
 @media (prefers-color-scheme: dark) {
-	#loading { 
-		background-color: #000; 
-	}
-}
-
-@media (prefers-color-scheme: light) {
-	#loading { 
-		background-color: #fff; 
-	}
-}
-
-@media (prefers-color-scheme: dark) {
 	#footer { 
 		background-color: #000; 
 	}
@@ -854,19 +842,39 @@ main #shortcut-icon {
     border-radius: 15px
 }
 
-main #shortcut-name {
+@media (prefers-color-scheme: dark) {
+	main #shortcut-name {
+    font-size: 34px;
+    color: #fff;
+    letter-spacing: -.82px
+}
+
+  main #shortcut-description {
+      font-size: 17px;
+      color: gray;
+      text-align: center;
+      line-height: 22px;
+      font-weight: 400
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  main #shortcut-name {
     font-size: 34px;
     color: #000;
     letter-spacing: -.82px
 }
 
-main #shortcut-description {
-    font-size: 17px;
-    color: #36393e;
-    text-align: center;
-    line-height: 22px;
-    font-weight: 400
+  main #shortcut-description {
+      font-size: 17px;
+      color: #36393e;
+      text-align: center;
+      line-height: 22px;
+      font-weight: 400
+  }
 }
+
+
 
 footer {
     position: fixed;
