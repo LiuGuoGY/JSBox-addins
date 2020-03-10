@@ -1,34 +1,25 @@
 @media (prefers-color-scheme: dark) {
-    body{
-        background-color:#000;
-    }
-    #main { 
-        background-color: #000; 
-    }
-    #footer { 
+  body{
+    background-color:#000;
+  }
+	#main { 
 		background-color: #000; 
-    }
-    main #loading .text {
-        color: gray;
-    }
+  }
+  #footer { 
+		background-color: #000; 
+	}
 }
 
 @media (prefers-color-scheme: light) {
-    body{
-        background-color:#fff;
-    }
-        #main {
-            background-color: #fff; 
-    }
-    #footer { 
+  body{
+    background-color:#fff;
+  }
+	#main {
 		background-color: #fff; 
-    }
-    main #loading .text {
-        vertical-align: middle
-    }
-    main #loading .text {
-        color: gray;
-    }
+  }
+  #footer { 
+		background-color: #fff; 
+	}
 }
 
 @font-face {
