@@ -441,13 +441,25 @@ body.zh-tw {
     position: relative
 }
 
-.footer .footer-icloud {
-    background-size: 81px 22px;
-    background-image: url(./images/wx_footer_signoff.png);
-    height: 22px;
-    width: 81px;
-    margin: 10px auto;
-    top: 15px
+@media (prefers-color-scheme: dark) {
+    .footer .footer-icloud {
+        background-size: 81px 22px;
+        background-image: url(./images/wx_footer_signoff_dark.png);
+        height: 22px;
+        width: 81px;
+        margin: 10px auto;
+        top: 15px
+    }
+}
+@media (prefers-color-scheme: light) {
+    .footer .footer-icloud {
+        background-size: 81px 22px;
+        background-image: url(./images/wx_footer_signoff.png);
+        height: 22px;
+        width: 81px;
+        margin: 10px auto;
+        top: 15px
+    }
 }
 
 /* .footer .footer-icloud {
@@ -1112,8 +1124,15 @@ footer .footer .copyright {
             background-image: url(./images/footer_gradient_web@2x.png)
         }
     }
-    .footer .footer-icloud {
-        background-image: url(./images/wx_footer_signoff@2x.png)
+    @media (prefers-color-scheme: dark) {
+        .footer .footer-icloud {
+            background-image: url(./images/wx_footer_signoff_dark@2x.png)
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        .footer .footer-icloud {
+            background-image: url(./images/wx_footer_signoff@2x.png)
+        }
     }
     @media only screen and (max-device-width:568px) {
         @media (prefers-color-scheme: dark) {
