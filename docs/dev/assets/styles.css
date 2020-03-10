@@ -22,18 +22,6 @@
 	}
 }
 
-@media (prefers-color-scheme: dark) {
-	#shortcut-links { 
-		background-color: #000; 
-	}
-}
-
-@media (prefers-color-scheme: light) {
-	#shortcut-links { 
-		background-color: #fff; 
-	}
-}
-
 @font-face {
     font-family: SF Pro Text;
     font-weight: 400;
@@ -450,6 +438,10 @@ body.zh-tw {
     width: 81px;
     margin: 10px auto;
     top: 15px
+}
+
+.footer .footer-icloud {
+    background-color: transparent;
 }
 
 .footer .copyright {
