@@ -13,7 +13,7 @@
     }
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: light no-preference) {
     body{
         background-color:#fff;
     }
@@ -426,11 +426,21 @@ body.zh-tw {
 
 .footer {
     background-size: 736px 44px;
-    background-image: url(./images/footer_gradient_web.png);
     margin: 0 auto;
     max-width: 736px;
     height: 44px;
     color: #727272
+}
+
+@media (prefers-color-scheme: dark) {
+    .footer {
+        background-image: url(./images/footer_gradient_web_dark.png);
+    }
+}
+@media (prefers-color-scheme: light no-preference) {
+    .footer {
+        background-image: url(./images/footer_gradient_web.png);
+    }
 }
 
 .footer,
@@ -861,14 +871,14 @@ main #shortcut-container {
 
   main #shortcut-description {
       font-size: 17px;
-      color: gray;
+      color: lightgray;
       text-align: center;
       line-height: 22px;
       font-weight: 400
   }
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: light no-preference) {
 
   main #shortcut-icon {
     width: 60px;
@@ -1101,15 +1111,29 @@ footer .footer .copyright {
     .badge-zu {
         background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zu_generic_rgb_wo_45@2x.png)
     }
-    .footer {
-        background-image: url(./images/footer_gradient_web@2x.png)
+    @media (prefers-color-scheme: dark) {
+        .footer {
+            background-image: url(./images/footer_gradient_web_dark@2x.png)
+        }
+    }
+    @media (prefers-color-scheme: light no-preference) {
+        .footer {
+            background-image: url(./images/footer_gradient_web@2x.png)
+        }
     }
     .footer .footer-icloud {
         background-image: url(./images/wx_footer_signoff@2x.png)
     }
     @media only screen and (max-device-width:568px) {
-        .footer {
-            background-image: url(./images/footer_gradient_iphone@2x.png)
+        @media (prefers-color-scheme: dark) {
+            .footer {
+                background-image: url(./images/footer_gradient_iphone_dark@2x.png)
+            }
+        }
+        @media (prefers-color-scheme: light no-preference) {
+            .footer {
+                background-image: url(./images/footer_gradient_iphone@2x.png)
+            }
         }
     }
     @media only screen and (min-device-width:600px) and (max-device-width:800px) {
