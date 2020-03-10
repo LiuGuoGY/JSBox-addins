@@ -13,7 +13,7 @@
     }
 }
 
-@media (prefers-color-scheme: light no-preference) {
+@media (prefers-color-scheme: light) {
     body{
         background-color:#fff;
     }
@@ -437,7 +437,7 @@ body.zh-tw {
         background-image: url(./images/footer_gradient_web_dark.png);
     }
 }
-@media (prefers-color-scheme: light no-preference) {
+@media (prefers-color-scheme: light) {
     .footer {
         background-image: url(./images/footer_gradient_web.png);
     }
@@ -878,7 +878,7 @@ main #shortcut-container {
   }
 }
 
-@media (prefers-color-scheme: light no-preference) {
+@media (prefers-color-scheme: light) {
 
   main #shortcut-icon {
     width: 60px;
@@ -1116,7 +1116,7 @@ footer .footer .copyright {
             background-image: url(./images/footer_gradient_web_dark@2x.png)
         }
     }
-    @media (prefers-color-scheme: light no-preference) {
+    @media (prefers-color-scheme: light) {
         .footer {
             background-image: url(./images/footer_gradient_web@2x.png)
         }
@@ -1130,7 +1130,7 @@ footer .footer .copyright {
                 background-image: url(./images/footer_gradient_iphone_dark@2x.png)
             }
         }
-        @media (prefers-color-scheme: light no-preference) {
+        @media (prefers-color-scheme: light) {
             .footer {
                 background-image: url(./images/footer_gradient_iphone@2x.png)
             }
