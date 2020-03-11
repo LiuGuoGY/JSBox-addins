@@ -466,6 +466,19 @@ body.ja-jp, body.zh-cn, body.zh-tw {
   margin-left: 3px
 }
 
+@media (prefers-color-scheme: dark) {
+  .bar-after :after {
+    background: #1A1A1A;
+    width: 1px;
+    content: "";
+    display: inline-block;
+    position: absolute;
+    height: 12px;
+    margin-top: 2px;
+    margin-left: 3px
+  }
+}
+
 .copyright-dir {
   display: inline-block;
   margin-right: 4px
