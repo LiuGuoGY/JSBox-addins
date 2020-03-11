@@ -3,15 +3,16 @@
 
 <head>
   <meta charset="utf-8" />
+  <link rel="stylesheet" href="./assets/styles-i.css">
   <title>打开引导</title>
 </head>
 
 <body>
-  <div class="title" align="center" style="margin:318px 0px 0px 0px;">
+  <div id="title" class="title" align="center" style="margin:318px 0px 0px 0px;display: none;">
     <font style="font-weight:900;font-size:33px;color:rgb(50,50,50);">请按照下面的示意图操作打开页面 </p>
     </font>
   </div>
-  <div style="width:600px;height:280px;text-align:center;margin:0 auto;">
+  <div id="content" style="width:600px;height:280px;text-align:center;margin:0 auto;display: none;">
     <div class="left" style="float:left;">
       <div>
         <img id="img_left" src="./assets/images/ios_more.png">
@@ -70,7 +71,10 @@
       }
       return searchJson
     }
-    if (!is_weixin()) {
+    if (is_weixin()) {
+      document.getElementById("title").style.display="";//隐藏
+      document.getElementById("content").style.display="";//显示
+    } else {
       var url = location.search;
       var qrurl = "./index.html?"
       if (url.indexOf("?") >= 0) {
