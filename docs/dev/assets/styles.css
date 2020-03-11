@@ -468,7 +468,7 @@ body.ja-jp, body.zh-cn, body.zh-tw {
 
 @media (prefers-color-scheme: dark) {
   .bar-after :after {
-    background: #1A1A1A;
+    background: #2A2A2A;
     width: 1px;
     content: "";
     display: inline-block;
