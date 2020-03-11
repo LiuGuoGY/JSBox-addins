@@ -1,464 +1,436 @@
+body {
+  background-color: #fff;
+}
 
-body{
-    background-color:#fff;
-}
 #main {
-    background-color: #fff; 
+  background-color: #fff;
 }
-#footer { 
-    background-color: #fff; 
+
+#footer {
+  background-color: #fff;
 }
 
 @media (prefers-color-scheme: dark) {
-  body{
-    background-color:#000;
+  body {
+    background-color: #000;
   }
-	#main { 
-		background-color: #000; 
+  #main {
+    background-color: #000;
   }
-  #footer { 
-		background-color: #000; 
-	}
+  #footer {
+    background-color: #000;
+  }
 }
 
 @font-face {
-    font-family: SF Pro Text;
-    font-weight: 400;
-    font-display: swap;
-    src: local(".SFProText-Regular"), url(./SF-Pro-Text-Regular.woff) format("woff")
+  font-family: SF Pro Text;
+  font-weight: 400;
+  font-display: swap;
+  src: local(".SFProText-Regular"), url(./SF-Pro-Text-Regular.woff) format("woff")
 }
 
 @font-face {
-    font-family: SF Pro Text;
-    font-weight: 500;
-    font-display: swap;
-    src: local(".SFProText-Medium"), url(./SF-Pro-Text-Medium.woff) format("woff")
+  font-family: SF Pro Text;
+  font-weight: 500;
+  font-display: swap;
+  src: local(".SFProText-Medium"), url(./SF-Pro-Text-Medium.woff) format("woff")
 }
 
 @font-face {
-    font-family: SF Pro Display;
-    font-weight: 400;
-    font-display: swap;
-    src: local(".SFProDisplay-Regular"), url(./SF-Pro-Display-Regular.woff) format("woff")
+  font-family: SF Pro Display;
+  font-weight: 400;
+  font-display: swap;
+  src: local(".SFProDisplay-Regular"), url(./SF-Pro-Display-Regular.woff) format("woff")
 }
 
 @font-face {
-    font-family: SF Pro Display;
-    font-weight: 500;
-    font-display: swap;
-    src: local(".SFProDisplay-Medium"), url(./SF-Pro-Display-Medium.woff) format("woff")
+  font-family: SF Pro Display;
+  font-weight: 500;
+  font-display: swap;
+  src: local(".SFProDisplay-Medium"), url(./SF-Pro-Display-Medium.woff) format("woff")
 }
 
 body {
-    font-family: SF Pro Text, Helvetica Neue, Helvetica, Arial, sans-serif;
-    color: #333;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale
+  font-family: SF Pro Text, Helvetica Neue, Helvetica, Arial, sans-serif;
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale
 }
 
-[dir=ltr] body.rtl,
-[dir=rtl] body.rtl,
-body.rtl {
-    direction: rtl
+[dir=ltr] body.rtl, [dir=rtl] body.rtl, body.rtl {
+  direction: rtl
 }
 
-body.ja-jp,
-body.zh-cn,
-body.zh-tw {
-    font-family: SF Pro Text, Helvetica Neue, sans-serif
+body.ja-jp, body.zh-cn, body.zh-tw {
+  font-family: SF Pro Text, Helvetica Neue, sans-serif
 }
 
 .badge-af {
-    background-size: 129px 45px;
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/af_generic_rgb_wo_45.png)
+  background-size: 129px 45px;
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/af_generic_rgb_wo_45.png)
 }
 
-.badge-af,
-.badge-ar {
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-af, .badge-ar {
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-ar {
-    background-size: 130px 45px;
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ar_generic_rgb_wo_45.png)
+  background-size: 130px 45px;
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ar_generic_rgb_wo_45.png)
 }
 
 .badge-be {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/be_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/be_generic_rgb_wo_45.png)
 }
 
-.badge-be,
-.badge-bg {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-be, .badge-bg {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-bg {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/bg_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/bg_generic_rgb_wo_45.png)
 }
 
 .badge-ca {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ca_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ca_generic_rgb_wo_45.png)
 }
 
-.badge-ca,
-.badge-zh-cn {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-ca, .badge-zh-cn {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-zh-cn {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-cn_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-cn_generic_rgb_wo_45.png)
 }
 
 .badge-zh-hk {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-hk_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-hk_generic_rgb_wo_45.png)
 }
 
-.badge-zh-hk,
-.badge-zh-tw {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-zh-hk, .badge-zh-tw {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-zh-tw {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-tw_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-tw_generic_rgb_wo_45.png)
 }
 
 .badge-hr {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hr_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hr_generic_rgb_wo_45.png)
 }
 
-.badge-cs,
-.badge-hr {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-cs, .badge-hr {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-cs {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/cs_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/cs_generic_rgb_wo_45.png)
 }
 
 .badge-da {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/da_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/da_generic_rgb_wo_45.png)
 }
 
-.badge-da,
-.badge-nl {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-da, .badge-nl {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-nl {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/nl_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/nl_generic_rgb_wo_45.png)
 }
 
 .badge-et {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/et_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/et_generic_rgb_wo_45.png)
 }
 
-.badge-et,
-.badge-fa {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-et, .badge-fa {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-fa {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fa_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fa_generic_rgb_wo_45.png)
 }
 
 .badge-fil {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fil_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fil_generic_rgb_wo_45.png)
 }
 
-.badge-fi,
-.badge-fil {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-fi, .badge-fil {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-fi {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fi_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fi_generic_rgb_wo_45.png)
 }
 
 .badge-fr {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fr_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fr_generic_rgb_wo_45.png)
 }
 
-.badge-de,
-.badge-fr {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-de, .badge-fr {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-de {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/de_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/de_generic_rgb_wo_45.png)
 }
 
 .badge-el {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/el_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/el_generic_rgb_wo_45.png)
 }
 
-.badge-el,
-.badge-en {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-el, .badge-en {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-en {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/en_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/en_generic_rgb_wo_45.png)
 }
 
 .badge-hu {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hu_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hu_generic_rgb_wo_45.png)
 }
 
-.badge-hu,
-.badge-id-in {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-hu, .badge-id-in {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-id-in {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/id-in_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/id-in_generic_rgb_wo_45.png)
 }
 
 .badge-it {
-    background-size: 129px 45px;
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/it_generic_rgb_wo_45.png)
+  background-size: 129px 45px;
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/it_generic_rgb_wo_45.png)
 }
 
-.badge-it,
-.badge-ja {
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-it, .badge-ja {
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-ja {
-    background-size: 130px 45px;
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ja_generic_rgb_wo_45.png)
+  background-size: 130px 45px;
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ja_generic_rgb_wo_45.png)
 }
 
 .badge-ko {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ko_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ko_generic_rgb_wo_45.png)
 }
 
-.badge-ko,
-.badge-lv {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-ko, .badge-lv {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-lv {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lv_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lv_generic_rgb_wo_45.png)
 }
 
 .badge-lt {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lt_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lt_generic_rgb_wo_45.png)
 }
 
-.badge-lt,
-.badge-ms {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-lt, .badge-ms {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-ms {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ms_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ms_generic_rgb_wo_45.png)
 }
 
 .badge-no {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/no_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/no_generic_rgb_wo_45.png)
 }
 
-.badge-no,
-.badge-pl {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-no, .badge-pl {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-pl {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pl_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pl_generic_rgb_wo_45.png)
 }
 
 .badge-pt-br {
-    background-size: 130px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0;
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-br_generic_rgb_wo_45.png)
+  background-size: 130px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-br_generic_rgb_wo_45.png)
 }
 
 .badge-pt-pt {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-pt_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-pt_generic_rgb_wo_45.png)
 }
 
-.badge-pt-pt,
-.badge-ro {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-pt-pt, .badge-ro {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-ro {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ro_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ro_generic_rgb_wo_45.png)
 }
 
 .badge-ru {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ru_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ru_generic_rgb_wo_45.png)
 }
 
-.badge-ru,
-.badge-sr {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-ru, .badge-sr {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-sr {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sr_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sr_generic_rgb_wo_45.png)
 }
 
 .badge-sk {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sk_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sk_generic_rgb_wo_45.png)
 }
 
-.badge-sk,
-.badge-sl {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-sk, .badge-sl {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-sl {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sl_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sl_generic_rgb_wo_45.png)
 }
 
 .badge-es {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es_generic_rgb_wo_45.png)
 }
 
-.badge-es,
-.badge-es-419 {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-es, .badge-es-419 {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-es-419 {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es-419_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es-419_generic_rgb_wo_45.png)
 }
 
 .badge-sv {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sv_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sv_generic_rgb_wo_45.png)
 }
 
-.badge-sv,
-.badge-sw {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-sv, .badge-sw {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-sw {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sw_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sw_generic_rgb_wo_45.png)
 }
 
 .badge-th {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/th_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/th_generic_rgb_wo_45.png)
 }
 
-.badge-th,
-.badge-tr {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-th, .badge-tr {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-tr {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/tr_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/tr_generic_rgb_wo_45.png)
 }
 
 .badge-uk {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/uk_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/uk_generic_rgb_wo_45.png)
 }
 
-.badge-uk,
-.badge-vi {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.badge-uk, .badge-vi {
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .badge-vi {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/vi_generic_rgb_wo_45.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/vi_generic_rgb_wo_45.png)
 }
 
 .badge-zu {
-    background-size: 129px 45px;
-    background-repeat: no-repeat;
-    background-position: 0 0;
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zu_generic_rgb_wo_45.png)
+  background-size: 129px 45px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zu_generic_rgb_wo_45.png)
 }
 
 .footer {
-    background-size: 736px 44px;
-    margin: 0 auto;
-    max-width: 736px;
-    height: 44px;
-    color: #727272
+  background-size: 736px 44px;
+  margin: 0 auto;
+  max-width: 736px;
+  height: 44px;
+  color: #727272
 }
-
 
 .footer {
-    background-image: url(./images/footer_gradient_web.png);
+  background-image: url(./images/footer_gradient_web.png);
 }
-
 
 @media (prefers-color-scheme: dark) {
-    .footer {
-        background-image: url(./images/footer_gradient_web_dark.png);
-    }
+  .footer {
+    background-image: url(./images/footer_gradient_web_dark.png);
+  }
 }
 
-.footer,
-.footer .footer-icloud {
-    background-repeat: no-repeat;
-    background-position: 0 0;
-    position: relative
+.footer, .footer .footer-icloud {
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  position: relative
 }
 
 .footer .footer-icloud {
+  background-size: 81px 22px;
+  background-image: url(./images/wx_footer_signoff.png);
+  height: 22px;
+  width: 81px;
+  margin: 10px auto;
+  top: 15px
+}
+
+@media (prefers-color-scheme: dark) {
+  .footer .footer-icloud {
     background-size: 81px 22px;
-    background-image: url(./images/wx_footer_signoff.png);
+    background-image: url(./images/wx_footer_signoff_dark.png);
     height: 22px;
     width: 81px;
     margin: 10px auto;
     top: 15px
-}
-
-@media (prefers-color-scheme: dark) {
-    .footer .footer-icloud {
-        background-size: 81px 22px;
-        background-image: url(./images/wx_footer_signoff_dark.png);
-        height: 22px;
-        width: 81px;
-        margin: 10px auto;
-        top: 15px
-    }
+  }
 }
 
 /* .footer .footer-icloud {
@@ -466,365 +438,387 @@ body.zh-tw {
 } */
 
 .footer .copyright {
-    position: relative;
-    top: 14px;
-    padding-bottom: 50px;
-    font-size: 11px;
-    line-height: 15px;
-    text-align: center
+  position: relative;
+  top: 14px;
+  padding-bottom: 50px;
+  font-size: 11px;
+  line-height: 15px;
+  text-align: center
 }
 
-.privacy,
-.terms {
-    padding-left: 4px
+.privacy, .terms {
+  padding-left: 4px
 }
 
 .bar-after {
-    display: inline-block;
-    padding-right: 4px
+  display: inline-block;
+  padding-right: 4px
 }
 
 .bar-after :after {
-    background: #e5e5e5;
-    width: 1px;
-    content: "";
-    display: inline-block;
-    position: absolute;
-    height: 12px;
-    margin-top: 2px;
-    margin-left: 3px
+  background: #e5e5e5;
+  width: 1px;
+  content: "";
+  display: inline-block;
+  position: absolute;
+  height: 12px;
+  margin-top: 2px;
+  margin-left: 3px
 }
 
 .copyright-dir {
-    display: inline-block;
-    margin-right: 4px
+  display: inline-block;
+  margin-right: 4px
 }
 
-.copyright-dir,
-[dir=ltr] .copyright-dir,
-[dir=rtl] .copyright-dir {
-    direction: ltr
+.copyright-dir, [dir=ltr] .copyright-dir, [dir=rtl] .copyright-dir {
+  direction: ltr
 }
 
-body.rtl .privacy,
-body.rtl .terms {
-    padding-right: 4px;
-    padding-left: 0
+body.rtl .privacy, body.rtl .terms {
+  padding-right: 4px;
+  padding-left: 0
 }
 
 body.rtl .bar-after {
-    padding-left: 4px;
-    padding-right: 0
+  padding-left: 4px;
+  padding-right: 0
 }
 
 body.rtl .bar-after :after {
-    margin-right: 3px;
-    margin-left: 0
+  margin-right: 3px;
+  margin-left: 0
 }
 
 body.rtl .copyright-dir {
-    margin-right: 0;
-    margin-left: 4px
+  margin-right: 0;
+  margin-left: 4px
 }
 
 @media only screen and (max-device-width:568px) {
-    .main {
-        width: 100%
-    }
-    .main .icon-container {
-        margin: 18px auto 28px;
-        max-width: 100%
-    }
-    .main .icon-container .description {
-        font-size: 15px
-    }
-    #content-container {
-        padding: 0 10px
-    }
-    .text-message {
-        font-size: 25px
-    }
-    .footer {
-        background-size: 320px 36px;
-        background-repeat: no-repeat;
-        background-position: 0 0;
-        background-image: url(./images/footer_gradient_iphone.png);
-        width: 320px;
-        height: 36px
-    }
-    .subscription-text {
-        width: 100%
-    }
+  .main {
+    width: 100%
+  }
+  .main .icon-container {
+    margin: 18px auto 28px;
+    max-width: 100%
+  }
+  .main .icon-container .description {
+    font-size: 15px
+  }
+  #content-container {
+    padding: 0 10px
+  }
+  .text-message {
+    font-size: 25px
+  }
+  .footer {
+    background-size: 320px 36px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: url(./images/footer_gradient_iphone.png);
+    width: 320px;
+    height: 36px
+  }
+  .subscription-text {
+    width: 100%
+  }
 }
 
 @media only screen and (min-device-width:600px) and (max-device-width:800px) {
-    .footer {
-        background-size: 580px 44px;
-        background-repeat: no-repeat;
-        background-position: 0 0;
-        background-image: url(./images/gradient_footer_580.png);
-        max-width: 580px;
-        height: 44px
-    }
+  .footer {
+    background-size: 580px 44px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: url(./images/gradient_footer_580.png);
+    max-width: 580px;
+    height: 44px
+  }
 }
 
 .spinner-32px-f3f5f5 {
+  width: 32px;
+  height: 32px;
+  background-repeat: no-repeat;
+  background-size: 32px 32px;
+  background-image: url(./images/spinner_32px_f3f5f5.gif);
+  background-position: 0 0
+}
+
+@media (prefers-color-scheme: dark) {
+  .spinner-32px-f3f5f5 {
     width: 32px;
     height: 32px;
     background-repeat: no-repeat;
     background-size: 32px 32px;
-    background-image: url(./images/spinner_32px_f3f5f5.gif);
+    background-image: url(./images/spinner_32px_f3f5f5_dark.gif);
     background-position: 0 0
+  }
 }
 
-@media (-webkit-min-device-pixel-ratio:1.5),
-(min--moz-device-pixel-ratio:1.5),
-(min-resolution:1.5dppx) {
+@media (-webkit-min-device-pixel-ratio:1.5), (min--moz-device-pixel-ratio:1.5), (min-resolution:1.5dppx) {
+  .spinner-32px-f3f5f5 {
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-image: url(./images/spinner_32px_f3f5f5@2x.gif);
+    background-size: 32px 32px
+  }
+  @media (prefers-color-scheme: dark) {
     .spinner-32px-f3f5f5 {
-        background-position: 0 0;
-        background-repeat: no-repeat;
-        background-image: url(./images/spinner_32px_f3f5f5@2x.gif);
-        background-size: 32px 32px
+      background-position: 0 0;
+      background-repeat: no-repeat;
+      background-image: url(./images/spinner_32px_f3f5f5@2x.gif);
+      background-size: 32px 32px
     }
+  }
 }
 
 .app-button {
-    position: relative
+  position: relative
 }
 
 .app-button>.left {
-    background-position: 0 0;
-    background-repeat: no-repeat;
-    left: 0;
-    width: 16px
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  left: 0;
+  width: 16px
 }
 
-.app-button>.left,
-.app-button>.middle {
-    background-image: url(./images/btn_more.png);
-    background-size: 244px 43px;
-    top: 0;
-    bottom: 0;
-    position: absolute
+.app-button>.left, .app-button>.middle {
+  background-image: url(./images/btn_more.png);
+  background-size: 244px 43px;
+  top: 0;
+  bottom: 0;
+  position: absolute
 }
 
 .app-button>.middle {
-    background-position: -16px 0;
-    background-repeat: repeat-x;
-    left: 16px;
-    right: 40px
+  background-position: -16px 0;
+  background-repeat: repeat-x;
+  left: 16px;
+  right: 40px
 }
 
 .app-button>.right {
-    background-image: url(./images/btn_more.png);
-    background-size: 244px 43px;
-    background-position: -204px 0;
-    background-repeat: no-repeat;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 40px;
-    position: absolute
+  background-image: url(./images/btn_more.png);
+  background-size: 244px 43px;
+  background-position: -204px 0;
+  background-repeat: no-repeat;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  position: absolute
 }
 
 .app-button .label {
-    position: relative;
-    text-align: center;
-    padding-right: 40px;
-    padding-left: 10px;
-    width: auto
+  position: relative;
+  text-align: center;
+  padding-right: 40px;
+  padding-left: 10px;
+  width: auto
 }
 
 .app-button .label a {
-    text-decoration: none
+  text-decoration: none
 }
 
 body.rtl .app-button {
-    background-size: 244px 43px;
-    background-repeat: no-repeat;
-    background-image: url(./images/btn_more_rtl.png);
-    background-position: 40px 16px
+  background-size: 244px 43px;
+  background-repeat: no-repeat;
+  background-image: url(./images/btn_more_rtl.png);
+  background-position: 40px 16px
 }
 
 body.rtl .app-button .label {
-    padding-right: 10px;
-    padding-left: 40px
+  padding-right: 10px;
+  padding-left: 40px
 }
 
 a.underline {
-    text-decoration: none;
-    color: #0169d9
+  text-decoration: none;
+  color: #0169d9
 }
 
 a.underline:hover {
-    color: rgba(1, 105, 217, .8)
+  color: rgba(1, 105, 217, .8)
 }
 
 a.underline:active {
-    color: #015dc0
+  color: #015dc0
 }
 
 hr {
-    height: 1px;
-    border: 0;
-    background-color: #f2f2f2;
-    margin: 18px 0
+  height: 1px;
+  border: 0;
+  background-color: #f2f2f2;
+  margin: 18px 0
 }
 
 .medium {
-    font-weight: 500
+  font-weight: 500
 }
 
 .hidden {
-    display: none
+  display: none
 }
 
 .visible {
-    display: block
+  display: block
 }
 
-#content-container,
-#loading-text {
-    margin-top: 28px;
-    margin-bottom: 31px
+#content-container, #loading-text {
+  margin-top: 28px;
+  margin-bottom: 31px
 }
 
 .icon-container {
-    margin: 56px auto 32px;
-    position: relative;
-    max-width: 540px
+  margin: 56px auto 32px;
+  position: relative;
+  max-width: 540px
 }
 
 .text-message {
-    font-size: 27px;
-    text-shadow: none;
-    text-align: center;
-    line-height: 1.3
+  font-size: 27px;
+  text-shadow: none;
+  text-align: center;
+  line-height: 1.3
 }
 
 .button-div {
-    position: relative;
-    margin-top: 20px;
-    margin-bottom: 20px
+  position: relative;
+  margin-top: 20px;
+  margin-bottom: 20px
 }
 
 .button-div a.button-message {
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 500;
-    color: #000;
-    line-height: 43px;
-    display: table;
-    margin: 0 auto
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: #000;
+  line-height: 43px;
+  display: table;
+  margin: 0 auto
 }
 
 .main {
-    margin-left: auto;
-    margin-right: auto;
-    width: 736px;
-    min-height: 360px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 736px;
+  min-height: 360px;
 }
 
 .header-title {
-    font-family: SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif;
-    line-height: 35px;
-    margin-bottom: 14px
+  font-family: SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif;
+  line-height: 35px;
+  margin-bottom: 14px
 }
 
-.description,
-.header-title {
-    text-shadow: none;
-    text-align: center
+.description, .header-title {
+  text-shadow: none;
+  text-align: center
 }
 
 .description {
-    font-size: 15px;
-    line-height: 1.3;
-    position: relative;
-    margin: 0 auto;
-    max-width: 470px
+  font-size: 15px;
+  line-height: 1.3;
+  position: relative;
+  margin: 0 auto;
+  max-width: 470px
 }
 
 .subscription {
-    text-align: left
+  text-align: left
 }
 
 .rtl .subscription {
-    text-align: right
+  text-align: right
 }
 
 .subscription-text {
-    position: relative;
-    margin: 21px auto;
-    color: #666;
-    display: table;
-    font-size: 13px;
-    line-height: 18px;
-    width: 400px
+  position: relative;
+  margin: 21px auto;
+  color: #666;
+  display: table;
+  font-size: 13px;
+  line-height: 18px;
+  width: 400px
 }
 
 ul.instructions {
-    margin: 0 10px;
-    padding: 5px 10px
+  margin: 0 10px;
+  padding: 5px 10px
 }
 
 .check-30 {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_accepted.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_accepted.png)
 }
 
-.check-30,
-.exclamation-30 {
-    width: 29px;
-    height: 30px;
-    background-size: 29px 30px;
-    background-repeat: no-repeat;
-    background-position: 0 0
+.check-30, .exclamation-30 {
+  width: 29px;
+  height: 30px;
+  background-size: 29px 30px;
+  background-repeat: no-repeat;
+  background-position: 0 0
 }
 
 .exclamation-30 {
-    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_invalid.png)
+  background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_invalid.png)
 }
 
 @media only screen and (min-device-width:320px) and (max-device-width:480px) {
-    .main {
-        width: 100%
-    }
-    .main .text-message {
-        font-size: 25px
-    }
-    .main .header-title {
-        margin-bottom: 12px
-    }
-    .main .body-message {
-        padding: 0 0 0 20px;
-        max-width: 296px
-    }
-    .main .subscription-text {
-        font-size: 12px;
-        width: unset;
-        max-width: 470px
-    }
-    body.rtl .body-message {
-        padding: 0 20px 0 0;
-        text-align: right
-    }
+  .main {
+    width: 100%
+  }
+  .main .text-message {
+    font-size: 25px
+  }
+  .main .header-title {
+    margin-bottom: 12px
+  }
+  .main .body-message {
+    padding: 0 0 0 20px;
+    max-width: 296px
+  }
+  .main .subscription-text {
+    font-size: 12px;
+    width: unset;
+    max-width: 470px
+  }
+  body.rtl .body-message {
+    padding: 0 20px 0 0;
+    text-align: right
+  }
 }
 
 body {
-    padding: 0;
-    margin: 0
+  padding: 0;
+  margin: 0
 }
 
 main {
-    padding: 2em
+  padding: 2em
 }
 
 main #loading {
-    margin-top: 2em;
-    text-align: center
+  margin-top: 2em;
+  text-align: center
 }
 
 main #loading .spinner-32px-f3f5f5 {
+  width: 32px;
+  height: 32px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-size: 32px 32px;
+  background-image: url(./images/spinner_32px_f3f5f5.gif);
+  vertical-align: middle;
+  display: inline-block;
+  float: none
+}
+
+@media (prefers-color-scheme: dark) {
+  main #loading .spinner-32px-f3f5f5 {
     width: 32px;
     height: 32px;
     background-position: 0 0;
@@ -834,350 +828,353 @@ main #loading .spinner-32px-f3f5f5 {
     vertical-align: middle;
     display: inline-block;
     float: none
+  }
 }
 
 main #loading .text {
-    vertical-align: middle;
-    color: #000;
+  vertical-align: middle;
+  color: #000;
 }
 
 @media (prefers-color-scheme: dark) {
-    main #loading .text {
-        vertical-align: middle;
-        color: #FFF;
-    }
+  main #loading .text {
+    vertical-align: middle;
+    color: #FFF;
+  }
 }
 
 main #shortcut-container {
-    text-align: center
+  text-align: center
 }
 
 @media only screen and (min-height:600px) {
-    main #shortcut-container {
-        margin-top: 3em
-    }
+  main #shortcut-container {
+    margin-top: 3em
+  }
 }
 
 @media only screen and (min-height:900px) {
-    main #shortcut-container {
-        margin-top: 6em
-    }
+  main #shortcut-container {
+    margin-top: 6em
+  }
 }
 
 main #shortcut-icon {
-    width: 60px;
-    height: 60px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, .14);
-    border-radius: 15px;
-    background-color: #FFF;
+  width: 60px;
+  height: 60px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, .14);
+  border-radius: 15px;
+  background-color: #FFF;
 }
+
 main #shortcut-name {
-    font-size: 34px;
-    color: #000;
-    letter-spacing: -.82px
+  font-size: 34px;
+  color: #000;
+  letter-spacing: -.82px
 }
 
 main #shortcut-description {
-    font-size: 17px;
-    color: #36393e;
-    text-align: center;
-    line-height: 22px;
-    font-weight: 400
+  font-size: 17px;
+  color: #36393e;
+  text-align: center;
+  line-height: 22px;
+  font-weight: 400
 }
 
 @media (prefers-color-scheme: dark) {
   main #shortcut-icon {
-      width: 60px;
-      height: 60px;
-      box-shadow: 0 4px 8px 0 rgba(255, 255, 255, .14);
-      border-radius: 15px;
-      background-color: #FFF;
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 8px 0 rgba(255, 255, 255, .14);
+    border-radius: 15px;
+    background-color: #FFF;
   }
-  
-	main #shortcut-name {
+  main #shortcut-name {
     font-size: 34px;
     color: #fff;
     letter-spacing: -.82px
   }
-
   main #shortcut-description {
-      font-size: 17px;
-      color: lightgray;
-      text-align: center;
-      line-height: 22px;
-      font-weight: 400
+    font-size: 17px;
+    color: lightgray;
+    text-align: center;
+    line-height: 22px;
+    font-weight: 400
   }
 }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #fff
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff
 }
 
 footer #shortcut-links {
-    text-align: center;
-    margin-top: 2em;
-    margin-bottom: 2em
+  text-align: center;
+  margin-top: 2em;
+  margin-bottom: 2em
 }
 
 @media only screen and (max-height:600px) {
-    footer #shortcut-links {
-        margin-top: 1em;
-        margin-bottom: 1em
-    }
+  footer #shortcut-links {
+    margin-top: 1em;
+    margin-bottom: 1em
+  }
 }
 
 footer #shortcut-links a {
-    max-width: 200px;
-    text-decoration: none;
-    padding: 10px;
-    margin: 1em auto;
-    border-radius: 8px;
-    color: #007aff;
-    -webkit-transition-property: -webkit-transform;
-    transition-property: -webkit-transform;
-    transition-property: transform;
-    transition-property: transform, -webkit-transform;
-    -webkit-transition-timing-function: ease-in-out;
-    transition-timing-function: ease-in-out;
-    -webkit-transition-duration: .2s;
-    transition-duration: .2s;
-    -webkit-tap-highlight-color: transparent
+  max-width: 200px;
+  text-decoration: none;
+  padding: 10px;
+  margin: 1em auto;
+  border-radius: 8px;
+  color: #007aff;
+  -webkit-transition-property: -webkit-transform;
+  transition-property: -webkit-transform;
+  transition-property: transform;
+  transition-property: transform, -webkit-transform;
+  -webkit-transition-timing-function: ease-in-out;
+  transition-timing-function: ease-in-out;
+  -webkit-transition-duration: .2s;
+  transition-duration: .2s;
+  -webkit-tap-highlight-color: transparent
 }
 
 footer #shortcut-links a:not(.hidden) {
-    display: block
+  display: block
 }
 
 footer #shortcut-links a.primary {
-    background: #0169d9;
-    color: #fff
+  background: #0169d9;
+  color: #fff
 }
 
 footer #shortcut-links a.primary:hover {
-    background: rgba(1, 105, 217, .9)
+  background: rgba(1, 105, 217, .9)
 }
 
 footer #shortcut-links a.primary:active {
-    background: #015dc0;
-    -webkit-transform: scale(.95);
-    transform: scale(.95)
+  background: #015dc0;
+  -webkit-transform: scale(.95);
+  transform: scale(.95)
 }
 
 footer .footer {
-    height: 84px
+  height: 84px
 }
 
 footer .footer .copyright {
-    padding: 0 20px
+  padding: 0 20px
 }
 
-@media (-webkit-min-device-pixel-ratio:1.3),
-(-webkit-min-device-pixel-ratio:1.30),
-(min-resolution:124.80dpi) {
-    .badge-af {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/af_generic_rgb_wo_45@2x.png)
-    }
-    .badge-ar {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ar_generic_rgb_wo_45@2x.png)
-    }
-    .badge-be {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/be_generic_rgb_wo_45@2x.png)
-    }
-    .badge-bg {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/bg_generic_rgb_wo_45@2x.png)
-    }
-    .badge-ca {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ca_generic_rgb_wo_45@2x.png)
-    }
-    .badge-zh-cn {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-cn_generic_rgb_wo_45@2x.png)
-    }
-    .badge-zh-hk {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-hk_generic_rgb_wo_45@2x.png)
-    }
-    .badge-zh-tw {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-tw_generic_rgb_wo_45@2x.png)
-    }
-    .badge-hr {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hr_generic_rgb_wo_45@2x.png)
-    }
-    .badge-cs {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/cs_generic_rgb_wo_45@2x.png)
-    }
-    .badge-da {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/da_generic_rgb_wo_45@2x.png)
-    }
-    .badge-nl {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/nl_generic_rgb_wo_45@2x.png)
-    }
-    .badge-et {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/et_generic_rgb_wo_45@2x.png)
-    }
-    .badge-fa {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fa_generic_rgb_wo_45@2x.png)
-    }
-    .badge-fil {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fil_generic_rgb_wo_45@2x.png)
-    }
-    .badge-fi {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fi_generic_rgb_wo_45@2x.png)
-    }
-    .badge-fr {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fr_generic_rgb_wo_45@2x.png)
-    }
-    .badge-de {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/de_generic_rgb_wo_45@2x.png)
-    }
-    .badge-el {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/el_generic_rgb_wo_45@2x.png)
-    }
-    .badge-en {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/en_generic_rgb_wo_45@2x.png)
-    }
-    .badge-hu {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hu_generic_rgb_wo_45@2x.png)
-    }
-    .badge-id-in {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/id-in_generic_rgb_wo_45@2x.png)
-    }
-    .badge-it {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/it_generic_rgb_wo_45@2x.png)
-    }
-    .badge-ja {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ja_generic_rgb_wo_45@2x.png)
-    }
-    .badge-ko {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ko_generic_rgb_wo_45@2x.png)
-    }
-    .badge-lv {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lv_generic_rgb_wo_45@2x.png)
-    }
-    .badge-lt {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lt_generic_rgb_wo_45@2x.png)
-    }
-    .badge-ms {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ms_generic_rgb_wo_45@2x.png)
-    }
-    .badge-no {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/no_generic_rgb_wo_45@2x.png)
-    }
-    .badge-pl {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pl_generic_rgb_wo_45@2x.png)
-    }
-    .badge-pt-br {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-br_generic_rgb_wo_45@2x.png)
-    }
-    .badge-pt-pt {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-pt_generic_rgb_wo_45@2x.png)
-    }
-    .badge-ro {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ro_generic_rgb_wo_45@2x.png)
-    }
-    .badge-ru {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ru_generic_rgb_wo_45@2x.png)
-    }
-    .badge-sr {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sr_generic_rgb_wo_45@2x.png)
-    }
-    .badge-sk {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sk_generic_rgb_wo_45@2x.png)
-    }
-    .badge-sl {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sl_generic_rgb_wo_45@2x.png)
-    }
-    .badge-es {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es_generic_rgb_wo_45@2x.png)
-    }
-    .badge-es-419 {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es-419_generic_rgb_wo_45@2x.png)
-    }
-    .badge-sv {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sv_generic_rgb_wo_45@2x.png)
-    }
-    .badge-sw {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sw_generic_rgb_wo_45@2x.png)
-    }
-    .badge-th {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/th_generic_rgb_wo_45@2x.png)
-    }
-    .badge-tr {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/tr_generic_rgb_wo_45@2x.png)
-    }
-    .badge-uk {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/uk_generic_rgb_wo_45@2x.png)
-    }
-    .badge-vi {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/vi_generic_rgb_wo_45@2x.png)
-    }
-    .badge-zu {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zu_generic_rgb_wo_45@2x.png)
-    }
-    
+@media (-webkit-min-device-pixel-ratio:1.3), (-webkit-min-device-pixel-ratio:1.30), (min-resolution:124.80dpi) {
+  .badge-af {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/af_generic_rgb_wo_45@2x.png)
+  }
+  .badge-ar {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ar_generic_rgb_wo_45@2x.png)
+  }
+  .badge-be {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/be_generic_rgb_wo_45@2x.png)
+  }
+  .badge-bg {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/bg_generic_rgb_wo_45@2x.png)
+  }
+  .badge-ca {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ca_generic_rgb_wo_45@2x.png)
+  }
+  .badge-zh-cn {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-cn_generic_rgb_wo_45@2x.png)
+  }
+  .badge-zh-hk {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-hk_generic_rgb_wo_45@2x.png)
+  }
+  .badge-zh-tw {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zh-tw_generic_rgb_wo_45@2x.png)
+  }
+  .badge-hr {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hr_generic_rgb_wo_45@2x.png)
+  }
+  .badge-cs {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/cs_generic_rgb_wo_45@2x.png)
+  }
+  .badge-da {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/da_generic_rgb_wo_45@2x.png)
+  }
+  .badge-nl {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/nl_generic_rgb_wo_45@2x.png)
+  }
+  .badge-et {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/et_generic_rgb_wo_45@2x.png)
+  }
+  .badge-fa {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fa_generic_rgb_wo_45@2x.png)
+  }
+  .badge-fil {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fil_generic_rgb_wo_45@2x.png)
+  }
+  .badge-fi {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fi_generic_rgb_wo_45@2x.png)
+  }
+  .badge-fr {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/fr_generic_rgb_wo_45@2x.png)
+  }
+  .badge-de {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/de_generic_rgb_wo_45@2x.png)
+  }
+  .badge-el {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/el_generic_rgb_wo_45@2x.png)
+  }
+  .badge-en {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/en_generic_rgb_wo_45@2x.png)
+  }
+  .badge-hu {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/hu_generic_rgb_wo_45@2x.png)
+  }
+  .badge-id-in {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/id-in_generic_rgb_wo_45@2x.png)
+  }
+  .badge-it {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/it_generic_rgb_wo_45@2x.png)
+  }
+  .badge-ja {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ja_generic_rgb_wo_45@2x.png)
+  }
+  .badge-ko {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ko_generic_rgb_wo_45@2x.png)
+  }
+  .badge-lv {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lv_generic_rgb_wo_45@2x.png)
+  }
+  .badge-lt {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/lt_generic_rgb_wo_45@2x.png)
+  }
+  .badge-ms {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ms_generic_rgb_wo_45@2x.png)
+  }
+  .badge-no {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/no_generic_rgb_wo_45@2x.png)
+  }
+  .badge-pl {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pl_generic_rgb_wo_45@2x.png)
+  }
+  .badge-pt-br {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-br_generic_rgb_wo_45@2x.png)
+  }
+  .badge-pt-pt {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/pt-pt_generic_rgb_wo_45@2x.png)
+  }
+  .badge-ro {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ro_generic_rgb_wo_45@2x.png)
+  }
+  .badge-ru {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/ru_generic_rgb_wo_45@2x.png)
+  }
+  .badge-sr {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sr_generic_rgb_wo_45@2x.png)
+  }
+  .badge-sk {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sk_generic_rgb_wo_45@2x.png)
+  }
+  .badge-sl {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sl_generic_rgb_wo_45@2x.png)
+  }
+  .badge-es {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es_generic_rgb_wo_45@2x.png)
+  }
+  .badge-es-419 {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/es-419_generic_rgb_wo_45@2x.png)
+  }
+  .badge-sv {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sv_generic_rgb_wo_45@2x.png)
+  }
+  .badge-sw {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/sw_generic_rgb_wo_45@2x.png)
+  }
+  .badge-th {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/th_generic_rgb_wo_45@2x.png)
+  }
+  .badge-tr {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/tr_generic_rgb_wo_45@2x.png)
+  }
+  .badge-uk {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/uk_generic_rgb_wo_45@2x.png)
+  }
+  .badge-vi {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/vi_generic_rgb_wo_45@2x.png)
+  }
+  .badge-zu {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/logos/google_play_badge/zu_generic_rgb_wo_45@2x.png)
+  }
+  .footer {
+    background-image: url(./images/footer_gradient_web@2x.png)
+  }
+  @media (prefers-color-scheme: dark) {
     .footer {
-        background-image: url(./images/footer_gradient_web@2x.png)
+      background-image: url(./images/footer_gradient_web_dark@2x.png)
     }
-    
-    @media (prefers-color-scheme: dark) {
-        .footer {
-            background-image: url(./images/footer_gradient_web_dark@2x.png)
-        }
-    }
-    
+  }
+  .footer .footer-icloud {
+    background-image: url(./images/wx_footer_signoff@2x.png)
+  }
+  @media (prefers-color-scheme: dark) {
     .footer .footer-icloud {
-        background-image: url(./images/wx_footer_signoff@2x.png)
+      background-image: url(./images/wx_footer_signoff_dark@2x.png)
     }
-    
+  }
+  @media only screen and (max-device-width:568px) {
+    .footer {
+      background-image: url(./images/footer_gradient_iphone@2x.png)
+    }
     @media (prefers-color-scheme: dark) {
-        .footer .footer-icloud {
-            background-image: url(./images/wx_footer_signoff_dark@2x.png)
-        }
+      .footer {
+        background-image: url(./images/footer_gradient_iphone_dark@2x.png)
+      }
     }
-    
-    @media only screen and (max-device-width:568px) {
-        .footer {
-            background-image: url(./images/footer_gradient_iphone@2x.png)
-        }
-
-        @media (prefers-color-scheme: dark) {
-            .footer {
-                background-image: url(./images/footer_gradient_iphone_dark@2x.png)
-            }
-        }
+  }
+  @media only screen and (min-device-width:600px) and (max-device-width:800px) {
+    .footer {
+      background-image: url(./images/gradient_footer_580@2x.png)
     }
-    @media only screen and (min-device-width:600px) and (max-device-width:800px) {
-        .footer {
-            background-image: url(./images/gradient_footer_580@2x.png)
-        }
-    }
+  }
+  .spinner-32px-f3f5f5 {
+    background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
+  }
+  @media (prefers-color-scheme: dark) {
     .spinner-32px-f3f5f5 {
-        background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
+      background-image: url(./images/spinner_32px_f3f5f5_dark@2x.gif)
     }
-    @media (-webkit-min-device-pixel-ratio:1.5),
-    (min--moz-device-pixel-ratio:1.5),
-    (min-resolution:1.5dppx) {
-        .spinner-32px-f3f5f5 {
-            background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
-        }
+  }
+  @media (-webkit-min-device-pixel-ratio:1.5), (min--moz-device-pixel-ratio:1.5), (min-resolution:1.5dppx) {
+    .spinner-32px-f3f5f5 {
+      background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
     }
-    .app-button>.left,
-    .app-button>.middle,
-    .app-button>.right {
-        background-image: url(./images/btn_more@2x.png)
+    @media (prefers-color-scheme: dark) {
+      .spinner-32px-f3f5f5 {
+        background-image: url(./images/spinner_32px_f3f5f5_dark@2x.gif)
+      }
     }
-    body.rtl .app-button {
-        background-image: url(./images/btn_more_rtl@2x.png)
-    }
-    .check-30 {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_accepted@2x.png)
-    }
-    .exclamation-30 {
-        background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_invalid@2x.png)
-    }
+  }
+  .app-button>.left, .app-button>.middle, .app-button>.right {
+    background-image: url(./images/btn_more@2x.png)
+  }
+  body.rtl .app-button {
+    background-image: url(./images/btn_more_rtl@2x.png)
+  }
+  .check-30 {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_accepted@2x.png)
+  }
+  .exclamation-30 {
+    background-image: url(/applications/mini-apps/1911Project37/miniapps_common/1911Project37/resources/images/exlarge_29x30_invalid@2x.png)
+  }
+  main #loading .spinner-32px-f3f5f5 {
+    background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
+  }
+  @media (prefers-color-scheme: dark) {
     main #loading .spinner-32px-f3f5f5 {
-        background-image: url(./images/spinner_32px_f3f5f5@2x.gif)
+      background-image: url(./images/spinner_32px_f3f5f5_dark@2x.gif)
     }
+  }
 }
