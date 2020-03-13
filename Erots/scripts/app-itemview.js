@@ -10,6 +10,8 @@ let topOffset = -20
 
 $app.listen({
   refreshAll: function (object) {
+    $console.info("string");
+    $console.info(object);
     if (object.appItem) {
       refreshAppItemView()
     }

@@ -32,8 +32,8 @@ function main() {
 }
 
 $app.listen({
-  refreshAll: function () {
-    refreshAllView()
+  refreshAll: function (object) {
+    refreshAllView(object.except)
   },
   requireCloud: function () {
     requireApps()
@@ -650,7 +650,7 @@ function genCloudAppListView() {
   }
   let appViewItems = []
   let apps = getCloudAppDisplaySource()
-  appViewItems = genAppListView(apps)
+  appViewItems = genAppListView(apps, "cloudAppsList")
   let cloudView = {
     type: "list",
     props: {
@@ -1095,7 +1095,7 @@ function genUpdateAppListView() {
   return updateView
 }
 
-function genAppListView(apps) {
+function genAppListView(apps, sourceViewName) {
   let appViewItems = []
   let buttonText = ""
   for (let i = 0; i < apps.length; i++) {
@@ -1213,13 +1213,21 @@ function genAppListView(apps) {
                           },
                           completion: function () {
                             buttonView.userInteractionEnabled = true
+                            apps[i].needUpdate = false
+                            apps[i].haveInstalled = true
                             api.uploadDownloadTimes(apps[i].objectId)
                             $device.taptic(2);
                             $delay(0.2, () => {
                               $device.taptic(2);
                             })
                             $delay(0.5, () => {
-                              refreshAllView()
+                              $app.notify({
+                                name: "refreshAll",
+                                object: { 
+                                  except: sourceViewName,
+                                  appItem: true, 
+                                }
+                              });
                             })
                           }
                         })
@@ -1239,14 +1247,14 @@ function genAppListView(apps) {
   return appViewItems
 }
 
-function refreshAllView() {
-  if ($("cloudAppsList")) {
+function refreshAllView(exceptViewName) {
+  if(((exceptViewName && exceptViewName != "cloudAppsList") || !exceptViewName) && $("cloudAppsList")) {
     let cloudOffset = $("cloudAppsList").contentOffset.y
     $("cloudAppsList").remove()
     $("cloudAppListParent").add(genCloudAppListView())
     $("cloudAppsList").contentOffset = $point(0, cloudOffset)
   }
-  if ($("updateAppsList")) {
+  if(((exceptViewName && exceptViewName != "updateAppsList") || !exceptViewName) && $("updateAppsList")) {
     let updateOffset = $("updateAppsList").contentOffset.y
     $("updateAppsList").remove()
     $("updateAppListParent").add(genUpdateAppListView())
@@ -1645,20 +1653,52 @@ function solveQuery() {
       case "show":
         appItemView.preview(query.objectId);
         break;
+      case "theme":
+        setQueryTheme(query.color);
+        break;
       default:
         break;
     }
   }
 }
 
+function setQueryTheme(color) {
+  if(utils.getCache("authPass") && color && color.length == 6) {
+    if (utils.getThemeMode() == "dark") {
+      $cache.set("darkThemeColor", $color("#" + color));
+    } else {
+      $cache.set("lightThemeColor", $color("#" + color));
+    }
+    refreshAllTheme(0.5)
+  } else {
+    ui.showToastView($("mainView"), utils.mColor.red, "无法设置主题颜色")
+  }
+}
+
 function showAnnouncement() {
   let show = utils.getCache("Settings").showAnnouncement
   let anno = utils.getCache("Settings").announcement
+  let link = utils.getCache("Settings").announceLink
+  let actions = [{
+    title: "好的",
+    handler: function () {
+
+    }
+  }]
+  if(link && link != "") {
+    actions.push({
+      title: "前往",
+      handler: function () {
+        $app.openURL(link);
+      }
+    })
+  }
   if (show && anno && anno != "") {
     $delay(0.5, () => {
       $ui.alert({
         title: "公告",
         message: "" + anno,
+        actions: actions
       });
     })
   }

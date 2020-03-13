@@ -449,6 +449,9 @@ function setupUploadView(updateApp) {
             didEndEditing: function(sender) {
               myApp.appName = sender.text
               refreshPreview()
+              if(myApp.appName.indexOf(".") >= 0) {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "名称中不要包含特殊符号");
+              }
             }
           }
         },],
@@ -1350,6 +1353,8 @@ function setupUploadView(updateApp) {
             if(myApp.appName == "未定义" || myApp.appName == "" || myApp.file == "" || myApp.appCate == "未分类" || myApp.appCate == "" || myApp.appVersion == "" || myApp.instruction == "" || myApp.versionInst == "") {
               if(myApp.appName == "未定义" || myApp.appName == "") {
                 ui.showToastView($("uploadItemView"), utils.mColor.red, "请填写应用名称");
+              } else if(myApp.appName.indexOf(".") >= 0) {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "应用名称中不要包含特殊符号");
               } else if(myApp.file == "") {
                 ui.showToastView($("uploadItemView"), utils.mColor.red, "请选择应用文件");
               } else if(myApp.appCate == "未分类" || myApp.appCate == "") {
