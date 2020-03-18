@@ -81,6 +81,9 @@ function getCache(key, def) {
         case "darkModeAuto":
           def = false;
           break;
+        case "themeMode":
+          def = 2;
+          break;
         case "lightThemeColor":
         case "darkThemeColor":
         case "themeColor":
@@ -236,14 +239,12 @@ function getUpdateDateString(time) {
 }
 
 function getThemeMode() {
-  if ($device.isDarkMode) {
-    return "dark"
-  } else {
-    if (getCache("darkModeAuto")) {
-      return ($system.brightness < 0.15) ? "dark" : "light";
-    } else {
-      return "light";
-    }
+  let themeMode = getCache("themeMode")
+  switch(themeMode) {
+    case 0: return "light";
+    case 1: return "dark";
+    case 2: return ($device.isDarkMode)?"dark":"light";
+    case 3: return ($system.brightness < 0.2)?"dark":"light";
   }
 }
 

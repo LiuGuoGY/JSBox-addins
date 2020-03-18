@@ -1388,12 +1388,6 @@ function genMeView() {
 
   let array = [{
     templateTitle: {
-      text: "作品竞赛",
-    },
-    url: "https://www.liuguogy.com/archives/first-jsbox-competition.html",
-  },
-  {
-    templateTitle: {
       text: "更新日志",
     },
     url: "https://www.liuguogy.com/archives/jsbox-store-developing.html",
@@ -1521,7 +1515,7 @@ function genMeView() {
         },
         {
           title: "其他",
-          rows: [tabShowInstalls, tabMyVoteCode],
+          rows: [tabShowInstalls],
         }
         ],
       },
@@ -1549,16 +1543,16 @@ function genMeView() {
               case 2:
                 (utils.getCache("authPass")) ? setupThemeSettingView() : genWxWelcomView();
                 break;
-              case 7:
+              case 6:
                 update.checkUpdate(true);
                 break;
-              case 8:
+              case 7:
                 setupFeedBack();
                 break;
-              case 9:
+              case 8:
                 setupReward();
                 break;
-              case 10:
+              case 9:
                 share("http://t.cn/AiNM3N1T");
                 break;
               default:
@@ -1806,7 +1800,8 @@ function refreshAllTheme(delay) {
 }
 
 function genThemeSettingView() {
-  let tabDarkModeAuto = {
+  let nowModeTexts = ["浅色", "深色", "自动", "亮度"]
+  let tabThemeMode = {
     type: "view",
     props: {
       bgcolor: utils.themeColor.bgcolor,
@@ -1815,7 +1810,7 @@ function genThemeSettingView() {
     views: [{
       type: "label",
       props: {
-        text: "根据亮度变换深浅色模式",
+        text: "主题模式",
         textColor: utils.themeColor.listContentTextColor,
       },
       layout: function (make, view) {
@@ -1823,20 +1818,25 @@ function genThemeSettingView() {
         make.centerY.equalTo(view.super)
       }
     }, {
-      type: "switch",
+      type: "view",
       props: {
-        onColor: $color(utils.mColor.iosGreen),
-        on: utils.getCache("darkModeAuto"),
+        bgcolor: $color("clear"),
       },
       layout: function (make, view) {
-        make.right.inset(20)
+        make.right.inset(15)
         make.centerY.equalTo(view.super)
+        make.size.equalTo($size(10, 16))
       },
-      events: {
-        changed: function (sender) {
-          $cache.set("darkModeAuto", sender.on)
-          refreshAllTheme(0.05)
-        }
+      views: [ui.createEnter(utils.themeColor.appHintColor)]
+    }, {
+      type: "label",
+      props: {
+        text: nowModeTexts[utils.getCache("themeMode")],
+        textColor: utils.themeColor.listContentTextColor,
+      },
+      layout: function (make, view) {
+        make.right.equalTo(view.prev.left).inset(20)
+        make.centerY.equalTo(view.super)
       }
     }],
   }
@@ -1904,7 +1904,7 @@ function genThemeSettingView() {
             bgcolor: utils.themeColor.bgcolor,
           },
           layout: $layout.fill,
-        }, tabDarkModeAuto, tabThemeColor],
+        }, tabThemeMode, tabThemeColor],
       },
       layout: function (make, view) {
         make.top.equalTo(view.prev.bottom)
@@ -1913,6 +1913,9 @@ function genThemeSettingView() {
       events: {
         didSelect: function (sender, indexPath, title) {
           switch (indexPath.row + indexPath.section) {
+            case 1:
+              showThemeModeSelectView($("themeSettingView"));
+              break;
             case 2:
               showColorSelectView($("themeSettingView"));
               break;
@@ -2107,6 +2110,293 @@ function showColorSelectView(superView) {
   $("windowView").relayout()
   $("windowView").remakeLayout(function (make) {
     make.height.equalTo(270)
+    if (superView.frame.width > windowWidth) {
+      make.width.equalTo(windowWidth)
+    } else {
+      make.width.equalTo(superView)
+    }
+    make.centerX.equalTo(superView)
+    make.bottom.inset(0)
+  })
+  $ui.animate({
+    duration: 0.15,
+    animation: () => {
+      $("infoView").alpha = 1
+    }
+  })
+  $ui.animate({
+    duration: 0.3,
+    velocity: 1,
+    damping: 2,
+    animation: () => {
+      $("windowView").relayout()
+    }
+  })
+
+  function hideView() {
+    $("windowView").remakeLayout(function (make) {
+      make.height.equalTo(270)
+      if (superView.frame.width > windowWidth) {
+        make.width.equalTo(windowWidth)
+      } else {
+        make.width.equalTo($("infoView"))
+      }
+      make.centerX.equalTo($("infoView"))
+      make.top.equalTo($("infoView").bottom)
+    })
+    $ui.animate({
+      duration: 0.2,
+      velocity: 0.5,
+      animation: () => {
+        $("infoView").alpha = 0;
+        $("windowView").relayout()
+      },
+      completion: () => {
+        if ($("infoView")) {
+          $("infoView").remove();
+        }
+      }
+    });
+  }
+}
+
+function showThemeModeSelectView(superView) {
+  let windowWidth = 400
+  let items = []
+  let imageIconSymbols = ["sun.max.fill", "moon.circle.fill", "circle.lefthalf.fill", "bolt.badge.a.fill"]
+  let modeTexts = ["浅色", "深色", "自动", "亮度"]
+  let selectedMode = utils.getCache("themeMode")
+  for (let i = 0; i < imageIconSymbols.length; i++) {
+    items.push({
+      modeIcon: {
+        symbol: imageIconSymbols[i],
+      },
+      selectedView: {
+        hidden: (selectedMode != i),
+      },
+      modeText: {
+        text: modeTexts[i],
+        textColor: (selectedMode == i)?utils.getCache("themeColor"):utils.themeColor.listContentTextColor,
+      }
+    })
+  }
+  superView.add({
+    type: "view",
+    props: {
+      id: "infoView",
+      alpha: 0,
+      clipsToBounds: true,
+    },
+    layout: function (make, view) {
+      make.size.equalTo(view.super)
+      make.center.equalTo(view.super)
+    },
+    views: [{
+      type: "view",
+      props: {
+        bgcolor: utils.themeColor.actionSheetBgColor,
+      },
+      layout: $layout.fill,
+      events: {
+        tapped: sender => {
+          hideView()
+        }
+      }
+    }, {
+      type: "view",
+      props: {
+        id: "windowView",
+        bgcolor: $color("clear"),
+      },
+      layout: function (make, view) {
+        make.height.equalTo(240)
+        if (superView.frame.width > windowWidth) {
+          make.width.equalTo(windowWidth)
+        } else {
+          make.width.equalTo(view.super)
+        }
+        make.centerX.equalTo(view.super)
+        make.top.equalTo(view.super.bottom)
+      },
+      views: [{
+        type: "view",
+        props: {
+          bgcolor: utils.themeColor.mainColor,
+          radius: 15,
+        },
+        layout: function (make, view) {
+          make.height.equalTo(view.super).multipliedBy(0.70)
+          make.left.right.inset(15)
+          make.centerX.equalTo(view.super)
+          make.top.inset(0)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "选择主题模式",
+            textColor: utils.themeColor.listContentTextColor,
+            font: $font("bold", 16),
+            align: $align.center,
+          },
+          layout: function (make, view) {
+            make.top.inset(15)
+            make.centerX.equalTo(view.super)
+            make.height.equalTo(23)
+            make.width.equalTo(view.super)
+          }
+        }, {
+          type: "matrix",
+          props: {
+            columns: 4,
+            itemHeight: 90,
+            spacing: 8,
+            scrollEnabled: false,
+            bgcolor: $color("clear"),
+            template: [{
+              type: "view",
+              props: {
+                bgcolor: $color("clear"),
+              },
+              layout: function (make, view) {
+                make.centerX.equalTo(view.super)
+                make.top.inset(7)
+                make.width.height.equalTo(50)
+              },
+              views: [{
+                type: "view",
+                props: {
+                  id: "selectedView",
+                  circular: true,
+                  borderWidth: 0,
+                  bgcolor: utils.getCache("themeColor"),
+                },
+                layout: function (make, view) {
+                  make.center.equalTo(view.super)
+                  make.width.height.equalTo(50)
+                },
+              },{
+                type: "view",
+                props: {
+                  circular: true,
+                  borderWidth: 0,
+                  bgcolor: utils.themeColor.mainColor,
+                },
+                layout: function (make, view) {
+                  make.center.equalTo(view.super)
+                  make.width.height.equalTo(45)
+                },
+                views: [{
+                  type: "view",
+                  props: {
+                    circular: true,
+                    borderWidth: 0,
+                    bgcolor: utils.themeColor.mainColor,
+                    clipsToBounds: false,
+                  },
+                  layout: function (make, view) {
+                    make.center.equalTo(view.super)
+                    make.width.height.equalTo(30)
+                  },
+                  views: [{
+                    type: "image",
+                    props: {
+                      id: "modeIcon",
+                      tintColor: utils.themeColor.listHeaderTextColor
+                    },
+                    layout: function (make, view) {
+                      make.center.equalTo(view.super)
+                      make.height.width.equalTo(view.super)
+                    },
+                  }]
+                },],
+              },]
+            },{
+              type: "view",
+              props: {
+                bgcolor: $color("clear"),
+              },
+              layout: function (make, view) {
+                make.bottom.inset(7)
+                make.width.equalTo(50)
+                make.height.equalTo(20)
+                make.centerX.equalTo(view.super)
+              },
+              views:[{
+                type: "label",
+                props: {
+                  id: "modeText",
+                  font: $font("bold", 15),
+                  align: $align.center,
+                },
+                layout: function (make, view) {
+                  make.center.equalTo(view.super)
+                  make.width.equalTo(view.super)
+                }
+              }]
+            }],
+            data: items,
+          },
+          events: {
+            didSelect: function (sender, indexPath, data) {
+              for (let i = 0; i < items.length; i++) {
+                items[i].selectedView.hidden = true
+                items[i].modeText.textColor = utils.themeColor.listContentTextColor
+              }
+              items[indexPath.row].selectedView.hidden = false
+              items[indexPath.row].modeText.textColor = utils.getCache("themeColor")
+              sender.data = items
+              $cache.set("themeMode", indexPath.row);
+              $delay(0.1, () => {
+                hideView()
+              })
+              setThemeColor()
+              refreshAllTheme(0.12)
+            }
+          },
+          layout: function (make, view) {
+            make.top.equalTo(view.prev.bottom).inset(5)
+            make.bottom.inset(10)
+            make.centerX.equalTo(view.super)
+            make.left.right.inset(20)
+          }
+        }]
+      }, {
+        type: "view",
+        props: {
+          bgcolor: utils.themeColor.mainColor,
+          radius: 15,
+        },
+        layout: function (make, view) {
+          make.left.right.inset(15)
+          make.centerX.equalTo(view.super)
+          make.top.equalTo(view.prev.bottom).inset(10)
+          make.bottom.inset(10)
+        },
+        views: [{
+          type: "button",
+          props: {
+            borderWidth: 0,
+            bgcolor: $color("clear"),
+            titleColor: utils.getCache("themeColor"),
+            font: $font(18),
+            title: "Cancel",
+          },
+          layout: function (make, view) {
+            make.center.equalTo(view.super)
+            make.size.equalTo(view.super)
+          },
+          events: {
+            tapped: function (sender) {
+              hideView()
+            }
+          }
+        }]
+      }],
+    }],
+  })
+  $("windowView").relayout()
+  $("windowView").remakeLayout(function (make) {
+    make.height.equalTo(240)
     if (superView.frame.width > windowWidth) {
       make.width.equalTo(windowWidth)
     } else {
