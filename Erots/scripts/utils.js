@@ -89,6 +89,9 @@ function getCache(key, def) {
         case "themeColor":
           def = $color(mColor.blue);
           break;
+        case "storeStiky":
+          def = false;
+          break;
       }
     }
     $cache.set(key, def)

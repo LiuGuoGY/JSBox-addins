@@ -372,53 +372,52 @@ function genAppItemShowView() {
       }
       commentSubviews.push({
         type: "view",
-        props: {
-          bgcolor: utils.themeColor.commentBgColor,
-          radius: 8,
-          menu: longPressMenu,
-        },
         layout: function (make, view) {
           make.top.inset(0)
           make.height.equalTo(view.super)
-          make.width.equalTo($device.info.screen.width - 40)
+          make.width.equalTo($device.info.screen.width - 30)
           if (i == 0) {
-            make.left.inset(20)
+            make.left.inset(0)
           } else {
-            make.left.equalTo(view.prev.right).inset(10)
+            make.left.equalTo(view.prev.right).inset(0)
           }
         },
-        events: {
-          longPressed: function (sender) {
-            let userInfo = user.getLoginUser()
-            if (user.haveLogined() && comments[comments.length - i - 1].time && userInfo.objectId == app.authorId) {
-              $device.taptic(0);
-              $ui.menu({
-                items: ["回复评论"],
-                handler: function (title, idx) {
-                  switch (idx) {
-                    case 0: {
-                      genCommentReplyView(app, comments.length - i - 1);
-                      break;
+        views: [{
+          type: "view",
+          props: {
+            bgcolor: utils.themeColor.commentBgColor,
+            radius: 8,
+            menu: longPressMenu,
+          },
+          layout: function (make, view) {
+            make.top.bottom.inset(0)
+            make.left.inset(0)
+            make.right.inset(10)
+            make.center.equalTo(view.super)
+          },
+          events: {
+            longPressed: function (sender) {
+              let userInfo = user.getLoginUser()
+              if (user.haveLogined() && comments[comments.length - i - 1].time && userInfo.objectId == app.authorId) {
+                $device.taptic(0);
+                $ui.menu({
+                  items: ["回复评论"],
+                  handler: function (title, idx) {
+                    switch (idx) {
+                      case 0: {
+                        genCommentReplyView(app, comments.length - i - 1);
+                        break;
+                      }
                     }
                   }
-                }
-              });
+                });
+              }
             }
-          }
-        },
-        views: cardSubViews,
+          },
+          views: cardSubViews,
+        }]
       })
     }
-    let commentMoveXOffsetOld, commentMoveXOffsetNew = 0;
-    commentSubviews.push({
-      type: "view",
-      layout: function (make, view) {
-        make.top.inset(0)
-        make.height.equalTo(view.super)
-        make.width.equalTo(30)
-        make.left.equalTo(view.prev.right).inset(0)
-      },
-    })
     commentView = {
       type: "view",
       layout: function (make, view) {
@@ -435,41 +434,15 @@ function genAppItemShowView() {
           showsHorizontalIndicator: false,
           showsVerticalIndicator: false,
           clipsToBounds: false,
+          pagingEnabled: true,
         },
-        layout: $layout.fill,
+        layout: function (make, view) {
+          make.top.bottom.inset(0)
+          make.left.inset(20)
+          make.right.inset(10)
+          make.center.equalTo(view.super)
+        },
         views: commentSubviews,
-        events: {
-          willBeginDragging: function (sender) {
-            commentMoveXOffsetOld = sender.contentOffset.x;
-          },
-          willEndDragging: function (sender, decelerate) {
-            commentMoveXOffsetNew = sender.contentOffset.x;
-          },
-          willBeginDecelerating: function (sender) {
-            let offsetChange = commentMoveXOffsetNew - commentMoveXOffsetOld
-            let unit = (sender.contentSize.width - 40) / comments.length
-            let x = Math.round(commentMoveXOffsetOld / unit) * unit
-            if (Math.abs(offsetChange) > 40) {
-              x = (offsetChange > 0) ? x + unit : x - unit
-            }
-            if (x < 0 || x > sender.contentSize.width - unit) {
-              x = Math.round(commentMoveXOffsetOld / unit) * unit
-            }
-            sender.scrollToOffset($point(x, 0))
-          },
-          didEndDragging: function (sender, decelerate) {
-            let offsetChange = commentMoveXOffsetNew - commentMoveXOffsetOld
-            let unit = (sender.contentSize.width - 40) / comments.length
-            let x = Math.round(commentMoveXOffsetOld / unit) * unit
-            if (Math.abs(offsetChange) > 40) {
-              x = (offsetChange > 0) ? x + unit : x - unit
-            }
-            if (x < 0 || x > sender.contentSize.width - unit) {
-              x = Math.round(commentMoveXOffsetOld / unit) * unit
-            }
-            sender.scrollToOffset($point(x, 0))
-          }
-        }
       }]
     }
   } else {
@@ -1778,37 +1751,46 @@ function genAppItemShowView() {
 }
 
 function genAppPreviewPhotosScrollView(photos, index) {
-  let moveXOffsetOld, moveXOffsetNew;
   let items = []
   for (let i = 0; i < photos.length; i++) {
     items.push({
-      type: "image",
+      type: "view",
       props: {
-        src: photos[i],
-        align: $align.center,
-        radius: 5,
-        contentMode: $contentMode.scaleToFill,
-        borderWidth: 1 / $device.info.screen.scale,
-        borderColor: $color("#E0E0E0"),
       },
       views: [{
-        type: "blur",
-        props: {
-          style: utils.themeColor.blurType, // 0 ~ 5
-          alpha: (utils.getThemeMode() == "dark")?0.85:1,
-        },
-        layout: $layout.fill
-      }, {
         type: "image",
         props: {
           src: photos[i],
+          align: $align.center,
           radius: 5,
-          contentMode: $contentMode.scaleAspectFit,
+          contentMode: $contentMode.scaleToFill,
           borderWidth: 1 / $device.info.screen.scale,
-          borderColor: utils.themeColor.separatorColor,
-          bgcolor: $color("clear"),
+          borderColor: $color("#E0E0E0"),
         },
-        layout: $layout.fill,
+        layout: function(make, view) {
+          make.left.right.inset(20)
+          make.top.bottom.inset(40)
+          make.center.equalTo(view.super)
+        },
+        views: [{
+          type: "blur",
+          props: {
+            style: utils.themeColor.blurType, // 0 ~ 5
+            alpha: (utils.getThemeMode() == "dark")?0.85:1,
+          },
+          layout: $layout.fill
+        }, {
+          type: "image",
+          props: {
+            src: photos[i],
+            radius: 5,
+            contentMode: $contentMode.scaleAspectFit,
+            borderWidth: 1 / $device.info.screen.scale,
+            borderColor: utils.themeColor.separatorColor,
+            bgcolor: $color("clear"),
+          },
+          layout: $layout.fill,
+        }]
       }]
     })
   }
@@ -1831,12 +1813,14 @@ function genAppPreviewPhotosScrollView(photos, index) {
       views: [{
         type: "scroll",
         props: {
-          contentOffset: $point(index * ($device.info.screen.width - 40 + 10/photos.length), 0),
+          id: "previewPhotosDetailScroll",
+          contentOffset: $point(index * ($device.info.screen.width), 0),
           alwaysBounceHorizontal: true,
           alwaysBounceVertical: false,
           userInteractionEnabled: true,
           showsHorizontalIndicator: false,
           showsVerticalIndicator: false,
+          pagingEnabled: true,
         },
         layout: function (make, view) {
           make.center.equalTo(view.super)
@@ -1853,55 +1837,16 @@ function genAppPreviewPhotosScrollView(photos, index) {
             }
           },
           layout: function(make, view) {
-            make.left.inset(25)
+            make.left.inset(0)
             make.centerY.equalTo(view.super)
-            make.width.equalTo(($device.info.screen.width - 40) * photos.length)
-            make.height.equalTo(view.super).multipliedBy(0.9)
+            make.width.equalTo(($device.info.screen.width) * photos.length)
+            make.height.equalTo(view.super)
           },
-        },{
-          type: "view",
-          layout: function (make, view) {
-            make.centerY.equalTo(view.super)
-            make.left.equalTo(view.prev.right)
-            make.width.equalTo(25)
-            make.height.equalTo(view.super).multipliedBy(0.9)
-          }
         }],
-        events: {
-          willBeginDragging: function (sender) {
-            moveXOffsetOld = sender.contentOffset.x;
-          },
-          willEndDragging: function (sender, decelerate) {
-            moveXOffsetNew = sender.contentOffset.x;
-          },
-          willBeginDecelerating: function (sender) {
-            let offsetChange = moveXOffsetNew - moveXOffsetOld
-            let unit = (sender.contentSize.width - 40) / photos.length
-            let x = Math.round(moveXOffsetOld / unit) * unit
-            if (Math.abs(offsetChange) > 40) {
-              x = (offsetChange > 0) ? x + unit : x - unit
-            }
-            if (x < 0 || x > sender.contentSize.width - unit) {
-              x = Math.round(moveXOffsetOld / unit) * unit
-            }
-            sender.scrollToOffset($point(x, 0))
-          },
-          didEndDragging: function (sender, decelerate) {
-            let offsetChange = moveXOffsetNew - moveXOffsetOld
-            let unit = (sender.contentSize.width - 40) / photos.length
-            let x = Math.round(moveXOffsetOld / unit) * unit
-            if (Math.abs(offsetChange) > 40) {
-              x = (offsetChange > 0) ? x + unit : x - unit
-            }
-            if (x < 0 || x > sender.contentSize.width - unit) {
-              x = Math.round(moveXOffsetOld / unit) * unit
-            }
-            sender.scrollToOffset($point(x, 0))
-          }
-        }
       },]
     },]
   });
+  $("previewPhotosDetailScroll").contentOffset = $point(index * ($device.info.screen.width), 0)
 }
 
 function genCommentView(app) {
@@ -2353,6 +2298,18 @@ function genCommentDetailView(comment) {
         },
       })
   }
+  let longPressMenu = {
+    items: [
+      {
+        title: "复制评论",
+        symbol: "doc.on.doc",
+        handler: sender => {
+          let replyText = (comment.reply)?("\n开发者回复" + "\n" + comment.reply):"";
+          $clipboard.text = comment.name + "\n" + comment.comment + replyText;
+        }
+      }
+    ]
+  }
   $ui.push({
     props: {
       navBarHidden: true,
@@ -2373,6 +2330,7 @@ function genCommentDetailView(comment) {
         props: {
           bgcolor: utils.themeColor.commentBgColor,
           radius: 8,
+          menu: longPressMenu,
         },
         layout: function (make, view) {
           make.top.inset(20)

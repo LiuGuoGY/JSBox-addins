@@ -1260,6 +1260,26 @@ function refreshAllView(exceptViewName) {
     $("updateAppListParent").add(genUpdateAppListView())
     $("updateAppsList").contentOffset = $point(0, updateOffset)
   }
+  storeStiky()
+}
+
+function storeStiky() {
+  if(utils.getCache("storeStiky")) {
+    moveToTop($addin.current.name);
+    function moveToTop(name) {
+      const list = $addin.list;
+      const index = list.findIndex(n => n.name === name || n.name === name + ".js");
+    
+      if (index === -1) {
+        missingApps.push(name);
+      } else {
+        const app = list[index];
+        list.splice(index, 1);
+        list.unshift(app);
+        $addin.list = list;
+      }
+    }
+  }
 }
 
 function genMeView() {
@@ -1440,7 +1460,7 @@ function genMeView() {
 
   let fuctionArray = [{
     templateTitle: {
-      text: "主题设置",
+      text: "功能设置",
     },
   },]
 
@@ -1882,6 +1902,45 @@ function genThemeSettingView() {
       },
     }],
   }
+  let tabStikySet = {
+    type: "view",
+    props: {
+      bgcolor: utils.themeColor.bgcolor,
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      views: [{
+          type: "label",
+          props: {
+            text: "商店置顶",
+          },
+          layout: function(make, view) {
+            make.left.inset(20)
+            make.centerY.equalTo(view.super)
+          }
+        },
+        {
+          type: "switch",
+          props: {
+            id: "tabStikySet",
+            on: utils.getCache("storeStiky"),
+            tintColor: utils.getCache("themeColor"),
+          },
+          layout: function(make, view) {
+            make.right.inset(20)
+            make.centerY.equalTo(view.super)
+          },
+          events: {
+            changed: function(sender) {
+              $cache.set("storeStiky", sender.on)
+            }
+          }
+        }
+      ],
+      layout: $layout.fill
+    }],
+  }
   let themeSettingView = {
     type: "view",
     props: {
@@ -1889,7 +1948,7 @@ function genThemeSettingView() {
       bgcolor: utils.themeColor.mainColor,
     },
     layout: $layout.fill,
-    views: [ui.genPageHeader("主页", "主题设置"), {
+    views: [ui.genPageHeader("主页", "功能设置"), {
       type: "list",
       props: {
         bgcolor: $color("clear"),
@@ -1904,7 +1963,7 @@ function genThemeSettingView() {
             bgcolor: utils.themeColor.bgcolor,
           },
           layout: $layout.fill,
-        }, tabThemeMode, tabThemeColor],
+        }, tabThemeMode, tabThemeColor, tabStikySet],
       },
       layout: function (make, view) {
         make.top.equalTo(view.prev.bottom)
@@ -2501,7 +2560,7 @@ function genWxWelcomView() {
         type: "label",
         props: {
           id: "welcomeDetailLabel",
-          text: "关注微信公众号「纵享派」即可解锁主题设置，感谢你对作者辛苦开发和维护的支持 :)",
+          text: "关注微信公众号「纵享派」即可解锁功能设置，感谢你对作者辛苦开发和维护的支持 :)",
           font: $font("bold", 20),
           align: $align.center,
           lines: 0,
