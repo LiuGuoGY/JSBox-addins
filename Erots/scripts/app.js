@@ -22,6 +22,7 @@ function show() {
   } else {
     ui.showBannedAlert()
   }
+  update.checkUpdate();
 }
 
 function main() {
@@ -1914,6 +1915,7 @@ function genThemeSettingView() {
           type: "label",
           props: {
             text: "商店置顶",
+            textColor: utils.themeColor.listContentTextColor,
           },
           layout: function(make, view) {
             make.left.inset(20)
@@ -1925,7 +1927,7 @@ function genThemeSettingView() {
           props: {
             id: "tabStikySet",
             on: utils.getCache("storeStiky"),
-            tintColor: utils.getCache("themeColor"),
+            onColor: utils.getCache("themeColor"),
           },
           layout: function(make, view) {
             make.right.inset(20)

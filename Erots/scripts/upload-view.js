@@ -981,9 +981,13 @@ function setupUploadView(updateApp) {
       
                   } else {
                     let data = undefined
+                    if(resp.data.info.size > 1000000) {
+                      ui.showToastView($("uploadItemView"), utils.mColor.red, "不支持大于1M大小的图片");
+                      return 0;
+                    }
                     if(resp.data.info.mimeType.indexOf("png") >= 0) {
                       data = resp.data.image.png
-                    } else if(resp.data.info.mimeType.indexOf("jpeg") >= 0){
+                    } else if(resp.data.info.mimeType.indexOf("jpeg") >= 0 || resp.data.info.mimeType.indexOf("jeg") >= 0){
                       data = resp.data.image.jpg(1.0)
                     } else if(resp.data.info.mimeType.length == 0) {
                       ui.showToastView($("uploadItemView"), utils.mColor.red, "不支持拍摄的HEIC照片");

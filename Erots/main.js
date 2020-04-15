@@ -14,5 +14,4 @@ if ($app.env == $env.today) {
 } else {
     let agreement = require("scripts/agreement");
     agreement.show();
-    update.checkUpdate();
 }
