@@ -1,10 +1,15 @@
 body {
-  background-color: #fff;
+  background-color: #FFF;
+}
+text {
+  color: #323232;
 }
 
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #000;
   }
+  text {
+    color: #CDCDCD;
+  }
 }
-
