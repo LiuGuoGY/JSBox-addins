@@ -355,6 +355,7 @@ function genAppItemShowView() {
             handler: sender => {
               let replyText = (haveReply)?("\n开发者回复" + "\n" + comments[comments.length - i - 1].reply):"";
               $clipboard.text = comments[comments.length - i - 1].name + "\n" + comments[comments.length - i - 1].comment + replyText;
+              ui.showToastView($("appItemView"), utils.mColor.green, "已复制");
             }
           }
         ]
@@ -859,9 +860,10 @@ function genAppItemShowView() {
         views: [{
           type: "view",
           layout: function (make, view) {
-            make.width.equalTo(view.super).multipliedBy(0.3)
-            make.center.equalTo(view.super)
+            make.width.equalTo(view.super).multipliedBy(0.45)
+            make.centerY.equalTo(view.super)
             make.height.equalTo(view.super)
+            make.right.inset(20)
           },
           views: [{
             type: "label",
@@ -894,7 +896,7 @@ function genAppItemShowView() {
           type: "view",
           layout: function (make, view) {
             make.left.inset(20)
-            make.right.equalTo(view.prev.left)
+            make.width.equalTo(view.super).multipliedBy(0.45)
             make.centerY.equalTo(view.super)
             make.height.equalTo(view.super)
           },
@@ -915,41 +917,6 @@ function genAppItemShowView() {
             type: "label",
             props: {
               text: "评论",
-              font: $font(11),
-              align: $align.center,
-              textColor: utils.themeColor.appHintColor,
-            },
-            layout: function (make, view) {
-              make.top.equalTo(view.prev.bottom).inset(5)
-              make.height.equalTo(15)
-              make.centerX.equalTo(view.super)
-            },
-          }]
-        }, {
-          type: "view",
-          layout: function (make, view) {
-            make.right.inset(20)
-            make.left.equalTo(view.prev.prev.right)
-            make.centerY.equalTo(view.super)
-            make.height.equalTo(view.super)
-          },
-          views: [{
-            type: "label",
-            props: {
-              text: "0",
-              font: $font("PingFangSC-Medium", 20),
-              align: $align.center,
-              textColor: $color("gray"),
-            },
-            layout: function (make, view) {
-              make.top.inset(15)
-              make.height.equalTo(18)
-              make.centerX.equalTo(view.super)
-            },
-          }, {
-            type: "label",
-            props: {
-              text: "点赞",
               font: $font(11),
               align: $align.center,
               textColor: utils.themeColor.appHintColor,
@@ -2306,6 +2273,7 @@ function genCommentDetailView(comment) {
         handler: sender => {
           let replyText = (comment.reply)?("\n开发者回复" + "\n" + comment.reply):"";
           $clipboard.text = comment.name + "\n" + comment.comment + replyText;
+          ui.showToastView($("appItemView"), utils.mColor.green, "已复制");
         }
       }
     ]

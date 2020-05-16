@@ -1305,6 +1305,22 @@ function genMeView() {
         }
       },
       {
+        type: "image",
+        props: {
+          id: "templateStateIcon",
+          bgcolor: $color(utils.mColor.iosGreen),
+          borderWidth: 1,
+          borderColor: $color(utils.mColor.iosGreen),
+          circular: true,
+          hidden: true,
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right).inset(10)
+          make.centerY.equalTo(view.super)
+          make.size.equalTo($size(14,14))
+        },
+      },
+      {
         type: "view",
         props: {
           bgcolor: $color("clear"),
@@ -1463,6 +1479,10 @@ function genMeView() {
     templateTitle: {
       text: "功能设置",
     },
+    templateStateIcon: {
+      icon: $icon("064", utils.themeColor.mainColor, $size(14, 14)),
+      hidden: !utils.getCache("authPass"),
+    }
   },]
 
   let view = {
@@ -1505,9 +1525,21 @@ function genMeView() {
         footer: {
           type: "view",
           props: {
-            height: 110,
+            height: 150,
           },
           views: [{
+            type: "image",
+            props: {
+              src: (utils.getThemeMode() == "light")?"assets/wx_footer_signoff@2x.png":"assets/wx_footer_signoff_dark@2x.png",
+              contentMode: $contentMode.scaleAspectFit,
+            },
+            layout: function(make, view) {
+              make.centerX.equalTo(view.super)
+              make.width.equalTo(view.super)
+              make.height.equalTo(22)
+              make.top.inset(23)
+            },
+          },{
             type: "label",
             props: {
               text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
@@ -1517,7 +1549,7 @@ function genMeView() {
             },
             layout: function (make, view) {
               make.centerX.equalTo(view.super)
-              make.top.inset(23)
+              make.top.equalTo(view.prev.bottom).inset(10)
             }
           },],
         },
@@ -1562,7 +1594,7 @@ function genMeView() {
                 wantToRealse();
                 break;
               case 2:
-                (utils.getCache("authPass")) ? setupThemeSettingView() : genWxWelcomView();
+                (utils.getCache("authPass") || !utils.getCache("Settings").needVerify) ? setupThemeSettingView() : genWxWelcomView();
                 break;
               case 6:
                 update.checkUpdate(true);
@@ -1960,12 +1992,12 @@ function genThemeSettingView() {
         separatorColor: utils.themeColor.separatorColor,
         itemHeight: 50,
         data: [{
-          type: "view",
-          props: {
-            bgcolor: utils.themeColor.bgcolor,
-          },
-          layout: $layout.fill,
-        }, tabThemeMode, tabThemeColor, tabStikySet],
+          title: "主题",
+          rows: [tabThemeMode, tabThemeColor],
+        }, {
+          title: "功能",
+          rows: [tabStikySet],
+        }],
       },
       layout: function (make, view) {
         make.top.equalTo(view.prev.bottom)
@@ -1973,13 +2005,18 @@ function genThemeSettingView() {
       },
       events: {
         didSelect: function (sender, indexPath, title) {
-          switch (indexPath.row + indexPath.section) {
-            case 1:
-              showThemeModeSelectView($("themeSettingView"));
-              break;
-            case 2:
-              showColorSelectView($("themeSettingView"));
-              break;
+          switch (indexPath.section) {
+            case 0:
+              switch(indexPath.row) {
+                case 0: 
+                  showThemeModeSelectView($("themeSettingView"));
+                  break;
+                case 1:
+                  showColorSelectView($("themeSettingView"));
+                  break;
+                default:
+                  break;
+              }
             default:
               break;
           }
@@ -2563,6 +2600,7 @@ function genWxWelcomView() {
         props: {
           id: "welcomeDetailLabel",
           text: "关注微信公众号「纵享派」即可解锁功能设置，感谢你对作者辛苦开发和维护的支持 :)",
+          textColor: utils.themeColor.listHeaderTextColor,
           font: $font("bold", 20),
           align: $align.center,
           lines: 0,
@@ -2638,8 +2676,8 @@ function genWxWelcomView() {
         props: {
           title: "我已关注",
           circular: true,
-          titleColor: $color("#a2a2a2"), //#3478f7
-          bgcolor: $color("white"),
+          titleColor: utils.themeColor.appHintColor, //#3478f7
+          bgcolor: utils.themeColor.bgcolor,
           font: $font("bold", 13),
         },
         layout: function (make, view) {
@@ -2953,7 +2991,6 @@ function setupReward() {
         props: {
           id: "selection",
           items: ["辣条￥2", "饮料￥5", "咖啡￥10"],
-          tintColor: utils.themeColor.listContentTextColor,
           index: 0,
         },
         layout: function (make, view) {
@@ -2977,7 +3014,7 @@ function setupReward() {
           font: $font(15),
         },
         layout: function (make, view) {
-          make.centerX.equalTo(view.super)
+          make.centerX.equalTo(view.super).offset(60)
           make.height.equalTo(40)
           make.bottom.inset(10)
         },
@@ -3008,51 +3045,13 @@ function setupReward() {
           font: $font(15),
         },
         layout: function (make, view) {
-          make.left.inset(40)
+          make.centerX.equalTo(view.super).offset(-60)
           make.height.equalTo(40)
           make.bottom.inset(10)
         },
         events: {
           tapped: function (sender) {
             begainReward(sender.title)
-          }
-        }
-      },
-      {
-        type: "button",
-        props: {
-          id: "aliRedPackButton",
-          title: " 红包 ",
-          icon: $icon("204", $color("#E81F1F"), $size(20, 20)),
-          bgcolor: $color("clear"),
-          titleColor: $color("#E81F1F"),
-          font: $font(15),
-        },
-        layout: function (make, view) {
-          make.right.inset(40)
-          make.height.equalTo(40)
-          make.bottom.inset(10)
-        },
-        events: {
-          tapped: function (sender) {
-            $clipboard.text = "623098624"
-            $ui.alert({
-              title: "提示",
-              message: "感谢你的支持！\n红包码 623098624 即将复制到剪切板，到支付宝首页粘贴红包码即可领取",
-              actions: [{
-                title: "确定",
-                handler: function () {
-                  $app.openURL("alipays://")
-                }
-              },
-              {
-                title: "取消",
-                handler: function () {
-
-                }
-              }
-              ]
-            })
           }
         }
       },
@@ -3068,20 +3067,7 @@ function setupReward() {
           make.centerX.equalTo($("aliRewardButton"))
           make.bottom.inset(8)
         }
-      }, {
-        type: "label",
-        props: {
-          id: "recommandText",
-          text: "— 零成本支持 —",
-          textColor: utils.themeColor.appHintColor,
-          font: $font(10),
-        },
-        layout: function (make, view) {
-          make.centerX.equalTo($("aliRedPackButton"))
-          make.bottom.inset(8)
-        }
-      },
-      ]
+      },]
     },
     {
       type: "list",
@@ -3327,7 +3313,7 @@ function setupFeedBack(text) {
       {
         type: "label",
         props: {
-          text: "如果需要发送图片或者视频，请在公众号中进行反馈。",
+          text: "如果需要发送图片或者视频，请在公众号「纵享派」中进行反馈。",
           textColor: utils.themeColor.appHintColor,
           align: $align.left,
           font: $font(12),
@@ -3335,7 +3321,7 @@ function setupFeedBack(text) {
         },
         layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
-          make.left.inset(20)
+          make.left.right.inset(20)
         }
       }
       ]

@@ -347,13 +347,15 @@ function setupUploadView(updateApp) {
                           if(success) {
                             myApp.file = path
                             let file = $file.read(path + "/assets/icon.png")
-                            let iconPath = "assets/temp/temp.png"
-                            $file.write({
-                              data: cutIcon(file.image, true).png,
-                              path: iconPath,
-                            })
-                            if(!updateApp) {
-                              myApp.appIcon = iconPath
+                            if(file) {
+                              let iconPath = "assets/temp/temp.png"
+                              $file.write({
+                                data: cutIcon(file.image, true).png,
+                                path: iconPath,
+                              })
+                              if(!updateApp) {
+                                myApp.appIcon = iconPath
+                              }
                             }
                             $("titleInput").text = myApp.appName
                             $("chooseFileButtonDetail").text = "已选择 " + title
@@ -1449,7 +1451,7 @@ function setupUploadView(updateApp) {
             
             //上传脚本文件
             let file = $file.read(myApp.file);
-            let fileUrl = await api.catbox_uploadFile(file);
+            let fileUrl = await api.catbox_uploadFile(file, $("myProgressText"));
             if(fileUrl) {
               if($("myProgress")) {
                 $("myProgress").locations = [0.0, 0.3, 0.3]
@@ -1460,6 +1462,10 @@ function setupUploadView(updateApp) {
               let resp2 = await $http.download({
                 url: fileUrl,
                 showsProgress: false,
+                progress: function(bytesWritten, totalBytes) {
+                  var percentage = bytesWritten * 1.0 / totalBytes
+                  $("myProgressText").text = "检验文件中... (" + percentage + "%)"
+                },
               })
               if(resp2.data && resp2.data.info && resp2.data.info.size == file.info.size) {
                 myApp.file = fileUrl;

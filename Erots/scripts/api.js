@@ -223,13 +223,16 @@ async function TinyPng_uploadPic(pic) {
   return undefined;
 }
 
-async function catbox_uploadFile(file) {
+async function catbox_uploadFile(file, view) {
   let resp = await $http.upload({
     url: "https://catbox.moe/user/api.php",
     files: [{ "data": file, "name": "fileToUpload"}],
     form: {
       "reqtype": "fileupload",
       "userhash": "db9c58fa320620970aa444d4f",
+    },
+    progress: function(percentage) {
+      view.text = "上传应用文件... (" + percentage + "%)"
     },
   });
   $console.info(resp);

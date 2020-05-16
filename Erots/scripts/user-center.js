@@ -386,6 +386,32 @@ function setupMyCommentsView() {
 }
 
 function setupMyPraiseView() {
+
+  async function uploadParise() {
+    ui.showToastView($("myPraiseView"), utils.mColor.blue, "正在上传设置中...");
+    await user.setPraise($("praiseInput").text)
+    let userInfo = user.getLoginUser()
+    userInfo.praise = $("praiseInput").text
+    user.saveUser(userInfo)
+    let cloudApps = utils.getCache("cloudApps", [])
+    let appObjects = []
+    for(let i = 0; i < cloudApps.length; i++) {
+      if(cloudApps[i].authorId === user.getLoginUser().objectId) {
+        if(!cloudApps[i].praise || cloudApps[i].praise != $("praiseInput").text) {
+          appObjects.push(cloudApps[i].objectId);
+        }
+      }
+    }
+    await api.uploadPraise(appObjects, $("praiseInput").text);
+    ui.showToastView($("myPraiseView"), utils.mColor.green, "设置成功");
+    $app.notify({
+      name: "refreshAll",
+      object: {appItem: true, }
+    });
+    $delay(0.5, ()=>{
+      $ui.pop();
+    })
+  }
   $ui.push({
     props: {
       id: "myPraiseView",
@@ -596,37 +622,28 @@ function setupMyPraiseView() {
           events: {
             tapped: function(sender) {
               if($("praiseInput").text.length <= 0) {
-                ui.showToastView($("myPraiseView"), utils.mColor.red, "赞赏链接不可为空");
+                $ui.alert({
+                  title: "提示",
+                  message: "确定要清除赞赏链接？",
+                  actions: [{
+                    title: "确定",
+                    handler: function () {
+                      uploadParise()
+                    }
+                  },{
+                    title: "取消",
+                    handler: function () {
+                    }
+                  }]
+                })
               } else {
                 $ui.alert({
                   title: "提示",
                   message: "确定要上传该设置？",
                   actions: [{
                     title: "确定",
-                    handler: async function () {
-                      ui.showToastView($("myPraiseView"), utils.mColor.blue, "正在上传设置中...");
-                      await user.setPraise($("praiseInput").text)
-                      let userInfo = user.getLoginUser()
-                      userInfo.praise = $("praiseInput").text
-                      user.saveUser(userInfo)
-                      let cloudApps = utils.getCache("cloudApps", [])
-                      let appObjects = []
-                      for(let i = 0; i < cloudApps.length; i++) {
-                        if(cloudApps[i].authorId === user.getLoginUser().objectId) {
-                          if(!cloudApps[i].praise || cloudApps[i].praise != $("praiseInput").text) {
-                            appObjects.push(cloudApps[i].objectId);
-                          }
-                        }
-                      }
-                      await api.uploadPraise(appObjects, $("praiseInput").text);
-                      ui.showToastView($("myPraiseView"), utils.mColor.green, "设置成功");
-                      $app.notify({
-                        name: "refreshAll",
-                        object: {"a": "b"}
-                      });
-                      $delay(0.5, ()=>{
-                        $ui.pop();
-                      })
+                    handler: function () {
+                      uploadParise()
                     }
                   },{
                     title: "取消",
