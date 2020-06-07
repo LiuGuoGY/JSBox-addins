@@ -1,0 +1,12 @@
+name: Sync To Gitee
+on: push
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: wearerequired/git-mirror-action@master
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
+        with:
+          source-repo: "git@github.com:LiuGuoGY/JSBox-addins.git"
+          destination-repo: "git@gitee.com:liuguogy/JSBox-addins.git"
