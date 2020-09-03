@@ -7,10 +7,12 @@ let user = require('scripts/user')
 let userCenterView = require('scripts/user-center')
 let appItemView = require('scripts/app-itemview')
 let api = require('scripts/api')
+const groups = require("./groups");
+const navigationBar = require("./navigationBar");
 
 let topOffset = -20
 let searchText = ""
-let query = $context.query
+let query = $context.query;
 
 let mIcon = []
 
@@ -47,10 +49,13 @@ function setThemeColor() {
   if (utils.getThemeMode() == "dark") {
     utils.themeColor = utils.tColor.dark;
     $cache.set("themeColor", utils.getCache("darkThemeColor"));
+    $app.theme = "dark";
   } else {
     utils.themeColor = utils.tColor.light;
     $cache.set("themeColor", utils.getCache("lightThemeColor"));
+    $app.theme = "light";
   }
+  
   mIcon = [{
     blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
     gray: $icon("102", utils.themeColor.mainTabGrayColor, $size(25, 25)),
@@ -1284,58 +1289,6 @@ function storeStiky() {
 }
 
 function genMeView() {
-  const feedBackTemplate = {
-    type: "view",
-    props: {
-      bgcolor: $color("clear"),
-    },
-    layout: $layout.fill,
-    views: [{
-      type: "view",
-      layout: $layout.fill,
-      views: [{
-        type: "label",
-        props: {
-          id: "templateTitle",
-          textColor: utils.themeColor.listContentTextColor,
-        },
-        layout: function (make, view) {
-          make.left.inset(15);
-          make.centerY.equalTo(view.super);
-        }
-      },
-      {
-        type: "image",
-        props: {
-          id: "templateStateIcon",
-          bgcolor: $color(utils.mColor.iosGreen),
-          borderWidth: 1,
-          borderColor: $color(utils.mColor.iosGreen),
-          circular: true,
-          hidden: true,
-        },
-        layout: function(make, view) {
-          make.left.equalTo(view.prev.right).inset(10)
-          make.centerY.equalTo(view.super)
-          make.size.equalTo($size(14,14))
-        },
-      },
-      {
-        type: "view",
-        props: {
-          bgcolor: $color("clear"),
-        },
-        layout: function (make, view) {
-          make.right.inset(15)
-          make.centerY.equalTo(view.super)
-          make.size.equalTo($size(10, 16))
-        },
-        views: [ui.createEnter(utils.themeColor.appHintColor)]
-      }
-      ]
-    }]
-  }
-
   const tabShowInstalls = {
     type: "view",
     props: {
@@ -1423,67 +1376,207 @@ function genMeView() {
     layout: $layout.fill
   }
 
-  let array = [{
-    templateTitle: {
-      text: "更新日志",
+  let newMeList = {
+    type: "list",
+    props: {
+      id: "melist",
+      style: 2, // 使用复选类型时这个应该选择 2
+      rowHeight: 45,
+      separatorInset: $insets(0, 66, 0, 0),
+      indicatorInsets: $insets(40, 0, 50, 0),
+      separatorColor: $color("systemSeparator"),
+      header: {
+        type: "view",
+        props: {
+          height: 95,
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "meListHeaderTitle",
+            text: "我的",
+            font: $font("Avenir-Black", 35),
+            textColor: utils.themeColor.listHeaderTextColor,
+            align: $align.center,
+          },
+          layout: function (make, view) {
+            make.left.inset(15)
+            make.bottom.inset(0)
+            make.height.equalTo(45)
+          }
+        }]
+      },
+      footer: {
+        type: "view",
+        props: {
+          height: 150,
+        },
+        views: [{
+          type: "image",
+          props: {
+            src: (utils.getThemeMode() == "light")?"assets/wx_footer_signoff@2x.png":"assets/wx_footer_signoff_dark@2x.png",
+            contentMode: $contentMode.scaleAspectFit,
+          },
+          layout: function(make, view) {
+            make.centerX.equalTo(view.super)
+            make.width.equalTo(view.super)
+            make.height.equalTo(22)
+            make.top.inset(23)
+          },
+        },{
+          type: "label",
+          props: {
+            text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
+            textColor: utils.themeColor.appCateTextColor,
+            align: $align.center,
+            font: $font(13)
+          },
+          layout: function (make, view) {
+            make.centerX.equalTo(view.super)
+            make.top.equalTo(view.prev.bottom).inset(10)
+          }
+        },],
+      },
+      data: groups.init({
+        groups: [{
+          title: "用户",
+          items: [{
+            type: "arrow",
+            async: false,
+            title: user.haveLogined() ? "个人中心" : "未登录用户",
+            symbol: "person.fill",
+            iconColor: utils.systemColor("pink"),
+            handler: () => {
+              user.haveLogined() ? userCenterView.setupUserCenterView() : wantToLogin();
+            }
+        }]
+        },{
+          title: "功能",
+          items: [{
+            type: "arrow",
+            async: false,
+            title: "我要发布",
+            symbol: "plus.app.fill",
+            iconColor: utils.systemColor("green"),
+            handler: () => {
+              wantToRealse();
+            }
+        },{
+            type: "arrow",
+            async: false,
+            title: "主题功能",
+            symbol: "cube.fill",
+            iconColor: utils.systemColor("orange"),
+            handler: () => {
+              (utils.getCache("authPass") || !utils.getCache("Settings").needVerify) ? setupThemeSettingView() : genWxWelcomView();
+            }
+        }]
+        },{
+          title: "其他",
+          items: [{
+            type: "arrow",
+            async: false,
+            title: "更新日志",
+            symbol: "safari.fill",
+            iconColor: utils.systemColor("blue"),
+            handler: () => {
+              setupWebView("更新日志", "https://www.liuguogy.com/archives/jsbox-store-developing.html");
+            }
+            },{
+              type: "arrow",
+              async: false,
+              title: "代码仓库",
+              symbol: "tray.fill",
+              iconColor: utils.systemColor("black"),
+              handler: () => {
+                // setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins/");
+                $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/");
+              }
+          },{
+              type: "arrow",
+              async: false,
+              title: "用户协议",
+              symbol: "doc.fill",
+              iconColor: utils.systemColor("purple"),
+              handler: () => {
+                setupWebView("用户协议", "https://www.liuguogy.com/archives/erots-user-agreement.html");
+              }
+          },{
+              type: "arrow",
+              async: false,
+              title: "检查更新",
+              async: true,
+              symbol: "capslock.fill",
+              iconColor: utils.systemColor("green"),
+              handler: async () => {
+                await update.checkUpdateNow();
+              }
+          },{
+              type: "arrow",
+              async: false,
+              title: "反馈建议",
+              symbol: "envelope.open.fill",
+              iconColor: utils.systemColor("orange"),
+              handler: () => {
+                setupFeedBack();
+              }
+          },{
+              type: "arrow",
+              async: false,
+              title: "支持与赞赏",
+              symbol: "heart.fill",
+              iconColor: utils.systemColor("red"),
+              handler: () => {
+                setupReward();
+              }
+          },{
+              type: "arrow",
+              async: true,
+              title: "分享︎︎给朋友",
+              symbol: "arrowshape.turn.up.right.fill",
+              iconColor: utils.systemColor("yellow"),
+              handler: () => {
+                share("https://xteko.com/redir?name=Erots&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fraw%2Fmaster%2FErots%2F.output%2FErots.box");
+              }
+          }]
+        },]
+      })
     },
-    url: "https://www.liuguogy.com/archives/jsbox-store-developing.html",
-  },
-  {
-    templateTitle: {
-      text: "GitHub",
-    },
-    url: "https://github.com/LiuGuoGY/JSBox-addins/",
-  },
-  {
-    templateTitle: {
-      text: "用户协议",
-    },
-    url: "https://www.liuguogy.com/archives/erots-user-agreement.html",
-  },
-  {
-    templateTitle: {
-      text: "检查更新",
-    },
-  },
-  {
-    templateTitle: {
-      text: "反馈建议",
-    },
-  },
-  {
-    templateTitle: {
-      text: "支持与赞赏",
-    },
-  },
-  {
-    templateTitle: {
-      text: "分享︎︎给朋友",
-    },
-  },
-  ]
-
-  let userArray = [{
-    templateTitle: {
-      text: user.haveLogined() ? "个人中心" : "未登录用户",
-    },
-  },]
-
-  let actionArray = [{
-    templateTitle: {
-      text: "我要发布",
-    },
-  },]
-
-  let fuctionArray = [{
-    templateTitle: {
-      text: "功能设置",
-    },
-    templateStateIcon: {
-      icon: $icon("064", utils.themeColor.mainColor, $size(14, 14)),
-      hidden: !utils.getCache("authPass"),
+    layout: $layout.fill,
+    events: {
+      didScroll: function (sender) {
+        if (sender.contentOffset.y >= 5 + topOffset && $("mePageHeaderView").alpha == 0) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function () {
+              $("mePageHeaderView").alpha = 1;
+            },
+          });
+        } else if (sender.contentOffset.y < 5 + topOffset && $("mePageHeaderView").alpha == 1) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function () {
+              $("mePageHeaderView").alpha = 0;
+            },
+          });
+        }
+        if (sender.contentOffset.y >= 45 + topOffset && $("mePageHeaderLabel").hidden === true) {
+          $("mePageHeaderLabel").hidden = false
+          $("mePageHeaderBlur").bgcolor = $color("clear")
+          $("meListHeaderTitle").hidden = true
+        } else if (sender.contentOffset.y < 45 + topOffset && $("mePageHeaderLabel").hidden === false) {
+          $("mePageHeaderLabel").hidden = true
+          $("mePageHeaderBlur").bgcolor = $color("insetGroupedBackground")
+          $("meListHeaderTitle").hidden = false
+        } else if (sender.contentOffset.y <= topOffset) {
+          let size = 35 - sender.contentOffset.y * 0.04
+          if (size > 40)
+            size = 40
+          $("meListHeaderTitle").font = $font("Avenir-Black", size)
+        }
+      },
     }
-  },]
+  };
 
   let view = {
     type: "view",
@@ -1492,160 +1585,7 @@ function genMeView() {
       hidden: true,
     },
     layout: $layout.fill,
-    views: [{
-      type: "list",
-      props: {
-        id: "melist",
-        bgcolor: $color("clear"),
-        template: feedBackTemplate,
-        indicatorInsets: $insets(40, 0, 50, 0),
-        indicatorStyle: utils.themeColor.indicatorStyle,
-        separatorColor: utils.themeColor.separatorColor,
-        header: {
-          type: "view",
-          props: {
-            height: 95,
-          },
-          views: [{
-            type: "label",
-            props: {
-              id: "meListHeaderTitle",
-              text: "我的",
-              font: $font("Avenir-Black", 35),
-              textColor: utils.themeColor.listHeaderTextColor,
-              align: $align.center,
-            },
-            layout: function (make, view) {
-              make.left.inset(15)
-              make.bottom.inset(0)
-              make.height.equalTo(45)
-            }
-          }]
-        },
-        footer: {
-          type: "view",
-          props: {
-            height: 150,
-          },
-          views: [{
-            type: "image",
-            props: {
-              src: (utils.getThemeMode() == "light")?"assets/wx_footer_signoff@2x.png":"assets/wx_footer_signoff_dark@2x.png",
-              contentMode: $contentMode.scaleAspectFit,
-            },
-            layout: function(make, view) {
-              make.centerX.equalTo(view.super)
-              make.width.equalTo(view.super)
-              make.height.equalTo(22)
-              make.top.inset(23)
-            },
-          },{
-            type: "label",
-            props: {
-              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
-              textColor: utils.themeColor.appCateTextColor,
-              align: $align.center,
-              font: $font(13)
-            },
-            layout: function (make, view) {
-              make.centerX.equalTo(view.super)
-              make.top.equalTo(view.prev.bottom).inset(10)
-            }
-          },],
-        },
-        data: [{
-          title: "用户",
-          rows: userArray,
-        }, {
-          title: "操作",
-          rows: actionArray,
-        }, {
-          title: "功能",
-          rows: fuctionArray,
-        }, {
-          title: "关于",
-          rows: array,
-        },
-        {
-          title: "其他",
-          rows: [tabShowInstalls],
-        }
-        ],
-      },
-      layout: function (make, view) {
-        make.top.inset(0)
-        make.bottom.inset(0)
-        make.left.right.inset(0)
-      },
-      events: {
-        didSelect: function (sender, indexPath, title) {
-          if (title.templateTitle == undefined) {
-            return 0
-          }
-          let titleText = title.templateTitle.text
-          if (title.url) {
-            setupWebView(titleText, title.url)
-          } else {
-            switch (indexPath.row + indexPath.section) {
-              case 0:
-                user.haveLogined() ? userCenterView.setupUserCenterView() : wantToLogin();
-                break;
-              case 1:
-                wantToRealse();
-                break;
-              case 2:
-                (utils.getCache("authPass") || !utils.getCache("Settings").needVerify) ? setupThemeSettingView() : genWxWelcomView();
-                break;
-              case 6:
-                update.checkUpdate(true);
-                break;
-              case 7:
-                setupFeedBack();
-                break;
-              case 8:
-                setupReward();
-                break;
-              case 9:
-                share("http://t.cn/AiNM3N1T");
-                break;
-              default:
-                break;
-            }
-          }
-        },
-        didScroll: function (sender) {
-          if (sender.contentOffset.y >= 5 + topOffset && $("mePageHeaderView").alpha == 0) {
-            $ui.animate({
-              duration: 0.2,
-              animation: function () {
-                $("mePageHeaderView").alpha = 1;
-              },
-            });
-          } else if (sender.contentOffset.y < 5 + topOffset && $("mePageHeaderView").alpha == 1) {
-            $ui.animate({
-              duration: 0.2,
-              animation: function () {
-                $("mePageHeaderView").alpha = 0;
-              },
-            });
-          }
-          if (sender.contentOffset.y >= 45 + topOffset && $("mePageHeaderLabel").hidden === true) {
-            $("mePageHeaderLabel").hidden = false
-            $("mePageHeaderBlur").bgcolor = $color("clear")
-            $("meListHeaderTitle").hidden = true
-          } else if (sender.contentOffset.y < 45 + topOffset && $("mePageHeaderLabel").hidden === false) {
-            $("mePageHeaderLabel").hidden = true
-            $("mePageHeaderBlur").bgcolor = utils.themeColor.mainColor
-            $("meListHeaderTitle").hidden = false
-          } else if (sender.contentOffset.y <= topOffset) {
-            let size = 35 - sender.contentOffset.y * 0.04
-            if (size > 40)
-              size = 40
-            $("meListHeaderTitle").font = $font("Avenir-Black", size)
-          }
-        },
-      }
-    }, {
+    views: [newMeList, {
       type: "view",
       props: {
         id: "mePageHeaderView",
@@ -1665,7 +1605,7 @@ function genMeView() {
         props: {
           id: "mePageHeaderBlur",
           style: utils.themeColor.blurType, // 0 ~ 5
-          bgcolor: utils.themeColor.mainColor,
+          bgcolor: $color("insetGroupedBackground"),
         },
         layout: $layout.fill,
       }, {
@@ -1688,9 +1628,9 @@ function genMeView() {
           layout: $layout.fill,
         },],
       },],
-    }],
+    }]
   }
-  requireInstallNumbers()
+  // requireInstallNumbers()
   return view
 }
 
@@ -1853,128 +1793,8 @@ function refreshAllTheme(delay) {
 }
 
 function genThemeSettingView() {
-  let nowModeTexts = ["浅色", "深色", "自动", "亮度"]
-  let tabThemeMode = {
-    type: "view",
-    props: {
-      bgcolor: utils.themeColor.bgcolor,
-    },
-    layout: $layout.fill,
-    views: [{
-      type: "label",
-      props: {
-        text: "主题模式",
-        textColor: utils.themeColor.listContentTextColor,
-      },
-      layout: function (make, view) {
-        make.left.inset(20)
-        make.centerY.equalTo(view.super)
-      }
-    }, {
-      type: "view",
-      props: {
-        bgcolor: $color("clear"),
-      },
-      layout: function (make, view) {
-        make.right.inset(15)
-        make.centerY.equalTo(view.super)
-        make.size.equalTo($size(10, 16))
-      },
-      views: [ui.createEnter(utils.themeColor.appHintColor)]
-    }, {
-      type: "label",
-      props: {
-        text: nowModeTexts[utils.getCache("themeMode")],
-        textColor: utils.themeColor.listContentTextColor,
-      },
-      layout: function (make, view) {
-        make.right.equalTo(view.prev.left).inset(20)
-        make.centerY.equalTo(view.super)
-      }
-    }],
-  }
-  let tabThemeColor = {
-    type: "view",
-    props: {
-      bgcolor: utils.themeColor.bgcolor,
-    },
-    layout: $layout.fill,
-    views: [{
-      type: "label",
-      props: {
-        text: "主题颜色",
-        textColor: utils.themeColor.listContentTextColor,
-      },
-      layout: function (make, view) {
-        make.left.inset(20)
-        make.centerY.equalTo(view.super)
-      }
-    }, {
-      type: "view",
-      props: {
-        bgcolor: $color("clear"),
-      },
-      layout: function (make, view) {
-        make.right.inset(15)
-        make.centerY.equalTo(view.super)
-        make.size.equalTo($size(10, 16))
-      },
-      views: [ui.createEnter(utils.themeColor.appHintColor)]
-    }, {
-      type: "view",
-      props: {
-        circular: true,
-        borderColor: utils.themeColor.iconBorderColor,
-        borderWidth: 1,
-        bgcolor: utils.getCache("themeColor"),
-      },
-      layout: function (make, view) {
-        make.right.equalTo(view.prev.left).inset(20)
-        make.centerY.equalTo(view.super)
-        make.size.equalTo($size(20, 20))
-      },
-    }],
-  }
-  let tabStikySet = {
-    type: "view",
-    props: {
-      bgcolor: utils.themeColor.bgcolor,
-    },
-    layout: $layout.fill,
-    views: [{
-      type: "view",
-      views: [{
-          type: "label",
-          props: {
-            text: "商店置顶",
-            textColor: utils.themeColor.listContentTextColor,
-          },
-          layout: function(make, view) {
-            make.left.inset(20)
-            make.centerY.equalTo(view.super)
-          }
-        },
-        {
-          type: "switch",
-          props: {
-            id: "tabStikySet",
-            on: utils.getCache("storeStiky"),
-            onColor: utils.getCache("themeColor"),
-          },
-          layout: function(make, view) {
-            make.right.inset(20)
-            make.centerY.equalTo(view.super)
-          },
-          events: {
-            changed: function(sender) {
-              $cache.set("storeStiky", sender.on)
-            }
-          }
-        }
-      ],
-      layout: $layout.fill
-    }],
-  }
+  let themeMode = utils.getCache("themeMode");
+  let themeSymbols = ["sun.max","moon.stars", "clock","bolt"]
   let themeSettingView = {
     type: "view",
     props: {
@@ -1982,46 +1802,70 @@ function genThemeSettingView() {
       bgcolor: utils.themeColor.mainColor,
     },
     layout: $layout.fill,
-    views: [ui.genPageHeader("主页", "功能设置"), {
+    views: [ui.genPageHeader("主页", "主题功能"), {
       type: "list",
       props: {
-        bgcolor: $color("clear"),
-        template: [],
-        indicatorInsets: $insets(45, 0, 50, 0),
-        indicatorStyle: utils.themeColor.indicatorStyle,
-        separatorColor: utils.themeColor.separatorColor,
-        itemHeight: 50,
-        data: [{
-          title: "主题",
-          rows: [tabThemeMode, tabThemeColor],
-        }, {
-          title: "功能",
-          rows: [tabStikySet],
-        }],
+        style: 2, // 使用复选类型时这个应该选择 2
+        rowHeight: 45,
+        separatorInset: $insets(0, 66, 0, 0),
+        indicatorInsets: $insets(100, 0, 49, 0),
+        separatorColor: $color("systemSeparator"),
+        header: {
+          type: "view",
+          props: {height: 5}
+        },
+        data: groups.init({
+          groups: [{
+            title: "主题",
+            items: [{
+              type: "arrow",
+              async: false,
+              title: "主题模式",
+              symbol: themeSymbols[themeMode],
+              iconColor: utils.systemColor("blue"),
+              handler: () => {
+                showThemeModeSelectView($("themeSettingView"));
+              }
+            },
+            {
+              type: "arrow",
+              async: false,
+              title: "主题颜色",
+              symbol: "pencil.tip",
+              iconColor: utils.getCache("themeColor"),
+              handler: () => {
+                showColorSelectView($("themeSettingView"));
+              }
+          },]
+          },
+          {
+            title: "功能",
+            items: [{
+              type: "switch",
+              async: false,
+              title: "商店置顶",
+              symbol: "arrow.up",
+              key: "storeStiky",
+              iconColor: utils.systemColor("orange"),
+              handler: () => {
+              }
+            },{
+              type: "switch",
+              async: false,
+              title: "欢迎动画",
+              symbol: "star",
+              key: "welcomeAnimation",
+              iconColor: utils.systemColor("purple"),
+              handler: () => {
+              }
+            },]
+          },]
+        })
       },
       layout: function (make, view) {
         make.top.equalTo(view.prev.bottom)
         make.left.right.bottom.inset(0)
       },
-      events: {
-        didSelect: function (sender, indexPath, title) {
-          switch (indexPath.section) {
-            case 0:
-              switch(indexPath.row) {
-                case 0: 
-                  showThemeModeSelectView($("themeSettingView"));
-                  break;
-                case 1:
-                  showColorSelectView($("themeSettingView"));
-                  break;
-                default:
-                  break;
-              }
-            default:
-              break;
-          }
-        }
-      }
     }]
   }
   return themeSettingView;
@@ -2599,7 +2443,7 @@ function genWxWelcomView() {
         type: "label",
         props: {
           id: "welcomeDetailLabel",
-          text: "关注微信公众号「纵享派」即可解锁功能设置，感谢你对作者辛苦开发和维护的支持 :)",
+          text: "关注微信公众号「纵享派」即可解锁主题功能，感谢你对作者辛苦开发和维护的支持 :)",
           textColor: utils.themeColor.listHeaderTextColor,
           font: $font("bold", 20),
           align: $align.center,

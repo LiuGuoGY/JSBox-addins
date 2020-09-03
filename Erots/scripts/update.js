@@ -1,6 +1,10 @@
 let ui = require('scripts/ui')
 let utils = require('scripts/utils')
 
+let appJsonUrl = "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/app.json"
+let updateDetailUrl = "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/updateDetail.md"
+let boxUrl = "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/.output/Erots.box"
+
 function getCurVersion() {
   let version = $file.exists("app.json")
     ? JSON.parse($file.read("app.json").string).version
@@ -24,7 +28,7 @@ function getCurDate() {
 
 function getLatestBuild(now) {
   $http.download({
-    url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/app.json",
+    url: appJsonUrl,
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
@@ -35,7 +39,7 @@ function getLatestBuild(now) {
         let force = appJson.force
         if(parseInt(updateBuild) > parseInt(getCurBuild())) {
           $http.download({
-            url: "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/updateDetail.md",
+            url: updateDetailUrl,
             showsProgress: false,
             timeout: 5,
             handler: function(resp) {
@@ -52,6 +56,34 @@ function getLatestBuild(now) {
       }
     }
   })
+}
+
+async function checkUpdateNow() {
+  let resp = await $http.download({
+    url: appJsonUrl,
+    showsProgress: false,
+    timeout: 5,
+  })
+  if(resp.data) {
+    let appJson = JSON.parse(resp.data.string)
+    let updateBuild = appJson.build
+    let updateVersion = appJson.version
+    let force = appJson.force
+    if(parseInt(updateBuild) > parseInt(getCurBuild())) {
+      let resp2 = await $http.download({
+        url: updateDetailUrl,
+        showsProgress: false,
+        timeout: 5,
+      })
+      if(resp2.data) {
+        sureToUpdate(updateVersion, resp2.data.string, force)
+      }
+    } else {
+      if($("mainView")) {
+        ui.showToastView($("mainView"), utils.mColor.blue, "当前版本已是最新")
+      }
+    }
+  }
 }
 
 //确定升级？
@@ -83,15 +115,13 @@ function sureToUpdate(version, des, force) {
 }
 
 function updateScript() {
-  let url =
-    "https://github.com/LiuGuoGY/JSBox-addins/raw/master/Erots/.output/Erots.box?raw=true";
   const scriptName = $addin.current.name;
   let ui = require('scripts/ui')
   if($("mainView")) {
     ui.addProgressView($("mainView"), "开始更新...")
   }
   $http.download({
-    url: url,
+    url: boxUrl,
     showsProgress: false,
     timeout: 5,
     progress: function(bytesWritten, totalBytes) {
@@ -169,4 +199,5 @@ module.exports = {
   getCurVersion: getCurVersion,
   getCurBuild: getCurBuild,
   getCurDate: getCurDate,
+  checkUpdateNow: checkUpdateNow,
 }

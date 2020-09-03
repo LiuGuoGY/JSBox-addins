@@ -1463,7 +1463,7 @@ function setupUploadView(updateApp) {
                 url: fileUrl,
                 showsProgress: false,
                 progress: function(bytesWritten, totalBytes) {
-                  var percentage = bytesWritten * 1.0 / totalBytes
+                  var percentage = (bytesWritten * 1.0 / totalBytes * 100).toFixed(1)
                   $("myProgressText").text = "检验文件中... (" + percentage + "%)"
                 },
               })

@@ -30,28 +30,60 @@ function detect() {
                 }
             }
         })
-        $ui.render({
-            props: {
-                navBarHidden: true,
-                statusBarStyle: (utils.getThemeMode() == "dark") ? 1 : 0,
-                bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("#FEFFFE"),
+        let welcomeView = {
+            type: "view",
+            layout: function(make, view) {
+                make.center.equalTo(view.super)
+                make.size.equalTo($size(40, 40))
             },
             views: [{
+                type: "spinner",
+                props: {
+                    loading: true,
+                    style: (utils.getThemeMode() == "dark") ? 1 : 2,
+                    bgcolor: $color("clear"),
+                },
+                layout: function(make, view) {
+                    make.top.inset(0)
+                    make.centerX.equalTo(view.super)
+                }
+            }, {
+                type: "label",
+                props: {
+                    text: "正在载入...",
+                    align: $align.center,
+                    font: $font(12),
+                    textColor: (utils.getThemeMode() == "dark") ? $color("white") : $color("darkGray"),
+                },
+                layout: function(make, view) {
+                    make.centerX.equalTo(view.super).offset(4)
+                    make.bottom.inset(0)
+                }
+            }],
+        }
+        if(utils.getCache("welcomeAnimation")) {
+            welcomeView = {
                 type: "view",
                 layout: function(make, view) {
                     make.center.equalTo(view.super)
-                    make.size.equalTo($size(40, 40))
+                    make.size.equalTo($size(100, 100))
                 },
                 views: [{
-                    type: "spinner",
+                    type: "lottie",
                     props: {
-                        loading: true,
-                        style: (utils.getThemeMode() == "dark") ? 1 : 2,
-                        bgcolor: $color("clear"),
+                        src: "assets/7899-loading.json",
+                        loop: true,
+                        // autoReverse: true,
                     },
-                    layout: function(make, view) {
+                    layout: (make, view) => {
+                        make.size.equalTo($size(100, 100));
                         make.top.inset(0)
-                        make.centerX.equalTo(view.super)
+                        make.centerX.equalTo(view.super);
+                    },
+                    events: {
+                        ready: (sender)=>{
+                            sender.play()
+                        }
                     }
                 }, {
                     type: "label",
@@ -63,10 +95,18 @@ function detect() {
                     },
                     layout: function(make, view) {
                         make.centerX.equalTo(view.super).offset(4)
-                        make.bottom.inset(0)
+                        make.bottom.inset(10)
                     }
                 }],
-            }, ]
+            }
+        }
+        $ui.render({
+            props: {
+                navBarHidden: true,
+                statusBarStyle: (utils.getThemeMode() == "dark") ? 1 : 0,
+                bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("#FEFFFE"),
+            },
+            views: [welcomeView]
         });
     } else {
         go();

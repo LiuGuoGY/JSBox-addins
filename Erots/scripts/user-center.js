@@ -2,6 +2,7 @@ let ui = require('scripts/ui')
 let utils = require('scripts/utils')
 let user = require('scripts/user')
 let api = require('scripts/api')
+const groups = require("./groups");
 
 $app.listen({
   refreshAll: function (object) {
@@ -111,88 +112,119 @@ function genUserCenterSubview() {
     }
   },]
   let userView = {
-    type: "view",
+    type: "list",
     props: {
-      id: "userCenterSubView",
-    },
-    layout: $layout.fill,
-    views: [{
-      type: "list",
-      props: {
-        bgcolor: $color("clear"),
-        template: userTemplate,
-        indicatorInsets: $insets(45, 0, 50, 0),
-        indicatorStyle: utils.themeColor.indicatorStyle,
-        separatorColor: utils.themeColor.separatorColor,
-        header: {
-          type: "view",
-          props:{
-            height: 20,
-          },
-          views: []
+      style: 2, // 使用复选类型时这个应该选择 2
+      rowHeight: 45,
+      separatorInset: $insets(0, 66, 0, 0),
+      indicatorInsets: $insets(100, 0, 49, 0),
+      separatorColor: $color("systemSeparator"),
+      header: {
+        type: "view",
+        props: {height: 5}
+      },
+      footer: {
+        type: "view",
+        props:{
+          height: 110,
         },
-        footer: {
-          type: "view",
-          props:{
-            height: 110,
+        views: [{
+          type: "button",
+          props: {
+            title: "退出登录",
+            bgcolor: utils.themeColor.commentBgColor,
+            titleColor: utils.getCache("themeColor"),
+            font: $font("bold", 16),
+            radius: 12,
           },
-          views: [{
-            type: "button",
-            props: {
-              title: "退出登录",
-              bgcolor: utils.themeColor.commentBgColor,
-              titleColor: utils.getCache("themeColor"),
-              font: $font("bold", 16),
-              radius: 12,
-            },
-            layout: function(make, view) {
-              make.left.right.inset(20)
-              make.center.equalTo(view.super)
-              make.height.equalTo(45)
-            },
-            events: {
-              tapped: async function(sender) {
-                $ui.alert({
-                  title: "提示",
-                  message: "确定要退出？",
-                  actions: [
-                    {
-                      title: "确定",
-                      handler: function() {
-                        user.logout()
-                      }
-                    },
-                    {
-                      title: "取消",
-                      handler: function() {
-                
-                      }
+          layout: function(make, view) {
+            make.left.right.inset(15)
+            make.center.equalTo(view.super)
+            make.height.equalTo(45)
+          },
+          events: {
+            tapped: async function(sender) {
+              $ui.alert({
+                title: "提示",
+                message: "确定要退出？",
+                actions: [
+                  {
+                    title: "确定",
+                    handler: function() {
+                      user.logout()
                     }
-                  ]
-                });
-              }
+                  },
+                  {
+                    title: "取消",
+                    handler: function() {
+              
+                    }
+                  }
+                ]
+              });
             }
-          }],
-        },
-        data: infoArray,
-      },
-      layout: function(make, view) {
-        make.top.inset(0)
-        make.bottom.inset(0)
-        make.left.right.inset(0)
-      },
-      events: {
-        didSelect: function(sender, indexPath, title) {
-          switch(indexPath.row + indexPath.section) {
-            case 2: setupMyPraiseView();break;
-            case 3: setupMyCommentsView();break;
-            case 4: setupManageMyAppsView();break;
-            default:break;
           }
-        }
-      }
-    }]
-  }
+        }],
+      },
+      data: groups.init({
+        groups: [{
+          title: "用户信息",
+          items: [{
+            type: "text",
+            async: false,
+            title: "邮箱",
+            symbol: "envelope",
+            iconColor: utils.systemColor("blue"),
+            text: userInfo.email,
+            handler: () => {
+            }
+          },
+          {
+            type: "text",
+            async: false,
+            title: "昵称",
+            symbol: "person",
+            iconColor: utils.systemColor("pink"),
+            text: userInfo.nickname,
+            handler: () => {}
+        },]
+        },
+        {
+          title: "应用管理",
+          items: [{
+            type: "arrow",
+            async: false,
+            title: "赞赏链接",
+            symbol: "link",
+            iconColor: utils.systemColor("red"),
+            handler: () => {
+              setupMyPraiseView();
+            }
+          },{
+              type: "arrow",
+              async: false,
+              title: "与我有关的评论",
+              symbol: "bubble.right",
+              iconColor: utils.systemColor("green"),
+              handler: () => {
+                setupMyCommentsView();
+              }
+            },
+            {
+              type: "arrow",
+              async: false,
+              title: "管理我的应用",
+              symbol: "hammer",
+              iconColor: utils.systemColor("purple"),
+              handler: () => {
+                setupManageMyAppsView();
+              }
+          }]
+        }]
+      })
+    },
+    layout: $layout.fillSafeArea,
+  };
   return userView
 }
 

@@ -231,7 +231,7 @@ async function catbox_uploadFile(file, view) {
       "reqtype": "fileupload",
       "userhash": "db9c58fa320620970aa444d4f",
     },
-    progress: function(percentage) {
+    progress: function(percetage) {
       view.text = "上传应用文件... (" + percentage + "%)"
     },
   });
