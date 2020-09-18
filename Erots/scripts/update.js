@@ -1,6 +1,16 @@
 let ui = require('scripts/ui')
 let utils = require('scripts/utils')
 
+let giteeUrl = {
+  appJsonUrl : "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/app.json",
+  updateDetailUrl : "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/updateDetail.md",
+  boxUrl : "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/.output/Erots.box"
+}
+let githubUrl = {
+  appJsonUrl : "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/app.json",
+  updateDetailUrl : "https://raw.githubusercontent.com/LiuGuoGY/JSBox-addins/master/Erots/updateDetail.md",
+  boxUrl : "https://github.com/LiuGuoGY/JSBox-addins/raw/master/Erots/.output/Erots.box?raw=true",
+}
 let appJsonUrl = "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/app.json"
 let updateDetailUrl = "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/updateDetail.md"
 let boxUrl = "https://gitee.com/liuguogy/JSBox-addins/raw/master/Erots/.output/Erots.box"
@@ -27,19 +37,51 @@ function getCurDate() {
 }
 
 function getLatestBuild(now) {
+  let isAppJsonGet = false
   $http.download({
-    url: appJsonUrl,
+    url: giteeUrl.appJsonUrl,
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
-      if(resp.data) {
+      if(resp.data && !isAppJsonGet) {
+        isAppJsonGet = true;
         let appJson = JSON.parse(resp.data.string)
         let updateBuild = appJson.build
         let updateVersion = appJson.version
         let force = appJson.force
         if(parseInt(updateBuild) > parseInt(getCurBuild())) {
           $http.download({
-            url: updateDetailUrl,
+            url: giteeUrl.updateDetailUrl,
+            showsProgress: false,
+            timeout: 5,
+            handler: function(resp) {
+              if(resp.data) {
+                sureToUpdate(updateVersion, resp.data.string, force)
+              }
+            }
+          })
+        } else {
+          if(now && $("mainView")) {
+            ui.showToastView($("mainView"), utils.mColor.blue, "当前版本已是最新")
+          }
+        }
+      }
+    }
+  })
+  $http.download({
+    url: githubUrl.appJsonUrl,
+    showsProgress: false,
+    timeout: 5,
+    handler: function(resp) {
+      if(resp.data && !isAppJsonGet) {
+        isAppJsonGet = true;
+        let appJson = JSON.parse(resp.data.string)
+        let updateBuild = appJson.build
+        let updateVersion = appJson.version
+        let force = appJson.force
+        if(parseInt(updateBuild) > parseInt(getCurBuild())) {
+          $http.download({
+            url: githubUrl.updateDetailUrl,
             showsProgress: false,
             timeout: 5,
             handler: function(resp) {
@@ -102,6 +144,7 @@ function sureToUpdate(version, des, force) {
   },
   {
     title: "是",
+    style: $alertActionType.cancel,
     handler: function() {
       $ui.popToRoot();
       updateScript()

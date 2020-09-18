@@ -3,6 +3,7 @@ let ui = require('scripts/ui')
 let user = require('scripts/user')
 let logUpView = require('scripts/login-view')
 let api = require('scripts/api')
+let appUtils = require('scripts/app-utils')
 
 let objectId = ""
 let topOffset = -20
@@ -10,7 +11,6 @@ let topOffset = -20
 
 $app.listen({
   refreshAll: function (object) {
-    $console.info("string");
     $console.info(object);
     if (object.appItem) {
       refreshAppItemView()
@@ -609,109 +609,56 @@ function genAppItemShowView() {
                   if (!app.needUpdate && app.haveInstalled) {
                     $addin.run(app.appName)
                   } else {
-                    sender.userInteractionEnabled = false
-                    sender.title = ""
-                    sender.updateLayout(function (make, view) {
-                      make.size.equalTo($size(30, 30))
-                    })
-                    $ui.animate({
-                      duration: 0.2,
-                      animation: function () {
-                        sender.relayout()
-                      },
-                      completion: function () {
-                        $ui.animate({
-                          duration: 0.1,
-                          animation: function () {
-                            sender.bgcolor = $color("clear")
-                          },
-                        })
-                        sender.add({
-                          type: "canvas",
-                          layout: (make, view) => {
-                            make.center.equalTo(view.super)
-                            make.size.equalTo($size(30, 30))
-                          },
-                          events: {
-                            draw: (view, ctx) => {
-                              ctx.strokeColor = utils.themeColor.appButtonBgColor,
-                                ctx.setLineWidth(2.5)
-                              ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
-                              ctx.strokePath()
+                    if(!appUtils.isOSSuit(app)) {
+                      $ui.alert({
+                        title: "提示",
+                        message: "当前的系统版本过低，最低要求 iOS" + app.needIOSVersion + "，确定安装？",
+                        actions: [
+                          {
+                            title: "安装",
+                            style: $alertActionType.destructive, // Optional
+                            handler: function() {
+                              appUtils.installApp(app, sender, ()=>{
+                                $app.notify({
+                                  name: "refreshAll",
+                                  object: { appItem: false }
+                                });
+                              })
                             }
                           },
-                        })
-                        let radius = 0;
-                        let timer = $timer.schedule({
-                          interval: 0.01,
-                          handler: function () {
-                            if (sender.get("canvas")) {
-                              sender.get("canvas").rotate(radius)
-                              radius = radius + Math.PI / 180 * 6
-                            } else {
-                              timer.invalidate()
+                          {
+                            title: "取消",
+                            handler: function() {
+                      
                             }
                           }
+                        ]
+                      });
+                    } else {
+                      appUtils.installApp(app, sender, ()=>{
+                        $app.notify({
+                          name: "refreshAll",
+                          object: { appItem: false }
                         });
-                        $http.download({
-                          url: app.file,
-                          showsProgress: false,
-                          handler: function (resp) {
-                            let json = utils.getSearchJson(app.appIcon)
-                            let icon_code = (json.code) ? json.code : "124";
-                            utils.saveAddin(app.appName, "icon_" + icon_code + ".png", resp.data);
-                            if (app.needUpdate && app.haveInstalled) {
-                              utils.addUpdateApps(app.objectId);
-                            }
-                            let cloudApps = utils.getCache("cloudApps", [])
-                            for (let j = 0; j < cloudApps.length; j++) {
-                              if (cloudApps[j].objectId == app.objectId) {
-                                cloudApps[j].haveInstalled = true
-                                cloudApps[j].needUpdate = false
-                              }
-                            }
-                            $cache.set("cloudApps", cloudApps);
-                            $ui.animate({
-                              duration: 0.1,
-                              animation: function () {
-                                sender.bgcolor = utils.themeColor.appButtonBgColor
-                              },
-                              completion: function () {
-                                sender.get("canvas").remove()
-                                sender.updateLayout(function (make, view) {
-                                  make.size.equalTo($size(75, 30))
-                                })
-                                $delay(0.1, ()=>{
-                                  sender.title = "打开"
-                                })
-                                $ui.animate({
-                                  duration: 0.2,
-                                  animation: function () {
-                                    sender.relayout()
-                                  },
-                                  completion: function () {
-                                    api.uploadDownloadTimes(app.objectId)
-                                    $app.notify({
-                                      name: "refreshAll",
-                                      object: { appItem: false }
-                                    });
-                                    app.needUpdate = false
-                                    app.haveInstalled = true
-                                    sender.userInteractionEnabled = true
-                                    $device.taptic(2);
-                                    $delay(0.2, () => { $device.taptic(2); })
-                                  }
-                                })
-                              }
-                            })
-                          }
-                        })
-                      }
-                    })
+                      })
+                    }
                   }
                 }
               },
             }]
+          }, {
+            type: "label",
+            props: {
+              text: "需要 iOS" + app.needIOSVersion,
+              font: $font(11),
+              textColor: utils.themeColor.appCateTextColor,
+              align: $align.left,
+              hidden: (app.needIOSVersion)?appUtils.isOSSuit(app):true,
+            },
+            layout: function (make, view) {
+              make.left.equalTo(view.prev.right).inset(15)
+              make.centerY.equalTo(view.prev)
+            }
           }, {
             type: "button",
             props: {
@@ -860,28 +807,28 @@ function genAppItemShowView() {
         views: [{
           type: "view",
           layout: function (make, view) {
-            make.width.equalTo(view.super).multipliedBy(0.45)
+            make.width.equalTo(view.super).multipliedBy(0.35)
             make.centerY.equalTo(view.super)
             make.height.equalTo(view.super)
-            make.right.inset(20)
+            make.left.inset(20)
           },
           views: [{
             type: "label",
             props: {
-              text: "" + app.downloadTimes,
+              text: (app.author) ? app.author : "无",
               font: $font("PingFangSC-Medium", 20),
               align: $align.center,
               textColor: $color("gray"),
             },
             layout: function (make, view) {
-              make.top.inset(15)
-              make.height.equalTo(18)
+              make.top.inset(10)
+              make.height.equalTo(23)
               make.centerX.equalTo(view.super)
             },
           }, {
             type: "label",
             props: {
-              text: "下载量",
+              text: "开发者",
               font: $font(11),
               align: $align.center,
               textColor: utils.themeColor.appHintColor,
@@ -895,10 +842,10 @@ function genAppItemShowView() {
         }, {
           type: "view",
           layout: function (make, view) {
-            make.left.inset(20)
-            make.width.equalTo(view.super).multipliedBy(0.45)
+            make.width.equalTo(view.super).multipliedBy(0.3)
             make.centerY.equalTo(view.super)
             make.height.equalTo(view.super)
+            make.left.equalTo(view.prev.right)
           },
           views: [{
             type: "label",
@@ -909,14 +856,49 @@ function genAppItemShowView() {
               textColor: $color("gray"),
             },
             layout: function (make, view) {
-              make.top.inset(15)
-              make.height.equalTo(18)
+              make.top.inset(10)
+              make.height.equalTo(23)
               make.centerX.equalTo(view.super)
             },
           }, {
             type: "label",
             props: {
               text: "评论",
+              font: $font(11),
+              align: $align.center,
+              textColor: utils.themeColor.appHintColor,
+            },
+            layout: function (make, view) {
+              make.top.equalTo(view.prev.bottom).inset(5)
+              make.height.equalTo(15)
+              make.centerX.equalTo(view.super)
+            },
+          }]
+        },{
+          type: "view",
+          layout: function (make, view) {
+            make.width.equalTo(view.super).multipliedBy(0.3)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+            make.right.inset(20)
+          },
+          views: [{
+            type: "label",
+            props: {
+              text: "" + app.downloadTimes,
+              font: $font("PingFangSC-Medium", 20),
+              align: $align.center,
+              textColor: $color("gray"),
+            },
+            layout: function (make, view) {
+              make.top.inset(10)
+              make.height.equalTo(23)
+              make.centerX.equalTo(view.super)
+            },
+          }, {
+            type: "label",
+            props: {
+              text: "下载量",
               font: $font(11),
               align: $align.center,
               textColor: utils.themeColor.appHintColor,
@@ -1378,172 +1360,12 @@ function genAppItemShowView() {
           make.height.equalTo(50)
           make.left.inset(20)
         },
-      }, {
-        type: "view",
-        layout: function (make, view) {
-          make.top.equalTo(view.prev.bottom)
-          make.height.equalTo(40)
-          make.left.right.inset(20)
-        },
-        views: [{
-          type: "label",
-          props: {
-            text: "开发者",
-            align: $align.left,
-            font: $font("PingFangSC-Regular", 14),
-            textColor: utils.themeColor.appCateTextColor,
-          },
-          layout: function (make, view) {
-            make.top.inset(0)
-            make.height.equalTo(20)
-            make.left.inset(0)
-            make.centerY.equalTo(view.super)
-          }
-        }, {
-          type: "label",
-          props: {
-            text: (app.author) ? app.author : "无",
-            align: $align.right,
-            font: $font("PingFangSC-Regular", 14),
-            textColor: utils.themeColor.listHeaderTextColor,
-          },
-          layout: function (make, view) {
-            make.top.inset(0)
-            make.height.equalTo(20)
-            make.right.inset(0)
-            make.left.equalTo(view.prev.right).inset(20 )
-            make.centerY.equalTo(view.super)
-          }
-        }, {
-          type: "canvas",
-          layout: function (make, view) {
-            make.bottom.inset(0)
-            make.height.equalTo(1 / $device.info.screen.scale)
-            make.left.right.inset(0)
-          },
-          events: {
-            draw: function (view, ctx) {
-              var width = view.frame.width
-              var scale = $device.info.screen.scale
-              ctx.strokeColor = $color("#D0D0D0")
-              ctx.setLineWidth(1 / scale)
-              ctx.moveToPoint(0, 0)
-              ctx.addLineToPoint(width, 0)
-              ctx.strokePath()
-            }
-          }
-        }]
-      }, {
-        type: "view",
-        layout: function (make, view) {
-          make.top.equalTo(view.prev.bottom)
-          make.height.equalTo(40)
-          make.left.right.inset(20)
-        },
-        views: [{
-          type: "label",
-          props: {
-            text: "类别",
-            align: $align.left,
-            font: $font(14),
-            textColor: utils.themeColor.appCateTextColor,
-          },
-          layout: function (make, view) {
-            make.top.inset(0)
-            make.height.equalTo(20)
-            make.left.inset(0)
-            make.centerY.equalTo(view.super)
-          }
-        }, {
-          type: "label",
-          props: {
-            text: app.appCate,
-            align: $align.right,
-            font: $font(14),
-            textColor: utils.themeColor.listHeaderTextColor,
-          },
-          layout: function (make, view) {
-            make.top.inset(0)
-            make.height.equalTo(20)
-            make.right.inset(0)
-            make.width.equalTo(100)
-            make.centerY.equalTo(view.super)
-          }
-        }, {
-          type: "canvas",
-          layout: function (make, view) {
-            make.bottom.inset(0)
-            make.height.equalTo(1 / $device.info.screen.scale)
-            make.left.right.inset(0)
-          },
-          events: {
-            draw: function (view, ctx) {
-              var width = view.frame.width
-              var scale = $device.info.screen.scale
-              ctx.strokeColor = $color("#D0D0D0")
-              ctx.setLineWidth(1 / scale)
-              ctx.moveToPoint(0, 0)
-              ctx.addLineToPoint(width, 0)
-              ctx.strokePath()
-            }
-          }
-        }]
-      },{
-        type: "view",
-        layout: function (make, view) {
-          make.top.equalTo(view.prev.bottom)
-          make.height.equalTo(40)
-          make.left.right.inset(20)
-        },
-        views: [{
-          type: "label",
-          props: {
-            text: "大小",
-            align: $align.left,
-            font: $font(14),
-            textColor: utils.themeColor.appCateTextColor,
-          },
-          layout: function (make, view) {
-            make.top.inset(0)
-            make.height.equalTo(20)
-            make.left.inset(0)
-            make.centerY.equalTo(view.super)
-          }
-        }, {
-          type: "label",
-          props: {
-            text: utils.numerToSize(app.appSize),
-            align: $align.right,
-            font: $font(14),
-            textColor: utils.themeColor.listHeaderTextColor,
-          },
-          layout: function (make, view) {
-            make.top.inset(0)
-            make.height.equalTo(20)
-            make.right.inset(0)
-            make.width.equalTo(100)
-            make.centerY.equalTo(view.super)
-          }
-        }, {
-          type: "canvas",
-          layout: function (make, view) {
-            make.bottom.inset(0)
-            make.height.equalTo(1 / $device.info.screen.scale)
-            make.left.right.inset(0)
-          },
-          events: {
-            draw: function (view, ctx) {
-              var width = view.frame.width
-              var scale = $device.info.screen.scale
-              ctx.strokeColor = $color("#D0D0D0")
-              ctx.setLineWidth(1 / scale)
-              ctx.moveToPoint(0, 0)
-              ctx.addLineToPoint(width, 0)
-              ctx.strokePath()
-            }
-          }
-        }]
-      }, {
+      }, 
+      genAppItemInfoView("开发者", (app.author) ? app.author : "无"),
+      genAppItemInfoView("类别", app.appCate),
+      genAppItemInfoView("大小", utils.numerToSize(app.appSize)),
+      genAppItemInfoView("系统要求", (app.needIOSVersion)?("iOS"+app.needIOSVersion+"+"):"无"), 
+      {
         type: "view",
         props: {
           hidden: !app.praise,
@@ -1713,6 +1535,65 @@ function genAppItemShowView() {
           }],
         }]
       }]
+    }]
+  }
+}
+
+function genAppItemInfoView(text, detail) {
+  return {
+    type: "view",
+    layout: function (make, view) {
+      make.top.equalTo(view.prev.bottom)
+      make.height.equalTo(40)
+      make.left.right.inset(20)
+    },
+    views: [{
+      type: "label",
+      props: {
+        text: text,
+        align: $align.left,
+        font: $font(14),
+        textColor: utils.themeColor.appCateTextColor,
+      },
+      layout: function (make, view) {
+        make.top.inset(0)
+        make.height.equalTo(20)
+        make.left.inset(0)
+        make.centerY.equalTo(view.super)
+      }
+    }, {
+      type: "label",
+      props: {
+        text: detail,
+        align: $align.right,
+        font: $font(14),
+        textColor: utils.themeColor.listHeaderTextColor,
+      },
+      layout: function (make, view) {
+        make.top.inset(0)
+        make.height.equalTo(20)
+        make.right.inset(0)
+        make.width.equalTo(100)
+        make.centerY.equalTo(view.super)
+      }
+    }, {
+      type: "canvas",
+      layout: function (make, view) {
+        make.bottom.inset(0)
+        make.height.equalTo(1 / $device.info.screen.scale)
+        make.left.right.inset(0)
+      },
+      events: {
+        draw: function (view, ctx) {
+          var width = view.frame.width
+          var scale = $device.info.screen.scale
+          ctx.strokeColor = $color("#D0D0D0")
+          ctx.setLineWidth(1 / scale)
+          ctx.moveToPoint(0, 0)
+          ctx.addLineToPoint(width, 0)
+          ctx.strokePath()
+        }
+      }
     }]
   }
 }

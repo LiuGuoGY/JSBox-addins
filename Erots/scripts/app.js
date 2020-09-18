@@ -7,8 +7,8 @@ let user = require('scripts/user')
 let userCenterView = require('scripts/user-center')
 let appItemView = require('scripts/app-itemview')
 let api = require('scripts/api')
+let appUtils = require('scripts/app-utils')
 const groups = require("./groups");
-const navigationBar = require("./navigationBar");
 
 let topOffset = -20
 let searchText = ""
@@ -856,108 +856,45 @@ function genUpdateAppListView() {
             tapped: function (sender) {
               let listView = $("updateAppsList")
               let needUpdateNumber = watingApps.length
+              let needOSAlert = false
               if (listView) {
                 sender.titleColor = utils.themeColor.appCateTextColor
                 sender.userInteractionEnabled = false
                 for (let i = 0; i < watingApps.length; i++) {
+                  if(!appUtils.isOSSuit(watingApps[i])) {
+                    needOSAlert = true
+                    needUpdateNumber--;
+                    if (needUpdateNumber <= 0) {
+                      $delay(0.5, () => {
+                        refreshAllView()
+                      })
+                    }
+                    continue;
+                  }
                   let itemView = listView.cell($indexPath(0, i + 1))
                   let buttonView = itemView.get("button")
-                  buttonView.title = ""
-                  buttonView.updateLayout(function (make, view) {
-                    make.size.equalTo($size(30, 30))
-                  })
-                  $ui.animate({
-                    duration: 0.2,
-                    animation: function () {
-                      buttonView.relayout()
-                    },
-                    completion: function () {
-                      $ui.animate({
-                        duration: 0.1,
-                        animation: function () {
-                          buttonView.bgcolor = $color("clear")
-                        },
-                      })
-                      buttonView.add({
-                        type: "canvas",
-                        layout: (make, view) => {
-                          make.center.equalTo(view.super)
-                          make.size.equalTo($size(30, 30))
-                        },
-                        events: {
-                          draw: (view, ctx) => {
-                            ctx.strokeColor = utils.themeColor.appButtonBgColor
-                            ctx.setLineWidth(2.5)
-                            ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
-                            ctx.strokePath()
-                          }
-                        },
-                      })
-                      let radius = 0;
-                      let timer = $timer.schedule({
-                        interval: 0.01,
-                        handler: function () {
-                          if (buttonView.get("canvas")) {
-                            buttonView.get("canvas").rotate(radius)
-                            radius = radius + Math.PI / 180 * 6
-                          } else {
-                            timer.invalidate()
-                          }
-                        }
-                      });
-                      $http.download({
-                        url: watingApps[i].file,
-                        showsProgress: false,
-                        handler: function (resp) {
-                          let json = utils.getSearchJson(watingApps[i].appIcon)
-                          let icon_code = (json.code) ? json.code : "124";
-                          utils.saveAddin(watingApps[i].appName, "icon_" + icon_code + ".png", resp.data);
-                          if (watingApps[i].needUpdate && watingApps[i].haveInstalled) {
-                            utils.addUpdateApps(watingApps[i].objectId);
-                          }
-                          let cloudApps = utils.getCache("cloudApps", [])
-                          for (let j = 0; j < cloudApps.length; j++) {
-                            if (cloudApps[j].objectId == watingApps[i].objectId) {
-                              cloudApps[j].haveInstalled = true
-                              cloudApps[j].needUpdate = false
-                              break;
-                            }
-                          }
-                          $cache.set("cloudApps", cloudApps);
-                          $ui.animate({
-                            duration: 0.1,
-                            animation: function () {
-                              buttonView.bgcolor = utils.themeColor.appButtonBgColor
-                            },
-                            completion: function () {
-                              buttonView.get("canvas").remove()
-                              buttonView.updateLayout(function (make, view) {
-                                make.size.equalTo($size(75, 30))
-                              })
-                              $delay(0.1, () => {
-                                buttonView.title = "打开"
-                              })
-                              $ui.animate({
-                                duration: 0.2,
-                                animation: function () {
-                                  buttonView.relayout()
-                                },
-                                completion: function () {
-                                  api.uploadDownloadTimes(watingApps[i].objectId)
-                                  needUpdateNumber--;
-                                  if (needUpdateNumber <= 0) {
-                                    $delay(0.5, () => {
-                                      refreshAllView()
-                                    })
-                                  }
-                                }
-                              })
-                            }
-                          })
-                        }
+                  appUtils.installApp(watingApps[i], buttonView, ()=>{
+                    needUpdateNumber--;
+                    if (needUpdateNumber <= 0) {
+                      $delay(0.5, () => {
+                        refreshAllView()
                       })
                     }
                   })
+                }
+                if(needOSAlert) {
+                  $ui.alert({
+                    title: "提示",
+                    message: "部分应用的最低系统要求不满足，如需更新请逐个点击更新",
+                    actions: [
+                      {
+                        title: "好的",
+                        handler: function() {
+                  
+                        }
+                      }
+                    ]
+                  });
                 }
               }
             }
@@ -1137,112 +1074,45 @@ function genAppListView(apps, sourceViewName) {
           if (!apps[i].needUpdate && apps[i].haveInstalled) {
             $addin.run(apps[i].appName)
           } else {
-            buttonView.userInteractionEnabled = false
-            buttonView.title = ""
-            buttonView.updateLayout(function (make, view) {
-              make.size.equalTo($size(30, 30))
-            })
-            $ui.animate({
-              duration: 0.2,
-              animation: function () {
-                buttonView.relayout()
-              },
-              completion: function () {
-                $ui.animate({
-                  duration: 0.1,
-                  animation: function () {
-                    buttonView.bgcolor = $color("clear")
-                  },
-                })
-                buttonView.add({
-                  type: "canvas",
-                  layout: (make, view) => {
-                    make.center.equalTo(view.super)
-                    make.size.equalTo($size(30, 30))
-                  },
-                  events: {
-                    draw: (view, ctx) => {
-                      ctx.strokeColor = utils.themeColor.appButtonBgColor
-                      ctx.setLineWidth(2.5)
-                      ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
-                      ctx.strokePath()
+            if(!appUtils.isOSSuit(apps[i])) {
+              $ui.alert({
+                title: "提示",
+                message: "当前的系统版本过低，最低要求 iOS" + apps[i].needIOSVersion + "，确定安装？",
+                actions: [
+                  {
+                    title: "安装",
+                    style: $alertActionType.destructive, // Optional
+                    handler: function() {
+                      appUtils.installApp(apps[i], buttonView, ()=>{
+                        $app.notify({
+                          name: "refreshAll",
+                          object: { 
+                            except: sourceViewName,
+                            appItem: true, 
+                          }
+                        });
+                      })
                     }
                   },
-                })
-                let radius = 0;
-                let timer = $timer.schedule({
-                  interval: 0.01,
-                  handler: function () {
-                    if (buttonView.get("canvas")) {
-                      buttonView.get("canvas").rotate(radius)
-                      radius = radius + Math.PI / 180 * 6
-                    } else {
-                      timer.invalidate()
+                  {
+                    title: "取消",
+                    handler: function() {
+              
                     }
+                  }
+                ]
+              });
+            } else {
+              appUtils.installApp(apps[i], buttonView, ()=>{
+                $app.notify({
+                  name: "refreshAll",
+                  object: { 
+                    except: sourceViewName,
+                    appItem: true, 
                   }
                 });
-                $http.download({
-                  url: apps[i].file,
-                  showsProgress: false,
-                  handler: function (resp) {
-                    let json = utils.getSearchJson(apps[i].appIcon)
-                    let icon_code = (json.code) ? json.code : "124";
-                    utils.saveAddin(apps[i].appName, "icon_" + icon_code + ".png", resp.data);
-                    if (apps[i].needUpdate && apps[i].haveInstalled) {
-                      utils.addUpdateApps(apps[i].objectId);
-                    }
-                    let cloudApps = utils.getCache("cloudApps", [])
-                    for (let j = 0; j < cloudApps.length; j++) {
-                      if (cloudApps[j].objectId == apps[i].objectId) {
-                        cloudApps[j].haveInstalled = true
-                        cloudApps[j].needUpdate = false
-                      }
-                    }
-                    $cache.set("cloudApps", cloudApps);
-                    $ui.animate({
-                      duration: 0.1,
-                      animation: function () {
-                        buttonView.bgcolor = utils.themeColor.appButtonBgColor
-                      },
-                      completion: function () {
-                        buttonView.get("canvas").remove()
-                        buttonView.updateLayout(function (make, view) {
-                          make.size.equalTo($size(75, 30))
-                        })
-                        $delay(0.1, () => {
-                          buttonView.title = "打开"
-                        })
-                        $ui.animate({
-                          duration: 0.2,
-                          animation: function () {
-                            buttonView.relayout()
-                          },
-                          completion: function () {
-                            buttonView.userInteractionEnabled = true
-                            apps[i].needUpdate = false
-                            apps[i].haveInstalled = true
-                            api.uploadDownloadTimes(apps[i].objectId)
-                            $device.taptic(2);
-                            $delay(0.2, () => {
-                              $device.taptic(2);
-                            })
-                            $delay(0.5, () => {
-                              $app.notify({
-                                name: "refreshAll",
-                                object: { 
-                                  except: sourceViewName,
-                                  appItem: true, 
-                                }
-                              });
-                            })
-                          }
-                        })
-                      }
-                    })
-                  }
-                })
-              }
-            })
+              })
+            }
           }
         }, {
           hintText: (apps[i].racing) ? "参赛作品" : "",

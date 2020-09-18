@@ -32,6 +32,7 @@ function setupUploadView(updateApp) {
         instruction: "",
         versionInst: "",
         previews: [],
+        needIOSVersion: 0,
       }
     }
     $cache.set("unfinishData", myApp)
@@ -1116,6 +1117,64 @@ function setupUploadView(updateApp) {
             make.width.equalTo(view.super)
           }
         }],
+      },
+      {
+        type: "view",
+        props: {
+          bgcolor: utils.themeColor.uploadBgcolor,
+        },
+        layout: function(make, view) {
+          make.centerX.equalTo(view.super)
+          make.top.equalTo(view.prev.bottom).inset(1)
+          make.height.equalTo(50)
+          make.left.right.inset(0)
+        },
+        views: [{
+          type: "label",
+          props: {
+            text: "系统版本要求",
+            align: $align.left,
+            font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(20)
+            make.left.inset(15)
+            make.width.equalTo(120)
+          }
+        },{
+          type: "input",
+          props: {
+            id: "needIOSVersionInput",
+            bgcolor: utils.themeColor.uploadBgcolor,
+            radius: 0,
+            type: $kbType.number,
+            text: "" + myApp.needIOSVersion,
+            textColor: utils.themeColor.appObviousColor,
+            darkKeyboard: utils.themeColor.darkKeyboard,
+            tintColor: utils.getCache("themeColor"),
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(32)
+            make.left.equalTo(view.prev.right)
+            make.right.inset(15)
+          },
+          events: {
+            returned: function(sender) {
+              sender.blur()
+            },
+            didEndEditing: function(sender) {
+              if(sender.text.length == 0) {
+                myApp.needIOSVersion = 0;
+              } else {
+                myApp.needIOSVersion = parseInt(sender.text);
+              }
+              refreshPreview()
+            }
+          }
+        },],
       },
       {
         type: "label",
