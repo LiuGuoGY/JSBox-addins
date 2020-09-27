@@ -8,6 +8,7 @@ function installApp(app, buttonView, handler) {
   buttonView.updateLayout(function (make, view) {
     make.size.equalTo($size(30, 30))
   })
+  let progress = 0.2;
   $ui.animate({
     duration: 0.2,
     animation: function () {
@@ -30,7 +31,7 @@ function installApp(app, buttonView, handler) {
           draw: (view, ctx) => {
             ctx.strokeColor = utils.themeColor.appButtonBgColor,
               ctx.setLineWidth(2.5)
-            ctx.addArc(15, 15, 14, 0, 3 / 2 * 3.14)
+            ctx.addArc(15, 15, 14, 0, progress * 2 * Math.PI)
             ctx.strokePath()
           }
         },
@@ -39,9 +40,11 @@ function installApp(app, buttonView, handler) {
       let timer = $timer.schedule({
         interval: 0.01,
         handler: function () {
-          if (buttonView.get("canvas")) {
-            buttonView.get("canvas").rotate(radius)
+          let canvas = buttonView.get("canvas")
+          if (canvas) {
+            canvas.rotate(radius);
             radius = radius + Math.PI / 180 * 6
+            canvas.invoke("setNeedsDisplay");
           } else {
             timer.invalidate()
           }
@@ -50,6 +53,10 @@ function installApp(app, buttonView, handler) {
       $http.download({
         url: app.file,
         showsProgress: false,
+        progress: function(bytesWritten, totalBytes) {
+          var percentage = bytesWritten * 1.0 / totalBytes;
+          progress = 0.2 + percentage * 0.8;
+        },
         handler: function (resp) {
           let json = utils.getSearchJson(app.appIcon)
           let icon_code = (json.code) ? json.code : "124";
