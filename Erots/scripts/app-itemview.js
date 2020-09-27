@@ -616,7 +616,7 @@ function genAppItemShowView() {
                         actions: [
                           {
                             title: "安装",
-                            style: $alertActionType.destructive, // Optional
+                            // style: $alertActionType.destructive, // Optional
                             handler: function() {
                               appUtils.installApp(app, sender, ()=>{
                                 $app.notify({

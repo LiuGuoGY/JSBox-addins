@@ -1081,7 +1081,7 @@ function genAppListView(apps, sourceViewName) {
                 actions: [
                   {
                     title: "安装",
-                    style: $alertActionType.destructive, // Optional
+                    // style: $alertActionType.destructive, // Optional
                     handler: function() {
                       appUtils.installApp(apps[i], buttonView, ()=>{
                         $app.notify({

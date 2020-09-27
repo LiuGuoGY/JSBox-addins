@@ -144,7 +144,7 @@ function sureToUpdate(version, des, force) {
   },
   {
     title: "是",
-    style: $alertActionType.cancel,
+    // style: $alertActionType.cancel,
     handler: function() {
       $ui.popToRoot();
       updateScript()
