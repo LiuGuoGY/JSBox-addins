@@ -1,5 +1,8 @@
 let utils = require('scripts/utils')
 
+const bombAppId = "51353b0736965d8a9c38869b93fdb038";
+const bombAppKey = "3161f0aa9e52d81f816556e63f255758";
+
 async function uploadSM(data, fileName) {
   let resp = await $http.upload({
     url: "https://sm.ms/api/upload",
@@ -239,6 +242,34 @@ async function catbox_uploadFile(file, view) {
   return resp.data
 }
 
+async function bomb_uploadFile(file, fileName, filePath, view) {
+  let isJsFile = filePath.endsWith(".js");
+  let suffix = isJsFile?".js":".zip";
+  let contentType = isJsFile?"text/plain":"application/x-zip-compressed"
+  let bodyContent = undefined
+  if(isJsFile) {
+    bodyContent = $data({
+      string: file,
+      encoding: 4
+    });
+  } else {
+    bodyContent = file
+  }
+  let resp = await $http.post({
+    url: "https://api.bmob.cn/2/files/" + fileName + suffix,
+    header: {
+      "X-Bmob-Application-Id": bombAppId,
+      "X-Bmob-REST-API-Key": bombAppKey,
+      "Content-Type": contentType,
+    },
+    body: bodyContent,
+  })
+  $console.info(resp);
+  if(resp.error)
+    $console.info(resp.error);
+  return resp.data.url;
+}
+
 async function uploadComment(objectId, commentJson) {
   let resp = await $http.request({
     method: "PUT",
@@ -425,6 +456,7 @@ module.exports = {
   uploadDownloadTimes: uploadDownloadTimes,
   uploadPraise: uploadPraise,
   catbox_uploadFile: catbox_uploadFile,
+  uploadFile: bomb_uploadFile,
   uploadOnStore: uploadOnStore,
   uploadReply: uploadReply,
   shimo_getToken: shimo_getToken,

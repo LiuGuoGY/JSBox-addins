@@ -1510,7 +1510,7 @@ function setupUploadView(updateApp) {
             
             //上传脚本文件
             let file = $file.read(myApp.file);
-            let fileUrl = await api.catbox_uploadFile(file, $("myProgressText"));
+            let fileUrl = await api.uploadFile(file, myApp.appName, myApp.file, $("myProgressText"));
             if(fileUrl) {
               if($("myProgress")) {
                 $("myProgress").locations = [0.0, 0.3, 0.3]
@@ -1526,6 +1526,8 @@ function setupUploadView(updateApp) {
                   $("myProgressText").text = "检验文件中... (" + percentage + "%)"
                 },
               })
+              $console.info(resp2.data.info.size);
+              $console.info(file.info.size);
               if(resp2.data && resp2.data.info && resp2.data.info.size == file.info.size) {
                 myApp.file = fileUrl;
               } else {
