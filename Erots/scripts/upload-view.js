@@ -1533,7 +1533,7 @@ function setupUploadView(updateApp) {
               } else {
                 if($("myProgressParent")) {
                   $("myProgressParent").remove()
-                  ui.showToastView($("uploadItemView"), utils.mColor.red, "文件校验失败，服务器异常，请等10分钟后继续尝试");
+                  ui.showToastView($("uploadItemView"), utils.mColor.red, "文件校验失败，请联系开发者");
                   return 0;
                 }
               }

@@ -246,15 +246,7 @@ async function bomb_uploadFile(file, fileName, filePath, view) {
   let isJsFile = filePath.endsWith(".js");
   let suffix = isJsFile?".js":".zip";
   let contentType = isJsFile?"text/plain":"application/x-zip-compressed"
-  let bodyContent = undefined
-  if(isJsFile) {
-    bodyContent = $data({
-      string: file,
-      encoding: 4
-    });
-  } else {
-    bodyContent = file
-  }
+  let bodyContent = file
   let resp = await $http.post({
     url: "https://api.bmob.cn/2/files/" + $text.URLEncode(fileName) + suffix,
     header: {
