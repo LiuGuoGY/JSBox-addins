@@ -256,7 +256,7 @@ async function bomb_uploadFile(file, fileName, filePath, view) {
     bodyContent = file
   }
   let resp = await $http.post({
-    url: "https://api.bmob.cn/2/files/" + fileName + suffix,
+    url: "https://api.bmob.cn/2/files/" + $text.URLEncode(fileName) + suffix,
     header: {
       "X-Bmob-Application-Id": bombAppId,
       "X-Bmob-REST-API-Key": bombAppKey,
