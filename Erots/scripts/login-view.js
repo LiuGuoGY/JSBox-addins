@@ -43,6 +43,7 @@ function setupLogUpView() {
           type: "label",
           props: {
             text: "邮箱",
+            textColor: $color("black"),
             align: $align.center,
             font: $font(14),
           },
@@ -74,6 +75,7 @@ function setupLogUpView() {
           props: {
             id: "emailInput",
             text: "",
+            textColor: $color("black"),
             type: $kbType.email,
             bgcolor: $color("white"),
             font: $font(15),
@@ -97,6 +99,7 @@ function setupLogUpView() {
           props: {
             id: "emailInputError",
             text: "",
+            textColor: $color("black"),
             align: $align.center,
             textColor: $color(utils.mColor.red),
             font: $font(14),
@@ -139,6 +142,7 @@ function setupLogUpView() {
           type: "label",
           props: {
             text: "昵称",
+            textColor: $color("black"),
             align: $align.center,
             font: $font(14),
           },
@@ -170,6 +174,7 @@ function setupLogUpView() {
           props: {
             id: "nameInput",
             text: "",
+            textColor: $color("black"),
             bgcolor: $color("white"),
             font: $font(15),
           },
@@ -204,6 +209,7 @@ function setupLogUpView() {
           type: "label",
           props: {
             text: "密码",
+            textColor: $color("black"),
             align: $align.center,
             font: $font(14),
           },
@@ -235,6 +241,7 @@ function setupLogUpView() {
           props: {
             id: "passwordInput",
             text: "",
+            textColor: $color("black"),
             secure: true,
             bgcolor: $color("white"),
             font: $font(15),
@@ -287,6 +294,7 @@ function setupLogUpView() {
           type: "label",
           props: {
             text: "确认密码",
+            textColor: $color("black"),
             align: $align.center,
             font: $font(14),
           },
@@ -318,6 +326,7 @@ function setupLogUpView() {
           props: {
             id: "passwordConfirmInput",
             text: "",
+            textColor: $color("black"),
             secure: true,
             bgcolor: $color("white"),
             font: $font(15),
@@ -452,6 +461,7 @@ function setupLoginView() {
           type: "label",
           props: {
             text: "邮箱",
+            textColor: $color("black"),
             align: $align.center,
             font: $font(14),
           },
@@ -482,6 +492,7 @@ function setupLoginView() {
           type: "input",
           props: {
             id: "emailInput",
+            textColor: $color("black"),
             text: utils.getCache("loginHistory", ""),
             type: $kbType.email,
             bgcolor: $color("white"),
@@ -538,6 +549,7 @@ function setupLoginView() {
           type: "label",
           props: {
             text: "密码",
+            textColor: $color("black"),
             align: $align.center,
             font: $font(14),
           },
@@ -569,6 +581,7 @@ function setupLoginView() {
           props: {
             id: "passwordInput",
             text: "",
+            textColor: $color("black"),
             secure: true,
             bgcolor: $color("white"),
             font: $font(15),
@@ -711,6 +724,7 @@ function setupPasswordResetView(source, email) {
           type: "label",
           props: {
             text: "邮箱",
+            textColor: $color("black"),
             align: $align.center,
             font: $font(14),
           },
@@ -742,6 +756,7 @@ function setupPasswordResetView(source, email) {
           props: {
             id: "pr_emailInput",
             text: (email)?email:"",
+            textColor: $color("black"),
             type: $kbType.email,
             bgcolor: $color("white"),
             font: $font(15),

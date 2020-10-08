@@ -876,6 +876,8 @@ function genUpdateAppListView() {
                   appUtils.installApp(watingApps[i], buttonView, ()=>{
                     needUpdateNumber--;
                     if (needUpdateNumber <= 0) {
+                      $device.taptic(2);
+                      $delay(0.2, () => { $device.taptic(2); })
                       $delay(0.5, () => {
                         refreshAllView()
                       })
@@ -1084,6 +1086,8 @@ function genAppListView(apps, sourceViewName) {
                     // style: $alertActionType.destructive, // Optional
                     handler: function() {
                       appUtils.installApp(apps[i], buttonView, ()=>{
+                        $device.taptic(2);
+                        $delay(0.2, () => { $device.taptic(2); })
                         $app.notify({
                           name: "refreshAll",
                           object: { 
@@ -1104,6 +1108,8 @@ function genAppListView(apps, sourceViewName) {
               });
             } else {
               appUtils.installApp(apps[i], buttonView, ()=>{
+                $device.taptic(2);
+                $delay(0.2, () => { $device.taptic(2); })
                 $app.notify({
                   name: "refreshAll",
                   object: { 

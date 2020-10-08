@@ -95,8 +95,6 @@ function installApp(app, buttonView, handler) {
                   app.needUpdate = false
                   app.haveInstalled = true
                   buttonView.userInteractionEnabled = true
-                  $device.taptic(2);
-                  $delay(0.2, () => { $device.taptic(2); })
                   handler();
                 }
               })

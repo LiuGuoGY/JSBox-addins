@@ -619,10 +619,14 @@ function genAppItemShowView() {
                             // style: $alertActionType.destructive, // Optional
                             handler: function() {
                               appUtils.installApp(app, sender, ()=>{
-                                $app.notify({
-                                  name: "refreshAll",
-                                  object: { appItem: false }
-                                });
+                                $device.taptic(2);
+                                $delay(0.2, () => { $device.taptic(2); })
+                                $delay(0.5, () => {
+                                  $app.notify({
+                                    name: "refreshAll",
+                                    object: { appItem: false }
+                                  });
+                                })
                               })
                             }
                           },
@@ -636,10 +640,14 @@ function genAppItemShowView() {
                       });
                     } else {
                       appUtils.installApp(app, sender, ()=>{
-                        $app.notify({
-                          name: "refreshAll",
-                          object: { appItem: false }
-                        });
+                        $device.taptic(2);
+                        $delay(0.2, () => { $device.taptic(2); })
+                        $delay(0.5, () => {
+                          $app.notify({
+                            name: "refreshAll",
+                            object: { appItem: false }
+                          });
+                        })
                       })
                     }
                   }
