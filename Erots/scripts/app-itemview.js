@@ -158,7 +158,8 @@ function genAppItemShowView() {
   let commentView = {}
   let commentSubviews = []
   if (comments && comments.length > 0) {
-    for (let i = 0; i < comments.length; i++) {
+    let showLength = (comments.length > 10)?10:comments.length;
+    for (let i = 0; i < showLength; i++) {
       let cardSubViews = []
       let commentSize = $text.sizeThatFits({
         text: comments[comments.length - i - 1].comment,

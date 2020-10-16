@@ -44,7 +44,7 @@ function installApp(app, buttonView, handler) {
           if (canvas) {
             canvas.rotate(radius);
             radius = radius + Math.PI / 180 * 6
-            canvas.invoke("setNeedsDisplay");
+            canvas.ocValue().invoke("setNeedsDisplay");
           } else {
             timer.invalidate()
           }

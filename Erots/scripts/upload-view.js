@@ -1554,11 +1554,14 @@ function setupUploadView(updateApp) {
             
             //上传图标
             if(!myApp.appIcon.startsWith("erots://") && !myApp.appIcon.startsWith("http")) {
-              if(myApp.appIcon.endsWith("png")) {
-                myApp.appIcon = await api.catbox_uploadFile($file.read(myApp.appIcon).image.png) //, "1.png"
+              let isPng = myApp.appIcon.endsWith("png")
+              let pic = undefined
+              if(isPng) {
+                pic = await api.TinyPng_uploadPic($file.read(myApp.appIcon).image.png)
               } else {
-                myApp.appIcon = await api.catbox_uploadFile($file.read(myApp.appIcon).image.jpg(1.0)) //, "1.jpg"
+                pic = await api.TinyPng_uploadPic($file.read(myApp.appIcon).image.jpg(1.0))
               }
+              myApp.appIcon = await api.bomb_uploadPic(pic, myApp.appName, isPng);
             }
 
             if($("myProgress")) {

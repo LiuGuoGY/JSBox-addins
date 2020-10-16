@@ -2,6 +2,7 @@ let utils = require('scripts/utils')
 
 const bombAppId = "51353b0736965d8a9c38869b93fdb038";
 const bombAppKey = "3161f0aa9e52d81f816556e63f255758";
+const tinyKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 
 async function uploadSM(data, fileName) {
   let resp = await $http.upload({
@@ -204,7 +205,7 @@ async function TinyPng_uploadPic(pic) {
   let resp = await $http.post({
     url: "https://api.tinify.com/shrink",
     header: {
-      Authorization: "Basic " + $text.base64Encode("api:" + randomValue(apiKeys)),
+      Authorization: "Basic " + $text.base64Encode("api:" + utils.randomValue(apiKeys)),
     },
     body: pic,
   })
@@ -226,6 +227,7 @@ async function TinyPng_uploadPic(pic) {
   return undefined;
 }
 
+
 async function catbox_uploadFile(file, view) {
   let resp = await $http.upload({
     url: "https://catbox.moe/user/api.php",
@@ -240,6 +242,25 @@ async function catbox_uploadFile(file, view) {
   });
   $console.info(resp);
   return resp.data
+}
+
+async function bomb_uploadPic(file, fileName, isPng) {
+  let suffix = isPng?".png":".jpg";
+  let contentType = isPng?"image/png":"image/jpeg"
+  let bodyContent = file
+  let resp = await $http.post({
+    url: "https://api.bmob.cn/2/files/" + $text.URLEncode(fileName) + suffix,
+    header: {
+      "X-Bmob-Application-Id": bombAppId,
+      "X-Bmob-REST-API-Key": bombAppKey,
+      "Content-Type": contentType,
+    },
+    body: bodyContent,
+  })
+  $console.info(resp);
+  if(resp.error)
+    $console.info(resp.error);
+  return resp.data.url;
 }
 
 async function bomb_uploadFile(file, fileName, filePath, view) {
@@ -456,5 +477,6 @@ module.exports = {
   TinyPng_uploadPic: TinyPng_uploadPic,
   uploadFaultReport: uploadFaultReport,
   getErotsSetting: getErotsSetting,
+  bomb_uploadPic: bomb_uploadPic,
 }
 
