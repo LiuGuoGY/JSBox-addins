@@ -463,20 +463,34 @@ function genAppItemShowView() {
       },
     }
   }
-  let appInstSize = $text.sizeThatFits({
+  let appInstSize = sizeOfLabelView({
     text: app.instruction,
-    width: $device.info.screen.width - 40,
+    lines: 0,
     font: $font("PingFangSC-Regular", 15),
-    lineSpacing: 5, // Optional
-  })
-  let appVerInstSize = $text.sizeThatFits({
+    attributedText: utils.setLineSpacing(app.instruction, 5),
+    align: $align.left,
+  }, $device.info.screen.width - 40)
+  let appVerInstSize = sizeOfLabelView({
     text: app.versionInst,
-    width: $device.info.screen.width - 40,
+    lines: 0,
     font: $font("PingFangSC-Regular", 15),
-    lineSpacing: 5, // Optional
-  })
-  const appInstFoldHeight = 125;
-  const appVerInstFoldHeight = 125;
+    attributedText: utils.setLineSpacing(app.instruction, 5),
+    align: $align.left,
+  }, $device.info.screen.width - 40)
+  let appInstFoldSize = sizeOfLabelView({
+    text: app.instruction,
+    lines: 3,
+    font: $font("PingFangSC-Regular", 15),
+    attributedText: utils.setLineSpacing(app.instruction, 5),
+    align: $align.left,
+  }, $device.info.screen.width - 40)
+  let appVerInstFoldSize = sizeOfLabelView({
+    text: app.versionInst,
+    lines: 3,
+    font: $font("PingFangSC-Regular", 15),
+    attributedText: utils.setLineSpacing(app.instruction, 5),
+    align: $align.left,
+  }, $device.info.screen.width - 40)
   let coverOffset = (app.cover && app.cover != "")?140:0;
   return {
     type: "view",
@@ -1025,18 +1039,13 @@ function genAppItemShowView() {
           id: "appVerInstLabel",
           text: app.versionInst,
           align: $align.left,
-          lines: 0,
+          lines: 3,
           font: $font("PingFangSC-Regular", 15),
           attributedText: utils.setLineSpacing(app.versionInst, 5),
           textColor: utils.themeColor.listContentTextColor,
         },
         layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(5)
-          if (appVerInstSize.height > appVerInstFoldHeight) {
-            make.height.equalTo(appVerInstFoldHeight)
-          } else {
-            make.height.equalTo(appVerInstSize.height)
-          }
           make.left.right.inset(20)
           make.centerX.equalTo(view.super)
         }
@@ -1047,7 +1056,7 @@ function genAppItemShowView() {
           locations: [0.0, 0.3],
           startPoint: $point(0, 0.5),
           endPoint: $point(1, 0.5),
-          hidden: (appVerInstSize.height <= appVerInstFoldHeight),
+          hidden: (appVerInstSize.height <= appVerInstFoldSize.height),
           bgcolor: $color("clear"),
         },
         layout: function (make, view) {
@@ -1072,11 +1081,8 @@ function genAppItemShowView() {
           },
           events: {
             tapped: function (sender) {
-              sender.super.hidden = true
-              $("appVerInstLabel").updateLayout(function (make, view) {
-                make.height.equalTo(appVerInstSize.height)
-              })
-              $("appVerInstLabel").relayout()
+              sender.super.hidden = true;
+              $("appVerInstLabel").lines = 0;
               resizeItemScroll()
             }
           }
@@ -1180,18 +1186,13 @@ function genAppItemShowView() {
           id: "appInstLabel",
           text: app.instruction,
           align: $align.left,
-          lines: 0,
+          lines: 3,
           font: $font("PingFangSC-Regular", 15),
           attributedText: utils.setLineSpacing(app.instruction, 5),
           textColor: utils.themeColor.listContentTextColor,
         },
         layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
-          if (appInstSize.height > appInstFoldHeight) {
-            make.height.equalTo(appInstFoldHeight)
-          } else {
-            make.height.equalTo(appInstSize.height)
-          }
           make.left.right.inset(20)
           make.centerX.equalTo(view.super)
         },
@@ -1202,7 +1203,7 @@ function genAppItemShowView() {
           locations: [0.0, 0.3],
           startPoint: $point(0, 0.5),
           endPoint: $point(1, 0.5),
-          hidden: (appInstSize.height <= appInstFoldHeight),
+          hidden: (appInstSize.height <= appInstFoldSize.height),
           bgcolor: $color("clear"),
         },
         layout: function (make, view) {
@@ -1228,10 +1229,7 @@ function genAppItemShowView() {
           events: {
             tapped: function (sender) {
               sender.super.hidden = true
-              $("appInstLabel").updateLayout(function (make, view) {
-                make.height.equalTo(appInstSize.height)
-              })
-              $("appInstLabel").relayout()
+              $("appInstLabel").lines = 0;
               resizeItemScroll()
             }
           }
@@ -1979,13 +1977,13 @@ function genUpdateHistoryView(app) {
         layout: function (make, view) {
           make.top.equalTo(view.prev.bottom).inset(5)
           make.centerX.equalTo(view.super)
-          let size = $text.sizeThatFits({
-            text: history[i].versionInst,
-            width: $device.info.screen.width - 40,
-            font: $font("PingFangSC-Regular", 15),
-            lineSpacing: 5,
-          })
-          make.height.equalTo(size.height)
+          // let size = $text.sizeThatFits({
+          //   text: history[i].versionInst,
+          //   width: $device.info.screen.width - 40,
+          //   font: $font("PingFangSC-Regular", 15),
+          //   lineSpacing: 5,
+          // })
+          // make.height.equalTo(size.height)
           make.left.right.inset(20)
         },
       }, {
@@ -2353,6 +2351,15 @@ function genAppReportFaultView(app) {
       }]
     }]
   })
+}
+
+function sizeOfLabelView(props, width) {
+  const uilabel = $ui.create({
+    type: "label",
+    props: props
+  })
+  const size = uilabel.ocValue().invoke("sizeThatFits:", $size(width, 0))
+  return size
 }
 
 function shadow(view) {
