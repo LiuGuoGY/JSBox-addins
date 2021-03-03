@@ -1369,6 +1369,15 @@ function genMeView() {
                 $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/");
               }
           },{
+            type: "arrow",
+            async: false,
+            title: "交流讨论",
+            symbol: "message.fill",
+            iconColor: utils.systemColor("red"),
+            handler: () => {
+              $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/discussions");
+            }
+          },{
               type: "arrow",
               async: false,
               title: "用户协议",
