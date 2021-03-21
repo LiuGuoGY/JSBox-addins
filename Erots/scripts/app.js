@@ -536,13 +536,15 @@ function genCloudAppListView() {
       views: [{
         type: "image",
         props: {
-          icon: $icon("023", $rgba(100, 100, 100, 0.4), $size(15, 15)),
+          // icon: $icon("023", utils.themeColor.appHintColor, $size(15, 15)),
+          symbol: "magnifyingglass",
+          tintColor: utils.themeColor.appHintColor,
           bgcolor: $color("clear"),
         },
         layout: function (make, view) {
           make.centerY.equalTo(view.super)
-          make.left.inset(7)
-          make.size.equalTo($size(15, 15))
+          make.left.inset(8)
+          make.size.equalTo($size(20, 20))
         },
       }, {
         type: "input",
@@ -665,7 +667,7 @@ function genCloudAppListView() {
       bgcolor: $color("clear"),
       indicatorInsets: $insets(40, 0, 50, 0),
       indicatorStyle: utils.themeColor.indicatorStyle,
-      separatorColor: utils.themeColor.separatorColor,
+      separatorColor: $color("systemSeparator"),
       separatorInset: $insets(0, 85, 0, 15),
       separatorHidden: ($app.info.build >= 497) ? false : true,
       header: {
@@ -956,7 +958,7 @@ function genUpdateAppListView() {
       indicatorInsets: $insets(40, 0, 50, 0),
       indicatorStyle: utils.themeColor.indicatorStyle,
       separatorInset: $insets(0, 85, 0, 15),
-      separatorColor: utils.themeColor.separatorColor,
+      separatorColor: $color("systemSeparator"),
       separatorHidden: true,
       header: {
         type: "view",
@@ -1558,14 +1560,22 @@ function showAnnouncement() {
     }
   }]
   if(link && link != "") {
+    $cache.remove("noAgainAunounceContent");
     actions.push({
       title: "前往",
       handler: function () {
         $app.openURL(link);
       }
     })
+  } else {
+    actions.push({
+      title: "不再提示",
+      handler: function () {
+        $cache.set("noAgainAunounceContent", anno);
+      }
+    })
   }
-  if (show && anno && anno != "") {
+  if (show && anno && anno != "" && utils.getCache("noAgainAunounceContent") != anno) {
     $delay(0.5, () => {
       $ui.alert({
         title: "公告",
@@ -2806,8 +2816,9 @@ function setupReward() {
         radius: 5,
         borderColor: $rgba(90, 90, 90, 0.4),
         borderWidth: 1,
-        separatorColor: utils.themeColor.separatorColor,
+        separatorColor: $color("systemSeparator"),
         indicatorStyle: utils.themeColor.indicatorStyle,
+        separatorInset: $insets(0, 20, 0, 20),
         insets: $insets(5, 5, 5, 5),
         rowHeight: 35,
         bgcolor: $color("clear"),

@@ -1664,19 +1664,41 @@ function setupUploadView(updateApp) {
           }
         }
       },{
-        type: "label",
-        props: {
-          text: "请注意： 仅可以上传原创应用，对于违反用户协议的上传，账号和设备可能会被封禁！",
-          lines: 0,
-          textColor: utils.themeColor.appHintColor,
-          font: $font(13),
-          lineSpacing: 20,
-        },
-        layout: function(make, view) {
+        type: "view",
+        layout: function (make, view) {
           make.left.right.inset(20)
           make.top.equalTo(view.prev.bottom).inset(15)
           make.centerX.equalTo(view.super)
+          make.height.equalTo(60)
         },
+        views: [{
+          type: "image",
+          props: {
+            // icon: $icon("009", utils.themeColor.appHintColor , $size(14, 14)),
+            symbol: "info.circle.fill",
+            tintColor: utils.themeColor.appHintColor,
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.size.equalTo($size(17, 17))
+            make.left.inset(0)
+            make.top.inset(17)
+          }
+        },{
+          type: "label",
+          props: {
+            text: "仅可以上传原创应用，对于违反用户协议的上传，账号和设备可能会被封禁！",
+            lines: 0,
+            textColor: utils.themeColor.appHintColor,
+            font: $font(13),
+            lineSpacing: 20,
+          },
+          layout: function(make, view) {
+            make.left.equalTo(view.prev.right).inset(5)
+            make.top.right.inset(0)
+            make.height.equalTo(view.super)
+          },
+        }],
       },]
     },
     {

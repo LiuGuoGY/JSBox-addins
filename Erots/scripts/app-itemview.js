@@ -8,7 +8,6 @@ let appUtils = require('scripts/app-utils')
 let objectId = ""
 let topOffset = -20
 
-
 $app.listen({
   refreshAll: function (object) {
     $console.info(object);
@@ -820,10 +819,28 @@ function genAppItemShowView() {
           }]
         }]
       }, {
+        type: "canvas",
+        layout: function (make, view) {
+          make.top.equalTo(view.prev.bottom).inset(10)
+          make.height.equalTo(1 / $device.info.screen.scale)
+          make.left.right.inset(20)
+        },
+        events: {
+          draw: function (view, ctx) {
+            var width = view.frame.width
+            var scale = $device.info.screen.scale
+            ctx.strokeColor = $color("systemSeparator");
+            ctx.setLineWidth(1);
+            ctx.moveToPoint(0, 0)
+            ctx.addLineToPoint(width, 0)
+            ctx.strokePath()
+          }
+        }
+      }, {
         type: "view",
         layout: function (make, view) {
           make.left.right.inset(0)
-          make.top.equalTo(view.prev.bottom)
+          make.top.equalTo(view.prev.bottom).inset(10)
           make.centerX.equalTo(view.super)
           make.height.equalTo(60)
         },
@@ -943,9 +960,8 @@ function genAppItemShowView() {
         events: {
           draw: function (view, ctx) {
             var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("lightGray")
-            ctx.setLineWidth(1 / scale)
+            ctx.strokeColor = $color("systemSeparator");
+            ctx.setLineWidth(1);
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
             ctx.strokePath()
@@ -1101,10 +1117,9 @@ function genAppItemShowView() {
         },
         events: {
           draw: function (view, ctx) {
-            var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("lightGray")
-            ctx.setLineWidth(1 / scale)
+            var width = view.frame.width;
+            ctx.strokeColor = $color("systemSeparator");
+            ctx.setLineWidth(1);
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
             ctx.strokePath()
@@ -1172,9 +1187,8 @@ function genAppItemShowView() {
         events: {
           draw: function (view, ctx) {
             var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("lightGray")
-            ctx.setLineWidth(1 / scale)
+            ctx.strokeColor = $color("systemSeparator");
+            ctx.setLineWidth(1);
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
             ctx.strokePath()
@@ -1244,9 +1258,8 @@ function genAppItemShowView() {
         events: {
           draw: function (view, ctx) {
             var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("lightGray")
-            ctx.setLineWidth(1 / scale)
+            ctx.strokeColor = $color("systemSeparator");
+            ctx.setLineWidth(1);
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
             ctx.strokePath()
@@ -1313,12 +1326,14 @@ function genAppItemShowView() {
         views: [{
           type: "image",
           props: {
-            icon: $icon("009", utils.themeColor.appHintColor , $size(14, 14)),
+            // icon: $icon("009", utils.themeColor.appHintColor , $size(14, 14)),
+            symbol: "info.circle.fill",
+            tintColor: utils.themeColor.appHintColor,
             bgcolor: $color("clear"),
           },
           layout: function(make, view) {
             make.centerY.equalTo(view.super)
-            make.size.equalTo($size(14, 14))
+            make.size.equalTo($size(17, 17))
             make.left.inset(10)
           }
         },{
@@ -1347,8 +1362,8 @@ function genAppItemShowView() {
           draw: function (view, ctx) {
             var width = view.frame.width
             var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("lightGray")
-            ctx.setLineWidth(1 / scale)
+            ctx.strokeColor = $color("systemSeparator");
+            ctx.setLineWidth(1);
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
             ctx.strokePath()
@@ -1452,7 +1467,7 @@ function genAppItemShowView() {
         }, {
           type: "label",
           props: {
-            text: "你的赞赏是开发者最大的动力",
+            text: "『 你的赞赏是开发者最大的动力 』",
             font: $font(13),
             textColor: utils.themeColor.appCateTextColor,
           },
@@ -1593,9 +1608,8 @@ function genAppItemInfoView(text, detail) {
       events: {
         draw: function (view, ctx) {
           var width = view.frame.width
-          var scale = $device.info.screen.scale
-          ctx.strokeColor = $color("#D0D0D0")
-          ctx.setLineWidth(1 / scale)
+          ctx.strokeColor = $color("systemSeparator");
+          ctx.setLineWidth(1);
           ctx.moveToPoint(0, 0)
           ctx.addLineToPoint(width, 0)
           ctx.strokePath()
@@ -1996,9 +2010,8 @@ function genUpdateHistoryView(app) {
         events: {
           draw: function (view, ctx) {
             var width = view.frame.width
-            var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("lightGray")
-            ctx.setLineWidth(1 / scale)
+            ctx.strokeColor = $color("systemSeparator");
+            ctx.setLineWidth(1);
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
             ctx.strokePath()
