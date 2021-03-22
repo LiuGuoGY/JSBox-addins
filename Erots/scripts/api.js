@@ -269,7 +269,7 @@ async function bomb_uploadFile(file, fileName, filePath, view) {
   let contentType = isJsFile?"text/plain":"application/x-zip-compressed"
   let bodyContent = file
   let resp = await $http.post({
-    url: "https://api.bmob.cn/2/files/" + $text.URLEncode(fileName) + suffix,
+    url: "https://api2.bmob.cn/2/files/" + encodeURIComponent(fileName) + suffix,
     header: {
       "X-Bmob-Application-Id": bombAppId,
       "X-Bmob-REST-API-Key": bombAppKey,
