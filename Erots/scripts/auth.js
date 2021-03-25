@@ -3,33 +3,30 @@ let ui = require("scripts/ui");
 let utils = require("scripts/utils");
 let api = require("scripts/api");
 
-function detect() {
+async function detect() {
     if ($app.env == $env.app) {
-        let url = utils.domain + "/classes/fansList?where={\"deviceId\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
-        $http.request({
-            method: "GET",
-            url: encodeURI(url),
-            timeout: 10,
-            header: {
-                "Content-Type": "application/json",
-                "X-LC-Id": utils.conAppId,
-                "X-LC-Key": utils.conAppKey,
-            },
-            handler: async function(resp) {
-                if (!resp.data) {
-                    setupNotConnectView()
-                } else {
-                    let data = resp.data.results
-                    if(data) {
-                        authCheck(data.length > 0)
-                    }
-                    await api.getErotsSetting();
-                    $delay(0.1, function() {
-                        go();
-                    });
-                }
-            }
-        })
+        // let url = utils.domain + "/classes/fansList?where={\"deviceId\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+        // $http.request({
+        //     method: "GET",
+        //     url: encodeURI(url),
+        //     timeout: 10,
+        //     header: {
+        //         "Content-Type": "application/json",
+        //         "X-LC-Id": utils.conAppId,
+        //         "X-LC-Key": utils.conAppKey,
+        //     },
+        //     handler: async function(resp) {
+        //         if (!resp.data) {
+        //             setupNotConnectView()
+        //         } else {
+        //             let data = resp.data.results
+        //             await api.getErotsSetting();
+        //             $delay(0.1, function() {
+        //                 go();
+        //             });
+        //         }
+        //     }
+        // })
         let welcomeView = {
             type: "view",
             layout: function(make, view) {
@@ -108,6 +105,14 @@ function detect() {
             },
             views: [welcomeView]
         });
+        let res = await api.getErotsSetting();
+        let res2 = await api.requireApps();
+        let res3 = await api.getExploreApps();
+        if(res && res2 && res3) {
+          go();
+        } else {
+          setupNotConnectView();
+        }
     } else {
         go();
     }

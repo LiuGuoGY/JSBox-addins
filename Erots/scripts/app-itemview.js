@@ -25,7 +25,21 @@ $app.listen({
 });
 
 function show(id) {
-  objectId = id
+  let app = {}
+  let cloudApps = utils.getCache("cloudApps", [])
+  for (let i = 0; i < cloudApps.length; i++) {
+    if (cloudApps[i].objectId == id) {
+      app = cloudApps[i];
+      break;
+    }
+  }
+  let subview = {};
+  if(app.onStore) {
+    subview = genAppItemShowView(app);
+    objectId = id;
+  } else {
+    subview = genNotOnStoreView();
+  }
   $ui.push({
     props: {
       id: "appItemViewParent",
@@ -33,13 +47,15 @@ function show(id) {
       statusBarStyle: utils.themeColor.statusBarStyle,
       bgcolor: utils.themeColor.mainColor,
     },
-    views: [genAppItemShowView()]
+    views: [subview]
   });
-  resizeItemScroll()
-  $("appPreviewPhotosScroll").resize()
-  $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
-  if($("heart_lottie_view")) { // 赞赏动画
-    $("heart_lottie_view").play();
+  if(app.onStore) {
+    resizeItemScroll()
+    $("appPreviewPhotosScroll").resize()
+    $("appPreviewPhotosScroll").contentSize = $size($("appPreviewPhotosScroll").contentSize.width + 20, 0)
+    if($("heart_lottie_view")) { // 赞赏动画
+      $("heart_lottie_view").play();
+    }
   }
 }
 
@@ -94,28 +110,25 @@ function preview(id) {
 }
 
 function genNotOnStoreView() {
-  if ($("appItemView")) {
-    $("appItemView").remove()
-    $("appItemViewParent").add({
-      type: "view",
+  return {
+    type: "view",
+    props: {
+      id: "appItemView",
+    },
+    layout: $layout.fill,
+    views: [ui.genPageHeader("主页", ""), {
+      type: "label",
       props: {
-        id: "appItemView",
+        text: "此应用已下架",
+        align: $align.center,
+        font: $font(15),
+        textColor: utils.themeColor.appObviousColor,
       },
-      layout: $layout.fill,
-      views: [ui.genPageHeader("主页", ""), {
-        type: "label",
-        props: {
-          text: "此应用已下架",
-          align: $align.center,
-          font: $font(15),
-          textColor: utils.themeColor.appObviousColor,
-        },
-        layout: function (make, view) {
-          make.center.equalTo(view.super)
-        }
-      }]
-    })
-  }
+      layout: function (make, view) {
+        make.center.equalTo(view.super)
+      }
+    }]
+  };
 }
 
 function resizeItemScroll() {
@@ -134,15 +147,7 @@ function refreshAppItemView() {
   }
 }
 
-function genAppItemShowView() {
-  let app = {}
-  let cloudApps = utils.getCache("cloudApps", [])
-  for (let i = 0; i < cloudApps.length; i++) {
-    if (cloudApps[i].objectId == objectId) {
-      app = cloudApps[i];
-      break;
-    }
-  }
+function genAppItemShowView(app) {
   let buttonText = ""
   if (app.haveInstalled) {
     if (app.needUpdate) {

@@ -333,11 +333,11 @@ function isVoiceOverRunning() {
 
 function numerToSize(number){
   var size = "";
-  if( number < 0.1 * 1024 ){ //如果小于0.1KB转化成B
+  if( number < 1024 ){ //如果小于1KB转化成B
     size = number.toFixed(2) + " B"; 	
-  }else if(number < 0.1 * 1024 * 1024 ){//如果小于0.1MB转化成KB
+  }else if(number < 1024 * 1024 ){//如果小于1MB转化成KB
     size = (number / 1024).toFixed(2) + " KB";			
-  }else if(number < 0.1 * 1024 * 1024 * 1024){ //如果小于0.1GB转化成MB
+  }else if(number < 1024 * 1024 * 1024){ //如果小于1GB转化成MB
     size = (number / (1024 * 1024)).toFixed(2) + " MB";
   }else{ //其他转化成GB
     size = (number / (1024 * 1024 * 1024)).toFixed(2) + " GB";

@@ -29,7 +29,6 @@ function show() {
 
 function main() {
   setupMainView()
-  requireApps()
   solveQuery()
   showAnnouncement()
 }
@@ -39,11 +38,12 @@ $app.listen({
     refreshAllView(object.except)
   },
   requireCloud: function () {
-    requireApps()
+    api.requireApps();
+    refreshAllView()
   },
 });
 
-let contentViews = ["cloudView", "updateView", "meView"] //"exploreView", 
+let contentViews = ["exploreView", "cloudView", "updateView", "meView"];
 
 function setThemeColor() {
   if (utils.getThemeMode() == "dark") {
@@ -57,6 +57,9 @@ function setThemeColor() {
   }
   
   mIcon = [{
+    blue: $icon("050", utils.getCache("themeColor"), $size(25, 25)),
+    gray: $icon("050", utils.themeColor.mainTabGrayColor, $size(25, 25)),
+  },{
     blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
     gray: $icon("102", utils.themeColor.mainTabGrayColor, $size(25, 25)),
   },
@@ -84,6 +87,10 @@ function setupMainView() {
     },
     views: [genMainView()]
   })
+  if (user.haveLogined()) {
+    let apps = utils.getCache("cloudApps", [])
+    showNewCommentNumber(apps)
+  }
 }
 
 function genMainView() {
@@ -116,7 +123,7 @@ function genMainView() {
           })
         },
       },
-      views: [genCloudView()],
+      views: [genExploreView(), genCloudView(), genUpdateView(), genMeView()],
     },
     {
       type: "view",
@@ -140,7 +147,7 @@ function genMainView() {
         type: "matrix",
         props: {
           id: "tab",
-          columns: 3,
+          columns: 4,
           itemHeight: 50,
           spacing: 0,
           scrollEnabled: false,
@@ -175,13 +182,21 @@ function genMainView() {
               icon: mIcon[0].blue,
             },
             menu_label: {
-              text: "应用",
+              text: "探索",
               textColor: utils.getCache("themeColor")
+            }
+          },{
+            menu_image: {
+              icon: mIcon[1].gray,
+            },
+            menu_label: {
+              text: "应用",
+              textColor: utils.themeColor.mainTabGrayColor
             }
           },
           {
             menu_image: {
-              icon: mIcon[1].gray,
+              icon: mIcon[2].gray,
             },
             menu_label: {
               text: "更新",
@@ -190,7 +205,7 @@ function genMainView() {
           },
           {
             menu_image: {
-              icon: mIcon[2].gray,
+              icon: mIcon[3].gray,
             },
             menu_label: {
               text: "我的",
@@ -322,13 +337,14 @@ function handleSelect(view, row) {
 
 function getContentView(number) {
   switch (number) {
-    // case 0: return genExploreView()
-    case 0:
-      return genCloudView()
+    case 0: 
+      return genExploreView();
     case 1:
-      return genUpdateView()
+      return genCloudView();
     case 2:
-      return genMeView()
+      return genUpdateView();
+    case 3:
+      return genMeView();
   }
 }
 
@@ -337,7 +353,7 @@ function genUpdateView() {
     type: "view",
     props: {
       id: "updateView",
-      hidden: false,
+      hidden: true,
     },
     layout: $layout.fill,
     views: [{
@@ -409,9 +425,331 @@ function genExploreView() {
       hidden: false,
     },
     layout: $layout.fill,
-    views: [],
+    views: [{
+      type: "view",
+      props: {
+        id: "exploreAppListParent",
+      },
+      layout: function (make, view) {
+        make.width.equalTo(view.super)
+        make.top.inset(0)
+        make.bottom.inset(0)
+        make.centerX.equalTo(view.super)
+      },
+      views: [genExploreAppListView()]
+    }, {
+      type: "view",
+      props: {
+        id: "explorePageHeaderView",
+        hidden: false,
+        alpha: 0,
+      },
+      layout: function (make, view) {
+        make.left.top.right.inset(0)
+        if ($device.info.version >= "11") {
+          make.bottom.equalTo(view.super.topMargin).offset(35)
+        } else {
+          make.height.equalTo(60)
+        }
+      },
+      views: [{
+        type: "blur",
+        props: {
+          id: "explorePageHeaderBlur",
+          style: utils.themeColor.blurType, // 0 ~ 5
+          bgcolor: utils.themeColor.mainColor,
+        },
+        layout: $layout.fill,
+      }, {
+        type: "view",
+        props: {},
+        layout: function (make, view) {
+          make.left.bottom.right.inset(0)
+          make.height.equalTo(45)
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "explorePageHeaderLabel",
+            text: "探索",
+            font: $font("bold", 17),
+            align: $align.center,
+            bgcolor: $color("clear"),
+            textColor: utils.themeColor.listHeaderTextColor,
+            hidden: true,
+          },
+          layout: $layout.fill,
+        },],
+      },],
+    }],
   }
   return view
+}
+
+function genExploreAppListView() {
+  let exploreInfos = utils.getCache("ExploreInfos", []);
+  let cloudApps = utils.getCache("cloudApps", [])
+  let bannerViewItems = []
+  for(let i = 0; i < exploreInfos.length; i++) {
+    if(!exploreInfos[i].show) {
+      continue;
+    } else {
+      let ids = exploreInfos[i].appIds;
+      let apps = []
+      for(let j = 0; j < ids.length; j++) {
+        for(let z = 0; z < cloudApps.length; z++) {
+          if(ids[j] == cloudApps[z].objectId && cloudApps[z].onStore) {
+            apps.push(cloudApps[z]);
+          }
+        }
+      }
+      bannerViewItems.push(genBannerView(exploreInfos[i].title, apps));
+    }
+  }
+  
+  let exploreView = {
+    type: "list",
+    props: {
+      id: "exploreAppsList",
+      template: [],
+      bgcolor: $color("clear"),
+      indicatorInsets: $insets(40, 0, 50, 0),
+      indicatorStyle: utils.themeColor.indicatorStyle,
+      separatorInset: $insets(0, 85, 0, 15),
+      separatorColor: $color("systemSeparator"),
+      separatorHidden: true,
+      header: {
+        type: "view",
+        props: {
+          height: 95,
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "exploreListHeaderTitle",
+            text: "探索",
+            font: $font("Avenir-Black", 35),
+            textColor: utils.themeColor.listHeaderTextColor,
+            align: $align.center,
+            indicatorInsets: $insets(45, 0, 50, 0),
+          },
+          layout: function (make, view) {
+            make.left.inset(15)
+            make.top.inset(50)
+            make.height.equalTo(45)
+          }
+        },]
+      },
+      footer: {
+        type: "view",
+        props: {
+          height: 50,
+          bgcolor: $color("clear"),
+        }
+      },
+      rowHeight: 290,
+      data: [{
+        rows: bannerViewItems,
+      }],
+    },
+    layout: $layout.fill,
+    events: {
+      didScroll: function (sender) {
+        if (sender.contentOffset.y >= 5 + topOffset && $("explorePageHeaderView").alpha == 0) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function () {
+              $("explorePageHeaderView").alpha = 1;
+            },
+          });
+        } else if (sender.contentOffset.y < 5 + topOffset && $("explorePageHeaderView").alpha == 1) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function () {
+              $("explorePageHeaderView").alpha = 0;
+            },
+          });
+        }
+        if (sender.contentOffset.y >= 45 + topOffset && $("explorePageHeaderLabel").hidden === true) {
+          $("explorePageHeaderLabel").hidden = false
+          $("explorePageHeaderBlur").bgcolor = $color("clear")
+          $("exploreListHeaderTitle").hidden = true
+        } else if (sender.contentOffset.y < 45 + topOffset && $("explorePageHeaderLabel").hidden === false) {
+          $("explorePageHeaderLabel").hidden = true
+          $("explorePageHeaderBlur").bgcolor = utils.themeColor.mainColor
+          $("exploreListHeaderTitle").hidden = false
+        } else if (sender.contentOffset.y <= topOffset) {
+          let size = 35 - sender.contentOffset.y * 0.04
+          if (size > 40)
+            size = 40
+          $("exploreListHeaderTitle").font = $font("Avenir-Black", size)
+        }
+      }
+    }
+  }
+  return exploreView
+}
+
+function genBannerView(title, apps) {
+  let appsListViewItems = genAppListItemView(apps, "exploreAppsList", true);
+  let number = apps.length;
+  let rows = 3;
+  let columns = Math.ceil(number / rows);
+  let bannerContent = [];
+  let leftView;
+  for(let i = 0; i < columns; i++) {
+    let topView;
+    for(let y = 0; y < rows; y++) {
+      if (i * rows + y < number) {
+        bannerContent.push({
+          type: "view",
+          views:[appsListViewItems[i * rows + y]],
+          layout: function(make, view) {
+            if(topView) {
+              make.top.equalTo(topView.bottom);
+            } else {
+              make.top.inset(0)
+            }
+            if(leftView) {
+              make.left.equalTo(leftView.right).inset(10);
+            } else {
+              make.left.inset(0)
+            }
+            make.width.equalTo($device.info.screen.width - 30);
+            make.height.equalTo(80)
+            if(y == rows - 1) {
+              leftView = view
+            }
+            topView = view
+          },
+          events: {
+            tapped: function(sender) {
+              if (sender.views[0].info) {
+                appItemView.show(sender.views[0].info);
+              }
+            }
+          }
+        })
+      }
+    }
+  }
+  let contentWidth = columns * ($device.info.screen.width - 20);
+  let view = {
+    type: "view",
+    props: {
+      bgcolor: $color("clear"),
+    },
+    layout: $layout.fill,
+    views: [{
+      type: "view",
+      props: {
+        bgcolor: $color("clear"),
+      },
+      layout: function(make, view) {
+        make.left.right.top.inset(0)
+        make.height.equalTo(50)
+      },
+      views: [{
+        type: "label",
+        props: {
+          text: title,
+          font: $font("bold", 22),
+          textColor: utils.themeColor.listHeaderTextColor,
+          bgcolor: $color("clear"),
+          align: $align.center,
+        },
+        layout: function (make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+      }, {
+        type: "button",
+        props: {
+          title: "查看全部",
+          titleColor: utils.getCache("themeColor"),
+          bgcolor: $color("clear"),
+          font: $font(17),
+          hidden: (apps.length <= 3),
+        },
+        layout: function (make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+        },
+        events: {
+          tapped: function (sender) {
+            genNewPageAppListView(title, "主页", apps);
+          }
+        }
+      }]
+    },{
+      type: "scroll",
+      props: {
+        alwaysBounceHorizontal: true,
+        alwaysBounceVertical: false,
+        userInteractionEnabled: true,
+        showsHorizontalIndicator: false,
+        showsVerticalIndicator: false,
+        clipsToBounds: false,
+        pagingEnabled: true,
+        contentSize: $size(contentWidth, 240),
+      },
+      layout: function(make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.inset(15)
+        make.right.inset(5)
+        make.height.equalTo(240)
+      },
+      views: bannerContent
+    }]
+  }
+  return view
+}
+
+function genNewPageAppListView(pageName, returnName, apps) {
+  let appsListViewItems = genAppListItemView(apps, "newPageAppsList");
+  $ui.push({
+    props: {
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [ui.genPageHeader(returnName, pageName), {
+      type: "list",
+      props: {
+        bgcolor: $color("clear"),
+        // indicatorInsets: $insets(40, 0, 50, 0),
+        indicatorStyle: utils.themeColor.indicatorStyle,
+        separatorColor: $color("systemSeparator"),
+        separatorInset: $insets(0, 85, 0, 15),
+        separatorHidden: false,
+        header: {
+          type: "view",
+          props: {
+            height: 10,
+          },
+        },
+        footer: {
+          type: "view",
+          props: {
+            height: 45,
+          },
+        },
+        data: appsListViewItems,
+        rowHeight: 80,
+      },
+      layout: function (make, view) {
+        make.top.equalTo(view.prev.bottom)
+        make.left.right.bottom.inset(0)
+      },
+      events: {
+        didSelect: function (sender, indexPath, data) {
+          if (data.props.info) {
+            appItemView.show(data.props.info);
+          }
+        }
+      }
+    }]
+  })
 }
 
 function genCloudView() {
@@ -420,7 +758,7 @@ function genCloudView() {
     props: {
       id: "cloudView",
       bgcolor: utils.themeColor.bgcolor,
-      hidden: false,
+      hidden: true,
     },
     layout: $layout.fill,
     views: [{
@@ -658,7 +996,7 @@ function genCloudAppListView() {
   }
   let appViewItems = []
   let apps = getCloudAppDisplaySource()
-  appViewItems = genAppListView(apps, "cloudAppsList")
+  appViewItems = genAppListItemView(apps, "cloudAppsList")
   let cloudView = {
     type: "list",
     props: {
@@ -817,8 +1155,8 @@ function genUpdateAppListView() {
     }
   }
   $cache.set("updateIds", newUpdateIds);
-  watingAppViewItems = genAppListView(watingApps)
-  updatedAppViewItems = genAppListView(updatedApps)
+  watingAppViewItems = genAppListItemView(watingApps)
+  updatedAppViewItems = genAppListItemView(updatedApps)
   if (watingAppViewItems.length > 0) {
     appListData.push({
       rows: [{
@@ -1042,7 +1380,7 @@ function genUpdateAppListView() {
   return updateView
 }
 
-function genAppListView(apps, sourceViewName) {
+function genAppListItemView(apps, sourceViewName, isFill) { //isFill 是指左右不留空隙，充满整个父view
   let appViewItems = []
   let buttonText = ""
   for (let i = 0; i < apps.length; i++) {
@@ -1059,7 +1397,6 @@ function genAppListView(apps, sourceViewName) {
       type: "view",
       props: {
         info: apps[i].objectId,
-        // bgcolor: utils.themeColor.bgcolor,
         bgcolor: $color("clear"),
       },
       layout: function (make, view) {
@@ -1070,7 +1407,7 @@ function genAppListView(apps, sourceViewName) {
       views: [{
         type: "view",
         layout: function (make, view) {
-          make.left.right.inset(15)
+          make.left.right.inset(isFill?0:15);
           make.height.equalTo(80)
           make.center.equalTo(view.super)
         },
@@ -1525,7 +1862,9 @@ function solveQuery() {
   if (query) {
     switch (query.q) {
       case "show":
-        appItemView.preview(query.objectId);
+        if(query.objectId) {
+          appItemView.show(query.objectId);
+        }
         break;
       case "theme":
         setQueryTheme(query.color);
@@ -3069,57 +3408,28 @@ function setupFeedBack(text) {
   })
 }
 
-function requireApps() {
-  $http.request({
-    method: "GET",
-    url: utils.domain + "/classes/App?limit=1000&order=-updateTime,-updatedAt",
-    timeout: 5,
-    header: {
-      "Content-Type": "application/json",
-      "X-LC-Id": utils.appId,
-      "X-LC-Key": utils.appKey,
-    },
-    handler: function (resp) {
-      let apps = resp.data.results
-      let installedApps = utils.getInstalledApps()
-      for (let i = 0; i < apps.length; i++) {
-        for (let j = 0; j < installedApps.length; j++) {
-          let localName = (installedApps[j].localName.endsWith(".js")) ? installedApps[j].localName.slice(0, -3) : installedApps[j].localName;
-          if (apps[i].objectId === installedApps[j].id && apps[i].appName == localName) {
-            apps[i].haveInstalled = true;
-            if (apps[i].buildVersion > installedApps[j].build) {
-              apps[i].needUpdate = true
-            } else {
-              apps[i].needUpdate = false
-            }
-          }
-        }
-      }
-      $cache.set("cloudApps", apps);
-      refreshAllView();
-      if (user.haveLogined()) {
-        showNewCommentNumber(apps)
-      }
-      if (query) {
-        switch (query.q) {
-          case "show":
-            for (let i = 0; i < apps.length; i++) {
-              if (apps[i].objectId === query.objectId) {
-                $app.notify({
-                  name: "refreshItemView",
-                  object: { onStore: apps[i].onStore }
-                });
-                break;
-              }
-            }
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  })
-}
+// function requireApps() {
+//   if (user.haveLogined()) {
+//     showNewCommentNumber(apps)
+//   }
+  // if (query) {
+  //   switch (query.q) {
+  //     case "show":
+  //       for (let i = 0; i < apps.length; i++) {
+  //         if (apps[i].objectId === query.objectId) {
+  //           $app.notify({
+  //             name: "refreshItemView",
+  //             object: { onStore: apps[i].onStore }
+  //           });
+  //           break;
+  //         }
+  //       }
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+// }
 
 function showNewCommentNumber(apps) {
   let commentNum = 0;

@@ -459,6 +459,55 @@ async function getErotsSetting() {
   return resp.data
 }
 
+async function getExploreApps() {
+  let resp = await $http.request({
+    method: "GET",
+    url: utils.domain + "/classes/Explore?keys=-updatedAt,-objectId,-createdAt&order=-updatedAt",
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+  })
+  if(resp.data) {
+    $cache.set("ExploreInfos", resp.data.results);
+  }
+  return resp.data
+}
+
+async function requireApps() {
+  let resp = await $http.request({
+    method: "GET",
+    url: utils.domain + "/classes/App?limit=1000&order=-updateTime,-updatedAt",
+    timeout: 7,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+  })
+  if(resp.data) {
+    let apps = resp.data.results
+    let installedApps = utils.getInstalledApps()
+    for (let i = 0; i < apps.length; i++) {
+      for (let j = 0; j < installedApps.length; j++) {
+        let localName = (installedApps[j].localName.endsWith(".js")) ? installedApps[j].localName.slice(0, -3) : installedApps[j].localName;
+        if (apps[i].objectId === installedApps[j].id && apps[i].appName == localName) {
+          apps[i].haveInstalled = true;
+          if (apps[i].buildVersion > installedApps[j].build) {
+            apps[i].needUpdate = true
+          } else {
+            apps[i].needUpdate = false
+          }
+        }
+      }
+    }
+    $cache.set("cloudApps", apps);
+  }
+  return resp.data;
+}
+
 module.exports = {
   uploadSM: uploadSM,
   uploadSMV2: uploadSMV2,
@@ -478,5 +527,7 @@ module.exports = {
   uploadFaultReport: uploadFaultReport,
   getErotsSetting: getErotsSetting,
   bomb_uploadPic: bomb_uploadPic,
+  requireApps: requireApps,
+  getExploreApps: getExploreApps,
 }
 
