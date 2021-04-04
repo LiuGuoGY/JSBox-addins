@@ -14,7 +14,7 @@ let topOffset = -20
 let searchText = ""
 let query = $context.query;
 
-let mIcon = []
+const mIconSymbols = ["square.grid.2x2.fill", "bag.fill", "square.and.arrow.down.fill", "person.fill"]
 
 function show() {
   uploadInstall()
@@ -43,7 +43,7 @@ $app.listen({
   },
 });
 
-let contentViews = ["exploreView", "cloudView", "updateView", "meView"];
+let contentViews = ["cloudView", "exploreView", "updateView", "meView"];
 
 function setThemeColor() {
   if (utils.getThemeMode() == "dark") {
@@ -55,22 +55,6 @@ function setThemeColor() {
     $cache.set("themeColor", utils.getCache("lightThemeColor"));
     $app.theme = "light";
   }
-  
-  mIcon = [{
-    blue: $icon("050", utils.getCache("themeColor"), $size(25, 25)),
-    gray: $icon("050", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-  },{
-    blue: $icon("102", utils.getCache("themeColor"), $size(25, 25)),
-    gray: $icon("102", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-  },
-  {
-    blue: $icon("164", utils.getCache("themeColor"), $size(25, 25)),
-    gray: $icon("164", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-  },
-  {
-    blue: $icon("109", utils.getCache("themeColor"), $size(25, 25)),
-    gray: $icon("109", utils.themeColor.mainTabGrayColor, $size(25, 25)),
-  }]
 }
 
 function setupMainView() {
@@ -123,7 +107,7 @@ function genMainView() {
           })
         },
       },
-      views: [genExploreView(), genCloudView(), genUpdateView(), genMeView()],
+      views: [genCloudView(), genExploreView(), genUpdateView(), genMeView()],
     },
     {
       type: "view",
@@ -156,12 +140,13 @@ function genMainView() {
             type: "image",
             props: {
               id: "menu_image",
-              bgcolor: $color("clear")
+              resizable: true,
+              clipsToBounds: false
             },
             layout: function (make, view) {
               make.centerX.equalTo(view.super)
-              make.width.height.equalTo(25)
-              make.top.inset(7)
+              make.size.equalTo($size(25, 25))
+              make.centerY.equalTo(view.super).offset(-6)
             },
           },
           {
@@ -179,40 +164,41 @@ function genMainView() {
           ],
           data: [{
             menu_image: {
-              icon: mIcon[0].blue,
-            },
-            menu_label: {
-              text: "探索",
-              textColor: utils.getCache("themeColor")
-            }
-          },{
-            menu_image: {
-              icon: mIcon[1].gray,
+              symbol: mIconSymbols[0],
+              tintColor: utils.getCache("themeColor"),
             },
             menu_label: {
               text: "应用",
               textColor: utils.themeColor.mainTabGrayColor
             }
-          },
-          {
+          },{
             menu_image: {
-              icon: mIcon[2].gray,
+              symbol: mIconSymbols[1],
+              tintColor: utils.themeColor.mainTabGrayColor,
+            },
+            menu_label: {
+              text: "探索",
+              textColor: utils.themeColor.mainTabGrayColor,
+            }
+          },{
+            menu_image: {
+              symbol: mIconSymbols[2],
+              tintColor: utils.themeColor.mainTabGrayColor,
             },
             menu_label: {
               text: "更新",
               textColor: utils.themeColor.mainTabGrayColor
             }
-          },
-          {
+          },{
             menu_image: {
-              icon: mIcon[3].gray,
+              symbol: mIconSymbols[3],
+              tintColor: utils.themeColor.mainTabGrayColor,
             },
             menu_label: {
               text: "我的",
               textColor: utils.themeColor.mainTabGrayColor
             }
-          },
-          ],
+          }],
         },
         layout: function (make, view) {
           make.top.inset(0)
@@ -319,14 +305,16 @@ function handleSelect(view, row) {
   for (let i = 0; i < newData.length; i++) {
     if (i == row) {
       newData[i].menu_label.textColor = utils.getCache("themeColor")
-      newData[i].menu_image.icon = mIcon[i].blue
+      newData[i].menu_image.symbol = mIconSymbols[i]
+      newData[i].menu_image.tintColor = utils.getCache("themeColor")
       if ($(contentViews[i]) == undefined) {
         $("content").add(getContentView(i))
       }
       $(contentViews[i]).hidden = false
     } else {
       newData[i].menu_label.textColor = utils.themeColor.mainTabGrayColor
-      newData[i].menu_image.icon = mIcon[i].gray
+      newData[i].menu_image.symbol = mIconSymbols[i]
+      newData[i].menu_image.tintColor = utils.themeColor.mainTabGrayColor
       if ($(contentViews[i]) != undefined) {
         $(contentViews[i]).hidden = true
       }
@@ -338,9 +326,9 @@ function handleSelect(view, row) {
 function getContentView(number) {
   switch (number) {
     case 0: 
-      return genExploreView();
-    case 1:
       return genCloudView();
+    case 1:
+      return genExploreView();
     case 2:
       return genUpdateView();
     case 3:
@@ -422,7 +410,7 @@ function genExploreView() {
     type: "view",
     props: {
       id: "exploreView",
-      hidden: false,
+      hidden: true,
     },
     layout: $layout.fill,
     views: [{
@@ -758,7 +746,7 @@ function genCloudView() {
     props: {
       id: "cloudView",
       bgcolor: utils.themeColor.bgcolor,
-      hidden: true,
+      hidden: false,
     },
     layout: $layout.fill,
     views: [{
