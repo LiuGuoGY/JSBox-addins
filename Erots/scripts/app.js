@@ -137,31 +137,37 @@ function genMainView() {
           scrollEnabled: false,
           bgcolor: $color("clear"),
           template: [{
-            type: "image",
-            props: {
-              id: "menu_image",
-              resizable: true,
-              clipsToBounds: false
-            },
+            type: "view",
             layout: function (make, view) {
-              make.centerX.equalTo(view.super)
-              make.size.equalTo($size(25, 25))
-              make.centerY.equalTo(view.super).offset(-6)
+              make.size.equalTo(view.super)
+              make.center.equalTo(view.super)
             },
-          },
-          {
-            type: "label",
-            props: {
-              id: "menu_label",
-              font: $font(10),
+            views: [{
+              type: "image",
+              props: {
+                id: "menu_image",
+                resizable: true,
+                clipsToBounds: false,
+              },
+              layout: function (make, view) {
+                make.centerX.equalTo(view.super)
+                make.size.equalTo($size(25, 25))
+                make.top.inset(6)
+              },
             },
-            layout: function (make, view) {
-              var preView = view.prev
-              make.centerX.equalTo(preView)
-              make.bottom.inset(5)
-            }
-          }
-          ],
+            {
+              type: "label",
+              props: {
+                id: "menu_label",
+                font: $font(10),
+              },
+              layout: function (make, view) {
+                var preView = view.prev
+                make.centerX.equalTo(preView)
+                make.bottom.inset(5)
+              }
+            }]
+          }],
           data: [{
             menu_image: {
               symbol: mIconSymbols[0],
@@ -484,8 +490,8 @@ function genExploreAppListView() {
     } else {
       let ids = exploreInfos[i].appIds;
       let apps = []
-      for(let j = 0; j < ids.length; j++) {
-        for(let z = 0; z < cloudApps.length; z++) {
+      for(let z = 0; z < cloudApps.length; z++) {
+        for(let j = 0; j < ids.length; j++) {
           if(ids[j] == cloudApps[z].objectId && cloudApps[z].onStore) {
             apps.push(cloudApps[z]);
           }
@@ -1492,39 +1498,6 @@ function storeStiky() {
 }
 
 function genMeView() {
-  const tabShowInstalls = {
-    type: "view",
-    props: {
-      bgcolor: utils.themeColor.bgcolor,
-    },
-    views: [{
-      type: "label",
-      props: {
-        id: "tabShowInstalls",
-        text: "安装量统计",
-        textColor: utils.themeColor.listContentTextColor,
-      },
-      layout: function (make, view) {
-        make.left.inset(15)
-        make.centerY.equalTo(view.super)
-      }
-    },
-    {
-      type: "label",
-      props: {
-        id: "tabShowInstallsDetail",
-        text: utils.getCache("installNumbers", 0).toString(),
-        textColor: utils.themeColor.appCateTextColor,
-      },
-      layout: function (make, view) {
-        make.right.inset(15)
-        make.centerY.equalTo(view.super)
-      }
-    }
-    ],
-    layout: $layout.fill
-  }
-
   const tabMyVoteCode = {
     type: "view",
     props: {
@@ -1750,6 +1723,15 @@ function genMeView() {
               handler: () => {
                 share("https://xteko.com/redir?name=Erots&url=https%3A%2F%2Fgithub.com%2FLiuGuoGY%2FJSBox-addins%2Fraw%2Fmaster%2FErots%2F.output%2FErots.box");
               }
+          },{
+            type: "text",
+            async: false,
+            title: "活跃安装量",
+            symbol: "chart.pie.fill",
+            iconColor: utils.systemColor("blue"),
+            text: utils.getCache("installNumbers", 0).toString(),
+            handler: () => {
+            }
           }]
         },]
       })
@@ -1842,7 +1824,7 @@ function genMeView() {
       },],
     }]
   }
-  // requireInstallNumbers()
+  requireInstallNumbers()
   return view
 }
 
@@ -2280,7 +2262,7 @@ function showColorSelectView(superView) {
       make.width.equalTo(superView)
     }
     make.centerX.equalTo(superView)
-    make.bottom.inset(0)
+    make.bottom.inset(10)
   })
   $ui.animate({
     duration: 0.15,
@@ -2567,7 +2549,7 @@ function showThemeModeSelectView(superView) {
       make.width.equalTo(superView)
     }
     make.centerX.equalTo(superView)
-    make.bottom.inset(0)
+    make.bottom.inset(10)
   })
   $ui.animate({
     duration: 0.15,
@@ -3500,8 +3482,6 @@ function requireInstallNumbers() {
     handler: function (resp) {
       let results = resp.data.count
       if (results != undefined) {
-        let view = $("tabShowInstallsDetail")
-        view.text = results
         $cache.set("installNumbers", results)
       }
     }

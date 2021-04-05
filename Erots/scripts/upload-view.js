@@ -8,6 +8,7 @@ function setupUploadView(updateApp) {
   let myApp = {}
   let previewsPrev = []
   let oldVersion = 0
+  let lastVersionInst = ""
   if(updateApp) {
     $cache.remove("unfinishData");
     if($file.exists("assets/temp")) {
@@ -17,6 +18,7 @@ function setupUploadView(updateApp) {
     myApp.file = "";
     myApp.buildVersion ++;
     oldVersion = updateApp.appVersion;
+    lastVersionInst = myApp.versionInst;
     myApp.versionInst = "";
   } else {
     myApp = utils.getCache("unfinishData")
@@ -1229,19 +1231,70 @@ function setupUploadView(updateApp) {
         },],
       },
       {
-        type: "label",
-        props: {
-          id: "updateDesLabel",
-          text: "新功能",
-          align: $align.left,
-          font: $font(16),
-          textColor: utils.themeColor.appObviousColor,
-        },
+        type: "view",
         layout: function(make, view) {
           make.top.equalTo(view.prev.bottom).inset(20)
           make.height.equalTo(20)
-          make.left.inset(10)
-        }
+          make.width.equalTo(view.super)
+        },
+        views: [{
+          type: "label",
+          props: {
+            id: "updateDesLabel",
+            text: "新功能",
+            align: $align.left,
+            font: $font(16),
+            textColor: utils.themeColor.appObviousColor,
+          },
+          layout: function(make, view) {
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(20)
+            make.left.inset(10)
+          }
+        },{
+          type: "button",
+          props: {
+            hidden: !updateApp,
+            userInteractionEnabled: true,
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.right.inset(10)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+            make.width.equalTo(118)
+          },
+          events: {
+            tapped: function (sender) {
+              $("updateDesInput").text += lastVersionInst;
+            }
+          },
+          views: [{
+            type: "image",
+            props: {
+              symbol: "square.and.pencil",
+              tintColor: utils.getCache("themeColor"),
+              bgcolor: $color("clear"),
+            },
+            layout: function (make, view) {
+              make.left.inset(10)
+              make.centerY.equalTo(view.super)
+              make.size.equalTo($size(17, 17))
+            },
+          },{
+            type: "label",
+            props: {
+              text: "上次新功能",
+              textColor: utils.getCache("themeColor"),
+              bgcolor: $color("clear"),
+              font: $font(15),
+            },
+            layout: function (make, view) {
+              make.right.inset(10)
+              make.centerY.equalTo(view.super)
+            },
+          }]
+        }]
       },
       {
         type: "view",
