@@ -105,14 +105,33 @@ async function detect() {
             },
             views: [welcomeView]
         });
-        let res = await api.getErotsSetting();
-        let res2 = await api.requireApps();
-        let res3 = await api.getExploreApps();
-        if(res && res2 && res3) {
-          go();
-        } else {
-          setupNotConnectView();
+        let times = 0;
+        let failed = false;
+        function isGo() {
+            if(times >= 2) {
+                if(!failed) {
+                    go();
+                } else {
+                    setupNotConnectView();
+                }
+            }
         }
+        $delay(0, async function() {
+            let res = await api.getErotsSetting();
+            times++;
+            if(!res) {
+                failed = true;
+            }
+            isGo();
+        });
+        $delay(0, async function() {
+            let res = await api.requireApps();
+            times++;
+            if(!res) {
+                failed = true;
+            }
+            isGo();
+        });
     } else {
         go();
     }

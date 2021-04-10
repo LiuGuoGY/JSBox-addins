@@ -241,6 +241,43 @@ function genPageHeader(backName, title, rightView) {
   return view
 }
 
+function genLoadingView(id) {
+  return {
+    type: "view",
+    props: {
+      id: (id)?id:"",
+    },
+    layout: function (make, view) {
+      make.center.equalTo(view.super)
+      make.size.equalTo($size(40, 40))
+    },
+    views: [{
+      type: "spinner",
+      props: {
+        loading: true,
+        style: utils.themeColor.spinnerStyle,
+        bgcolor: $color("clear"),
+      },
+      layout: function (make, view) {
+        make.top.inset(0)
+        make.centerX.equalTo(view.super)
+      }
+    }, {
+      type: "label",
+      props: {
+        text: "正在载入...",
+        align: $align.center,
+        font: $font(12),
+        textColor: utils.themeColor.appObviousColor,
+      },
+      layout: function (make, view) {
+        make.centerX.equalTo(view.super).offset(4)
+        make.bottom.inset(0)
+      }
+    }],
+  }
+}
+
 function createBack(color) {
   let view = {
     type: "canvas",
@@ -621,4 +658,5 @@ module.exports = {
   createBack: createBack,
   createEnter: createEnter,
   genIconView: genIconView,
+  genLoadingView: genLoadingView,
 }

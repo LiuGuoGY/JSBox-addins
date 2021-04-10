@@ -107,7 +107,7 @@ function genMainView() {
           })
         },
       },
-      views: [genCloudView(), genExploreView(), genUpdateView(), genMeView()],
+      views: [genCloudView()],
     },
     {
       type: "view",
@@ -430,7 +430,7 @@ function genExploreView() {
         make.bottom.inset(0)
         make.centerX.equalTo(view.super)
       },
-      views: [genExploreAppListView()]
+      views: [ui.genLoadingView("exploreLoading")] //genExploreAppListView()
     }, {
       type: "view",
       props: {
@@ -477,6 +477,13 @@ function genExploreView() {
       },],
     }],
   }
+  $delay(0, async function() {
+    await api.getExploreApps();
+    if($("exploreLoading")) {
+      $("exploreLoading").remove()
+    }
+    $("exploreAppListParent").add(genExploreAppListView())
+  });
   return view
 }
 
@@ -1474,6 +1481,12 @@ function refreshAllView(exceptViewName) {
     $("updateAppsList").remove()
     $("updateAppListParent").add(genUpdateAppListView())
     $("updateAppsList").contentOffset = $point(0, updateOffset)
+  }
+  if(((exceptViewName && exceptViewName != "exploreAppsList") || !exceptViewName) && $("exploreAppsList")) {
+    let updateOffset = $("exploreAppsList").contentOffset.y
+    $("exploreAppsList").remove()
+    $("exploreAppListParent").add(genExploreAppListView())
+    $("exploreAppsList").contentOffset = $point(0, updateOffset)
   }
   storeStiky()
 }
