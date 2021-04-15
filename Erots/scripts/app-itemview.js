@@ -24,17 +24,20 @@ $app.listen({
   },
 });
 
-function show(id) {
-  let app = {}
+function getAppItem(id) {
   let cloudApps = utils.getCache("cloudApps", [])
   for (let i = 0; i < cloudApps.length; i++) {
     if (cloudApps[i].objectId == id) {
-      app = cloudApps[i];
-      break;
+      return cloudApps[i];
     }
   }
+  return null;
+}
+
+function show(id) {
+  let app = getAppItem(id);
   let subview = {};
-  if(app.onStore) {
+  if(app && app.onStore) {
     subview = genAppItemShowView(app);
     objectId = id;
   } else {
@@ -109,7 +112,7 @@ function resizeItemScroll() {
 function refreshAppItemView() {
   if ($("appItemView")) {
     $("appItemView").remove()
-    $("appItemViewParent").add(genAppItemShowView())
+    $("appItemViewParent").add(genAppItemShowView(getAppItem(objectId)))
     $("appItemShowScroll").resize()
     $("appItemShowScroll").contentSize = $size(0, $("appItemShowScroll").contentSize.height + 50)
     $("appPreviewPhotosScroll").resize()
