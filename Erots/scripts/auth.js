@@ -178,6 +178,7 @@ function setupNotConnectView() {
                 layout: function(make, view) {
                     make.centerX.equalTo(view.super).offset(4)
                     make.bottom.inset(0)
+                    make.width.equalTo(100)
                 },
                 events: {
                     tapped: function(sender) {
@@ -185,7 +186,30 @@ function setupNotConnectView() {
                     }
                 }
             }],
-        }, ]
+        }, {
+            type: "button",
+            props: {
+                title: "查看可能的原因",
+                align: $align.center,
+                font: $font(15),
+                titleColor: $color("gray"),
+                borderWidth: 0,
+                contentEdgeInsets: $insets(5, 15, 6, 15),
+                bgcolor: $color("clear"),
+            },
+            layout: function(make, view) {
+                make.centerX.equalTo(view.super)
+                make.bottom.inset(20)
+            },
+            events: {
+                tapped: function(sender) {
+                    $ui.alert({
+                        title: "无法连接的原因",
+                        message: "1. 请检查与 api.lncldglobal.com 的连通性；\n2. 请尝试关闭代理或者更换节点；",
+                    });
+                }
+            }
+        }]
     });
 }
 

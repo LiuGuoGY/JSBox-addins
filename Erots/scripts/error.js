@@ -9,7 +9,7 @@ async function getMessage(code, error) {
   if(code === 140) {
     return "今日的API次数已经用完，请明日再使用，对此带来的不便，敬请谅解"
   }
-  return (await tran.tran(error) + " 错误代码: " + code)
+  return (error + "\n错误代码: " + code)
 }
 
 module.exports = {
