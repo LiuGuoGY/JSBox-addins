@@ -1678,8 +1678,8 @@ function genMeView() {
               symbol: "tray.fill",
               iconColor: utils.systemColor("black"),
               handler: () => {
-                // setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins/");
-                $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/");
+                setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins/");
+                // $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/");
               }
           },{
             type: "arrow",
@@ -1688,7 +1688,8 @@ function genMeView() {
             symbol: "message.fill",
             iconColor: utils.systemColor("red"),
             handler: () => {
-              $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/discussions");
+              setupWebView("Discussion", "https://github.com/LiuGuoGY/JSBox-addins/discussions");
+              // $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/discussions");
             }
           },{
               type: "arrow",
@@ -2942,7 +2943,23 @@ function setupWebView(title, url) {
       statusBarStyle: utils.themeColor.statusBarStyle,
       bgcolor: utils.themeColor.mainColor,
     },
-    views: [ui.genPageHeader("我的", title), {
+    views: [ui.genPageHeader("我的", title, {
+      type: "image",
+      props: {
+        symbol: "safari",
+        tintColor: utils.getCache("themeColor"),
+      },
+      layout: function(make, view) {
+        make.size.equalTo($size(26, 26))
+        make.centerY.equalTo(view.super)
+        make.right.inset(15)
+      },
+      events: {
+        tapped: function (sender) {
+          $app.openURL(url)
+        }
+      },
+    }), {
       type: "web",
       props: {
         id: "webView",

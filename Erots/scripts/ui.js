@@ -5,7 +5,7 @@ function showToastView(view, color, text, duration) {
   let topInset = view.frame.height / 10
   let textSize = $text.sizeThatFits({
     text: text,
-    width: view.width,
+    width: view.frame.width,
     font: $font(15),
   })
   if(duration === undefined) {
@@ -230,7 +230,7 @@ function genPageHeader(backName, title, rightView) {
           bgcolor: $color("clear"),
         },
         layout: function(make, view) {
-          make.right.inset(20)
+          make.right.inset(0)
           make.height.equalTo(view.super)
           make.width.equalTo(50)
         },

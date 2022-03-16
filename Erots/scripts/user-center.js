@@ -126,45 +126,8 @@ function genUserCenterSubview() {
       footer: {
         type: "view",
         props:{
-          height: 110,
-        },
-        views: [{
-          type: "button",
-          props: {
-            title: "退出登录",
-            bgcolor: utils.themeColor.commentBgColor,
-            titleColor: utils.getCache("themeColor"),
-            font: $font("bold", 16),
-            radius: 12,
-          },
-          layout: function(make, view) {
-            make.left.right.inset(15)
-            make.center.equalTo(view.super)
-            make.height.equalTo(45)
-          },
-          events: {
-            tapped: async function(sender) {
-              $ui.alert({
-                title: "提示",
-                message: "确定要退出？",
-                actions: [
-                  {
-                    title: "确定",
-                    handler: function() {
-                      user.logout()
-                    }
-                  },
-                  {
-                    title: "取消",
-                    handler: function() {
-              
-                    }
-                  }
-                ]
-              });
-            }
-          }
-        }],
+          height: 30,
+        }
       },
       data: groups.init({
         groups: [{
@@ -219,8 +182,36 @@ function genUserCenterSubview() {
               handler: () => {
                 setupManageMyAppsView();
               }
-          }]
-        }]
+          },
+        ]},{
+          title: "",
+          items: [{
+            type: "textButton",
+            async: false,
+            title: "退出登录",
+            titleColor: utils.getCache("themeColor"),
+            handler: () => {
+              $ui.alert({
+                title: "提示",
+                message: "确定要退出？",
+                actions: [
+                  {
+                    title: "确定",
+                    handler: function() {
+                      user.logout()
+                    }
+                  },
+                  {
+                    title: "取消",
+                    handler: function() {
+              
+                    }
+                  }
+                ]
+              });
+            }
+          }
+        ]}]
       })
     },
     layout: $layout.fillSafeArea,

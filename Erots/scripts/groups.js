@@ -69,6 +69,19 @@ exports.init = ({ groups }) => groups.map(item => {
             make.right.inset(20);
             make.centerY.equalTo(view.super);
           }
+        },
+        textButton: {
+          type: "label",
+          props: {
+            text: text,
+            font: $font(16),
+            align: $align.right,
+            textColor: $color("systemSecondaryLabel")
+          },
+          layout: (make, view) => {
+            make.right.inset(20);
+            make.centerY.equalTo(view.super);
+          }
         }
       };
 
@@ -105,7 +118,7 @@ exports.init = ({ groups }) => groups.map(item => {
       return {
         type: "view",
         props: {
-          selectable: type === "arrow" || type === "check"
+          selectable: type === "arrow" || type === "check" || type === "textButton"
         },
         layout: $layout.fill,
         events: {
@@ -117,6 +130,7 @@ exports.init = ({ groups }) => groups.map(item => {
               $cache.set(key, value);
               async ? handlerAsync(sender) : handler(value);
             }
+            if (type === "textButton") handler();
           }
         },
         views: [types[type], {
