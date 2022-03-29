@@ -328,7 +328,7 @@ function() {
                         u.className = "";
                     d.onclick = function(e) {
                             var rqstJson = getRequest()
-                            var link = "jsbox://run?name=Erots&q=" + rqstJson.q + "&objectId=" + rqstJson.objectId;
+                            var link = "jsbox://run?script=var%20a%3Dfalse%3B%24addin.list.forEach%28function%28b%29%7B%28b.name%3D%3D%22Erots%22%29%3Fa%3Dtrue%3A0%7D%29%3Bfunction%20run%28%29%7B%24addin.run%28%7Bname%3A%22Erots%22%2Cquery%3A%7B%22q%22%3A%22" + rqstJson.q + "%22%2C%22objectId%22%3A%22" + rqstJson.objectId + "%22%7D%7D%29%7Dif%28a%29%7Brun%28%29%7Delse%7B%24ui.loading%28%22%E6%AD%A3%E5%9C%A8%E4%B8%8B%E8%BD%BDErots%22%29%3B%24http.get%28%7Burl%3A%22https%3A%2F%2Fgitee.com%2Fliuguogy%2FJSBox-addins%2Fraw%2Fmaster%2FErots%2F.output%2FErots.box%22%2Chandler%3Afunction%28b%29%7B%24ui.loading%28false%29%3B%24addin.save%28%7Bname%3A%22Erots%22%2Cdata%3Ab.data%2Chandler%3Afunction%28c%29%7Bif%28c%29%7Brun%28%29%7D%7D%7D%29%7D%7D%29%7D%3B";
                             if (is_weixin()) {
                                 var url = location.search;
                                 var qrurl = "./instruction.html?";
