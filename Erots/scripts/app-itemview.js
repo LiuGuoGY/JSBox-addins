@@ -681,15 +681,8 @@ function genAppItemShowView(app) {
                   handler: function (title, idx) {
                     switch (idx) {
                       case 0: $share.sheet(["https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]); break;
-                      case 1: {
-                        if (!user.haveLogined()) {
-                          showNotLoginError("反馈失效");
-                        } else {
-                          genAppReportFaultView(app);
-                        }
-                        break;
-                      }
-                      case 2: genAppShareView(app); break;
+                      case 1: ui.showToastView($("appItemView"), utils.mColor.blue, "请在下方评论来告诉开发者吧！");break;
+                      default: break;
                     }
                   }
                 });
@@ -1693,6 +1686,7 @@ function genAppPreviewPhotosScrollView(photos, index) {
       },]
     },]
   });
+
   $("previewPhotosDetailScroll").contentOffset = $point(index * ($device.info.screen.width), 0)
 }
 

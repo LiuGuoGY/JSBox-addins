@@ -37,8 +37,8 @@ $app.listen({
   refreshAll: function (object) {
     refreshAllView(object.except)
   },
-  requireCloud: function () {
-    api.requireApps();
+  requireCloud: async function () {
+    await api.requireApps();
     refreshAllView()
   },
 });
@@ -3442,7 +3442,7 @@ function showNewCommentNumber(apps) {
   }
   let oldCommentNum = utils.getCache("commentNum", 0);
   if (commentNum > oldCommentNum) {
-    ui.showToastView($("mainView"), utils.mColor.blue, "你有 " + (commentNum - oldCommentNum) + " 个新评论哦");
+    $delay(1, ()=>{ui.showToastView($("mainView"), utils.mColor.blue, "你有 " + (commentNum - oldCommentNum) + " 个新评论哦");});
   }
   $cache.set("commentNum", commentNum);
 }
