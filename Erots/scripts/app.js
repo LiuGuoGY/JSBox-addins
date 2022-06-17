@@ -16,7 +16,7 @@ let query = $context.query;
 
 const mIconSymbols = ["square.grid.2x2.fill", "bag.fill", "square.and.arrow.down.fill", "person.fill"]
 
-function show() {
+async function show() {
   uploadInstall()
   checkBlackList()
   if (!utils.getCache("haveBanned", false)) {

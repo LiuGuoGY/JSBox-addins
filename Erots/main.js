@@ -1,7 +1,7 @@
 let ui = require('scripts/ui')
 let utils = require('scripts/utils')
 let update = require("scripts/update");
-
+let api = require('scripts/api')
 
 if ($app.env == $env.today) {
     if (utils.getCache("haveBanned") === true) {
