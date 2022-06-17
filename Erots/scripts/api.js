@@ -1,7 +1,7 @@
 let utils = require('scripts/utils')
 
-const bombAppId = "51353b0736965d8a9c38869b93fdb038";
-const bombAppKey = "3161f0aa9e52d81f816556e63f255758";
+const bombAppId = "18a4d3a3de2625b00e78b606ae6deee4";
+const bombAppKey = "422d5d6fcc6efd6b310c223d091ebab0";
 const tinyKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
 
 async function uploadSM(data, fileName) {
