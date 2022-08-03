@@ -352,7 +352,7 @@ function() {
             // window.main.loadShortcut(n)
             var rqstJson = getRequest();
             if (rqstJson.objectId) {
-                fetch('https://j3j1wl1I.api.lncldglobal.com/1.1/classes/App/' + rqstJson.objectId, {
+                fetch('https://lc.liuguogy.com/1.1/classes/App/' + rqstJson.objectId, {
                     headers: {
                         "Content-Type": "application/json",
                         "X-LC-Id": "j3j1wl1IDqkAISktyLfBDKRL-MdYXbMMI",
