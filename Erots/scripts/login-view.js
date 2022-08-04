@@ -379,7 +379,7 @@ function setupLogUpView() {
         type: "button",
         props: {
           id: "logUpButton",
-          title: "注册 >",
+          title: "注册",
           bgcolor: $color(utils.mColor.gray),
           titleColor: $color("white"),
           radius: 3,
@@ -623,7 +623,7 @@ function setupLoginView() {
         type: "button",
         props: {
           id: "loginButton",
-          title: "登录 >",
+          title: "登录",
           bgcolor: $color(utils.mColor.lightBlue),
           titleColor: $color("white"),
           radius: 3,
@@ -798,7 +798,7 @@ function setupPasswordResetView(source, email) {
         type: "button",
         props: {
           id: "resetButton",
-          title: "重置密码 >",
+          title: "重置密码",
           bgcolor: $color(utils.mColor.gray),
           titleColor: $color("white"),
           radius: 3,

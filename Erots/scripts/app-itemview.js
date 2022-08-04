@@ -668,6 +668,26 @@ function genAppItemShowView(app) {
               font: $font("bold", 20),
               circular: true,
               align: $align.center,
+              menu: {
+                pullDown: true,
+                asPrimary: true,
+                items: [
+                  {
+                    title: "分享链接",
+                    symbol: "square.and.arrow.up",
+                    handler: sender => {
+                      $share.sheet(["https://liuguogy.github.io/JSBox-addins/?q=show&objectId=" + app.objectId]);
+                    }
+                  },
+                  {
+                    title: "失效反馈",
+                    symbol: "exclamationmark.octagon",
+                    handler: sender => {
+                      ui.showToastView($("appItemView"), utils.mColor.blue, "请在下方评论来告诉开发者吧！");
+                    }
+                  },
+                ]
+              }
             },
             layout: function (make, view) {
               make.centerY.equalTo(view.super)
@@ -1708,7 +1728,7 @@ function genCommentView(app) {
         borderColor: $color("clear"),
       },
       layout: function (make, view) {
-        make.right.inset(0)
+        make.right.inset(10)
         make.height.equalTo(view.super)
       },
       events: {

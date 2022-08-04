@@ -59,58 +59,105 @@ function genUserCenterSubview() {
       },]
     }]
   }
-  let userInfo = user.getLoginUser()
-  let infoArray = [{
-    userTitle: {
-      text: "邮箱"
-    },
-    userDetail: {
+  let userInfo = user.getLoginUser();
+  let userGroups = [{
+    title: "用户信息",
+    items: [{
+      type: "text",
+      async: false,
+      title: "邮箱",
+      symbol: "envelope",
+      iconColor: utils.systemColor("blue"),
       text: userInfo.email,
+      handler: () => {
+      }
     },
-    canGo: {
-      hidden: true,
-    }
-  },{
-    userTitle: {
-      text: "昵称"
-    },
-    userDetail: {
+    {
+      type: "text",
+      async: false,
+      title: "昵称",
+      symbol: "person",
+      iconColor: utils.systemColor("pink"),
       text: userInfo.nickname,
-    },
-    canGo: {
-      hidden: true,
-    }
-  },{
-    userTitle: {
-      text: "赞赏链接"
-    },
-    userDetail: {
-      text: (userInfo.praise)?userInfo.praise:"无",
-    },
-    canGo: {
-      hidden: false,
-    }
-  },{
-    userTitle: {
-      text: "与我有关的评论"
-    },
-    userDetail: {
-      text: "",
-    },
-    canGo: {
-      hidden: false,
-    }
-  },{
-    userTitle: {
-      text: "管理我的应用"
-    },
-    userDetail: {
-      text: "",
-    },
-    canGo: {
-      hidden: false,
-    }
+      handler: () => {}
   },]
+  },
+  {
+    title: "应用管理",
+    items: [{
+      type: "arrow",
+      async: false,
+      title: "赞赏链接",
+      symbol: "link",
+      iconColor: utils.systemColor("yellow"),
+      handler: () => {
+        setupMyPraiseView();
+      }
+    },{
+        type: "arrow",
+        async: false,
+        title: "与我有关的评论",
+        symbol: "bubble.right",
+        iconColor: utils.systemColor("green"),
+        handler: () => {
+          setupMyCommentsView();
+        }
+      },
+      {
+        type: "arrow",
+        async: false,
+        title: "管理我的应用",
+        symbol: "hammer",
+        iconColor: utils.systemColor("purple"),
+        handler: () => {
+          setupManageMyAppsView();
+        }
+    },
+  ]},
+  {
+    title: "",
+    items: [{
+      type: "textButton",
+      async: false,
+      title: "退出登录",
+      titleColor: utils.getCache("themeColor"),
+      handler: () => {
+        $ui.alert({
+          title: "提示",
+          message: "确定要退出？",
+          actions: [
+            {
+              title: "确定",
+              handler: function() {
+                user.logout()
+              }
+            },
+            {
+              title: "取消",
+              handler: function() {
+        
+              }
+            }
+          ]
+        });
+      }
+    }
+  ]}];
+  if(userInfo.admin === true) {
+    userGroups.splice(2, 0, {
+      title: "管理员操作",
+      items: [{
+        type: "arrow",
+        async: true,
+        title: "管理所有应用",
+        symbol: "rectangle.3.offgrid",
+        iconColor: utils.systemColor("red"),
+        handler: async () => {
+          await setupManageMyAppsView(true);
+        }
+    },
+    ]});
+  }
   let userView = {
     type: "list",
     props: {
@@ -130,88 +177,7 @@ function genUserCenterSubview() {
         }
       },
       data: groups.init({
-        groups: [{
-          title: "用户信息",
-          items: [{
-            type: "text",
-            async: false,
-            title: "邮箱",
-            symbol: "envelope",
-            iconColor: utils.systemColor("blue"),
-            text: userInfo.email,
-            handler: () => {
-            }
-          },
-          {
-            type: "text",
-            async: false,
-            title: "昵称",
-            symbol: "person",
-            iconColor: utils.systemColor("pink"),
-            text: userInfo.nickname,
-            handler: () => {}
-        },]
-        },
-        {
-          title: "应用管理",
-          items: [{
-            type: "arrow",
-            async: false,
-            title: "赞赏链接",
-            symbol: "link",
-            iconColor: utils.systemColor("red"),
-            handler: () => {
-              setupMyPraiseView();
-            }
-          },{
-              type: "arrow",
-              async: false,
-              title: "与我有关的评论",
-              symbol: "bubble.right",
-              iconColor: utils.systemColor("green"),
-              handler: () => {
-                setupMyCommentsView();
-              }
-            },
-            {
-              type: "arrow",
-              async: false,
-              title: "管理我的应用",
-              symbol: "hammer",
-              iconColor: utils.systemColor("purple"),
-              handler: () => {
-                setupManageMyAppsView();
-              }
-          },
-        ]},{
-          title: "",
-          items: [{
-            type: "textButton",
-            async: false,
-            title: "退出登录",
-            titleColor: utils.getCache("themeColor"),
-            handler: () => {
-              $ui.alert({
-                title: "提示",
-                message: "确定要退出？",
-                actions: [
-                  {
-                    title: "确定",
-                    handler: function() {
-                      user.logout()
-                    }
-                  },
-                  {
-                    title: "取消",
-                    handler: function() {
-              
-                    }
-                  }
-                ]
-              });
-            }
-          }
-        ]}]
+        groups: userGroups
       })
     },
     layout: $layout.fillSafeArea,
@@ -683,13 +649,17 @@ function setupMyPraiseView() {
   });
 }
 
-function setupManageMyAppsView() {
+async function setupManageMyAppsView(isAdmin) {
   let cloudApps = utils.getCache("cloudApps", [])
   let author = user.getLoginUser()
   let myApps = []
-  for(let i = 0; i < cloudApps.length; i++) {
-    if (cloudApps[i].authorId == author.objectId) {
-      myApps.push(cloudApps[i])
+  if(isAdmin) {
+    myApps = cloudApps
+  } else {
+    for(let i = 0; i < cloudApps.length; i++) {
+      if (cloudApps[i].authorId == author.objectId) {
+        myApps.push(cloudApps[i])
+      }
     }
   }
   let appViewItems = []

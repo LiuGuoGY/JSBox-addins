@@ -11,7 +11,7 @@ function showAgreement() {
       props: {
         navBarHidden: true,
         statusBarStyle: 0,
-        bgcolor: $color("white"), //(utils.getThemeMode() == "dark") ? $color("black") : $color("white"),
+        bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("white"),
       },
       views: [{
         type: "markdown",
@@ -27,7 +27,7 @@ function showAgreement() {
       }, {
         type: "view",
         props: {
-          bgcolor: $color("#F0F0F0"),
+          bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("white"),
         },
         layout: function (make, view) {
           make.top.equalTo(view.prev.bottom)

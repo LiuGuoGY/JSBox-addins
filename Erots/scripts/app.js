@@ -1631,12 +1631,17 @@ function genMeView() {
           title: "用户",
           items: [{
             type: "arrow",
-            async: false,
+            async: true,
             title: user.haveLogined() ? "个人中心" : "未登录用户",
             symbol: "person.fill",
             iconColor: utils.systemColor("pink"),
-            handler: () => {
-              user.haveLogined() ? userCenterView.setupUserCenterView() : wantToLogin();
+            handler: async () => {
+              if(user.haveLogined()) {
+                await user.requireUser();
+                userCenterView.setupUserCenterView()
+              } else {
+                wantToLogin()
+              }
             }
         }]
         },{
@@ -3563,7 +3568,7 @@ function uploadInstall() {
 function sendFeedBack(text, contact) {
   $http.request({
     method: "POST",
-    url: utils.domain + "/feedback",
+    url: utils.domain + "/classes/Feedback",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -3571,9 +3576,9 @@ function sendFeedBack(text, contact) {
       "X-LC-Key": utils.appKey,
     },
     body: {
-      status: "open",
-      content: text + "\nID: " + $objc("FCUUID").invoke("uuidForDevice").rawValue().toString(),
+      content: text,
       contact: contact,
+      deviceId: $objc("FCUUID").invoke("uuidForDevice").rawValue().toString(),
     },
     handler: function (resp) {
       $device.taptic(2)
