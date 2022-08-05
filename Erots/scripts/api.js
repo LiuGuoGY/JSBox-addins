@@ -228,13 +228,13 @@ async function TinyPng_uploadPic(pic) {
 }
 
 
-async function catbox_uploadFile(file, view) {
+async function catbox_uploadFile(file, userhash) {
   let resp = await $http.upload({
     url: "https://catbox.moe/user/api.php",
     files: [{ "data": file, "name": "fileToUpload"}],
     form: {
       "reqtype": "fileupload",
-      "userhash": "db9c58fa320620970aa444d4f",
+      "userhash": userhash,
     },
     progress: function(percentage) {
       view.text = "上传应用文件... (" + percentage + "%)"
@@ -459,6 +459,22 @@ async function getErotsSetting() {
   return resp.data
 }
 
+async function uploadErotsSetting(data) {
+  let resp = await $http.request({
+    method: "PUT",
+    url: utils.domain + "/classes/Setting/5e4b9ae7f94e0f00083f98a6",
+    timeout: 5,
+    header: {
+      "Content-Type": "application/json",
+      "X-LC-Id": utils.appId,
+      "X-LC-Key": utils.appKey,
+    },
+    body: data,
+  })
+  $console.info(resp);
+  return resp.data
+}
+
 async function getExploreApps() {
   let resp = await $http.request({
     method: "GET",
@@ -529,5 +545,6 @@ module.exports = {
   bomb_uploadPic: bomb_uploadPic,
   requireApps: requireApps,
   getExploreApps: getExploreApps,
+  uploadErotsSetting: uploadErotsSetting,
 }
 

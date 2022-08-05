@@ -155,7 +155,16 @@ function genUserCenterSubview() {
         handler: async () => {
           await setupManageMyAppsView(true);
         }
-    },
+      },{
+        type: "arrow",
+        async: false,
+        title: "修改公告",
+        symbol: "speaker.3",
+        iconColor: utils.systemColor("blue"),
+        handler: () => {
+          genAnnouncementView();
+        }
+      },
     ]});
   }
   let userView = {
@@ -164,7 +173,7 @@ function genUserCenterSubview() {
       style: 2, // 使用复选类型时这个应该选择 2
       rowHeight: 45,
       separatorInset: $insets(0, 66, 0, 0),
-      indicatorInsets: $insets(100, 0, 49, 0),
+      // indicatorInsets: $insets(100, 0, 49, 0),
       separatorColor: $color("systemSeparator"),
       header: {
         type: "view",
@@ -183,6 +192,69 @@ function genUserCenterSubview() {
     layout: $layout.fillSafeArea,
   };
   return userView
+}
+
+function genAnnouncementView() {
+  $ui.push({
+    props: {
+      id: "genAnnouncementView",
+      navBarHidden: true,
+      statusBarStyle: utils.themeColor.statusBarStyle,
+      bgcolor: utils.themeColor.mainColor,
+    },
+    views: [ui.genPageHeader("个人", "修改公告", {
+      type: "button",
+      props: {
+        title: "发布",
+        titleColor: utils.getCache("themeColor"),
+        font: $font("bold", 17),
+        bgcolor: $color("clear"),
+        borderColor: $color("clear"),
+      },
+      layout: function (make, view) {
+        make.right.inset(10)
+        make.height.equalTo(view.super)
+      },
+      events: {
+        tapped: async function (sender) {
+          if ($("announcementText").text.length >= 0) {
+            sender.userInteractionEnabled = false
+            sender.titleColor = utils.themeColor.appCateTextColor
+            await api.uploadErotsSetting({
+              announcement: $("announcementText").text
+            })
+            await api.getErotsSetting();
+            ui.showToastView($("genAnnouncementView"), utils.mColor.green, "发布成功")
+            $delay(1, () => {
+              $ui.pop();
+            })
+          }
+        },
+      },
+    }), {
+      type: "text",
+      props: {
+        id: "announcementText",
+        text: utils.getCache("Settings").announcement,
+        align: $align.left,
+        radius: 0,
+        textColor: utils.themeColor.listContentTextColor,
+        font: $font(17),
+        borderColor: $color("clear"),
+        insets: $insets(12, 20, 12, 20),
+        alwaysBounceVertical: true,
+        bgcolor: utils.themeColor.bgcolor,
+        tintColor: utils.getCache("themeColor"),
+        darkKeyboard: utils.themeColor.darkKeyboard,
+      },
+      layout: function (make, view) {
+        make.height.equalTo(view.super)
+        make.top.equalTo(view.prev.bottom)
+        make.centerX.equalTo(view.center)
+        make.left.right.inset(0)
+      },
+    }]
+  })
 }
 
 function setupUserCenterView(prevTitle) {

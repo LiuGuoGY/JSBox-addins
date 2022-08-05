@@ -205,7 +205,7 @@ function setupNotConnectView() {
                 tapped: function(sender) {
                     $ui.alert({
                         title: "无法连接的原因",
-                        message: "1. 请检查与 api.lncldglobal.com 的连通性；\n2. 请尝试关闭代理或者更换节点；",
+                        message: "1. 请检查与 " + utils.domain + " 的连通性；\n2. 请尝试关闭代理或者更换节点；",
                     });
                 }
             }

@@ -1635,13 +1635,13 @@ function setupUploadView(updateApp) {
                   if(myApp.previews[i].endsWith("png")) {
                     // $console.info($file.read(myApp.previews[i]).image);
                     // let pic = await api.TinyPng_uploadPic($file.read(myApp.previews[i]).image.png)
-                    let url = await api.catbox_uploadFile($file.read(myApp.previews[i]).image.png) //, "1.png"
+                    let url = await api.catbox_uploadFile($file.read(myApp.previews[i]).image.png, utils.getCache("Settings").catbox_userhash) //, "1.png"
                     if(url) {
                       arrays.push(url);
                     }
                   } else {
                     // let pic = await api.TinyPng_uploadPic($file.read(myApp.previews[i]).image.jpg(1.0))
-                    let url = await api.catbox_uploadFile($file.read(myApp.previews[i]).image.jpg(1.0)) //, "1.jpg"
+                    let url = await api.catbox_uploadFile($file.read(myApp.previews[i]).image.jpg(1.0), utils.getCache("Settings").catbox_userhash) //, "1.jpg"
                     if(url) {
                       arrays.push(url);
                     }
