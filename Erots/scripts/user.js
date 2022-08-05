@@ -208,12 +208,18 @@ async function requireUser() {
     },
   })
   $console.info(resp);
-  saveUser(resp.data)
+  updateUser(resp.data);
   return resp.data
 }
 
 function saveUser(data) {
   $cache.set("loginUser", data)
+}
+
+function updateUser(data) {
+  for(let key in data) {
+    getLoginUser()[key] = data[key];
+  }
 }
 
 function getLoginUser() {

@@ -665,6 +665,10 @@ async function setupManageMyAppsView(isAdmin) {
   let appViewItems = []
   for(let i = 0; i < myApps.length; i++) {
     let buttonText = (myApps[i].onStore)?"上架中":"下架中";
+    let subtitile = (myApps[i].subtitle != "") ? myApps[i].subtitle : myApps[i].appCate;
+    if(isAdmin) {
+      subtitile = myApps[i].author;
+    }
     appViewItems.push({
       type: "view",
       props: {
@@ -683,7 +687,7 @@ async function setupManageMyAppsView(isAdmin) {
           make.height.equalTo(80)
           make.center.equalTo(view.super)
         },
-        views: [ui.genAppShowView(myApps[i].appIcon, myApps[i].appName, (myApps[i].subtitle != "") ? myApps[i].subtitle : myApps[i].appCate, buttonText, function(buttonView) {
+        views: [ui.genAppShowView(myApps[i].appIcon, myApps[i].appName, subtitile, buttonText, function(buttonView) {
           buttonView.userInteractionEnabled = false
           buttonView.title = ""
           buttonView.updateLayout(function (make, view) {
@@ -800,7 +804,7 @@ async function setupManageMyAppsView(isAdmin) {
         $app.keyboardToolbarEnabled = false
       }
     },
-    views: [ui.genPageHeader("个人", "我的应用"), {
+    views: [ui.genPageHeader("个人", isAdmin?"所有应用":"我的应用"), {
       type: "list",
       props: {
         style: 0,
