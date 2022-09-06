@@ -1563,7 +1563,7 @@ function setupUploadView(updateApp) {
             
             //上传脚本文件
             let file = $file.read(myApp.file);
-            let fileUrl = await api.uploadFile(file, myApp.appName, myApp.file, $("myProgressText"));
+            let fileUrl = await api.catbox_uploadFile(file, utils.getCache("Settings").catbox_userhash, $("myProgressText"));
             if(fileUrl) {
               if($("myProgress")) {
                 $("myProgress").locations = [0.0, 0.3, 0.3]
@@ -1614,7 +1614,7 @@ function setupUploadView(updateApp) {
               } else {
                 pic = await api.TinyPng_uploadPic($file.read(myApp.appIcon).image.jpg(1.0))
               }
-              myApp.appIcon = await api.bomb_uploadPic(pic, myApp.appName, isPng);
+              myApp.appIcon = await api.catbox_uploadFile(pic, utils.getCache("Settings").catbox_userhash);
             }
 
             if($("myProgress")) {
