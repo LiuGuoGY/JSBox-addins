@@ -46,7 +46,7 @@ async function show() {
                     lists.push({
                         type: "text",
                         props: {
-                            text: data[i].name,
+                            text: data[i].title,
                             font: $font(15),
                             lineLimit: lineLimit,
                             frame: {
@@ -206,7 +206,7 @@ async function show() {
                         props: {
                             alignment: $widget.verticalAlignment.leading,
                             spacing: 10,
-                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].name) + "&url=" + encodeURI(data[i].url),
+                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].title) + "&url=" + "https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
                         },
                         views: [
                             {
@@ -221,7 +221,7 @@ async function show() {
                             {
                                 type: "text",
                                 props: {
-                                    text: data[i].name,
+                                    text: data[i].title,
                                     font: $font(15),
 
                                     frame: {
@@ -271,7 +271,7 @@ async function show() {
                 }
             } else {
                 let lists = [];
-                for (let i = 0; i < data.length; i++) {
+                for (let i = 0; i < 10; i++) { //仅展示10条
                     let tintColor = $color("gray");
                     switch (i) {
                         case 0: tintColor = $color("#E74C3C"); break;
@@ -284,7 +284,7 @@ async function show() {
                         props: {
                             alignment: $widget.verticalAlignment.leading,
                             spacing: 10,
-                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].name) + "&url=" + encodeURI(data[i].url),
+                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].title) + "&url=" + "https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
                         },
                         views: [
                             {
@@ -299,7 +299,7 @@ async function show() {
                             {
                                 type: "text",
                                 props: {
-                                    text: data[i].name,
+                                    text: data[i].title,
                                     font: $font(15),
                                     frame: {
                                         alignment: $widget.alignment.leading,
@@ -356,9 +356,9 @@ async function fetchWeiboHotData() {
 
     let weiboHotData = await request.getWeiboHot();
 
-    if (weiboHotData && weiboHotData.data == 200 && weiboHotData.list) {
+    if (weiboHotData) {
         utils.setCache("hotData", weiboHotData.list);
-        return weiboHotData.list;
+        return weiboHotData.data;
     } else {
         return data;
     }

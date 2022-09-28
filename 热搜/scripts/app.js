@@ -166,7 +166,7 @@ function setupWebView(title, url) {
           }
 
           /*关闭搜索栏*/
-          .ntop-nav[data-v-bf3ded56] {
+          .ntop-nav {
             display: none;
           }
 
@@ -199,9 +199,6 @@ function setupWebView(title, url) {
             }
             .m-panel {
               border-color: ${systemGray5};
-              background: #000;
-            }
-            .ntop-nav[data-v-bf3ded56] {
               background: #000;
             }
             .m-top-nav {
@@ -333,7 +330,7 @@ function setupWebView(title, url) {
             }
 
             /* 评论列表 */
-            .comment-content[data-v-36b85f94] {
+            .comment-content {
               background-color: #000 !important;
             }
             .lite-msg, .lite-page-list {
@@ -473,7 +470,7 @@ async function show() {
   if (weiboHotData) {
     hotData = weiboHotData;
   }
-  let len = hotData.list.length;
+  let len = hotData.data.length;
   let listData = []
   for (let i = 0; i < len; i++) {
     let tintColor = $color("gray");
@@ -489,11 +486,11 @@ async function show() {
         tintColor: tintColor,
       },
       text: {
-        text: hotData.list[i].name,
-        info: hotData.list[i].url
+        text: hotData.data[i].title,
+        info: "https://s.weibo.com/weibo?q=" + encodeURIComponent(hotData.data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
       },
       hot: {
-        text: shortNumber(hotData.list[i].hot),
+        text: shortNumber(hotData.data[i].number),
       }
     })
   }
@@ -524,6 +521,12 @@ async function show() {
             make.top.inset(0)
           }
         }]
+      },
+      footer: {
+        type: "view",
+        props: {
+          height: 80,
+        },
       },
       template: {
         props: {

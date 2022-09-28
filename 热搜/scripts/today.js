@@ -77,9 +77,9 @@ async function show() {
     let nowTime = new Date().getTime()
     if (nowTime - utils.getCache("lastRequestTime", 0) > 60000) {
         let weiboHotData = await request.getWeiboHot();
-        let len = weiboHotData.list.length;
+        let len = weiboHotData.data.length;
         let listData = [];
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < 10; i++) {
             let tintColor = $color("gray");
             switch (i) {
                 case 0: tintColor = $color("#E74C3C"); break;
@@ -88,14 +88,14 @@ async function show() {
                 default: break;
             }
             listData.push({
-                order: {
-                    symbol: (i + 1) + ".circle.fill",
-                    tintColor: tintColor,
-                },
-                text: {
-                    text: weiboHotData.list[i].name,
-                    info: weiboHotData.list[i].url,
-                }
+              order: {
+                symbol: (i + 1) + ".circle.fill",
+                tintColor: tintColor,
+              },
+              text: {
+                text: weiboHotData.data[i].title,
+                info: "https://s.weibo.com/weibo?q=" + encodeURIComponent(weiboHotData.data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
+              },
             })
         }
         $("list").data = listData;
