@@ -465,35 +465,8 @@ async function show() {
   //测试
   //setupWebView("", "https://m.weibo.cn/search?containerid=231522type%3D1%26q%3D%23%E6%97%A5%E6%9C%AC%E7%96%91%E4%BC%BC%E5%87%BA%E7%8E%B0%E9%A6%96%E4%BE%8B%E5%84%BF%E7%AB%A5%E4%B8%8D%E6%98%8E%E5%8E%9F%E5%9B%A0%E6%80%A5%E6%80%A7%E8%82%9D%E7%82%8E%E7%97%85%E4%BE%8B%23");
   
-  let hotData = []
   let weiboHotData = await request.getWeiboHot();
-  if (weiboHotData) {
-    hotData = weiboHotData;
-  }
-  let len = hotData.data.length;
-  let listData = []
-  for (let i = 0; i < len; i++) {
-    let tintColor = $color("gray");
-    switch (i) {
-      case 0: tintColor = $color("#E74C3C"); break;
-      case 1: tintColor = $color("#E67E22"); break;
-      case 2: tintColor = $color("#F1C40F"); break;
-      default: break;
-    }
-    listData.push({
-      order: {
-        symbol: (i + 1) + ".circle.fill",
-        tintColor: tintColor,
-      },
-      text: {
-        text: hotData.data[i].title,
-        info: "https://s.weibo.com/weibo?q=" + encodeURIComponent(hotData.data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
-      },
-      hot: {
-        text: shortNumber(hotData.data[i].number),
-      }
-    })
-  }
+  let listData = solveWeiboHotData(weiboHotData.data);
   $("main").add({
     type: "list",
     props: {
@@ -591,9 +564,8 @@ async function show() {
   $("spinner").stop();
 }
 
-async function updateWeiboHotData() {
-  let hotData = await request.getWeiboHot();
-  let len = hotData.list.length;
+function solveWeiboHotData(data) {
+  let len = data.length;
   let listData = []
   for (let i = 0; i < len; i++) {
     let tintColor = $color("gray");
@@ -609,16 +581,21 @@ async function updateWeiboHotData() {
         tintColor: tintColor,
       },
       text: {
-        text: hotData.list[i].name,
-        info: hotData.list[i].url
+        text: data[i].title,
+        info: "https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
       },
       hot: {
-        text: shortNumber(hotData.list[i].hot),
+        text: shortNumber(data[i].number),
       }
     })
   }
+  return listData;
+}
+
+async function updateWeiboHotData() {
+  let hotData = await request.getWeiboHot();
   if ($("list")) {
-    $("list").data = listData;
+    $("list").data = solveWeiboHotData(hotData.data);
   }
 }
 
