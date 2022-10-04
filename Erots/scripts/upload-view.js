@@ -1557,45 +1557,91 @@ function setupUploadView(updateApp) {
             if($("myProgress")) {
               $("myProgress").locations = [0.0, 0.1, 0.1]
             }
-            if($("myProgressText")) {
-              $("myProgressText").text = "上传应用文件..."
-            }
             
-            //上传脚本文件
+            
+            //上传脚本文件服务器
+            if($("myProgressText")) {
+              $("myProgressText").text = "上传应用文件至服务器1..."
+            }
+            let successTimes = 0;
             let file = $file.read(myApp.file);
-            let fileUrl = await api.catbox_uploadFile(file, utils.getCache("Settings").catbox_userhash, $("myProgressText"));
+            let fileUrl = await api.uploadFile(file, myApp.appName, myApp.file, (progress)=>{
+              if($("myProgressText")) {
+                $("myProgressText").text = "上传服务器1应用文件... (" + progress + "%)"
+              }
+            });
             if(fileUrl) {
               if($("myProgress")) {
                 $("myProgress").locations = [0.0, 0.3, 0.3]
               }
               if($("myProgressText")) {
-                $("myProgressText").text = "检验文件中..."
+                $("myProgressText").text = "服务器1检验文件中..."
               }
               let resp2 = await $http.download({
                 url: fileUrl,
                 showsProgress: false,
                 progress: function(bytesWritten, totalBytes) {
                   var percentage = (bytesWritten * 1.0 / totalBytes * 100).toFixed(1)
-                  $("myProgressText").text = "检验文件中... (" + percentage + "%)"
+                  $("myProgressText").text = "服务器1检验文件中... (" + percentage + "%)"
                 },
               })
               $console.info(resp2.data.info.size);
               $console.info(file.info.size);
               if(resp2.data && resp2.data.info && resp2.data.info.size == file.info.size) {
                 myApp.file = fileUrl;
+                successTimes ++;
               } else {
                 if($("myProgressParent")) {
-                  $("myProgressParent").remove()
-                  ui.showToastView($("uploadItemView"), utils.mColor.red, "文件校验失败，请联系开发者");
-                  return 0;
+                  ui.showToastView($("uploadItemView"), utils.mColor.red, "服务器1文件校验失败");
                 }
               }
             } else {
               if($("myProgressParent")) {
-                $("myProgressParent").remove()
-                ui.showToastView($("uploadItemView"), utils.mColor.red, "上传失败，服务器异常，请稍后尝试");
-                return 0;
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "上传失败，服务器1异常");
               }
+            }
+
+            //上传脚本文件服务器2
+            if($("myProgressText")) {
+              $("myProgressText").text = "上传应用文件至服务器2..."
+            }
+            let fileUrl2 = await api.catbox_uploadFile(file, utils.getCache("Settings").catbox_userhash, $("myProgressText"));
+            if(fileUrl2) {
+              if($("myProgress")) {
+                $("myProgress").locations = [0.0, 0.3, 0.3]
+              }
+              if($("myProgressText")) {
+                $("myProgressText").text = "服务器2检验文件中..."
+              }
+              let resp2 = await $http.download({
+                url: fileUrl2,
+                showsProgress: false,
+                progress: function(bytesWritten, totalBytes) {
+                  var percentage = (bytesWritten * 1.0 / totalBytes * 100).toFixed(1)
+                  $("myProgressText").text = "服务器2检验文件中... (" + percentage + "%)"
+                },
+              })
+              $console.info(resp2.data.info.size);
+              $console.info(file.info.size);
+              if(resp2.data && resp2.data.info && resp2.data.info.size == file.info.size) {
+                myApp.file2 = fileUrl2;
+                successTimes ++;
+              } else {
+                if($("myProgressParent")) {
+                  ui.showToastView($("uploadItemView"), utils.mColor.red, "服务器2文件校验失败");
+                }
+              }
+            } else {
+              if($("myProgressParent")) {
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "上传失败，服务器2异常");
+              }
+            }
+            if(successTimes <= 0) {
+              if($("myProgressParent")) {
+                $("myProgressParent").remove();
+                ui.showToastView($("uploadItemView"), utils.mColor.red, "上传全部失败，服务器全部异常，请联系开发者");
+              }
+              return 0;
             }
 
             if($("myProgress")) {
@@ -1614,7 +1660,7 @@ function setupUploadView(updateApp) {
               } else {
                 pic = await api.TinyPng_uploadPic($file.read(myApp.appIcon).image.jpg(1.0))
               }
-              myApp.appIcon = await api.catbox_uploadFile(pic, utils.getCache("Settings").catbox_userhash);
+              myApp.appIcon = await api.bomb_uploadPic(pic, myApp.appName, isPng);
             }
 
             if($("myProgress")) {

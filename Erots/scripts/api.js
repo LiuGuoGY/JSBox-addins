@@ -2,7 +2,8 @@ let utils = require('scripts/utils')
 
 const bombAppId = "51353b0736965d8a9c38869b93fdb038";
 const bombAppKey = "3161f0aa9e52d81f816556e63f255758";
-const tinyKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"]
+const tinyKeys = ["qp8G6bzstArEa3sLgYa90TImDLmJ511r", "N2Ceias4LsCo0DzW2OaYPvTWMifcJZ6t"];
+const bmobUrl = "http://bmobapi.liuguogy.com/2/files/"
 
 async function uploadSM(data, fileName) {
   let resp = await $http.upload({
@@ -251,7 +252,7 @@ async function bomb_uploadPic(file, fileName, isPng) {
   let contentType = isPng?"image/png":"image/jpeg"
   let bodyContent = file
   let resp = await $http.post({
-    url: "https://api.bmob.cn/2/files/" + $text.URLEncode(fileName) + suffix,
+    url: bmobUrl + $text.URLEncode(fileName) + suffix,
     header: {
       "X-Bmob-Application-Id": bombAppId,
       "X-Bmob-REST-API-Key": bombAppKey,
@@ -265,19 +266,22 @@ async function bomb_uploadPic(file, fileName, isPng) {
   return resp.data.url;
 }
 
-async function bomb_uploadFile(file, fileName, filePath, view) {
+async function bomb_uploadFile(file, fileName, filePath, progressHandler) {
   let isJsFile = filePath.endsWith(".js");
   let suffix = isJsFile?".js":".zip";
   let contentType = isJsFile?"text/plain":"application/x-zip-compressed"
   let bodyContent = file
   let resp = await $http.post({
-    url: "https://api2.bmob.cn/2/files/" + encodeURIComponent(fileName) + suffix,
+    url: bmobUrl + encodeURIComponent(fileName) + suffix,
     header: {
       "X-Bmob-Application-Id": bombAppId,
       "X-Bmob-REST-API-Key": bombAppKey,
       "Content-Type": contentType,
     },
     body: bodyContent,
+    progress: function(percentage) {
+      progressHandler(percentage);
+    },
   })
   $console.info(resp);
   if(resp.error)

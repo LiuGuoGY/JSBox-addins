@@ -468,7 +468,6 @@ function genAppItemShowView(app) {
     attributedText: utils.setLineSpacing(app.instruction, 5),
     align: $align.left,
   }, $device.info.screen.width - 40)
-  let coverOffset = (app.cover && app.cover != "")?140:0;
   return {
     type: "view",
     props: {
@@ -498,14 +497,14 @@ function genAppItemShowView(app) {
       },
       events: {
         didScroll: function(sender) {
-          if (sender.contentOffset.y >= 10 + topOffset + coverOffset && $("itemPageHeaderBlur").alpha == 0) {
+          if (sender.contentOffset.y >= 10 + topOffset && $("itemPageHeaderBlur").alpha == 0) {
             $ui.animate({
               duration: 0.2,
               animation: function () {
                 $("itemPageHeaderBlur").alpha = 1;
               },
             });
-          } else if (sender.contentOffset.y < 10 + topOffset + coverOffset && $("itemPageHeaderBlur").alpha == 1) {
+          } else if (sender.contentOffset.y < 10 + topOffset && $("itemPageHeaderBlur").alpha == 1) {
             $ui.animate({
               duration: 0.2,
               animation: function () {
@@ -513,14 +512,14 @@ function genAppItemShowView(app) {
               },
             });
           }
-          if (sender.contentOffset.y >= 110 + topOffset + coverOffset && $("itemPageHeaderTitle").alpha == 0) {
+          if (sender.contentOffset.y >= 110 + topOffset && $("itemPageHeaderTitle").alpha == 0) {
             $ui.animate({
               duration: 0.2,
               animation: function () {
                 $("itemPageHeaderTitle").alpha = 1;
               },
             });
-          } else if (sender.contentOffset.y < 110 + topOffset + coverOffset && $("itemPageHeaderTitle").alpha == 1) {
+          } else if (sender.contentOffset.y < 110 + topOffset && $("itemPageHeaderTitle").alpha == 1) {
             $ui.animate({
               duration: 0.2,
               animation: function () {
@@ -531,26 +530,10 @@ function genAppItemShowView(app) {
         }
       },
       views: [{
-        type: "image",
-        props: {
-          src: (app.cover)?app.cover:"",
-          contentMode: $contentMode.scaleAspectFill,
-        },
-        layout: function (make, view) {
-          make.left.right.inset(0)
-          make.top.inset(0)
-          if(app.cover && app.cover != "") {
-            make.height.equalTo(200)
-          } else {
-            make.height.equalTo(60)
-          }
-          make.centerX.equalTo(view.super)
-        },
-      },{
         type: "view",
         layout: function (make, view) {
           make.left.right.inset(20)
-          make.top.equalTo(view.prev.bottom).inset(10)
+          make.top.inset(70)
           make.height.equalTo(120)
           make.centerX.equalTo(view.super)
         },
@@ -1831,7 +1814,7 @@ function genCommentReplyView(app, position) {
         borderColor: $color("clear"),
       },
       layout: function (make, view) {
-        make.right.inset(0)
+        make.right.inset(10)
         make.height.equalTo(view.super)
       },
       events: {
@@ -2283,7 +2266,7 @@ function genAppReportFaultView(app) {
         borderColor: $color("clear"),
       },
       layout: function (make, view) {
-        make.right.inset(0)
+        make.right.inset(10)
         make.height.equalTo(view.super)
       },
       events: {

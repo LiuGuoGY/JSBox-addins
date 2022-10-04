@@ -1413,6 +1413,19 @@ function genAppListItemView(apps, sourceViewName, isFill) { //isFill 是指左�
           make.center.equalTo(view.super)
         },
         views: [ui.genAppShowView(apps[i].appIcon, apps[i].appName, (apps[i].subtitle != "") ? apps[i].subtitle : apps[i].appCate, buttonText, function (buttonView) {
+          function install() {
+            appUtils.installApp(apps[i], buttonView, ()=>{
+              $device.taptic(2);
+              $delay(0.2, () => { $device.taptic(2); })
+              $app.notify({
+                name: "refreshAll",
+                object: { 
+                  except: sourceViewName,
+                  appItem: true, 
+                }
+              });
+            })
+          }
           if (!apps[i].needUpdate && apps[i].haveInstalled) {
             $addin.run(apps[i].appName)
           } else {
@@ -1425,17 +1438,7 @@ function genAppListItemView(apps, sourceViewName, isFill) { //isFill 是指左�
                     title: "安装",
                     // style: $alertActionType.destructive, // Optional
                     handler: function() {
-                      appUtils.installApp(apps[i], buttonView, ()=>{
-                        $device.taptic(2);
-                        $delay(0.2, () => { $device.taptic(2); })
-                        $app.notify({
-                          name: "refreshAll",
-                          object: { 
-                            except: sourceViewName,
-                            appItem: true, 
-                          }
-                        });
-                      })
+                      install();
                     }
                   },
                   {
@@ -1447,17 +1450,7 @@ function genAppListItemView(apps, sourceViewName, isFill) { //isFill 是指左�
                 ]
               });
             } else {
-              appUtils.installApp(apps[i], buttonView, ()=>{
-                $device.taptic(2);
-                $delay(0.2, () => { $device.taptic(2); })
-                $app.notify({
-                  name: "refreshAll",
-                  object: { 
-                    except: sourceViewName,
-                    appItem: true, 
-                  }
-                });
-              })
+              install();
             }
           }
         }, {

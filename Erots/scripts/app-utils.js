@@ -50,58 +50,105 @@ function installApp(app, buttonView, handler) {
           }
         }
       });
-      $http.download({
-        url: app.file,
-        showsProgress: false,
-        progress: function(bytesWritten, totalBytes) {
-          var percentage = bytesWritten * 1.0 / totalBytes;
-          progress = 0.2 + percentage * 0.8;
-        },
-        handler: function (resp) {
-          let json = utils.getSearchJson(app.appIcon)
-          let icon_code = (json.code) ? json.code : "124";
-          utils.saveAddin(app.appName, "icon_" + icon_code + ".png", resp.data);
-          if (app.needUpdate && app.haveInstalled) {
-            utils.addUpdateApps(app.objectId);
-          }
-          let cloudApps = utils.getCache("cloudApps", [])
-          for (let j = 0; j < cloudApps.length; j++) {
-            if (cloudApps[j].objectId == app.objectId) {
-              cloudApps[j].haveInstalled = true
-              cloudApps[j].needUpdate = false
-            }
-          }
-          $cache.set("cloudApps", cloudApps);
-          $ui.animate({
-            duration: 0.1,
-            animation: function () {
-              buttonView.bgcolor = utils.themeColor.appButtonBgColor
+      let success = false;
+      let times = 0;
+      function downloadFile(url) {
+        if (url && url != "") {
+          $http.download({
+            url: url,
+            showsProgress: false,
+            progress: function (bytesWritten, totalBytes) {
+              var percentage = bytesWritten * 1.0 / totalBytes;
+              let progress_value = 0.2 + percentage * 0.8;
+              if(progress_value > progress) {
+                progress = progress_value;
+              }
             },
-            completion: function () {
-              buttonView.get("canvas").remove()
-              buttonView.updateLayout(function (make, view) {
-                make.size.equalTo($size(75, 30))
-              })
-              $delay(0.1, ()=>{
-                buttonView.title = "打开"
-              })
-              $ui.animate({
-                duration: 0.2,
-                animation: function () {
-                  buttonView.relayout()
-                },
-                completion: function () {
-                  api.uploadDownloadTimes(app.objectId)
-                  app.needUpdate = false
-                  app.haveInstalled = true
-                  buttonView.userInteractionEnabled = true
-                  handler();
+            handler: function (resp) {
+              console.log(resp);
+              if (success) {
+                return;
+              }
+              times++;
+              if (!resp.error && resp.status && resp.status == 1) {
+                success = true;
+                console.log(url);
+                let json = utils.getSearchJson(app.appIcon)
+                let icon_code = (json.code) ? json.code : "124";
+                utils.saveAddin(app.appName, "icon_" + icon_code + ".png", resp.data);
+                if (app.needUpdate && app.haveInstalled) {
+                  utils.addUpdateApps(app.objectId);
                 }
-              })
+                let cloudApps = utils.getCache("cloudApps", [])
+                for (let j = 0; j < cloudApps.length; j++) {
+                  if (cloudApps[j].objectId == app.objectId) {
+                    cloudApps[j].haveInstalled = true
+                    cloudApps[j].needUpdate = false
+                  }
+                }
+                $cache.set("cloudApps", cloudApps);
+                $ui.animate({
+                  duration: 0.1,
+                  animation: function () {
+                    buttonView.bgcolor = utils.themeColor.appButtonBgColor
+                  },
+                  completion: function () {
+                    buttonView.get("canvas").remove()
+                    buttonView.updateLayout(function (make, view) {
+                      make.size.equalTo($size(75, 30))
+                    })
+                    $delay(0.1, () => {
+                      buttonView.title = "打开"
+                    })
+                    $ui.animate({
+                      duration: 0.2,
+                      animation: function () {
+                        buttonView.relayout()
+                      },
+                      completion: function () {
+                        api.uploadDownloadTimes(app.objectId)
+                        app.needUpdate = false
+                        app.haveInstalled = true
+                        buttonView.userInteractionEnabled = true
+                        handler();
+                      }
+                    })
+                  }
+                })
+              } else {
+                if (times >= 2) {
+                  $ui.animate({
+                    duration: 0.1,
+                    animation: function () {
+                      buttonView.bgcolor = utils.themeColor.appButtonBgColor
+                    },
+                    completion: function () {
+                      buttonView.get("canvas").remove()
+                      buttonView.updateLayout(function (make, view) {
+                        make.size.equalTo($size(75, 30))
+                      })
+                      $delay(0.1, () => {
+                        buttonView.title = "获取"
+                      })
+                      $ui.animate({
+                        duration: 0.2,
+                        animation: function () {
+                          buttonView.relayout()
+                        },
+                        completion: function () {
+                          buttonView.userInteractionEnabled = true;
+                        }
+                      })
+                    }
+                  })
+                }
+              }
             }
-          })
+          });
         }
-      })
+      }
+      downloadFile(app.file);
+      downloadFile(app.file2);
     }
   })
 }
