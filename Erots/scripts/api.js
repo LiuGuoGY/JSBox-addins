@@ -243,8 +243,11 @@ async function catbox_uploadFile(file, userhash, view) {
       }
     },
   });
-  $console.info(resp);
-  return resp.data
+  if(resp.error) {
+    $console.info(resp.error);
+    return null;
+  }
+  return resp.data;
 }
 
 async function bomb_uploadPic(file, fileName, isPng) {
@@ -261,8 +264,10 @@ async function bomb_uploadPic(file, fileName, isPng) {
     body: bodyContent,
   })
   $console.info(resp);
-  if(resp.error)
+  if(resp.error) {
     $console.info(resp.error);
+    return null;
+  }
   return resp.data.url;
 }
 
