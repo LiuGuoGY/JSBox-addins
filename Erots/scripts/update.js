@@ -43,27 +43,32 @@ function getLatestBuild(now) {
     showsProgress: false,
     timeout: 5,
     handler: function(resp) {
+      console.log(resp.data);
       if(resp.data && !isAppJsonGet) {
-        isAppJsonGet = true;
-        let appJson = JSON.parse(resp.data.string)
-        let updateBuild = appJson.build
-        let updateVersion = appJson.version
-        let force = appJson.force
-        if(parseInt(updateBuild) > parseInt(getCurBuild())) {
-          $http.download({
-            url: giteeUrl.updateDetailUrl,
-            showsProgress: false,
-            timeout: 5,
-            handler: function(resp) {
-              if(resp.data) {
-                sureToUpdate(updateVersion, resp.data.string, force)
+        try {
+          let appJson = JSON.parse(resp.data.string)
+          let updateBuild = appJson.build
+          let updateVersion = appJson.version
+          let force = appJson.force
+          isAppJsonGet = true;
+          if(parseInt(updateBuild) > parseInt(getCurBuild())) {
+            $http.download({
+              url: giteeUrl.updateDetailUrl,
+              showsProgress: false,
+              timeout: 5,
+              handler: function(resp) {
+                if(resp.data) {
+                  sureToUpdate(updateVersion, resp.data.string, force)
+                }
               }
+            })
+          } else {
+            if(now && $("mainView")) {
+              ui.showToastView($("mainView"), utils.mColor.blue, "当前版本已是最新")
             }
-          })
-        } else {
-          if(now && $("mainView")) {
-            ui.showToastView($("mainView"), utils.mColor.blue, "当前版本已是最新")
           }
+        } catch(e) {
+          isAppJsonGet = false;
         }
       }
     }
@@ -180,6 +185,9 @@ function updateScript() {
         data: box,
         handler: success => {
           if (success) {
+            if($("myProgress")) {
+              $("myProgress").locations = [0.0, 100, 100]
+            }
             $cache.remove("lastCT")
             $device.taptic(2)
             $delay(0.2, function() {
