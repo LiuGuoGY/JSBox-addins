@@ -1663,11 +1663,11 @@ function genMeView() {
           items: [{
             type: "arrow",
             async: false,
-            title: "更新日志",
-            symbol: "safari.fill",
+            title: "云服务状态",
+            symbol: "icloud.circle.fill",
             iconColor: utils.systemColor("blue"),
             handler: () => {
-              setupWebView("更新日志", "https://www.liuguogy.com/archives/jsbox-store-developing.html");
+              setupWebView("云服务状态", "https://stats.uptimerobot.com/72803SzlY2");
             }
             },{
               type: "arrow",
@@ -1679,16 +1679,6 @@ function genMeView() {
                 setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins/");
                 // $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/");
               }
-          },{
-            type: "arrow",
-            async: false,
-            title: "交流讨论",
-            symbol: "message.fill",
-            iconColor: utils.systemColor("red"),
-            handler: () => {
-              setupWebView("Discussion", "https://github.com/LiuGuoGY/JSBox-addins/discussions");
-              // $app.openURL("https://github.com/LiuGuoGY/JSBox-addins/discussions");
-            }
           },{
               type: "arrow",
               async: false,
