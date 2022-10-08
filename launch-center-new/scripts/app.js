@@ -368,7 +368,7 @@ function genRowsView(reorder, columns) {
       didLongPress: function(sender, indexPath, data) {
         $device.taptic(2)
         $ui.menu({
-          items: ["复制URL", "保存到桌面", "编辑"],
+          items: ["复制URL", "保存到桌面", "编辑", "删除"],
           handler: function(title, idx) {
             if(idx == 0) {
               $clipboard.text = utils.getCache("localItems", [])[indexPath.row].url
@@ -377,6 +377,9 @@ function genRowsView(reorder, columns) {
               $system.makeIcon({ title: utils.getCache("localItems", [])[indexPath.row].title.text, url: utils.getCache("localItems", [])[indexPath.row].url, icon: $("rowsShow").cell(indexPath).get("icon").image })
             } else if(idx == 2) {
               setupUploadView("edit", data.title.text, data.icon.src, data.url, data.descript, undefined, indexPath)
+            } else if(idx == 3) {
+              $("rowsShow").delete(indexPath)
+              $cache.set("localItems", $("rowsShow").data)
             }
           }
         })
@@ -2561,7 +2564,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                       }
                     })
                   } else if(idx == 1){
-                    if($clipboard.text.indexOf("://apps.apple.com/") >= 0) {
+                    if($clipboard.text && $clipboard.text.indexOf("://apps.apple.com/") >= 0) {
                       let appUrl = $clipboard.link;
                       let appIdNumber = appUrl.match(/\/id(\S*)/)[1]
                       let country = appUrl.match(/com\/(\S*)\/app/)[1]
@@ -2952,7 +2955,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           make.top.equalTo(view.prev.bottom).inset(30)
         },
         events: {
-          tapped: function(sender) {
+          tapped: async function(sender) {
             if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
               ui.showToastView($("uploadItemView"), mColor.red, "请补全信息")
             } else if ($("verifyButton").info == false && action != "edit") {
@@ -2964,6 +2967,8 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
               if(descriptText.length == 0) {
                 descriptText = undefined
               }
+              sender.userInteractionEnabled = false;
+              sender.titleColor = $color("gray");
               if(action == "upload") {
                 if(haveExisted($("schemeInput").text)) {
                   $ui.alert({
@@ -2986,7 +2991,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                   updateToLocal($("rowsShow"), indexPath, $("titleInput").text, icon, $("schemeInput").text, descriptText)
                   $ui.pop()
                 } else {
-                  uploadSM(action, $("chooseButton").info, undefined, indexPath, fileName)
+                  uploadSM(action, $("chooseButton").info, undefined, indexPath, fileName);
                 }
               }
             }
@@ -4652,8 +4657,9 @@ async function uploadSM(action, pic, objectId, indexPath, fileName) {
     }
   } else {
     if (typeof(pic) != "undefined") {
-      ui.showToastView($("uploadItemView"), mColor.blue, "请稍候")
+      ui.showToastView($("uploadItemView"), mColor.blue, "请稍候，正在上传中...")
       let url = await catbox_uploadFile(pic);
+      console.log(url);
       updateToLocal($("rowsShow"), indexPath, $("titleInput").text, url, $("schemeInput").text, $("descriptInput").text)
       $ui.pop()
     }
