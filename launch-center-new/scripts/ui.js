@@ -6,7 +6,7 @@ function showToastView(view, color, text, duration) {
   let topInset = view.frame.height / 10
   let textSize = $text.sizeThatFits({
     text: text,
-    width: view.width,
+    width: view.frame.width,
     font: $font(15),
   })
   if(duration === undefined) {
@@ -114,21 +114,23 @@ function showToastView(view, color, text, duration) {
 }
 
 function genTemplate() {
+  let blurColor = (utils.getThemeMode() == "dark")?$rgba(255, 255, 255, 0.1):$rgba(255, 255, 255, 0.3);
+  let textColor = (utils.getThemeMode() == "dark")?$color("white"):$color("black");
   let showMode = utils.getCache("showMode", 0)
   let template = []
   if(showMode == 0) {
     template.push({
-      type: "blur",
+      type: "view",
       props: {
         radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-        style: 1 // 0 ~ 5 调整背景的颜色程度
+        bgcolor: blurColor,
       },
       layout: $layout.fill,
     },{
       type: "label",
       props: {
         id: "title",
-        textColor: $color("black"),
+        textColor: textColor,
         bgcolor: $color("clear"),
         font: $font(13),
         align: $align.center,
@@ -155,10 +157,10 @@ function genTemplate() {
     })
   } else if(showMode == 1) {
     template.push({
-      type: "blur",
+      type: "view",
       props: {
         circular: true,
-        style: 1, // 0 ~ 5 调整背景的颜色程度
+        bgcolor: blurColor,
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
@@ -183,7 +185,7 @@ function genTemplate() {
       type: "label",
       props: {
         id: "title",
-        textColor: $color("black"),
+        textColor: textColor,
         bgcolor: $color("clear"),
         font: $font(13),
         align: $align.center,
@@ -218,10 +220,10 @@ function genTemplate() {
     })
   } else if(showMode == 3) {
     template.push({
-      type: "blur",
+      type: "view",
       props: {
         radius: 5, //调整边框是什么形状的如:方形圆形什么的
-        style: 1 // 0 ~ 5 调整背景的颜色程度
+        bgcolor: blurColor,
       },
       layout: function(make, view) {
         make.center.equalTo(view.super)
@@ -245,7 +247,7 @@ function genTemplate() {
       type: "label",
       props: {
         id: "title",
-        textColor: $color("black"),
+        textColor: textColor,
         bgcolor: $color("clear"),
         font: $font(13),
         align: $align.center,

@@ -3,6 +3,7 @@ let utils = require('scripts/utils')
 let update = require('scripts/update')
 let sync = require('scripts/sync')
 let welcome = require('scripts/welcome')
+let ios14widget = require('scripts/ios14widget')
 
 let appId = "wCpHV9SrijfUPmcGvhUrpClI-gzGzoHsz"
 let appKey = "CHcCPcIWDClxvpQ0f0v5tkMN"
@@ -42,7 +43,6 @@ function main() {
   requireCloudConfig()
   setupMainView()
   solveQuery()
-  update.checkUpdate()
   welcome.show($("mainView"))
 }
 
@@ -250,12 +250,6 @@ function solveQuery() {
     switch(query.q) {
       case "show":
       showOneItem(query.objectId);break;
-      default:break;
-    }
-    switch(query.action) {
-      case "update": {
-        update.checkUpdate(true);
-      };break;
       default:break;
     }
   }
@@ -1200,6 +1194,29 @@ function genSettingView() {
         }
       },
       {
+        type: "button",
+        props: {
+          icon: $icon("008", $color("white"), $size(14, 14)),
+          bgcolor: $color("lightGray"),
+          borderWidth: 1,
+          borderColor: $color("lightGray"),
+          circular: true,
+        },
+        layout: function(make, view) {
+          make.left.equalTo(view.prev.right).inset(10)
+          make.centerY.equalTo(view.super)
+          make.size.equalTo($size(14,14))
+        },
+        events: {
+          tapped: function(sender) {
+            $ui.alert({
+              title: "iCloud 自动同步",
+              message: "受限于 iCloud 的不稳定性，所以本脚本的同步功能仅在本地收藏无启动器时才会从云端拉取，目的是防止不小心删除脚本，或者是新设备安装脚本时的启动器同步。",
+            });
+          }
+        }
+      },
+      {
         type: "view",
         layout: function(make, view) {
           make.right.inset(15)
@@ -1242,6 +1259,9 @@ function genSettingView() {
             $("tabSetColumnsDetail").text = sender.value
             $cache.set("columns", sender.value)
             refreshLocalView()
+            if($app.info.build >= 1127) {
+              $widget.reloadTimeline();
+            }
           }
         }
       },
@@ -1290,6 +1310,9 @@ function genSettingView() {
                 $("tabShowModeDetail").text = getShowModeText()
                 $("rowsShow").remove()
                 $("rowsShowParent").add(genRowsView($("reorderButton").info, utils.getCache("columns")))
+                if($app.info.build >= 1127) {
+                  $widget.reloadTimeline();
+                }
               }
             })
           }
@@ -1386,6 +1409,60 @@ function genSettingView() {
     layout: $layout.fill
   }
 
+  const tabShowIos14Widget = {
+    type: "view",
+    views: [{
+        type: "label",
+        props: {
+          text: "桌面小组件",
+        },
+        layout: function(make, view) {
+          make.left.inset(15)
+          make.centerY.equalTo(view.super)
+        }
+      },
+      {
+        type: "view",
+        layout: function(make, view) {
+          make.right.inset(15)
+          make.centerY.equalTo(view.super)
+          make.height.equalTo(view.super)
+          make.width.equalTo(view.super).multipliedBy(0.5)
+        },
+        events: {
+          tapped: function(sender) {
+            ios14widget.show()
+          }
+        },
+        views: [{
+          type: "image",
+          props: {
+            src: "assets/enter.png",
+            bgcolor: $color("clear"),
+          },
+          layout: function(make, view) {
+            make.right.inset(0)
+            make.centerY.equalTo(view.super)
+            make.size.equalTo($size(8, 18))
+          },
+        }, {
+          type: "label",
+          props: {
+            text: "预览",
+            align: $align.right,
+          },
+          layout: function(make, view) {
+            make.right.equalTo(view.prev.left).inset(5)
+            make.centerY.equalTo(view.super)
+            make.height.equalTo(view.super)
+          },
+        },]
+      },
+      
+    ],
+    layout: $layout.fill
+  }
+
   const tabBackgroundTranparent = {
     type: "view",
     props: {
@@ -1416,43 +1493,6 @@ function genSettingView() {
         events: {
           changed: function(sender) {
               $cache.set("backgroundTranparent", sender.on)
-          }
-        }
-      }
-    ],
-    layout: $layout.fill
-  }
-
-  const tabPullToClose = {
-    type: "view",
-    props: {
-
-    },
-    views: [{
-        type: "label",
-        props: {
-          id: "tabPullToClose",
-          text: "下拉关闭",
-        },
-        layout: function(make, view) {
-          make.left.inset(15)
-          make.centerY.equalTo(view.super)
-        }
-      },
-      {
-        type: "switch",
-        props: {
-          id: "tabPullToCloseSwitch",
-          onColor: $color(mColor.iosGreen),
-          on: utils.getCache("pullToClose"),
-        },
-        layout: function(make, view) {
-          make.right.inset(15)
-          make.centerY.equalTo(view.super)
-        },
-        events: {
-          changed: function(sender) {
-            $cache.set("pullToClose", sender.on)
           }
         }
       }
@@ -1533,20 +1573,9 @@ function genSettingView() {
 
   let array = [{
     templateTitle: {
-      text : "更新日志",
-    },
-    url: "https://www.liuguogy.com/archives/launch-center.html",
-  },
-  {
-    templateTitle: {
       text : "GitHub",
     },
     // url: "https://github.com/LiuGuoGY/JSBox-addins/tree/master/launch-center-new",
-  },
-  {
-    templateTitle: {
-      text : "检查更新",
-    },
   },
   {
     templateTitle: {
@@ -1607,7 +1636,7 @@ function genSettingView() {
           views: [{
             type: "label",
             props: {
-              text: "Version " + update.getCurVersion() + " (Build " + update.getCurDate() + "-" + update.getCurBuild() + ") © Linger.",
+              text: "Created By Linger.",
               textColor: $color("#BBBBBB"),
               align: $align.center,
               font: $font(13)
@@ -1620,11 +1649,11 @@ function genSettingView() {
         },
         data: [{
           title: "功能",
-          rows: [tabSetColumns, tabShowMode, tabOpenBroswer],
+          rows: [tabSetColumns, tabShowMode, tabOpenBroswer, tabShowIos14Widget],
         },
         {
           title: "效果",
-          rows: [tabBackgroundTranparent, tabPullToClose, tabStaticHeight],
+          rows: [tabBackgroundTranparent, tabStaticHeight],
         },
         {
           title: "关于",
@@ -1654,7 +1683,7 @@ function genSettingView() {
             setupWebView(titleText, title.url)
           } else {
             switch(indexPath.row) {
-              case 1: setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins", function() {
+              case 0: setupWebView("GitHub", "https://github.com/LiuGuoGY/JSBox-addins", function() {
                 $ui.menu({
                   items: ["用 Grape 打开", "用 PPHub 打开", "用其他应用打开"],
                   handler: function(title, idx) {
@@ -1670,13 +1699,11 @@ function genSettingView() {
                   }
                 });
               });break;
-              case 2: update.checkUpdate(true)
+              case 1: setupFeedBack()
                 break
-              case 3: setupFeedBack()
+              case 2: setupReward()
                 break
-              case 4: setupReward()
-                break
-              case 5: share("http://t.cn/E7kdTkv")
+              case 3: share("https://liuguogy.github.io/JSBox-addins/?q=show&objectId=5cea510ca673f500680c5c40")
                 break
               default:
             }
@@ -1735,6 +1762,7 @@ function genSettingView() {
             align: $align.center,
             bgcolor: $color("clear"),
             textColor: $color("black"),
+            hidden: true,
           },
           layout: $layout.fill,
         },],
@@ -2533,9 +2561,9 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                       }
                     })
                   } else if(idx == 1){
-                    if($clipboard.text && ($clipboard.text.indexOf("://itunes.apple.com/") >= 0 || ($clipboard.items[1] && $clipboard.items[1]["public.url"].string.indexOf("://itunes.apple.com/") >= 0))) {
-                      let appUrl = ($clipboard.text.indexOf("://itunes.apple.com/") >= 0)?$clipboard.link:$clipboard.items[1]["public.url"].string;
-                      let appIdNumber = appUrl.match(/\/id(\S*)\?/)[1]
+                    if($clipboard.text.indexOf("://apps.apple.com/") >= 0) {
+                      let appUrl = $clipboard.link;
+                      let appIdNumber = appUrl.match(/\/id(\S*)/)[1]
                       let country = appUrl.match(/com\/(\S*)\/app/)[1]
                       $http.get({
                         url: "https://itunes.apple.com/lookup?id=" + appIdNumber + "&country=" + country,
@@ -4141,7 +4169,7 @@ function showInfoView(superView, data) {
                 utils.myOpenUrl(data.url)
                 resumeAction = 3
                 $thread.background({
-                  delay: 0.1,
+                  delay: 0.3,
                   handler: function() {
                     if(resumeAction == 3) {
                       resumeAction = 0
@@ -4212,7 +4240,7 @@ function showInfoView(superView, data) {
 function requireRewardNumber() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Reward?count=1&limit=0",
+    url: "https://avoscloud.com/1.1/classes/Reward?count=1&limit=0",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -4239,7 +4267,7 @@ function showOneItem(objectId) {
   }
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items/" + objectId + "?keys=-deviceToken,-size,-createdAt",
+    url: "https://avoscloud.com/1.1/classes/Items/" + objectId + "?keys=-deviceToken,-size,-createdAt",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -4272,7 +4300,7 @@ function showOneItem(objectId) {
 function requireItems() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt&keys=-deviceToken,-size",
+    url: "https://avoscloud.com/1.1/classes/Items?limit=1000&order=-updatedAt&keys=-deviceToken,-size",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -4320,7 +4348,7 @@ function requireItems() {
 }
 
 function requireMyItems() {
-  let url = "https://wcphv9sr.api.lncld.net/1.1/classes/Items?limit=1000&order=-updatedAt&where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+  let url = "https://avoscloud.com/1.1/classes/Items?limit=1000&order=-updatedAt&where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
   $http.request({
     method: "GET",
     url: encodeURI(url),
@@ -4413,7 +4441,7 @@ function deleteCloudItem(objectId) {
   }
   $http.request({
     method: "DELETE",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Items/" + objectId,
+    url: "https://avoscloud.com/1.1/classes/Items/" + objectId,
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -4453,7 +4481,7 @@ function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
   if(deviceToken != undefined) {
     json.deviceToken = deviceToken
   }
-  let objectUrl = "https://wcphv9sr.api.lncld.net/1.1/classes/Items".concat((objectId == undefined)?(""):("/" + objectId))
+  let objectUrl = "https://avoscloud.com/1.1/classes/Items".concat((objectId == undefined)?(""):("/" + objectId))
   $http.request({
     method: (objectId == undefined)?"POST":"PUT",
     url: objectUrl,
@@ -4505,7 +4533,7 @@ function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
 function requireReward() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/classes/Reward",
+    url: "https://avoscloud.com/1.1/classes/Reward",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -4536,7 +4564,7 @@ function requireReward() {
 function requireInstallNumbers() {
   $http.request({
     method: "GET",
-    url: "https://wcphv9sr.api.lncld.net/1.1/installations?count=1&limit=0",
+    url: "https://avoscloud.com/1.1/installations?count=1&limit=0",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -4576,7 +4604,7 @@ function uploadInstall() {
     $cache.set("installInfo", info)
     $http.request({
       method: "POST",
-      url: "https://pwqyveon.api.lncld.net/1.1/installations",
+      url: "https://avoscloud.com/1.1/installations",
       timeout: 5,
       header: {
         "Content-Type": "application/json",
@@ -4612,36 +4640,36 @@ function cutIcon(image) {
   return snapshot
 }
 
-function uploadSM(action, pic, objectId, indexPath, fileName) {
+async function uploadSM(action, pic, objectId, indexPath, fileName) {
   if(action != "edit") {
     if (typeof(pic) != "undefined") {
-      $http.upload({
-        url: "https://sm.ms/api/upload",
-        files: [{ "data": pic, "name": "smfile", "filename": fileName}],
-        handler: function(resp) {
-          var data = resp.data.data
-          let deviceId = undefined
-          if(action != "renew") {
-            deviceId = $objc("FCUUID").invoke("uuidForDevice").rawValue()
-          }
-          uploadItem($("title").text, data.url, $("schemeInput").text, $("descriptInput").text, data.size, deviceId, objectId)
-        }
-      })
+      let url = await catbox_uploadFile(pic);
+      let deviceId = undefined
+      if(action != "renew") {
+        deviceId = $objc("FCUUID").invoke("uuidForDevice").rawValue()
+      }
+      uploadItem($("title").text, url, $("schemeInput").text, $("descriptInput").text, 0, deviceId, objectId)
     }
   } else {
     if (typeof(pic) != "undefined") {
       ui.showToastView($("uploadItemView"), mColor.blue, "请稍候")
-      $http.upload({
-        url: "https://sm.ms/api/upload",
-        files: [{ "data": pic, "name": "smfile", "filename": fileName}],
-        handler: function(resp) {
-          var data = resp.data.data
-          updateToLocal($("rowsShow"), indexPath, $("titleInput").text, data.url, $("schemeInput").text, $("descriptInput").text)
-          $ui.pop()
-        }
-      })
+      let url = await catbox_uploadFile(pic);
+      updateToLocal($("rowsShow"), indexPath, $("titleInput").text, url, $("schemeInput").text, $("descriptInput").text)
+      $ui.pop()
     }
   }
+}
+
+async function catbox_uploadFile(file) {
+  let resp = await $http.upload({
+    url: "https://catbox.moe/user/api.php",
+    files: [{ "data": file, "name": "fileToUpload"}],
+    form: {
+      "reqtype": "fileupload"
+    },
+  });
+  $console.info(resp);
+  return resp.data
 }
 
 function uploadTinyPng(action, pic, objectId, indexPath, fileName) {
@@ -4683,7 +4711,7 @@ function randomValue(object) {
 function sendFeedBack(text, contact) {
   $http.request({
     method: "POST",
-    url: "https://wcphv9sr.api.lncld.net/1.1/feedback",
+    url: "https://avoscloud.com/1.1/feedback",
     timeout: 5,
     header: {
       "Content-Type": "application/json",
@@ -4726,7 +4754,7 @@ function checkBlackList() {
   if(needCheckBlackList) {
     $cache.remove("haveBanned")
     $cache.set("lastCheckBlackTime", nowTime)
-    let url = "https://wcphv9sr.api.lncld.net/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
+    let url = "https://avoscloud.com/1.1/classes/list?where={\"deviceToken\":\"" + $objc("FCUUID").invoke("uuidForDevice").rawValue() + "\"}"
     $http.request({
       method: "GET",
       url: encodeURI(url),

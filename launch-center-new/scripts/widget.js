@@ -3,7 +3,7 @@ let utils = require('scripts/utils')
 let update = require('scripts/update')
 
 function setupWidgetView() {
-  let items = ui.addButtonMore(utils.getCache("localItems", []))
+  let items = utils.getCache("localItems", [])
   let columns = utils.getCache("columns")
   let itemHeight = utils.getWidgetHeight() * 5 / 11
   let view = {
@@ -31,7 +31,7 @@ function setupWidgetView() {
     }]
   }
   $ui.render(view)
-  update.easyCheckUpdate()
+  // update.easyCheckUpdate()
 
   if(!utils.getCache("widgetHeight")) {
     $delay(0.2, function() {

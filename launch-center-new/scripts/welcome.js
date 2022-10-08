@@ -62,8 +62,6 @@ function playEmoji(view, duration) {
           completion: function() {
             if($(id)) {
               $(id).remove()
-            } else {
-              $console.info(id);
             }
           }
         })

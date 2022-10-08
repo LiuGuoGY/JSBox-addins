@@ -92,6 +92,14 @@ function randomValue(object) {
   return object[x]
 }
 
+function getThemeMode() {
+  if ($device.isDarkMode && $app.env == $env.today) {
+    return "dark"
+  } else {
+    return "light";
+  }
+}
+
 module.exports = {
   getCache: getCache,
   randomValue: randomValue,
@@ -99,4 +107,5 @@ module.exports = {
   colors: colors,
   myOpenUrl: myOpenUrl,
   getWidgetHeight: getWidgetHeight,
+  getThemeMode: getThemeMode,
 }
