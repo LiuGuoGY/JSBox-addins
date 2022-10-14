@@ -7,6 +7,10 @@
 
 更多介绍请移步：[**Linger 博客**](https://www.liuguogy.com)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=LiuGuoGY/JSBox-addins&type=Date)](https://star-history.com/#LiuGuoGY/JSBox-addins&Date)
+
 ### Erots - 脚本商店 Erots
 
 #### 功能
