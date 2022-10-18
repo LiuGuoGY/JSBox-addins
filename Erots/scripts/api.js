@@ -535,6 +535,19 @@ async function requireApps() {
   return resp.data;
 }
 
+async function requireServerState() {
+  let resp = await $http.request({
+    method: "GET",
+    url: "https://stats.uptimerobot.com/api/getMonitorList/72803SzlY2",
+    timeout: 5,
+  })
+  if(resp.data && resp.data.status == "ok") {
+    console.log(resp.data);
+    return resp.data;
+  }
+  return null;
+}
+
 module.exports = {
   uploadSM: uploadSM,
   uploadSMV2: uploadSMV2,
@@ -557,5 +570,6 @@ module.exports = {
   requireApps: requireApps,
   getExploreApps: getExploreApps,
   uploadErotsSetting: uploadErotsSetting,
+  requireServerState: requireServerState,
 }
 
