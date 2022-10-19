@@ -5,7 +5,8 @@
     "idleTimerDisabled" : false,
     "autoKeyboardEnabled" : false,
     "keyboardToolbarEnabled" : false,
-    "rotateDisabled" : false
+    "rotateDisabled" : false,
+    "theme": "auto"
   },
   "info" : {
     "version" : "1.0",

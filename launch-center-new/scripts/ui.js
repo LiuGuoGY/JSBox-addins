@@ -30,7 +30,7 @@ function showToastView(view, color, text, duration) {
     views: [{
       type: "blur",
       props: {
-        style: 1, // 0 ~ 5
+        style: $blurStyle.ultraThinMaterial, // 0 ~ 5
         radius: 5,
       },
       layout: $layout.fill
@@ -58,7 +58,7 @@ function showToastView(view, color, text, duration) {
         props: {
           text: text,
           bgcolor: $color("clear"),
-          textColor: $color(utils.mColor.black),
+          textColor: $color(utils.mColor.black, "white"),
           font: $font(15),
         },
         layout: function(make, view) {
@@ -343,7 +343,7 @@ function addProgressView(superView) {
     type: "blur",
     props: {
       id: "myProgressParent",
-      style: 1,
+      style: $blurStyle.ultraThinMaterial,
       alpha: 0,
     },
     layout: $layout.fill,

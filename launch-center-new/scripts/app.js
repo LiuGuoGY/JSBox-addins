@@ -143,7 +143,7 @@ function setupMainView() {
         views: [{
           type: "blur",
           props: {
-            style: 1,
+            style: $blurStyle.ultraThinMaterial,
           },
           layout: $layout.fill,
         },{
@@ -315,7 +315,7 @@ function genRowsView(reorder, columns) {
             id: "localListHeaderTitle",
             text: "本地",
             font: $font("Avenir-Black", 35),
-            textColor: $color("black"),
+            textColor: $color("black", "white"),
             align: $align.center,
           },
           layout: function(make, view) {
@@ -385,13 +385,28 @@ function genRowsView(reorder, columns) {
         })
       },
       didScroll: function(sender) {
+        if (sender.contentOffset.y >= 5 + topOffset && $("localPageHeaderBlur").alpha == 0) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function () {
+              $("localPageHeaderBlur").alpha = 1;
+            },
+          });
+        } else if (sender.contentOffset.y < 5 + topOffset && $("localPageHeaderBlur").alpha == 1) {
+          $ui.animate({
+            duration: 0.2,
+            animation: function () {
+              $("localPageHeaderBlur").alpha = 0;
+            },
+          });
+        }
         if(sender.contentOffset.y >= 40 + topOffset && $("localPageHeaderLabel").hidden === true) {
           $("localPageHeaderLabel").hidden = false
           $("localPageHeaderBlur").bgcolor = $color("clear")
           $("localListHeaderTitle").hidden = true
         } else if(sender.contentOffset.y < 40 + topOffset && $("localPageHeaderLabel").hidden === false) {
           $("localPageHeaderLabel").hidden = true
-          $("localPageHeaderBlur").bgcolor = $color("white")
+          $("localPageHeaderBlur").bgcolor = $color("white", "black")
           $("localListHeaderTitle").hidden = false
         }else if(sender.contentOffset.y < topOffset) {
           let size = 35 - sender.contentOffset.y * 0.04
@@ -442,8 +457,9 @@ function genLocalView() {
         type: "blur",
         props: {
           id: "localPageHeaderBlur",
-          style: 1, // 0 ~ 5
-          bgcolor: $color("white"),
+          style: $blurStyle.ultraThinMaterial, // 0 ~ 5
+          bgcolor: $color("white", "black"),
+          alpha: 0,
         },
         layout: $layout.fill,
       },{
@@ -460,7 +476,7 @@ function genLocalView() {
             font: $font("bold", 17),
             align: $align.center,
             bgcolor: $color("clear"),
-            textColor: $color("black"),
+            textColor: $color("black", "white"),
             hidden: true,
           },
           layout: $layout.fill,
@@ -605,7 +621,7 @@ function genCloudView() {
     {
       type: "view",
       props: {
-        bgcolor: $rgba(100, 100, 100, 0.1),
+        bgcolor: $color("#F9F9F9", "#202020"),
         radius: 10,
       },
       layout: function(make, view) {
@@ -617,7 +633,7 @@ function genCloudView() {
       views: [{
         type: "image",
         props: {
-          icon: $icon("023", $rgba(100, 100, 100, 0.4), $size(15, 15)),
+          icon: $icon("023", $color("lightGray", "gray"), $size(15, 15)),
           bgcolor: $color("clear"),
         },
         layout: function(make, view) {
@@ -632,6 +648,7 @@ function genCloudView() {
           returnKeyType: 6,
           userInteractionEnabled: false,
           tintColor: $color(mColor.theme),
+          bgcolor: $color("clear"),
         },
         layout: function(make, view) {
           make.centerY.equalTo(view.super)
@@ -715,7 +732,7 @@ function genCloudView() {
           type: "label",
           props: {
             id: "search_hint",
-            text: "Launcher",
+            text: "共" + utils.getCache("cloudItems", []).length + "个启动器",
             align: $align.center,
             textColor: $rgba(100, 100, 100, 0.4),
             hidden: false,
@@ -759,7 +776,7 @@ function genCloudView() {
               type: "label",
               props: {
                 id: "title",
-                textColor: $color("black"),
+                textColor: $color("black", "white"),
                 bgcolor: $color("clear"),
                 font: $font(13),
                 align: $align.center,
@@ -797,7 +814,7 @@ function genCloudView() {
                 id: "cloudListHeaderTitle",
                 text: "云库",
                 font: $font("Avenir-Black", 35),
-                textColor: $color("black"),
+                textColor: $color("black", "white"),
                 align: $align.center,
               },
               layout: function(make, view) {
@@ -823,7 +840,7 @@ function genCloudView() {
                   id: "searchBarParent",
                   clipsToBounds: true,
                   userInteractionEnabled: true,
-                  bgcolor: $color("white"),
+                  bgcolor: $color("white", "black"),
                 },
                 layout: function(make, view) {
                   make.left.inset(15)
@@ -856,29 +873,60 @@ function genCloudView() {
           make.centerX.equalTo(view.super)
         },
         events: {
+          ready: function(sender) {
+            requireItems()
+          },
           didSelect(sender, indexPath, data) {
             $("search_input").blur()
             showInfoView($("mainView"), data, indexPath)
           },
           didLongPress: function(sender, indexPath, data) {
             $device.taptic(2)
-            $ui.menu({
-              items: ["收藏到本地"],
-              handler: function(title, idx) {
-                if(idx == 0) {
-                  addToLocal(data, true)
+            if(!data.icon.src || !data.icon.src.startsWith("http")) {
+              $ui.menu({
+                items: ["图标错误需要编辑", "收藏到本地"],
+                handler: function(title, idx) {
+                  if(idx == 0) {
+                    setupUploadView("renew", data.title.text, null, data.url, data.descript, data.objectId)
+                  } else if(idx == 1) {
+                    addToLocal(data, true)
+                  }
                 }
-              }
-            })
+              })
+            } else {
+              $ui.menu({
+                items: ["收藏到本地"],
+                handler: function(title, idx) {
+                  if(idx == 0) {
+                    addToLocal(data, true)
+                  }
+                }
+              })
+            }
           },
           didScroll: function(sender) {
+            if (sender.contentOffset.y >= 5 + topOffset && $("cloudPageHeaderBlur").alpha == 0) {
+              $ui.animate({
+                duration: 0.2,
+                animation: function () {
+                  $("cloudPageHeaderBlur").alpha = 1;
+                },
+              });
+            } else if (sender.contentOffset.y < 5 + topOffset && $("cloudPageHeaderBlur").alpha == 1) {
+              $ui.animate({
+                duration: 0.2,
+                animation: function () {
+                  $("cloudPageHeaderBlur").alpha = 0;
+                },
+              });
+            }
             if(sender.contentOffset.y >= 40 + topOffset && $("cloudPageHeaderLabel").hidden === true) {
               $("cloudPageHeaderLabel").hidden = false
               $("cloudPageHeaderBlur").bgcolor = $color("clear")
               $("cloudListHeaderTitle").hidden = true
             } else if(sender.contentOffset.y < 40 + topOffset && $("cloudPageHeaderLabel").hidden === false) {
               $("cloudPageHeaderLabel").hidden = true
-              $("cloudPageHeaderBlur").bgcolor = $color("white")
+              $("cloudPageHeaderBlur").bgcolor = $color("white", "black")
               $("cloudListHeaderTitle").hidden = false
             }else if(sender.contentOffset.y < topOffset) {
               let size = 35 - sender.contentOffset.y * 0.04
@@ -911,8 +959,9 @@ function genCloudView() {
           type: "blur",
           props: {
             id: "cloudPageHeaderBlur",
-            style: 1, // 0 ~ 5
-            bgcolor: $color("white"),
+            style: $blurStyle.ultraThinMaterial, // 0 ~ 5
+            bgcolor: $color("white", "black"),
+            alpha: 0,
           },
           layout: $layout.fill,
         },{
@@ -929,7 +978,7 @@ function genCloudView() {
               font: $font("bold", 17),
               align: $align.center,
               bgcolor: $color("clear"),
-              textColor: $color("black"),
+              textColor: $color("black", "white"),
               hidden: true,
             },
             layout: $layout.fill,
@@ -979,8 +1028,6 @@ function genCloudView() {
       },]
     },],
   }
-  
-  requireItems()
   return view
 }
 
@@ -1026,7 +1073,7 @@ function searchItems(text) {
                   font: $font(17),
                   align: $align.center,
                   bgcolor: $color("clear"),
-                  textColor: $color("black"),
+                  textColor: $color("black", "white"),
                 },
                 layout: function(make, view) {
                   make.width.equalTo(view.super)
@@ -1199,7 +1246,7 @@ function genSettingView() {
       {
         type: "button",
         props: {
-          icon: $icon("008", $color("white"), $size(14, 14)),
+          icon: $icon("008", $color("white", "black"), $size(14, 14)),
           bgcolor: $color("lightGray"),
           borderWidth: 1,
           borderColor: $color("lightGray"),
@@ -1250,7 +1297,7 @@ function genSettingView() {
         props: {
           max: 10,
           min: 2,
-          tintColor: $color("black"),
+          tintColor: $color("black", "white"),
           value: utils.getCache("columns"),
         },
         layout: function(make, view) {
@@ -1521,7 +1568,7 @@ function genSettingView() {
       },{
         type: "button",
         props: {
-          icon: $icon("008", $color("white"), $size(14, 14)),
+          icon: $icon("008", $color("white", "black"), $size(14, 14)),
           bgcolor: $color("lightGray"),
           borderWidth: 1,
           borderColor: $color("lightGray"),
@@ -1621,7 +1668,7 @@ function genSettingView() {
               id: "settingListHeaderTitle",
               text: "设置",
               font: $font("Avenir-Black", 35),
-              textColor: $color("black"),
+              textColor: $color("black", "white"),
               align: $align.center,
             },
             layout: function(make, view) {
@@ -1713,13 +1760,28 @@ function genSettingView() {
           }
         },
         didScroll: function(sender) {
+          if (sender.contentOffset.y >= 5 + topOffset && $("settingPageHeaderBlur").alpha == 0) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function () {
+                $("settingPageHeaderBlur").alpha = 1;
+              },
+            });
+          } else if (sender.contentOffset.y < 5 + topOffset && $("settingPageHeaderBlur").alpha == 1) {
+            $ui.animate({
+              duration: 0.2,
+              animation: function () {
+                $("settingPageHeaderBlur").alpha = 0;
+              },
+            });
+          }
           if(sender.contentOffset.y >= 40 + topOffset && $("settingPageHeaderLabel").hidden === true) {
             $("settingPageHeaderLabel").hidden = false
             $("settingPageHeaderBlur").bgcolor = $color("clear")
             $("settingListHeaderTitle").hidden = true
           } else if(sender.contentOffset.y < 40 + topOffset && $("settingPageHeaderLabel").hidden === false) {
             $("settingPageHeaderLabel").hidden = true
-            $("settingPageHeaderBlur").bgcolor = $color("white")
+            $("settingPageHeaderBlur").bgcolor = $color("white", "black")
             $("settingListHeaderTitle").hidden = false
           }else if(sender.contentOffset.y < topOffset) {
             let size = 35 - sender.contentOffset.y * 0.04
@@ -1746,8 +1808,9 @@ function genSettingView() {
         type: "blur",
         props: {
           id: "settingPageHeaderBlur",
-          style: 1, // 0 ~ 5
-          bgcolor: $color("white"),
+          style: $blurStyle.ultraThinMaterial, // 0 ~ 5
+          bgcolor: $color("white", "black"),
+          alpha: 0,
         },
         layout: $layout.fill,
       },{
@@ -1764,7 +1827,7 @@ function genSettingView() {
             font: $font("bold", 17),
             align: $align.center,
             bgcolor: $color("clear"),
-            textColor: $color("black"),
+            textColor: $color("black", "white"),
             hidden: true,
           },
           layout: $layout.fill,
@@ -1843,8 +1906,8 @@ function setupWebView(title, url, moreHandler) {
           text: title,
           font: $font("bold", 17),
           align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
+          bgcolor: $color("white", "black"),
+          textColor: $color("black", "white"),
         },
         layout: $layout.fill,
       },{
@@ -1955,8 +2018,8 @@ function setupUploadHelpView() {
           text: "帮助",
           font: $font("bold", 17),
           align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
+          bgcolor: $color("white", "black"),
+          textColor: $color("black", "white"),
         },
         layout: $layout.fill,
       },{
@@ -2066,8 +2129,8 @@ function setupMyUpView() {
           text: "我的上传",
           font: $font("bold", 17),
           align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
+          bgcolor: $color("white", "black"),
+          textColor: $color("black", "white"),
         },
         layout: $layout.fill,
       },{
@@ -2140,7 +2203,7 @@ function setupMyUpView() {
             type: "label",
             props: {
               id: "title",
-              textColor: $color("black"),
+              textColor: $color("black", "white"),
               bgcolor: $color("clear"),
               font: $font(13),
               align: $align.center,
@@ -2225,9 +2288,10 @@ function setupMyUpView() {
 }
 
 function setupUploadView(action, title, icon, url, descript, objectId, indexPath) {
+  $app.autoKeyboardEnabled = true;
+  $app.keyboardToolbarEnabled = true;
   let fileName = ""
   let isIconRevised = false
-  let showOptional = descript?true:false
   let actionText = "  开始上传  "
   switch(action) {
     case "upload": actionText = "  开始上传  "
@@ -2243,6 +2307,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       title: "Upload Launcher",
       navBarHidden: true,
       statusBarStyle: 0,
+      bgcolor: $color("white", "black"),
     },
     events: {
       appeared: function(sender) {
@@ -2275,8 +2340,8 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           text: (action === "upload")?"上传":"编辑",
           font: $font("bold", 17),
           align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
+          bgcolor: $color("white", "black"),
+          textColor: $color("black", "white"),
         },
         layout: $layout.fill,
       },{
@@ -2362,7 +2427,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       type: "scroll",
       props: {
         id: "uploadScroll",
-        bgcolor: $color("#F9F9F8"),
+        bgcolor: $color("#F9F9F8", "#202020"),
         showsVerticalIndicator: true,
       },
       layout: function(make, view) {
@@ -2393,7 +2458,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         type: "view",
         props: {
           id: "preView",
-          bgcolor: $color("white"),
+          bgcolor: $color("white", "black"),
         },
         layout: function(make, view) {
           make.left.right.inset(0)
@@ -2409,18 +2474,10 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
             make.center.equalTo(view.super)
           },
           views: [{
-            type: "blur",
-            props: {
-              radius: 2.0, //调整边框是什么形状的如:方形圆形什么的
-              style: 1 // 0 ~ 5 调整背景的颜色程度
-            },
-            layout: $layout.fill
-          },
-          {
             type: "label",
             props: {
               id: "title",
-              textColor: $color("black"),
+              textColor: $color("black", "white"),
               bgcolor: $color("clear"),
               font: $font(13),
               text: (title == undefined)?"未定义":title,
@@ -2467,7 +2524,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: $color("white", "black"),
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -2493,7 +2550,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
           type: "input",
           props: {
             id: "titleInput",
-            bgcolor: $color("white"),
+            bgcolor: $color("white", "black"),
             radius: 0,
             text: (title == undefined)?"":title,
           },
@@ -2516,7 +2573,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: $color("white", "black"),
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -2654,7 +2711,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: $color("white", "black"),
           clipsToBounds: true,
         },
         layout: function(make, view) {
@@ -2689,7 +2746,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
             props: {
               id: "schemeInput",
               text: (url == undefined)?"":url,
-              bgcolor: $color("white"),
+              bgcolor: $color("white", "black"),
               radius: 0,
               type: $kbType.url,
             },
@@ -2730,7 +2787,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
       {
         type: "view",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: $color("white", "black"),
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
@@ -2805,77 +2862,24 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         }
       },
       {
-        type: "button",
-        props: {
-          title: descript?"隐藏可选参数":"显示可选参数",
-          font: $font("bold", 14),
-          titleColor: $color(mColor.gray),
-          bgcolor: $color("clear"),
-        },
-        layout: function(make, view) {
-          make.top.equalTo(view.prev.bottom).inset(20)
-          make.height.equalTo(20)
-          make.left.inset(10)
-        },
-        events: {
-          tapped: function(sender) {
-            if(!showOptional) {
-              sender.title = "隐藏可选参数"
-              showOptional = true
-              $("optionalView").hidden = false
-              $("optionalView").updateLayout(function(make) {
-                make.height.equalTo(180)
-              })
-              $ui.animate({
-                duration: 0.4,
-                damping: 0.8,
-                animation: function() {
-                  $("optionalView").relayout()
-                },
-                completion: function() {
-                  resize()
-                }
-              })
-            } else {
-              sender.title = "显示可选参数"
-              showOptional = false
-              $("uploadScroll").scrollToOffset($point(0, 0))
-              $("optionalView").hidden = true
-              $("optionalView").updateLayout(function(make) {
-                make.height.equalTo(0)
-              })
-              $ui.animate({
-                duration: 0.35,
-                animation: function() {
-                  $("optionalView").relayout()
-                },
-                completion: function() {
-                  resize()
-                }
-              })
-            }
-          }
-        }
-      },
-      {
         type: "view",
         props: {
           id: "optionalView",
           bgcolor: $color("clear"),
           clipsToBounds: true,
-          hidden: descript?false:true,
+          hidden: false,
         },
         layout: function(make, view) {
           make.centerX.equalTo(view.super)
           make.top.equalTo(view.prev.bottom).inset(20)
-          make.height.equalTo(descript?180:0)
+          make.height.equalTo(180)
           make.left.right.inset(0)
         },
         views: [{
           type: "label",
           props: {
             id: "descriptLabel",
-            text: "启动器说明",
+            text: "启动器说明（可选）",
             align: $align.left,
             font: $font(16),
           },
@@ -2887,7 +2891,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         },{
           type: "view",
           props: {
-            bgcolor: $color("white"),
+            bgcolor: $color("white", "black"),
           },
           layout: function(make, view) {
             make.centerX.equalTo(view.super)
@@ -2900,7 +2904,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
             props: {
               id: "descriptInput",
               text: (descript)?descript:"",
-              bgcolor: $color("white"),
+              bgcolor: $color("white", "black"),
               radius: 0,
               font: $font(15),
             },
@@ -2942,7 +2946,7 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         props: {
           id: "cloudButton",
           title: actionText,
-          bgcolor: $color("#F0F0F6"),
+          bgcolor: $color("#F0F0F0", "#101010"),
           titleColor: $color(mColor.theme),
           font: $font("bold", 16),
           radius: 12,
@@ -2956,10 +2960,12 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
         },
         events: {
           tapped: async function(sender) {
-            if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0 || $("chooseButton").info == undefined) {
+            if ($("titleInput").text.length == 0 || $("schemeInput").text.length == 0) {
               ui.showToastView($("uploadItemView"), mColor.red, "请补全信息")
             } else if ($("verifyButton").info == false && action != "edit") {
               ui.showToastView($("uploadItemView"), mColor.red, "请先通过验证")
+            } else if (!$("chooseButton").info) {
+              ui.showToastView($("uploadItemView"), mColor.red, "图片未选择")
             } else if ($("descriptInput").text.length > 80) {
               ui.showToastView($("uploadItemView"), mColor.red, "说明文字过长")
             } else {
@@ -3030,7 +3036,7 @@ function setUrlInputTool() {
     views: [{
       type: "blur",
       props: {
-        style: 5,
+        style: $blurStyle.chromeMaterial,
       },
       layout: $layout.fill
     },{
@@ -3062,7 +3068,7 @@ function setUrlInputTool() {
       views: [{
         type: "button",
         props: {
-          bgcolor: $color("white"),
+          bgcolor: $color("white", "black"),
           smoothRadius: 8,
         },
         layout: function(make, view) {
@@ -3088,7 +3094,7 @@ function setUrlInputTool() {
           type: "label",
           props: {
             text: "剪切板参数",
-            textColor: $color("black"),
+            textColor: $color("black", "white"),
             bgcolor: $color("clear"),
             font: $font(13),
             align: $align.center,
@@ -3250,8 +3256,8 @@ function setupReward() {
           text: "支持与赞赏",
           font: $font("bold", 17),
           align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
+          bgcolor: $color("white", "black"),
+          textColor: $color("black", "white"),
         },
         layout: $layout.fill,
       },{
@@ -3716,8 +3722,8 @@ function setupFeedBack(text) {
           text: "反馈建议",
           font: $font("bold", 17),
           align: $align.center,
-          bgcolor: $color("white"),
-          textColor: $color("black"),
+          bgcolor: $color("white", "black"),
+          textColor: $color("black", "white"),
         },
         layout: $layout.fill,
       },{
@@ -3847,7 +3853,7 @@ function setupFeedBack(text) {
               id: "feedbackContact",
               textColor: $color("#333333"),
               font: $font(15),
-              bgcolor: $color("white"),
+              bgcolor: $color("white", "black"),
               borderColor: $rgba(90, 90, 90, 0.6),
               borderWidth: 1,
               insets: $insets(5, 5, 5, 5),
@@ -3926,7 +3932,7 @@ function showInfoView(superView, data) {
       type: "view",
       props: {
         id: "windowView",
-        bgcolor: $color("#f6f6f6"),
+        bgcolor: $color("#f6f6f6", "#101010"),
       },
       layout: function(make, view) {
         make.height.equalTo(270)
@@ -4010,7 +4016,7 @@ function showInfoView(superView, data) {
           draw: function(view, ctx) {
             var width = view.frame.width
             var scale = $device.info.screen.scale
-            ctx.strokeColor = $color("#bbbbbb")
+            ctx.strokeColor = $color("#bbbbbb", "#555555")
             ctx.setLineWidth(1 / scale)
             ctx.moveToPoint(0, 0)
             ctx.addLineToPoint(width, 0)
@@ -4077,7 +4083,7 @@ function showInfoView(superView, data) {
           props: {
             text: data.title.text,
             font: $font("bold", 17),
-            textColor: $color("#555555"),
+            textColor: $color("#555555", "#E0E0E0"),
             align: $align.left,
           },
           layout: function(make, view) {
@@ -4124,7 +4130,7 @@ function showInfoView(superView, data) {
         props: {
           text: (data.descript)?data.descript:"暂无说明",
           font: $font(15),
-          textColor: $color("#555555"),
+          textColor: $color("#555555", "#E0E0E0"),
           bgcolor: $color("clear"),
           align: $align.left,
           lines: 0,
@@ -4302,8 +4308,9 @@ function showOneItem(objectId) {
   })
 }
 
-function requireItems() {
-  $http.request({
+async function requireItems() {
+  let view = $("rowsCloudShow")
+  let resp1 = await $http.request({
     method: "GET",
     url: "https://avoscloud.com/1.1/classes/Items?limit=1000&order=-updatedAt&keys=-deviceToken,-size",
     timeout: 5,
@@ -4312,44 +4319,61 @@ function requireItems() {
       "X-LC-Id": appId,
       "X-LC-Key": appKey,
     },
-    handler: function(resp) {
-      let view = $("rowsCloudShow")
-      let data = resp.data.results
-      if (data != undefined) {
-        let array = []
-        for (let i = 0; i < data.length; i++) {
-          array.push({
-            title: {
-              text: data[i].title
-            },
-            icon: {
-              src: data[i].icon
-            },
-            url: data[i].url,
-            descript: data[i].descript,
-            objectId: data[i].objectId,
-          })
-        }
-        view.data = array
-        view.endRefreshing()
-        let cloudItems = utils.getCache("cloudItems", [])
-        if(array.length > cloudItems.length) {
-          ui.showToastView($("mainView"), mColor.blue, "发现 " + (array.length - cloudItems.length) + " 个新启动器")
-        }
-        $cache.set("cloudItems", array)
-        if($("noSearchItemView")) {
-          $("noSearchItemView").remove()
-        }
-        $("search_input").text = ""
-        $("search_hint").hidden = false
-      } else if(data.length == 0){
-        view.endRefreshing()
-        ui.showToastView($("mainView"), mColor.red, "服务器开小差了，请稍后重试")
-      } else {
-        view.endRefreshing()
-      }
+  });
+  let data = resp1.data.results;
+  $console.info(data);
+  if(data.length >= 1000) {
+    let resp2 = await $http.request({
+      method: "GET",
+      url: "https://avoscloud.com/1.1/classes/Items?limit=1000&skip=1000&order=-updatedAt&keys=-deviceToken,-size",
+      timeout: 5,
+      header: {
+        "Content-Type": "application/json",
+        "X-LC-Id": appId,
+        "X-LC-Key": appKey,
+      },
+    });
+    $console.info(resp2.data.results);
+    if(resp2.data && resp2.data.results) {
+      data = data.concat(resp2.data.results);
     }
-  })
+  }
+  console.log(data.length);
+  if (data) {
+    let array = []
+    for (let i = 0; i < data.length; i++) {
+      array.push({
+        title: {
+          text: data[i].title
+        },
+        icon: {
+          src: (data[i].icon && data[i].icon.startsWith("http"))?data[i].icon:"assets/error.png",
+        },
+        url: data[i].url,
+        descript: data[i].descript,
+        objectId: data[i].objectId,
+      })
+    }
+    view.data = array
+    console.log(array.length);
+    view.endRefreshing()
+    let cloudItems = utils.getCache("cloudItems", [])
+    if(array.length > cloudItems.length) {
+      ui.showToastView($("mainView"), mColor.blue, "发现 " + (array.length - cloudItems.length) + " 个新启动器")
+    }
+    $cache.set("cloudItems", array)
+    if($("noSearchItemView")) {
+      $("noSearchItemView").remove()
+    }
+    $("search_input").text = "";
+    $("search_hint").text = "共" + array.length + "个启动器"
+    $("search_hint").hidden = false
+  } else if(data.length == 0){
+    view.endRefreshing()
+    ui.showToastView($("mainView"), mColor.red, "服务器开小差了，请稍后重试")
+  } else {
+    view.endRefreshing()
+  }
 }
 
 function requireMyItems() {
@@ -4400,7 +4424,7 @@ function requireMyItems() {
                   font: $font(17),
                   align: $align.center,
                   bgcolor: $color("clear"),
-                  textColor: $color("black"),
+                  textColor: $color("black", "white"),
                 },
                 layout: function(make, view) {
                   make.width.equalTo(view.super)
@@ -4412,7 +4436,7 @@ function requireMyItems() {
                 props: {
                   title: "我要上传",
                   font: $font(15),
-                  titleColor: $color("white"),
+                  titleColor: $color("white", "black"),
                   bgcolor: $color(mColor.theme),
                   radius: 3,
                 },
@@ -4453,8 +4477,8 @@ function deleteCloudItem(objectId) {
       "X-LC-Id": appId,
       "X-LC-Key": appKey,
     },
-    handler: function(resp) {
-      requireItems()
+    handler: async function(resp) {
+      await requireItems()
       $("rowsCloudShow").scrollToOffset($point(0, 0))
     }
   })
@@ -4497,11 +4521,11 @@ function uploadItem(title, icon, url, descript, size, deviceToken, objectId) {
       "X-LC-Key": appKey,
     },
     body: json,
-    handler: function(resp) {
+    handler: async function(resp) {
       $("cloudButton").info = {isfinish: true}
       let view = $("progress")
       ui.showToastView($("uploadItemView"), mColor.green, "上传成功")
-      requireItems()
+      await requireItems()
       $("rowsCloudShow").scrollToOffset($point(0, 0))
       requireMyItems()
       if(view != undefined) {
@@ -4648,7 +4672,8 @@ function cutIcon(image) {
 async function uploadSM(action, pic, objectId, indexPath, fileName) {
   if(action != "edit") {
     if (typeof(pic) != "undefined") {
-      let url = await catbox_uploadFile(pic);
+      let url = await bomb_uploadPic(pic, fileName);
+      console.log(url);
       let deviceId = undefined
       if(action != "renew") {
         deviceId = $objc("FCUUID").invoke("uuidForDevice").rawValue()
@@ -4658,7 +4683,7 @@ async function uploadSM(action, pic, objectId, indexPath, fileName) {
   } else {
     if (typeof(pic) != "undefined") {
       ui.showToastView($("uploadItemView"), mColor.blue, "请稍候，正在上传中...")
-      let url = await catbox_uploadFile(pic);
+      let url = await bomb_uploadPic(pic, fileName);
       console.log(url);
       updateToLocal($("rowsShow"), indexPath, $("titleInput").text, url, $("schemeInput").text, $("descriptInput").text)
       $ui.pop()
@@ -4676,6 +4701,30 @@ async function catbox_uploadFile(file) {
   });
   $console.info(resp);
   return resp.data
+}
+
+async function bomb_uploadPic(file, fileName) {
+  const bombAppId = "51353b0736965d8a9c38869b93fdb038";
+  const bombAppKey = "3161f0aa9e52d81f816556e63f255758";
+  const bmobUrl = "http://bmobapi.liuguogy.com/2/files/";
+  let isPng = (fileName && fileName.toLowerCase().endsWith(".png"));
+  let contentType = isPng?"image/png":"image/jpeg"
+  let bodyContent = file
+  let resp = await $http.post({
+    url: bmobUrl + $text.URLEncode(fileName),
+    header: {
+      "X-Bmob-Application-Id": bombAppId,
+      "X-Bmob-REST-API-Key": bombAppKey,
+      "Content-Type": contentType,
+    },
+    body: bodyContent,
+  })
+  $console.info(resp);
+  if(resp.error) {
+    $console.info(resp.error);
+    return null;
+  }
+  return resp.data.url;
 }
 
 function uploadTinyPng(action, pic, objectId, indexPath, fileName) {

@@ -93,7 +93,7 @@ function randomValue(object) {
 }
 
 function getThemeMode() {
-  if ($device.isDarkMode && $app.env == $env.today) {
+  if ($device.isDarkMode) {
     return "dark"
   } else {
     return "light";
