@@ -2778,6 +2778,12 @@ function setupUploadView(action, title, icon, url, descript, objectId, indexPath
                     message: "请勿上传捷径内规则的链接，因为捷径自带启动器，且其他人无从获取",
                   })
                   sender.text = ""
+                } else if(sender.text.indexOf("weixin://dl/business") >= 0) {
+                  $ui.alert({
+                    title: "提示",
+                    message: "请勿上传微信小程序的链接，因为此链接只能你访问，其他人无法访问",
+                  })
+                  sender.text = ""
                 }
               }
             }
