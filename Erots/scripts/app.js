@@ -14,7 +14,7 @@ let topOffset = -20
 let searchText = ""
 let query = $context.query;
 
-const mIconSymbols = ["square.grid.2x2.fill", "bag.fill", "square.and.arrow.down.fill", "person.fill"]
+const mIconSymbols = ["square.grid.2x2.fill", "square.and.arrow.down.fill", "person.fill"]
 
 async function show() {
   uploadInstall()
@@ -43,7 +43,7 @@ $app.listen({
   },
 });
 
-let contentViews = ["cloudView", "exploreView", "updateView", "meView"];
+let contentViews = ["cloudView", "updateView", "meView"];
 
 function setThemeColor() {
   if (utils.getThemeMode() == "dark") {
@@ -131,7 +131,7 @@ function genMainView() {
         type: "matrix",
         props: {
           id: "tab",
-          columns: 4,
+          columns: 3,
           itemHeight: 50,
           spacing: 0,
           scrollEnabled: false,
@@ -183,21 +183,12 @@ function genMainView() {
               tintColor: utils.themeColor.mainTabGrayColor,
             },
             menu_label: {
-              text: "探索",
-              textColor: utils.themeColor.mainTabGrayColor,
-            }
-          },{
-            menu_image: {
-              symbol: mIconSymbols[2],
-              tintColor: utils.themeColor.mainTabGrayColor,
-            },
-            menu_label: {
               text: "更新",
               textColor: utils.themeColor.mainTabGrayColor
             }
           },{
             menu_image: {
-              symbol: mIconSymbols[3],
+              symbol: mIconSymbols[2],
               tintColor: utils.themeColor.mainTabGrayColor,
             },
             menu_label: {
@@ -334,10 +325,8 @@ function getContentView(number) {
     case 0: 
       return genCloudView();
     case 1:
-      return genExploreView();
-    case 2:
       return genUpdateView();
-    case 3:
+    case 2:
       return genMeView();
   }
 }

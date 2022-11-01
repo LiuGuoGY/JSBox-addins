@@ -103,73 +103,7 @@ async function detect() {
                 statusBarStyle: (utils.getThemeMode() == "dark") ? 1 : 0,
                 bgcolor: (utils.getThemeMode() == "dark") ? $color("black") : $color("#FEFFFE"),
             },
-            views: [welcomeView, {
-                type: "view",
-                props: {
-                    id: "statusView",
-                    
-                },
-                layout: function(make, view) {
-                    make.centerX.equalTo(view.super)
-                    make.bottom.inset(30)
-                    make.width.equalTo(view.super)
-                    make.height.equalTo(40)
-                }
-            }]
-        });
-        let states = await api.requireServerState();
-        let monitors = states.psp.monitors;
-        let statusViews = [];
-        let itemWidth = 80;
-        for(let i = 0; i < monitors.length; i++) {
-            statusViews.push({
-                type: "view",
-                layout: function(make, view) {
-                    make.centerY.equalTo(view.super)
-                    make.width.equalTo(itemWidth)
-                    make.height.equalTo(view.super)
-                    if(i == 0) {
-                        make.left.inset(0)
-                    } else {
-                        make.left.equalTo(view.prev.right).inset(5)
-                    }
-                },
-                views: [{
-                    type: "view",
-                    props: {
-                        bgcolor: (monitors[i].statusClass == "success")?$color("#3bd771"):$color("#df484a"),
-                        circular: true,
-                    },
-                    layout: function(make, view) {
-                        make.centerY.equalTo(view.super)
-                        make.size.equalTo($size(12, 12))
-                        make.left.inset(0)
-                    },
-                },{
-                    type: "label",
-                    props: {
-                        text: monitors[i].name,
-                        align: $align.center,
-                        font: $font(12),
-                        textColor: (utils.getThemeMode() == "dark") ? $color("white") : $color("darkGray"),
-                        align: $align.left,
-                    },
-                    layout: function(make, view) {
-                        make.centerY.equalTo(view.super)
-                        make.height.equalTo(30)
-                        make.left.equalTo(view.prev.right).inset(5)
-                    }
-                }]
-            })
-        }
-        $("statusView").add({
-            type: "view",
-            layout: function(make, view) {
-                make.center.equalTo(view.super)
-                make.height.equalTo(view.super)
-                make.width.equalTo(itemWidth*monitors.length)
-            },
-            views: statusViews,
+            views: [welcomeView]
         });
         let times = 0;
         let failed = false;
