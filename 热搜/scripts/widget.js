@@ -25,7 +25,7 @@ async function show() {
 
             if (family == 0) {
                 let lists = [];
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < 4; i++) {
                     let tintColor = $color("gray");
                     let lineLimit = 2;
                     switch (i) {
@@ -40,14 +40,14 @@ async function show() {
                             symbol: (i + 1) + ".circle.fill",
                             resizable: true,
                             color: tintColor,
-                            frame: $size(20, 20),
+                            frame: $size(18, 18),
                         }
                     })
                     lists.push({
                         type: "text",
                         props: {
                             text: data[i].title,
-                            font: $font(15),
+                            font: $font(14),
                             lineLimit: lineLimit,
                             frame: {
                                 alignment: $widget.alignment.center,
@@ -66,7 +66,7 @@ async function show() {
                             type: "image",
                             props: {
                                 image: $image("assets/weibo.png"),
-                                opacity: 0.12,
+                                opacity: 0.1,
                                 resizable: true,
                                 rotationEffect: Math.PI * 0.05,
                                 offset: $point(-0.25 * displaySize.width, -0.25 * displaySize.height),
@@ -77,21 +77,10 @@ async function show() {
                             }
                         },
                         {
-                            type: "text",
-                            props: {
-                                date: date,
-                                font: $font("bold", 35),
-                                opacity: 0.12,
-                                position: $point(displaySize.width * 0.65, displaySize.height - 18),
-                                color: $color("gray"),
-                                style: $widget.dateStyle.time
-                            }
-                        },
-                        {
                             type: "vgrid",
                             props: {
                                 columns: [{
-                                    fixed: 20,
+                                    fixed: 15,
                                 }, {
                                     flexible: {
                                         minimum: 20,
@@ -103,97 +92,48 @@ async function show() {
                                 alignment: $widget.horizontalAlignment.leading,
                             },
                             views: lists,
+                        },
+                        {
+                            type: "zstack",
+                            props: {
+                                frame: {
+                                    width: 40,
+                                    height: 15,
+                                    alignment: $widget.alignment.center,
+                                },
+                                clipped: true,
+                                position: $point(displaySize.width - 35, displaySize.height - 10),
+                            },
+                            views: [
+                                {
+                                    type: "color",
+                                    props: {
+                                        light: "black",
+                                        dark: "white",
+                                        cornerRadius: {
+                                            value: 7,
+                                            style: 1 // 0: circular, 1: continuous
+                                        },
+                                        opacity: 0.2,
+                                    }
+                                },
+                                {
+                                    type: "text",
+                                    props: {
+                                        date: date,
+                                        font: $font("bold", 10),
+                                        color: $color("white"),
+                                        style: $widget.dateStyle.time,
+                                        opacity: 0.8,
+                                    }
+                                },
+                            ]
                         }
                     ]
                 }
             } else if (family == 1) {
-                // let lists = [];
-                // for (let i = 0; i < 8; i++) {
-                //     let tintColor = $color("gray");
-                //     let lineLimit = 1;
-                //     switch (i) {
-                //         case 0: tintColor = $color("#E74C3C"); lineLimit = 2; break;
-                //         case 1: tintColor = $color("#E67E22"); lineLimit = 2; break;
-                //         case 2: tintColor = $color("#F1C40F"); lineLimit = 2; break;
-                //         case 3: lineLimit = 2; break;
-                //         default: break;
-                //     }
-                //     lists.push({
-                //         type: "image",
-                //         props: {
-                //             symbol: (i + 1) + ".circle.fill",
-                //             resizable: true,
-                //             color: tintColor,
-                //             frame: $size(20, 20),
-                //         }
-                //     })
-                //     lists.push({
-                //         type: "text",
-                //         props: {
-                //             link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].name) + "&url=" + encodeURI(data[i].url),
-                //             text: data[i].name,
-                //             font: $font(15),
-                //             lineLimit: lineLimit,
-                //             frame: {
-                //                 alignment: $widget.alignment.leading,
-                //             }
-                //         }
-                //     })
-                // }
-                // return {
-                //     type: "zstack",
-                //     props: {
-                //         alignment: $widget.alignment.center,
-                //     },
-                //     views: [
-                //         {
-                //             type: "image",
-                //             props: {
-                //                 image: $image("assets/weibo.png"),
-                //                 opacity: 0.12,
-                //                 resizable: true,
-                //                 frame: $size(displaySize.height * 0.7 * 1.23, displaySize.height * 0.7),
-                //             }
-                //         },
-                //         {
-                //             type: "text",
-                //             props: {
-                //                 date: date,
-                //                 font: $font("bold", 35),
-                //                 opacity: 0.12,
-                //                 position: $point(displaySize.width - 60, displaySize.height - 18),
-                //                 color: $color("gray"),
-                //                 style: $widget.dateStyle.time
-                //             }
-                //         },
-                //         {
-                //             type: "vgrid",
-                //             props: {
-                //                 columns: [{
-                //                     fixed: 20,
-                //                 }, {
-                //                     flexible: {
-                //                         minimum: 20,
-                //                         maximum: Infinity
-                //                     }
-                //                 }, {
-                //                     fixed: 20,
-                //                 }, {
-                //                     flexible: {
-                //                         minimum: 20,
-                //                         maximum: Infinity
-                //                     }
-                //                 }],
-                //                 spacing: 5,
-                //                 padding: 10,
-                //                 alignment: $widget.horizontalAlignment.leading,
-                //             },
-                //             views: lists,
-                //         }
-                //     ]
-                // }
                 let lists = [];
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 6; i++) {
                     let tintColor = $color("gray");
                     switch (i) {
                         case 0: tintColor = $color("#E74C3C"); break;
@@ -206,7 +146,7 @@ async function show() {
                         props: {
                             alignment: $widget.verticalAlignment.leading,
                             spacing: 10,
-                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].title) + "&url=" + "https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
+                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].title) + "&url=" + encodeURI("https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1])),
                         },
                         views: [
                             {
@@ -215,15 +155,14 @@ async function show() {
                                     symbol: (i + 1) + ".circle.fill",
                                     resizable: true,
                                     color: tintColor,
-                                    frame: $size(20, 20),
+                                    frame: $size(18, 18),
                                 }
                             },
                             {
                                 type: "text",
                                 props: {
                                     text: data[i].title,
-                                    font: $font(15),
-
+                                    font: $font(14),
                                     frame: {
                                         alignment: $widget.alignment.leading,
                                     }
@@ -236,29 +175,19 @@ async function show() {
                     type: "zstack",
                     props: {
                         alignment: $widget.alignment.center,
+                        widgetURL: "jsbox://run?name=" + encodeURI($addin.current.name),
                     },
                     views: [
                         {
                             type: "image",
                             props: {
                                 image: $image("assets/weibo.png"),
-                                opacity: 0.12,
+                                opacity: 0.1,
                                 resizable: true,
                                 frame: $size(displaySize.height * 0.7 * 1.23, displaySize.height * 0.7),
                             }
                         },
                         {
-                            type: "text",
-                            props: {
-                                date: date,
-                                font: $font("bold", 35),
-                                opacity: 0.12,
-                                position: $point(displaySize.width - 60, displaySize.height - 18),
-                                color: $color("gray"),
-                                style: $widget.dateStyle.time
-                            }
-                        },
-                        {
                             type: "vstack",
                             props: {
                                 spacing: 5,
@@ -266,12 +195,48 @@ async function show() {
                                 alignment: $widget.horizontalAlignment.leading,
                             },
                             views: lists,
+                        },
+                        {
+                            type: "zstack",
+                            props: {
+                                frame: {
+                                    width: 50,
+                                    height: 20,
+                                    alignment: $widget.alignment.center,
+                                },
+                                clipped: true,
+                                position: $point(displaySize.width - 40, displaySize.height - 20),
+                            },
+                            views: [
+                                {
+                                    type: "color",
+                                    props: {
+                                        light: "black",
+                                        dark: "white",
+                                        cornerRadius: {
+                                            value: 10,
+                                            style: 1 // 0: circular, 1: continuous
+                                        },
+                                        opacity: 0.2,
+                                    }
+                                },
+                                {
+                                    type: "text",
+                                    props: {
+                                        date: date,
+                                        font: $font("bold", 12),
+                                        color: $color("white"),
+                                        style: $widget.dateStyle.time,
+                                        opacity: 0.8,
+                                    }
+                                },
+                            ]
                         }
                     ]
                 }
             } else {
                 let lists = [];
-                for (let i = 0; i < 10; i++) { //仅展示10条
+                for (let i = 0; i < 13; i++) { //仅展示10条
                     let tintColor = $color("gray");
                     switch (i) {
                         case 0: tintColor = $color("#E74C3C"); break;
@@ -284,7 +249,7 @@ async function show() {
                         props: {
                             alignment: $widget.verticalAlignment.leading,
                             spacing: 10,
-                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].title) + "&url=" + "https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
+                            link: "jsbox://run?name=" + encodeURI($addin.current.name) + "&title=" + encodeURI(data[i].title) + "&url=" + encodeURI("https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1])),
                         },
                         views: [
                             {
@@ -293,14 +258,14 @@ async function show() {
                                     symbol: (i + 1) + ".circle.fill",
                                     resizable: true,
                                     color: tintColor,
-                                    frame: $size(20, 20),
+                                    frame: $size(18, 18),
                                 }
                             },
                             {
                                 type: "text",
                                 props: {
                                     text: data[i].title,
-                                    font: $font(15),
+                                    font: $font(14),
                                     frame: {
                                         alignment: $widget.alignment.leading,
                                     }
@@ -313,26 +278,16 @@ async function show() {
                     type: "zstack",
                     props: {
                         alignment: $widget.alignment.center,
+                        widgetURL: "jsbox://run?name=" + encodeURI($addin.current.name),
                     },
                     views: [
                         {
                             type: "image",
                             props: {
                                 image: $image("assets/weibo.png"),
-                                opacity: 0.12,
+                                opacity: 0.1,
                                 resizable: true,
-                                frame: $size(displaySize.height * 0.5 * 1.23, displaySize.height * 0.5),
-                            }
-                        },
-                        {
-                            type: "text",
-                            props: {
-                                date: date,
-                                font: $font("bold", 35),
-                                opacity: 0.12,
-                                position: $point(displaySize.width * 0.5, displaySize.height - 18),
-                                color: $color("gray"),
-                                style: $widget.dateStyle.time
+                                frame: $size(displaySize.height * 0.4 * 1.23, displaySize.height * 0.4),
                             }
                         },
                         {
@@ -343,6 +298,42 @@ async function show() {
                                 alignment: $widget.horizontalAlignment.leading,
                             },
                             views: lists,
+                        },
+                        {
+                            type: "zstack",
+                            props: {
+                                frame: {
+                                    width: 50,
+                                    height: 20,
+                                    alignment: $widget.alignment.center,
+                                },
+                                clipped: true,
+                                position: $point(displaySize.width - 40, displaySize.height - 20),
+                            },
+                            views: [
+                                {
+                                    type: "color",
+                                    props: {
+                                        light: "black",
+                                        dark: "white",
+                                        cornerRadius: {
+                                            value: 10,
+                                            style: 1 // 0: circular, 1: continuous
+                                        },
+                                        opacity: 0.2,
+                                    }
+                                },
+                                {
+                                    type: "text",
+                                    props: {
+                                        date: date,
+                                        font: $font("bold", 12),
+                                        color: $color("white"),
+                                        style: $widget.dateStyle.time,
+                                        opacity: 0.8,
+                                    }
+                                },
+                            ]
                         }
                     ]
                 }

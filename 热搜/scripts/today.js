@@ -79,7 +79,7 @@ async function show() {
         let weiboHotData = await request.getWeiboHot();
         let len = weiboHotData.data.length;
         let listData = [];
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < len; i++) {
             let tintColor = $color("gray");
             switch (i) {
                 case 0: tintColor = $color("#E74C3C"); break;

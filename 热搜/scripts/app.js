@@ -582,7 +582,7 @@ function solveWeiboHotData(data) {
       },
       text: {
         text: data[i].title,
-        info: "https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1]) + "&Refer=index",
+        info: "https://s.weibo.com/weibo?q=" + encodeURIComponent(data[i].scheme.match(/search\?keyword=(.*)/)[1]), // + "&Refer=index"
       },
       hot: {
         text: shortNumber(data[i].number),
