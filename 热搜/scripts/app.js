@@ -289,6 +289,25 @@ function setupWebView(title, url) {
               -webkit-filter: drop-shadow(0 1px 1px rgba(255, 255, 255, .2));
             }
 
+            /* 当事人 */
+            .card11.ctype-1 .card:not(.card9):not(.card59) .card-wrap {
+              border-color: ${systemGray6};
+            }
+            .card11.ctype-1 .card:not(.card9):not(.card59).m-panel:first-of-type {
+              border-color: ${systemGray6};
+            }
+
+            /* 相关搜索 */
+            .m-item-box {
+              color: ${colorLabel};
+            }
+            .m-item-box::before {
+              background-color: ${systemGray6};
+            }
+            .m-item-box::after {
+              background-color: ${systemGray6};
+            }
+
             /* 点击 */
             .m-active {
               background-color: ${systemGray5} !important;
@@ -349,6 +368,15 @@ function setupWebView(title, url) {
             a {
               color: ${colorBlue};
             }
+
+            /* 评论引用*/
+            .lite-page-list .m-text-box .cmt-sub-txt {
+              background: ${systemGray6};
+            }
+            .lite-page-list .m-text-box .cmt-sub-txt span[data-v-1b0e6d11] {
+              color: ${colorLabel} !important;
+            }
+            .lite-page-list .m-text-box .cmt-sub-txt span[data-v-1b0e6d11]
 
             /* 发表评论 */
             .lite-page-editor {
